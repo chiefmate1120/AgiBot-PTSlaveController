@@ -1,0 +1,430 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SetupRobot" Id="{41d3f45b-28bf-4672-9f4d-c2ea05b7f776}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SetupRobot
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// 	flag if robot self-check passed
+	m_armPackageFinished :ARRAY[1..g_sArmNum] OF BOOL :=[4(FALSE)];	
+
+	// setup arms, responsible for arm kinematic and control
+	m_setupArms :ARRAY[1..g_sArmNum] OF FB_SetupArm;
+	
+	// arm light control word
+	m_lightCrlWord :ARRAY [1..g_sArmNum] OF UDINT;
+	
+	// arm state
+	m_setupArmState:ARRAY[1..g_sArmNum] OF E_setupArmState:=[4(E_setupArmState.SetupArmState_Error)];
+	m_lastSetupArmState:ARRAY[1..g_sArmNum] OF E_setupArmState:=[4(E_setupArmState.SetupArmState_Error)];
+	m_nextSetupArmState:ARRAY[1..g_sArmNum] OF E_setupArmState:=[4(E_setupArmState.SetupArmState_Error)];
+	
+	// all arm controller instance 
+	m_armCtrlFactory :ARRAY[1..g_sArmNum,1..SetupArmState_totalNum] OF I_SetupArmCtrl;
+	m_armInit :ARRAY[1..g_sArmNum] OF FB_SetupCtrlInit;
+	m_armError :ARRAY[1..g_sArmNum] OF FB_SetupCtrlError;
+	m_armSelfCheck :ARRAY[1..g_sArmNum] OF FB_SetupCtrlSelfCheck;
+	m_armHold :ARRAY[1..g_sArmNum] OF FB_SetupCtrlHold;
+	m_armManualAdjust :ARRAY[1..g_sArmNum] OF FB_SetupCtrlManualAdjust;
+	m_armAutoAdjust :ARRAY[1..g_sArmNum] OF FB_SetupCtrlAutoAdjust;
+	m_armPackage :ARRAY[1..g_sArmNum] OF FB_SetupCtrlPackage;
+	m_armCart :ARRAY[1..g_sArmNum] OF FB_SetupCtrlCart;
+	m_armJnt3GraCali :ARRAY[1..g_sArmNum] OF FB_SetupCtrlJnt3GraCali;
+	m_armJnt5GraCali :ARRAY[1..g_sArmNum] OF FB_SetupCtrlJnt5GraCali;
+	m_armDisable :ARRAY[1..g_sArmNum] OF FB_SetupCtrlDisable;
+	m_Performance :ARRAY[1..g_sArmNum] OF FB_SetupCtrlPerformance;
+	m_armStop :ARRAY[1..g_sArmNum] OF FB_SetupCtrlStop;
+	m_selfCheckTransport :ARRAY[1..g_sArmNum] OF FB_SetupCtrlSelfCheckTransport;
+	
+	
+	// arm controller interface
+	m_armCtrl :ARRAY[1..g_sArmNum] OF I_SetupArmCtrl;
+	m_armCtrlCmds :ARRAY[1..g_sArmNum] OF ST_SetupArmCtrlCmds;
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+
+]]></ST>
+    </Implementation>
+    <Method Name="controllerTransit" Id="{3577cb7c-f285-4439-ba82-81bb9ae9fd01}">
+      <Declaration><![CDATA[METHOD PROTECTED controllerTransit : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:int;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO g_sArmNum DO 
+	// Controller transit
+	IF m_nextSetupArmState[i]<> m_setupArmState[i] THEN
+		// reset current controller
+		m_armCtrl[i].reset();
+		
+		// transit to new controller
+		m_lastSetupArmState[i]:=m_setupArmState[i];
+		m_setupArmState[i]:=m_nextSetupArmState[i];
+		m_armCtrl[i]:=m_armCtrlFactory[i,m_setupArmState[i]];
+		
+		// init next controller
+		m_armCtrl[i].Init(m_setupArms[i],m_armCtrlCmds[i]);
+		m_setupArms[i].updateCmds(m_armCtrlCmds[i]);
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="getStatus" Id="{87cb863f-d525-453d-a0db-af97bcb1e34e}">
+      <Declaration><![CDATA[METHOD PUBLIC getStatus : BOOL
+VAR_IN_OUT
+	// slave robot information, including arm status and cartesian data
+	r_setupStatus :ST_SetupStatus;
+	
+	// slave robot joint data
+	r_setupJointsData :ST_SetupJointData;
+	
+END_VAR
+
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[r_setupStatus.m_armState:=m_setupArmState;
+
+// TODO: project cartesion data to monitor coordinate
+FOR i:=1 TO g_sArmNum DO
+	
+	// cartesion
+	r_setupStatus.m_curEndPose[i]:=m_setupArms[i].curCartPose;
+	r_setupStatus.m_rcPos[i]:=m_setupArms[i].rcPos;
+	
+	// joint
+	r_setupJointsData.m_curMotorPos[i]:=m_setupArms[i].curMotorPos;
+	r_setupJointsData.m_curLinkPos[i]:=m_setupArms[i].curLinkPos;
+	r_setupJointsData.m_curJntPos[i]:=m_setupArms[i].curJntPos;
+	r_setupJointsData.m_curJntVel[i]:=m_setupArms[i].curJntVel;
+	r_setupJointsData.m_rawJntCurrent[i]:=m_setupArms[i].rawJntCurrent;
+	r_setupJointsData.m_cmdJntCurrent[i] := m_setupArms[i].cmdJntCurrent;
+	
+	// command info
+	// joint info
+	r_setupJointsData.m_cmdJntPos[i]:=m_armCtrlCmds[i].m_cmdJntPos;
+	
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{0db3a443-112b-48f7-898b-6b92ed428f2d}">
+      <Declaration><![CDATA[METHOD PUBLIC Init : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO g_sArmNum DO
+	// arm init
+	m_setupArms[i].Init(i);
+	m_setupArmState[i]:=SlaveArmState_Init;
+	m_lastSetupArmState[i]:=SlaveArmState_Init;
+	m_nextSetupArmState[i]:=SlaveArmState_Init;
+	
+	// command init
+	m_armCtrlCmds[i].m_jntEnableFlag := g_zeroVec5i;
+	m_armCtrlCmds[i].m_jntOPMode := g_setupAllPosMode;
+	m_armCtrlCmds[i].m_cmdJntPos := m_setupArms[i].curJntPos;
+	m_armCtrlCmds[i].m_cmdJntVel := g_zeroVec5d;
+	m_armCtrlCmds[i].m_cmdJntAcc := g_zeroVec5d;
+	m_armCtrlCmds[i].m_cmdJntTrq := g_zeroVec5d;
+	
+	// generate controller factory
+	m_armCtrlFactory[i,SetupArmState_Error] := m_armError[i];
+	m_armCtrlFactory[i,SetupArmState_Init] := m_armInit[i];
+	m_armCtrlFactory[i,SetupArmState_SelfCheck] := m_armSelfCheck[i];
+	m_armCtrlFactory[i,SetupArmState_Hold] := m_armHold[i];
+	m_armCtrlFactory[i,SetupArmState_ManualAdjust] := m_armManualAdjust[i];
+	m_armCtrlFactory[i,SetupArmState_AutoAdjust] := m_armAutoAdjust[i];
+	m_armCtrlFactory[i,SetupArmState_Package] := m_armPackage[i];
+	m_armCtrlFactory[i,SetupArmState_Cart] := m_armCart[i];
+	m_armCtrlFactory[i,SetupArmState_jnt3GravityCali] := m_armJnt3GraCali[i];
+	m_armCtrlFactory[i,SetupArmState_jnt5GravityCali] := m_armJnt5GraCali[i];
+	m_armCtrlFactory[i,SetupArmState_Disable] := m_armDisable[i];
+	m_armCtrlFactory[i,SetupArmState_Performance] := m_Performance[i];
+	m_armCtrlFactory[i,SetupArmState_Sotp] := m_armStop[i];
+	m_armCtrlFactory[i,SetupArmState_SelfCheckTransport] := m_selfCheckTransport[i];
+	
+	// assign controller
+	m_armCtrl[i]:=m_armCtrlFactory[i,m_setupArmState[i]];
+	m_armCtrl[i].Init(m_setupArms[i],m_armCtrlCmds[i]);
+END_FOR
+	]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{00eef043-1869-4f40-8399-c0641788ce23}">
+      <Declaration><![CDATA[METHOD PUBLIC run : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupInputDataPool:ST_SetupInputDataPool;
+END_VAR
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// update arm status
+FOR i:=1 TO g_sArmNum DO
+	// update dynamic data
+	m_setupArms[i].updateDyna(i_setupInputDataPool.m_setupJnt3Gravity[i], i_setupInputDataPool.m_setupJnt5Gravity[i]);
+								
+	// update slave arm kinematics
+	m_setupArms[i].updateStatus();
+END_FOR
+
+// state machine transition
+stateMachine(i_setupInputDataPool);
+
+//update arm light
+updateArmLight(i_setupInputDataPool);
+
+// controller transition
+controllerTransit();
+
+FOR i:=1 TO g_sArmNum DO
+	// null ptr check
+	ASSERT(0 <> m_armCtrl[i]);
+	
+	// run controller
+	m_armCtrl[i].run(m_setupArms[i],m_armCtrlCmds[i]);
+
+	// update commands to drivers
+	m_setupArms[i].updateCmds(m_armCtrlCmds[i]);
+END_FOR
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="stateMachine" Id="{ec1b7cf8-3c23-4752-ad51-56e56c84a99b}">
+      <Declaration><![CDATA[// state machine check and transit 
+METHOD PROTECTED stateMachine : BOOL
+VAR_IN_OUT CONSTANT
+		i_setupInputDataPool:ST_SetupInputDataPool;
+END_VAR
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check package state
+GVL_interactUI.g_cartOperation.m_armStorageCompleted := BOOL_TO_UINT(m_armPackageFinished[1]);
+FOR  i:=2 TO g_sArmNum DO
+	GVL_interactUI.g_cartOperation.m_armStorageCompleted := GVL_interactUI.g_cartOperation.m_armStorageCompleted AND BOOL_TO_UINT(m_armPackageFinished[i]);
+END_FOR
+GVL_interactUI.g_cartOperation.m_armStorageCompleted :=GVL_interactUI.g_cartOperation.m_armStorageCompleted AND BOOL_TO_UINT(SlaveArmControl.m_slaveRobot.m_slavePackageFinished) ;
+
+FOR i:=1 TO g_sArmNum DO
+	// State machine transit 
+	CASE m_setupArmState[i] OF
+		// error
+		SetupArmState_Error:
+			IF FALSE = i_setupInputDataPool.m_safetyData.m_setupErrFlag[i]  THEN
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
+			END_IF
+			// to manual adjust
+			IF m_setupArms[i].manualAdjustOn OR m_setupArms[i].m_jnt5AdjustDir<>0 THEN
+				m_nextSetupArmState[i]:=SetupArmState_ManualAdjust;
+			END_IF
+			
+		// init
+		SetupArmState_Init:
+			// to hold. No self check for setup arm currently
+			IF m_armCtrl[i].isFinished  THEN
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
+			END_IF
+
+		//self check
+		SetupArmState_SelfCheck:
+			IF m_armCtrl[i].isFinished  THEN
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
+			END_IF
+		
+		//hold
+		SetupArmState_Hold:
+			// to manual adjust
+			IF m_setupArms[i].manualAdjustOn OR m_setupArms[i].m_jnt5AdjustDir<>0 THEN
+				m_nextSetupArmState[i]:=SetupArmState_ManualAdjust;
+			// to package	
+			ELSIF  GVL_interactUI.g_uiCtrl.m_packageEnable AND SlaveArmControl.m_slaveRobot.m_slavePackageFinished 
+						AND NOT m_armPackageFinished[i] THEN
+				m_nextSetupArmState[i]:= SetupArmState_Package;
+			// to selfcheck
+			ELSIF GVL_interactUI.g_salveSelfCheckTransportEnable THEN
+					m_nextSetupArmState[i] := SetupArmState_SelfCheckTransport;	
+			END_IF
+			
+		
+		// manual adjust
+		SetupArmState_ManualAdjust:
+			m_armPackageFinished[i] := FALSE;
+			// to hold
+			IF NOT(m_setupArms[i].manualAdjustOn) AND m_setupArms[i].jnt5AdjustDir=0 THEN
+				m_nextSetupArmState[i] := SetupArmState_Sotp;
+			END_IF
+			
+		// auto adjust
+		SetupArmState_AutoAdjust:
+				
+		//package
+		SetupArmState_Package:
+			IF m_armCtrl[i].isFinished  THEN
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
+				m_armPackageFinished[i]  := TRUE;
+			ELSIF  NOT GVL_interactUI.g_uiCtrl.m_packageEnable THEN
+				m_nextSetupArmState[i]:=SetupArmState_Sotp;
+			END_IF
+		
+		//cart
+		SetupArmState_Cart:
+		
+		//joint 5 gravity calibration
+		SetupArmState_jnt5GravityCali:
+			IF m_armCtrl[i].isFinished  THEN
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
+			END_IF 
+			
+		//joint 3 gravity calibration
+		SetupArmState_jnt3GravityCali:
+			IF m_armCtrl[i].isFinished  THEN
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
+			END_IF 
+		
+		// arm disable
+		SetupArmState_Disable:
+			IF NOT(SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i]) THEN
+				m_nextSetupArmState[i]:= SetupArmState_Hold;
+			END_IF
+			
+		//arm Performance
+		SetupArmState_Performance:
+			// to hold
+			IF  m_armCtrl[i].isFinished THEN
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
+			END_IF	
+
+		//arm Stop
+		SetupArmState_Sotp:
+			// to hold
+			IF  m_armCtrl[i].isFinished THEN
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
+			END_IF
+			
+		SetupArmState_SelfCheckTransport:
+			// to hold
+			IF  m_armCtrl[i].isFinished THEN
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
+			END_IF							
+	END_CASE
+	
+	// arm disable
+	IF SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i] THEN
+		m_nextSetupArmState[i] := SetupArmState_Disable;
+	// error check
+	ELSIF i_setupInputDataPool.m_safetyData.m_setupErrFlag[i] AND NOT (m_setupArms[i].manualAdjustOn OR m_setupArms[i].m_jnt5AdjustDir<>0) THEN
+		m_nextSetupArmState[i]:=SetupArmState_Error;
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="updateArmLight" Id="{d08e58f5-1983-4668-aa13-ca360de1aae1}">
+      <Declaration><![CDATA[METHOD updateArmLight : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupInputDataPool:ST_SetupInputDataPool;
+END_VAR
+
+VAR
+	i : INT;
+	slaveArmState :E_SlaveArmState;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//*******************机械臂与动力盒上的灯光写入********************
+//不可恢复性故障-----红色常亮
+//可恢复故障----琥珀色-先闪烁5s、再进行常亮
+//正处于器械控制或者端口控制状态-----蓝色闪烁
+//该手术臂正在执行一项需要用户短时间等待的活动、例如器械卡接----蓝色-脉动闪烁
+//工具更换引导正在进行中-----绿色闪烁
+//未通电、已禁用、已收起----------关
+//系统正常运行-----蓝色常亮
+//灯光颜色--0-灯灭、1蓝灯常亮、2蓝灯闪烁、3琥珀色闪烁、4红灯闪烁、5绿灯常亮、6绿灯闪烁、7红灯常亮、8琥珀色常亮、9蓝灯脉动式闪烁  20关机灯灭
+FOR i := 1 TO g_sArmNum BY 1 DO
+	slaveArmState := i_setupInputDataPool.m_slaveStatus.m_armState[i];
+	IF slaveArmState = SlaveArmState_Error OR m_setupArmState[i] = SlaveArmState_Error THEN
+		IF SafetyCheck.m_SafetyCheck.m_armErrFlag[i,3] THEN
+			m_lightCrlWord[i] := ArmLight_RedBlink;
+		ELSIF SafetyCheck.m_SafetyCheck.m_armErrFlag[i,2] THEN
+			m_lightCrlWord[i] := ArmLight_AmberBlink;
+		END_IF
+	ELSIF slaveArmState = SlaveArmState_PowerOff THEN
+		m_lightCrlWord[i] := ArmLight_PowerOff;
+	ELSIF slaveArmState = SlaveArmState_Disable THEN
+		m_lightCrlWord[i] := ArmLight_Off;
+	ELSIF slaveArmState = SlaveArmState_MountPanel OR slaveArmState = SlaveArmState_MountInstru THEN
+		m_lightCrlWord[i] := ArmLight_BluePulse;
+	ELSIF slaveArmState = SlaveArmState_InstruRetract OR slaveArmState = SlaveArmState_Adjust OR slaveArmState = SlaveArmState_SelfCheck 
+ 		OR slaveArmState = SlaveArmState_Package OR m_setupArmState[i] = SetupArmState_Package OR m_setupArmState[i] = SetupArmState_ManualAdjust  THEN
+		m_lightCrlWord[i] := ArmLight_BlueBlink;
+	ELSIF slaveArmState = SlaveArmState_InstruInvasion THEN
+		m_lightCrlWord[i] := ArmLight_GreenBlink;
+	ELSE
+		m_lightCrlWord[i] := ArmLight_BlueOn;
+	END_IF
+
+	m_setupArms[i].checkLight(m_lightCrlWord[i]);
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SetupRobot">
+      <LineId Id="60" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="33" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupRobot.controllerTransit">
+      <LineId Id="48" Count="14" />
+      <LineId Id="29" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupRobot.getStatus">
+      <LineId Id="23" Count="0" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="57" Count="4" />
+      <LineId Id="143" Count="1" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="21" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupRobot.Init">
+      <LineId Id="184" Count="34" />
+      <LineId Id="61" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupRobot.run">
+      <LineId Id="180" Count="28" />
+      <LineId Id="22" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupRobot.stateMachine">
+      <LineId Id="670" Count="116" />
+      <LineId Id="16" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupRobot.updateArmLight">
+      <LineId Id="82" Count="33" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

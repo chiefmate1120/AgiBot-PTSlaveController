@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SlaveCtrlStop" Id="{03e7bf18-07e1-493d-b46e-00a7fc843560}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Slave Arm Joint1-3 decelerate to stop
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlStop EXTENDS FB_SlaveArmCtrlBase
+VAR
+	// stop motion is terminated after set time period
+	m_maxStopPeriod :LREAL := 0.12;
+	
+	// deceleration period 
+	m_decPeriod :LREAL := 0.1;
+	
+	// instrument joint compensated backlash
+	m_instruBacklash :Vec5d :=g_zeroVec5d;
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{5c8aebac-4b88-468e-9571-6f8136c358fb}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR 
+	i :INT;
+	nextCmdVel :LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF m_isFinished THEN
+	m_cmdJntVel := g_zeroVec8d;
+	m_cmdJntPos := i_slaveArm.curJntPos;
+	m_FFJntTrq := g_zeroVec8d;
+	RETURN;
+END_IF
+
+IF m_timePeriod > m_maxStopPeriod  THEN
+	m_isFinished := TRUE;
+	RETURN;
+END_IF
+
+FOR i := 1 TO 3 DO
+	IF m_timePeriod > m_decPeriod THEN
+		m_cmdJntVel[i] := 0;
+		m_FFJntTrq[i]:=0;
+	ELSE
+		nextCmdVel := m_cmdJntVel[i] + m_cmdJntAcc[i]*g_slaveArmCtrlCycleTime;
+		m_cmdJntPos[i] := m_cmdJntPos[i] + (nextCmdVel + m_cmdJntVel[i])*g_slaveArmCtrlCycleTime/2.0;
+		m_cmdJntVel[i] := nextCmdVel;
+		m_FFJntTrq[i] :=  i_slaveArm.massMat[i,i] * m_cmdJntAcc[i] ;
+	END_IF
+END_FOR
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{bd69b8cd-377c-4832-b8a1-80eb64850a03}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+VAR
+	i:INT;
+	maxJntTrq:LREAL;
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+
+// determine joint deceleration
+FOR i:=1 TO 3 DO 
+	m_jntOPMode[i] := DriverOPMode_PosTrq;
+	m_cmdJntVel[i] := i_slaveArm.curJntVel[i];
+	i_slaveArm.m_jntPIDCtrl[i].reset();
+	m_cmdJntAcc[i] := -i_slaveArm.curJntVel[i]/m_decPeriod;
+END_FOR
+
+// NOTE: move instrument joint to remove backlash compensation
+IF i_slaveArm.instrument.instruType = InstruType_Endoscope THEN
+	m_instruBacklash := g_zeroVec5d;
+ELSE
+	FOR i:=4 TO 7 DO 
+		m_jntOPMode[i] := DriverOPMode_PosTrq;
+		m_cmdJntPos[i] := i_slaveArm.curJntPos[i]-m_instruBacklash[i-3];
+	END_FOR
+END_IF
+
+
+// update commands to arm
+copyCmds(r_slaveArmCtrlCmd);
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="setInstruBacklash" Id="{e7ddc6be-ceb9-4ce0-8d1e-ed1fce38d513}">
+      <Declaration><![CDATA[METHOD setInstruBacklash : BOOL
+VAR_INPUT
+	i_backlash :Vec5d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_instruBacklash := i_backlash;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveCtrlStop">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlStop.calcCmdJntPos">
+      <LineId Id="224" Count="1" />
+      <LineId Id="227" Count="0" />
+      <LineId Id="256" Count="0" />
+      <LineId Id="228" Count="0" />
+      <LineId Id="226" Count="0" />
+      <LineId Id="230" Count="0" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="231" Count="0" />
+      <LineId Id="233" Count="0" />
+      <LineId Id="232" Count="0" />
+      <LineId Id="235" Count="0" />
+      <LineId Id="234" Count="0" />
+      <LineId Id="240" Count="1" />
+      <LineId Id="257" Count="0" />
+      <LineId Id="271" Count="0" />
+      <LineId Id="273" Count="2" />
+      <LineId Id="272" Count="0" />
+      <LineId Id="242" Count="0" />
+      <LineId Id="237" Count="0" />
+      <LineId Id="211" Count="0" />
+      <LineId Id="98" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlStop.init">
+      <LineId Id="186" Count="23" />
+      <LineId Id="74" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

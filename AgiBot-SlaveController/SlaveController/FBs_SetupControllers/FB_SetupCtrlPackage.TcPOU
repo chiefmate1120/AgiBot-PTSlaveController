@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SetupCtrlPackage" Id="{3caa7d81-2fc0-4b44-8421-fc376f3615bb}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Setup Arm Move to Package Posture
+FUNCTION_BLOCK PUBLIC FB_SetupCtrlPackage EXTENDS FB_SetupArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	m_packagePlanner : FB_setupTrajMoveJ;
+	
+	//packageDHJntPos
+	m_packageJntPosSetup :ARRAY[1..g_sArmNum] OF ARRAY[1..g_setupJntNum] OF LREAL :=
+	[  [-2.4143153178222341, 0.60021142578125009, 0.0008296630859375, 2.3980403753279123, 0.41365595585786952],  
+		 [-2.3412008932551989, 0.60021142578125009, 0.0008296630859375, 2.0989802559847859, 0.41365595585786952],  
+	 [-1.1307249356258431, 0.60021142578125009, 0.0008296630859375, 1.1508892077727717, 0.41365595585786952], 
+	  [-2.4143153178222341, 0.60021142578125009, 0.0008296630859375, 0.99319805630335234, 0.41365595585786952] ];
+	m_packageMaxJntVelSetup: Vec5d := [ 0.01, 0.01, 3(20*g_deg2Rad)];
+	m_packageMaxJntAccSetup: Vec5d := [0.01, 0.01,  3(40*g_deg2Rad)];
+	m_packageMaxJntJerkSetup: Vec5d := [  0.2, 0.2, 3(80*g_deg2Rad)];	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{128cf82a-2565-4e2d-b9db-59d7f2488400}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+VAR 
+	curJntVel :Vec5d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF m_packagePlanner.isGene = FALSE THEN
+	calcCmdJntPos:=FALSE;
+	RETURN;
+END_IF
+
+// traj plan
+calcCmdJntPos :=m_packagePlanner.evaluate(m_timePeriod, jntPos=> m_cmdJntPos, jntVel=>m_cmdJntVel, jntAcc=> m_cmdJntAcc);
+
+// check IF TO terminate
+curJntVel :=i_setupArm.curJntVel;
+m_isFinished :=m_timePeriod > m_packagePlanner.duration  AND norm(curJntVel)<7*g_jntStaticVelThres;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{2d8c4ce8-f95d-44ef-b5b3-99ca1edcf8a1}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+VAR_IN_OUT 
+	r_setupArmCtrlCmd :ST_SetupArmCtrlCmds;
+END_VAR
+VAR
+	i :INT;
+	startJntPos,endJntPos :Vec5d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check if to hold the command joint position unchanged
+m_holdLastCmds := checkToHoldLastCmds(i_setupArm);
+
+SUPER^.Init(i_setupArm,r_setupArmCtrlCmd);
+
+m_jntEnableFlag[4] := 1;
+m_jntEnableFlag[5] := 1;
+
+//traj plan
+startJntPos:= i_setupArm.curJntPos;
+endJntPos := i_setupArm.curJntPos;
+
+FOR i := 4 TO 5 DO
+	IF i = 4 THEN
+		endJntPos[i] := -startJntPos[1];
+	ELSE
+		endJntPos[i] := m_packageJntPosSetup[i_setupArm.armIdx][i];
+	END_IF	
+END_FOR
+m_packagePlanner.init(startJntPos,endJntPos,m_packageMaxJntVelSetup,m_packageMaxjntAccSetup,m_packageMaxjntJerkSetup);
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SetupCtrlPackage">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlPackage.calcCmdJntPos">
+      <LineId Id="8" Count="9" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlPackage.init">
+      <LineId Id="68" Count="0" />
+      <LineId Id="66" Count="1" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="96" Count="1" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="69" Count="1" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="76" Count="1" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="79" Count="3" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

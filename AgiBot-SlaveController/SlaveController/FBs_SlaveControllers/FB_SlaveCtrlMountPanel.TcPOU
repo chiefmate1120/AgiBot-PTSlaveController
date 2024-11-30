@@ -1,0 +1,195 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SlaveCtrlMountPanel" Id="{823d9da4-dfa7-45fa-b541-870812882ed0}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Mounting Panel
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMountPanel EXTENDS FB_SlaveArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// mount status
+	m_mountStatus :INT := 0;
+	
+	// flag if joint is mounted
+	m_jointMounted :ARRAY[1..5] OF BOOL := [5(FALSE)];
+	
+	// mount motion planning
+	m_jntOTG :ARRAY[1..5] OF FB_secOrdTrajFilter;
+	m_panelMountVel :LREAL := 2*pi;
+	m_panelMountAcc :LREAL := 4*pi;
+	
+	// joint current threshold which indicate motor is buckled with panel
+	m_maxJntCurrent :INT := 80;
+	
+	// command mount motion
+	m_mountStepPos :LREAL := 45.0 * g_deg2Rad;
+	m_targetMountPos :Vec5d;
+	
+	//panel clamp error Id
+	m_panelClampErrId : UINT;
+	m_panelClampTime : LREAL;
+	m_noCurrentTime : LREAL :=10;
+	m_notReturnToZero : LREAL :=15;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{19d93df1-8900-4356-b776-97d66cc8cc37}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR 
+	i :INT;
+	curJntPos :Vec8d;
+	jntPosErr :Vec8d;
+	cycleNum :LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF m_panelClampErrId>0 THEN
+	RETURN;
+END_IF
+
+curJntPos := i_slaveArm.curJntPos;
+
+CASE m_mountStatus OF
+	// To lock joint with panel
+	0:
+		FOR i:=1 TO 5 DO
+			// check joint buckled with panel
+			IF ABS(i_slaveArm.filtJntCurrent[i+3])> m_maxJntCurrent THEN 
+				m_jointMounted[i]:=TRUE;
+				m_targetMountPos[i]:=curJntPos[i+3];
+				m_jntOTG[i].init(m_targetMountPos[i], 0,m_panelMountVel, m_panelMountAcc, g_slaveArmCtrlCycleTime);
+			END_IF
+			
+			// set command joint position step
+			IF FALSE = m_jointMounted[i] THEN
+				m_targetMountPos[i]:=curJntPos[i+3]+m_mountStepPos;
+			END_IF
+		END_FOR
+		
+		IF (m_jointMounted[1] AND m_jointMounted[2] AND m_jointMounted[3] AND m_jointMounted[4] AND m_jointMounted[5]) or m_timePeriod > 5.0 THEN
+			m_mountStatus:=1;
+		END_IF
+	
+	// determine zero position
+	1:
+		FOR i:=1 TO 5 DO
+			cycleNum := FLOOR(curJntPos[i+3]/g_2pi);
+			m_targetMountPos[i]:=cycleNum* g_2Pi;
+		END_FOR
+		m_mountStatus :=2;
+	
+	// move back to zero position
+	2:
+		m_isFinished:=TRUE;
+		FOR i:=1 TO 5 DO
+			IF ABS(m_targetMountPos[i]-curJntPos[i+3])>GVL_SlaveControlParameters.g_jntCtrlAngTolHigh THEN
+				m_isFinished:=FALSE;
+				EXIT;
+			END_IF
+		END_FOR
+END_CASE
+
+//panel clamp status check
+m_panelClampErrId := panelClampStatus();
+
+// traj plan
+FOR i:=1 TO 5 DO
+	m_jntOTG[i].run(m_targetMountPos[i],0.0, o_cmdAcc=>m_cmdJntAcc[3+i],o_cmdVel=>m_cmdJntVel[3+i],o_cmdPos=>m_cmdJntPos[i+3]);
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{ee3f7839-f2f4-4010-851e-5bc229c0ad27}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+VAR
+	i : INT;
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+m_jntOPMode[4] := DriverOPMode_PosTrq;
+m_jntOPMode[5] := DriverOPMode_PosTrq;
+m_jntOPMode[6] := DriverOPMode_PosTrq;
+m_jntOPMode[7] := DriverOPMode_PosTrq;
+m_jntOPMode[8] := DriverOPMode_PosTrq;
+
+m_mountStatus:=0;
+FOR i:=1 TO 5 DO
+	m_targetMountPos[i]:=m_cmdJntPos[i+3];
+	m_jntOTG[i].init(m_targetMountPos[i], 0,m_panelMountVel, m_panelMountAcc, g_slaveArmCtrlCycleTime);
+	m_jointMounted[i]:=FALSE;
+END_FOR
+m_panelClampTime :=0;
+m_panelClampErrId := 0;
+// update commands to arm
+copyCmds(r_slaveArmCtrlCmd);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="panelClampErrId" Id="{5bdb25a2-6f11-4339-bd1e-c473b3f79ec5}">
+      <Declaration><![CDATA[PROPERTY panelClampErrId : UINT]]></Declaration>
+      <Get Name="Get" Id="{c79df79b-5cac-436e-892c-eeda99954cfc}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[panelClampErrId := m_panelClampErrId;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="panelClampStatus" Id="{eda9a7e2-0dfb-4ed0-8d8b-c62377a124d6}">
+      <Declaration><![CDATA[METHOD panelClampStatus : UINT
+VAR_IN_OUT CONSTANT
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//m_panelClampErrId=1 panel clamp the current does not reach the set value
+//m_panelClampErrId=2 panel clamp position does not return to zero
+m_panelClampTime := LIMIT(0,m_panelClampTime + g_slaveArmCtrlCycleTime,10);
+
+IF m_mountStatus=0  AND m_panelClampTime>=m_noCurrentTime  THEN
+	panelClampStatus := 1;
+ELSIF m_mountStatus=2 AND m_panelClampTime>=m_notReturnToZero  THEN
+	panelClampStatus := 2;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveCtrlMountPanel">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMountPanel.calcCmdJntPos">
+      <LineId Id="276" Count="52" />
+      <LineId Id="150" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMountPanel.init">
+      <LineId Id="140" Count="16" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMountPanel.panelClampErrId.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMountPanel.panelClampStatus">
+      <LineId Id="3" Count="8" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

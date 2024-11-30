@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SetupCtrlStop" Id="{2b39a0dc-24d1-457b-943f-73080894e676}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: setup Arm Joint3-5 decelerate to stop
+FUNCTION_BLOCK PUBLIC FB_SetupCtrlStop EXTENDS FB_SetupArmCtrlBase
+VAR
+	// stop motion is terminated after set time period
+	m_maxStopPeriod :LREAL := 0.12;
+	
+	// deceleration period 
+	m_decPeriod :LREAL := 0.1;
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{7d3d4bc6-a9ba-43c5-8aaa-4916905417fa}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+
+
+VAR 
+	i :INT;
+	nextCmdVel :LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF m_isFinished THEN
+	m_cmdJntVel := g_zeroVec5d;
+	m_cmdJntPos := i_setupArm.curJntPos;
+	RETURN;
+END_IF
+
+IF m_timePeriod > m_maxStopPeriod  THEN
+	m_isFinished := TRUE;
+	RETURN;
+END_IF
+
+FOR i := 3 TO 5 DO
+	IF m_timePeriod > m_decPeriod THEN
+		m_cmdJntVel[i] := 0;
+	ELSE
+		nextCmdVel := m_cmdJntVel[i] + m_cmdJntAcc[i]*g_setupArmCtrlCycleTime;
+		m_cmdJntPos[i] := m_cmdJntPos[i] + (nextCmdVel + m_cmdJntVel[i])*g_setupArmCtrlCycleTime/2.0;
+		m_cmdJntVel[i] := nextCmdVel;
+	END_IF
+END_FOR
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{1aa46783-fabc-41be-a8ea-91f8151acc74}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+VAR_IN_OUT 
+	r_setupArmCtrlCmd :ST_SetupArmCtrlCmds;
+END_VAR
+VAR
+	i:INT;
+	maxJntTrq:LREAL;
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check if to hold the command joint position unchanged
+m_holdLastCmds := checkToHoldLastCmds(i_setupArm);
+SUPER^.Init(i_setupArm,r_setupArmCtrlCmd);
+
+m_jntEnableFlag :=g_zeroVec5i;// setup arm joint is diabled by default
+
+// determine joint deceleration
+FOR i:=3 TO 5 DO 
+		m_jntOPMode[i] := DriverOPMode_Pos;
+		m_cmdJntVel[i] := i_setupArm.curJntVel[i];
+		m_cmdJntAcc[i] := -i_setupArm.curJntVel[i]/m_decPeriod;
+		m_jntEnableFlag[i] := BOOL_TO_INT(r_setupArmCtrlCmd.m_jntEnableFlag[i]=1 AND (r_setupArmCtrlCmd.m_jntOPMode[i] = DriverOPMode_Pos OR r_setupArmCtrlCmd.m_jntOPMode[i] = DriverOPMode_PosTrq));
+END_FOR
+
+IF m_jntEnableFlag[3] = 0 THEN
+	m_jntOPMode[3]:= DriverOPMode_Trq;
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SetupCtrlStop">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlStop.calcCmdJntPos">
+      <LineId Id="224" Count="1" />
+      <LineId Id="227" Count="1" />
+      <LineId Id="226" Count="0" />
+      <LineId Id="230" Count="0" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="231" Count="0" />
+      <LineId Id="233" Count="0" />
+      <LineId Id="232" Count="0" />
+      <LineId Id="235" Count="0" />
+      <LineId Id="234" Count="0" />
+      <LineId Id="240" Count="1" />
+      <LineId Id="271" Count="0" />
+      <LineId Id="273" Count="2" />
+      <LineId Id="242" Count="0" />
+      <LineId Id="237" Count="0" />
+      <LineId Id="211" Count="0" />
+      <LineId Id="98" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlStop.init">
+      <LineId Id="252" Count="17" />
+      <LineId Id="74" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

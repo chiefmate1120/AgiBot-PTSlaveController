@@ -1,0 +1,353 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="SlaveArmControl" Id="{6192c11b-cd6e-4883-b627-958acfb9caf3}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM SlaveArmControl
+VAR
+	// master robot data, input from master controller box
+	m_masterRobotData AT %I* : MSCommu_MasterStatus;
+	
+	// all data from other tasks and controller 
+	m_slaveInputDataPool : ST_SlaveInputDataPool;
+		
+	// slave robot data, ouput to master controller box
+	m_slaveRobotData AT %Q* :MSCommu_slaveStatus;
+	
+	// slave robot status, including arm status and cartesian data, output to other tasks
+	m_slaveStatus AT%Q* :ST_slaveStatus;
+	
+	// slave robot joint data, output to other tasks
+	m_slaveJointsData AT %Q* :ST_slaveJointData;
+	
+	// flag to init robot
+	m_robotInit :BOOL :=FALSE;
+	
+	// wait time before robot init  for ethercat to be statble 
+	m_robotInitWaitTime : LREAL:=0;
+	
+	// slave robot
+	m_slaveRobot:FB_SlaveRobot;
+
+	// code execute time measure
+	m_codeTime : Profiler;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[m_codeTime(START:=TRUE, RESET:=TRUE);
+
+// wait communication to be stable
+IF(m_robotInitWaitTime<g_robotInitWaitTime) THEN
+	m_robotInitWaitTime := m_robotInitWaitTime+g_slaveArmCtrlCycleTime;
+	RETURN;
+END_IF
+
+// robot init
+IF m_robotInit =FALSE THEN
+	m_slaveRobot.Init();
+	m_robotInit:=TRUE;
+END_IF
+
+// input from UI
+UIInputProcess();
+
+// master input data cast
+masterInputDataCast(m_masterRobotData, m_slaveInputDataPool.m_masterStatus);
+
+// robot run
+m_slaveRobot.run(m_slaveInputDataPool);
+
+// update data pool
+m_slaveRobot.getStatus(m_slaveStatus,m_slaveJointsData);
+
+// slave output data cast
+slaveOutputDataCast(m_slaveInputDataPool.m_setupStatus, m_slaveStatus, m_slaveRobotData);
+
+// output to UI
+UIOutputProcess();
+
+m_codeTime(START:=FALSE);]]></ST>
+    </Implementation>
+    <Method Name="masterInputDataCast" Id="{688f8323-8b5a-4cc7-b4b2-cb5f74424c3f}">
+      <Declaration><![CDATA[// convert from MSCommu_Mastertatus for master-slave communication to local ST_MasterStatus for control
+METHOD masterInputDataCast : BOOL
+VAR_IN_OUT CONSTANT
+	masterInputData:MSCommu_MasterStatus;
+END_VAR
+VAR_IN_OUT
+	masterStatus :ST_MasterStatus;
+END_VAR
+
+VAR
+	i : INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[masterStatus.m_masterHeartBeat := masterInputData.m_heartBeat;
+masterStatus.m_motionScale := masterInputData.m_motionScale;
+masterStatus.m_slaveSelfCheckFlag := masterInputData.m_slaveSelfCheckFlag OR GVL_interactUI.g_salveSelfCheckEnable;
+masterStatus.m_masterStopButton := masterInputData.m_masterStopButton;
+masterStatus.m_uiResetFault := masterInputData.m_uiResetFault;
+
+FOR i:=1 TO g_mArmNum DO
+	masterStatus.m_armState[i] := masterInputData.m_armState[i];
+	masterStatus.m_teleSlaveArmIdx[i] :=masterInputData.m_teleSlaveArmIdx[i];
+	masterStatus.m_gripAngle[i] := masterInputData.m_gripAngle[i];
+	masterStatus.m_curArmPose[i].m_pos := masterInputData.m_curArmPose[i].m_pos;
+	masterStatus.m_curArmPose[i].m_rot := masterInputData.m_curArmPose[i].m_rot;
+	masterStatus.m_curArmTwist[i] :=masterInputData.m_curArmTwist[i];
+	masterStatus.m_pedalHover[i] := masterInputData.m_pedalHover[i];
+	masterStatus.m_electricKnifePedalTrigger[i] := masterInputData.m_electricKnifePedalTrigger[i];
+	masterStatus.m_tryMSControl[i] := masterInputData.m_tryMSControl[i];
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="slaveOutputDataCast" Id="{110717ec-abfc-4dc8-a3ed-d3c3fbcf321b}">
+      <Declaration><![CDATA[// convert from local ST_SlaveStatus for control to MSCommu_SlaveStatus for master-slave communication
+METHOD slaveOutputDataCast : BOOL
+VAR_IN_OUT CONSTANT
+	setupStatus :ST_SetupStatus;
+	slaveStatus :ST_SlaveStatus;
+END_VAR
+VAR_IN_OUT 
+	slaveOutputData : MSCommu_SlaveStatus;
+END_VAR
+
+VAR
+	slavePoseInCart, slavePoseInScope:ST_Frame;
+	tmpFrame :ST_Frame;
+	i :INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Slave heart beat
+IF slaveOutputData.m_heartBeat > 10 THEN
+	slaveOutputData.m_heartBeat :=0;
+ELSE
+	slaveOutputData.m_heartBeat :=slaveOutputData.m_heartBeat+1;
+END_IF
+
+FOR i := 1 TO g_sArmNum DO
+	slaveOutputData.m_slaveAllowInMS :=(SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i] OR SlaveArmControl.m_slaveRobot.m_panelMountedFlag[i])
+								AND (m_slaveInputDataPool.m_UIData.m_masterSlaveFlag OR GVL_interactUI.g_dumpEnergyUPS > 30) ;	
+	IF NOT slaveOutputData.m_slaveAllowInMS THEN
+		EXIT;
+	END_IF
+END_FOR
+
+
+slaveOutputData.m_seflCheckPass:=  m_slaveInputDataPool.m_UIData.m_armSelfCheckFinshed[1] AND  m_slaveInputDataPool.m_UIData.m_armSelfCheckFinshed[2] AND m_slaveInputDataPool.m_UIData.m_armSelfCheckFinshed[3] AND m_slaveInputDataPool.m_UIData.m_armSelfCheckFinshed[4] ;
+slaveOutputData.m_endoscopeMounted :=slaveStatus.m_endoscopeMounted;
+slaveOutputData.m_endoscopePose.m_pos :=slaveStatus.m_endoscopePose.m_pos;
+slaveOutputData.m_endoscopePose.m_rot :=slaveStatus.m_endoscopePose.m_rot;
+slaveOutputData.m_slaveStopButton := NOT SafetyCheck.m_stopButton;
+
+FOR i:= 1 TO g_sArmNum DO
+	slaveOutputData.m_armState[i] := slaveStatus.m_armState[i];
+	slaveOutputData.m_instruStauts[i].m_fingerAngle := slaveStatus.m_instruStauts[i].m_fingerAngle;
+	slaveOutputData.m_instruStauts[i].m_ready := slaveStatus.m_instruStauts[i].m_ready;
+	slaveOutputData.m_instruStauts[i].m_type := slaveStatus.m_instruStauts[i].m_type;
+	slaveOutputData.m_instruEnergyType[i] := m_slaveRobot.m_slaveArms[i].m_instrument.isEnergyType;
+	slavePoseInCart := transform(setupStatus.m_curEndPose[i], slaveStatus.m_curArmPose[i]);
+	tmpFrame :=invFrame(slaveStatus.m_endoscopePose);
+	slavePoseInScope := transform(tmpFrame, slavePoseInCart);
+	slaveOutputData.m_curArmPose[i].m_pos :=slavePoseInScope.m_pos;
+	slaveOutputData.m_curArmPose[i].m_rot :=slavePoseInScope.m_rot;
+	slaveOutputData.m_masterSlavePoseError[i] :=slaveStatus.m_masterSlavePoseError[i];
+END_FOR
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="UIInputProcess" Id="{9dd02246-5151-482e-a090-b6247e0a96d4}">
+      <Declaration><![CDATA[// tranform data from UI(global variable write by ADS) to ST_UIData
+METHOD UIInputProcess : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:int;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// arm disable
+FOR i:=1 TO g_sArmNum DO 
+	m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i]:= FALSE;
+END_FOR
+IF GVL_interactUI.g_armIsDisable >0 AND GVL_interactUI.g_armIsDisable<= g_sArmNum THEN
+	m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[GVL_interactUI.g_armIsDisable]:= TRUE;
+END_IF
+
+FOR i:=1 TO g_sArmNum DO 
+	IF m_slaveRobot.m_slaveArmState[i] = SlaveArmState_MasterSlave THEN
+		m_slaveInputDataPool.m_UIData.m_masterSlaveFlag :=TRUE;
+	END_IF
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="UIOutputProcess" Id="{d0fa8c54-c1d5-4f7b-80a8-06c5ca1c6dd6}">
+      <Declaration><![CDATA[METHOD UIOutputProcess : BOOL
+VAR_INPUT
+END_VAR
+
+VAR
+	i , j: INT;
+END_VAR
+
+VAR_STAT
+	m_instruUsageCountsLast : ARRAY [1..g_sArmNum] OF ULINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//endoscope type
+IF m_slaveRobot.m_endoScopeType = EndoscopeType_0  THEN
+	GVL_interactUI.g_scopeType:= 0;
+ELSIF m_slaveRobot.m_endoScopeType = EndoscopeType_30  THEN
+	GVL_interactUI.g_scopeType := 30;
+END_IF
+
+//arm state machine
+GVL_interactUI.g_armStateMachine.m_stateMachineArm1:=m_slaveStatus.m_armState[1];
+GVL_interactUI.g_armStateMachine.m_stateMachineArm2:=m_slaveStatus.m_armState[2];
+GVL_interactUI.g_armStateMachine.m_stateMachineArm3:=m_slaveStatus.m_armState[3];
+GVL_interactUI.g_armStateMachine.m_stateMachineArm4:=m_slaveStatus.m_armState[4];
+
+//arm is adjustment state
+FOR i := 1 TO g_sArmNum BY 1 DO
+	IF m_slaveStatus.m_armState[i] = SlaveArmState_Adjust OR SetupArmControl.m_setupStatus.m_armState[i] = SetupArmState_ManualAdjust 
+							OR SetupArmControl.m_setupStatus.m_armState[i] = SetupArmState_AutoAdjust THEN
+		GVL_interactUI.g_armIsAdjustment[i] := 1;
+	ELSE
+		GVL_interactUI.g_armIsAdjustment[i] := 0;
+	END_IF
+END_FOR
+
+
+//arm self check status
+FOR i := 1 TO g_sArmNum DO
+	m_slaveInputDataPool.m_UIData.m_armInSelfCheck[i] := m_slaveStatus.m_armState[i] = SlaveArmState_SelfCheck AND NOT m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i];
+	m_slaveInputDataPool.m_UIData.m_armSelfCheckFinshed[i] := m_slaveStatus.m_selfCheckPass[i] OR m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i];
+END_FOR
+
+IF m_slaveInputDataPool.m_UIData.m_armInSelfCheck[1] OR m_slaveInputDataPool.m_UIData.m_armInSelfCheck[2] OR m_slaveInputDataPool.m_UIData.m_armInSelfCheck[3] OR m_slaveInputDataPool.m_UIData.m_armInSelfCheck[4] THEN
+	GVL_interactUI.g_slaveSelfCheckStatus := 1;
+ELSIF m_slaveInputDataPool.m_UIData.m_armSelfCheckFinshed[1] AND m_slaveInputDataPool.m_UIData.m_armSelfCheckFinshed[2] AND m_slaveInputDataPool.m_UIData.m_armSelfCheckFinshed[3] AND m_slaveInputDataPool.m_UIData.m_armSelfCheckFinshed[4] THEN
+	GVL_interactUI.g_slaveSelfCheckStatus := 2;
+ELSE
+	GVL_interactUI.g_slaveSelfCheckStatus := 0;
+END_IF
+
+//instrument information export to UI
+FOR i := 1 TO g_sArmNum DO
+	GVL_interactUI.g_instruInformatiom[i].m_instruIsConnected:=m_slaveStatus.m_instruStauts[i].m_ready;
+	GVL_interactUI.g_instruInformatiom[i].m_instruInMasterSlave := (m_slaveStatus.m_armState[i] = SlaveArmState_MasterSlave OR m_slaveStatus.m_armState[i] = SlaveArmState_EndoScope);
+	IF m_slaveStatus.m_instruStauts[i].m_type = InstruType_Endoscope THEN
+		GVL_interactUI.g_instruInformatiom[i].m_instruType := 4;
+		GVL_interactUI.g_scopeGravityAngle := m_slaveRobot.m_slaveArms[i].curDHJntPos[4];
+	ELSE
+		GVL_interactUI.g_instruInformatiom[i].m_instruType := m_slaveRobot.m_slaveArms[i].m_instrument.isEnergyType;
+	END_IF
+	
+	GVL_interactUI.g_instruInformatiom[i].m_armId := i;
+	GVL_interactUI.g_instruInformatiom[i].m_instruSerialNum :=  m_slaveRobot.m_slaveArms[i].m_instrument.onChipData.m_InstruseriesNum;
+	GVL_interactUI.g_instruInformatiom[i].m_instruID := m_slaveRobot.m_slaveArms[i].m_instrument.onChipData.m_InstruID;
+	GVL_interactUI.g_instruInformatiom[i].m_nameEn := m_slaveRobot.m_slaveArms[i].m_instrument.instruName;
+	GVL_interactUI.g_instruInformatiom[i].m_nameCh := m_slaveRobot.m_slaveArms[i].m_instrument.instruNameCH;
+	
+	//instrument pedal hover and pedal active
+	GVL_interactUI.g_instruInformatiom[i].m_pedalHover:=FALSE;
+	GVL_interactUI.g_instruInformatiom[i].m_pedalActive := 0;
+	FOR j := 1 TO g_mArmNum BY 1 DO
+		 IF  m_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx[j] > 0 AND   m_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx[j] <= 4  THEN
+			IF m_slaveInputDataPool.m_masterStatus.m_pedalHover[j] = TRUE THEN
+				GVL_interactUI.g_instruInformatiom[m_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx[j]].m_pedalHover:=TRUE;
+			ELSE
+				GVL_interactUI.g_instruInformatiom[m_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx[j]].m_pedalHover:=FALSE;
+			END_IF
+			
+			IF m_slaveRobot.m_slaveArms[m_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx[j]].m_instrument.isEnergyType > 0 THEN
+				IF m_slaveInputDataPool.m_masterStatus.m_electricKnifePedalTrigger[j] = 1 THEN 
+					GVL_interactUI.g_instruInformatiom[m_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx[j]].m_pedalActive := 1;
+				ELSIF m_slaveInputDataPool.m_masterStatus.m_electricKnifePedalTrigger[j] = 2 THEN 
+					GVL_interactUI.g_instruInformatiom[m_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx[j]].m_pedalActive := 2;
+				END_IF
+			END_IF
+			
+		END_IF
+	END_FOR
+	
+	//instrument number of  use
+	IF m_slaveRobot.m_slaveArms[i].m_instrument.onChipData.m_InstruUsageCounts <> m_InstruUsageCountsLast[i] THEN
+		GVL_interactUI.g_instruInformatiom[i].m_useLifeplc := ULINT_TO_UINT(m_slaveRobot.m_slaveArms[i].m_instrument.onChipData.m_InstruUsageCounts);
+	END_IF
+	m_InstruUsageCountsLast[i] :=m_slaveRobot.m_slaveArms[i].m_instrument.onChipData.m_InstruUsageCounts;
+	
+	//read-write instrument number of use
+	m_slaveRobot.m_slaveArms[i].m_instrument.writeNumOfUseToChip(GVL_interactUI.g_instruInformatiom[i].m_useLifeplc + 1 =  GVL_interactUI.g_instruInformatiom[i].m_useLifeUi AND m_slaveRobot.m_slaveArms[i].m_instrument.onChipData.m_InstruReadSucceed, GVL_interactUI.g_instruInformatiom[i].m_useLifeUi);
+
+	//intrument total number of use
+	GVL_interactUI.g_instruInformatiom[i].m_instruTotalLife := m_slaveRobot.m_slaveArms[i].m_instrument.m_onChipData.m_InstrumaxUsageCounts;
+	//The coordinates of the instrument relative to the endoscope for UI display
+END_FOR
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="SlaveArmControl">
+      <LineId Id="85" Count="0" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="112" Count="1" />
+      <LineId Id="141" Count="0" />
+      <LineId Id="114" Count="2" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="205" Count="0" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="207" Count="1" />
+      <LineId Id="169" Count="0" />
+      <LineId Id="171" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="173" Count="0" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="174" Count="0" />
+      <LineId Id="210" Count="0" />
+      <LineId Id="209" Count="0" />
+      <LineId Id="211" Count="0" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="87" Count="0" />
+    </LineIds>
+    <LineIds Name="SlaveArmControl.masterInputDataCast">
+      <LineId Id="86" Count="16" />
+      <LineId Id="17" Count="0" />
+    </LineIds>
+    <LineIds Name="SlaveArmControl.slaveOutputDataCast">
+      <LineId Id="246" Count="37" />
+      <LineId Id="8" Count="0" />
+    </LineIds>
+    <LineIds Name="SlaveArmControl.UIInputProcess">
+      <LineId Id="78" Count="12" />
+      <LineId Id="69" Count="0" />
+    </LineIds>
+    <LineIds Name="SlaveArmControl.UIOutputProcess">
+      <LineId Id="263" Count="5" />
+      <LineId Id="272" Count="75" />
+      <LineId Id="372" Count="0" />
+      <LineId Id="348" Count="0" />
+      <LineId Id="371" Count="0" />
+      <LineId Id="352" Count="1" />
+      <LineId Id="383" Count="0" />
+      <LineId Id="354" Count="3" />
+      <LineId Id="34" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

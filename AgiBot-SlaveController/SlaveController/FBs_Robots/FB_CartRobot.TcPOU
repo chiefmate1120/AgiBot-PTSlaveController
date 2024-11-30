@@ -1,0 +1,357 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_CartRobot" Id="{1219119a-c34a-4efb-a0e2-076d2e563cc0}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_CartRobot
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+
+	m_slaveCart: FB_SlaveCart;		
+	
+	// input arm button 
+	m_carHandChassisDriveUnlock AT%I* :ARRAY [1..2] OF BOOL;
+	
+	//open laser io
+	m_openHorizonLaser AT  %Q* :DINT;
+	m_openCrossLaser AT  %Q* :DINT;
+		
+	//cart suppor leg depoly finshed
+	m_supportLegFinshed : BOOL;
+	
+	// all cart controller instance 
+	m_cartCtrlFactory :ARRAY[1..CartJointState_totalNum] OF I_CartJointCtrl;
+	
+	m_cartState:E_CartJointState:=CartJointState_Init;
+	m_lastCartState:E_CartJointState:=CartJointState_Init;
+	m_nextCartState:E_CartJointState:=CartJointState_Init;
+	
+	// flag if cart joint self-check passed
+	m_selfCheckPass:  BOOL :=FALSE;
+	
+	// all cart controller instance 
+	m_cartError :FB_CartCtrlError;
+	m_cartInit :FB_CartCtrlInit;
+	m_cartReady :FB_CartCtrlReady;
+	m_cartInSurgery :FB_CartCtrlInSurgery;
+	m_cartMotionCar :FB_CartCtrlMotionCar;
+	m_cartAsepticDeploy :FB_CartCtrlAsepticDeploy;
+	m_cartAdjust :FB_CartCtrlAdjust;
+	m_cartRotaOverhang :FB_CartCtrlRotaOverhang;
+	m_cartSlowStop : FB_CartCtrlSlowDown;
+	m_cartStandColuAdjust : FB_CartCtrlStandColuAdjust;
+	m_cartSupportLeg : FB_CartSupportLeg;
+	
+	// cart controller interface
+	m_cartCtrl : I_CartJointCtrl;
+	m_cartCtrlCmds : ST_SlaveArmCtrlCmds;
+	
+	//state machine flow jump condition allowed
+	m_hangAdjustAllowed : BOOL;
+	m_asepticDeploymentAllowed :BOOL;
+	m_cartMoveAllowed :BOOL;
+	m_rotaOverhangAllowed :BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="getStatus" Id="{3a75a7ab-dab2-4f14-a4cf-7bc1351f901a}">
+      <Declaration><![CDATA[METHOD getStatus : BOOL
+VAR_IN_OUT
+	
+	r_cartStatus :ST_CartStatus;	
+
+	// cart joint data
+	r_cartJointsData :ST_CartJointData;
+END_VAR
+
+VAR 
+	i : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[r_cartStatus.m_CartState :=m_cartState;
+
+r_cartStatus.m_uiControl := GVL_interactUI.g_uiCtrl;
+r_cartStatus.m_sdrivingLeverSensorManualFlag :=NOT m_slaveCart.m_drivingLeverSensorManual;
+//r_cartStatus.m_stabilizerDeployedFlag
+r_cartStatus.m_trocarOnFlag := m_slaveCart.m_trocarOnFlag;
+r_cartStatus.m_joystickValue := m_slaveCart.m_joystickSignal;
+r_cartStatus.m_jntPosReachLimit := m_cartAdjust.jntPosReachLimit;
+
+r_cartJointsData.m_cmdJntPos := m_slaveCart.cmdJntPos;
+r_cartJointsData.m_cmdJntVel := m_slaveCart.cmdJntVel;
+r_cartJointsData.m_curJntPos := m_slaveCart.curJntPos;
+r_cartJointsData.m_curJntTrq := m_slaveCart.curJntCurrent;
+r_cartJointsData.m_curJntVel := m_slaveCart.curJntVel;
+r_cartJointsData.m_curLinkPos := m_slaveCart.curLinkPos;
+r_cartJointsData.m_curMotorPos := m_slaveCart.curMotorPos;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{dac0d65c-106c-4eed-932d-303e798c1acc}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_slaveCart.init();
+m_cartState := CartJointState_Init;
+m_lastCartState := CartJointState_Init;
+m_nextCartState := CartJointState_Init;
+m_selfCheckPass := FALSE;
+
+//command init
+m_cartCtrlCmds.m_jntEnableFlag := g_zeroVec8i;
+m_cartCtrlCmds.m_jntOPMode := g_slaveAllPosMode;
+m_cartCtrlCmds.m_cmdJntPos := m_slaveCart.m_curJntPos;
+m_cartCtrlCmds.m_cmdJntVel := g_zeroVec8d;
+m_cartCtrlCmds.m_cmdJntAcc := g_zeroVec8d;
+m_cartCtrlCmds.m_cmdJntTrq := g_zeroVec8d;
+
+
+// generate controller factory
+//m_cartCtrlFactory[CartJointState_Error] := m_cartError;
+m_cartCtrlFactory[CartJointState_Init] := m_cartInit;
+m_cartCtrlFactory[CartJointState_Ready] := m_cartReady;
+m_cartCtrlFactory[CartJointState_InSurgery] := m_cartInSurgery;
+m_cartCtrlFactory[CartJointState_Movement] := m_cartMotionCar;
+m_cartCtrlFactory[CartJointState_HangAdjust] := m_cartAdjust;
+m_cartCtrlFactory[CartJointState_AsepticDeployment] := m_cartAsepticDeploy;
+m_cartCtrlFactory[CartJointState_RotaOverhang] := m_cartRotaOverhang;
+m_cartCtrlFactory[CartJointState_SlowStop] := m_cartSlowStop;
+m_cartCtrlFactory[CartJointState_StandColuAdjust] := m_cartStandColuAdjust;
+m_cartCtrlFactory[CartJointState_SupportLeg] := m_cartSupportLeg;
+
+// assign controller
+m_cartCtrl:=m_cartCtrlFactory[m_cartState];
+m_cartCtrl.Init(m_slaveCart,m_cartCtrlCmds);
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="laserIO" Id="{4619ebd3-1444-4ef9-b949-07f0643ac6ed}">
+      <Declaration><![CDATA[METHOD laserIO : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//cross laser IO output , when slave self check succeed , and trocar  install at least one
+IF GVL_interactUI.g_slaveSelfCheckStatus = 2 AND m_slaveCart.m_trocarOnFlag = 0 THEN
+	m_openCrossLaser := 1;
+ELSE
+	m_openCrossLaser := 0;
+END_IF
+
+//Horizontal laser IO output ,when adjusting the trolley or moving the trolley
+IF (m_slaveCart.curJntPos[5] * 1000 + GVL_CartControlParameters.g_cartInitialHeight) > GVL_CartControlParameters.g_cartOpenHorizonLaserHeight AND  (m_cartState = CartJointState_Movement OR m_cartState = CartJointState_HangAdjust) THEN
+	m_openHorizonLaser :=  1;
+ELSE
+	m_openHorizonLaser :=  0;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{a2c569bc-04e6-4881-bf0d-89b31bc10fd5}">
+      <Declaration><![CDATA[METHOD PUBLIC run : BOOL
+VAR_IN_OUT CONSTANT
+	i_cartDataPool: ST_CartInputDataPool;
+END_VAR
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// state machine transition
+stateMachine(i_cartDataPool);	
+
+//update ui data
+m_slaveCart.ProcessingUIData(i_cartDataPool.m_UIData);
+
+//update cart joint status
+m_slaveCart.updateStatus();
+
+laserIO();
+
+// null ptr check
+IF 0 = m_cartCtrl THEN
+	RETURN;
+END_IF
+
+// run controller
+m_cartCtrl.run(m_slaveCart,m_cartCtrlCmds);
+
+
+
+m_slaveCart.updateCmds(m_cartCtrlCmds);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="stateMachine" Id="{b5b8be07-918e-41ec-9d55-8af52c43f215}">
+      <Declaration><![CDATA[METHOD PROTECTED stateMachine : BOOL
+VAR_IN_OUT CONSTANT
+	i_cartDataPool: ST_CartInputDataPool;
+END_VAR
+VAR
+	i,j:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_hangAdjustAllowed := m_slaveCart.m_trocarOnFlag=0 AND ( i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_joystickEnable OR i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_cameraJoystickEnable);
+m_asepticDeploymentAllowed := m_slaveCart.m_trocarOnFlag=0 AND ((i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_dockingEnable AND m_slaveCart.cartDockingState=0) 
+												OR (i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_drapingEnable AND m_slaveCart.cartDrapingState=0)) AND NOT ( i_cartDataPool.m_safetyData.m_cartAdjustErr OR i_cartDataPool.m_safetyData.m_cartStandColumnErr) ;
+m_cartMoveAllowed := m_slaveCart.m_trocarOnFlag=0 AND  (m_carHandChassisDriveUnlock[1] OR m_carHandChassisDriveUnlock[2]) AND NOT i_cartDataPool.m_safetyData.m_cartWheelErr AND NOT m_supportLegFinshed;
+m_rotaOverhangAllowed := m_slaveCart.m_trocarOnFlag=0 AND m_slaveCart.m_rotaOverhangOnFlag > 1 AND NOT i_cartDataPool.m_safetyData.m_cartOverhangErr;
+
+// state machine transit
+CASE m_cartState OF
+	//cart joint error
+	CartJointState_Error:
+		//IF FALSE = i_cartDataPool.m_safetyData.m_slaveErrFlag THEN
+		//	// to standby
+		//	IF m_selfCheckPass THEN
+		//		m_nextCartState :=CartJointState_Standby;
+		//	ELSE
+		//		m_nextCartState :=CartJointState_Init;
+		//	END_IF
+		//END_IF
+
+	CartJointState_Init:
+		IF m_cartCtrl.isFinished THEN
+			m_nextCartState :=CartJointState_Ready;
+		END_IF
+		
+		
+	CartJointState_Ready:
+		IF m_cartCtrl.isFinished  THEN
+			m_nextCartState := CartJointState_InSurgery;
+			
+		ELSIF m_hangAdjustAllowed THEN
+			m_nextCartState := CartJointState_HangAdjust;
+			
+		ELSIF m_asepticDeploymentAllowed THEN
+			m_nextCartState := CartJointState_AsepticDeployment;
+			
+		ELSIF m_cartMoveAllowed THEN
+			m_nextCartState := CartJointState_Movement;
+			
+		ELSIF m_rotaOverhangAllowed THEN
+			m_nextCartState := CartJointState_RotaOverhang;
+			
+		ELSIF m_slaveCart.m_trocarOnFlag=0 AND  m_slaveCart.m_columnAdjustEnable  THEN
+			m_nextCartState := CartJointState_StandColuAdjust;
+			
+		ELSIF ( (m_slaveCart.m_trocarOnFlag>=3 AND NOT m_supportLegFinshed) OR (m_slaveCart.m_trocarOnFlag=0 AND m_supportLegFinshed))
+						AND NOT  i_cartDataPool.m_safetyData.m_cartSteadyFootErr THEN
+			m_nextCartState := CartJointState_SupportLeg;
+		END_IF
+		
+	
+	CartJointState_InSurgery:
+		IF m_cartCtrl.isFinished  THEN
+			m_nextCartState :=CartJointState_Ready;
+		END_IF
+		
+		
+	CartJointState_Movement:
+		IF m_slaveCart.m_trocarOnFlag<>0 OR (NOT m_carHandChassisDriveUnlock[1] AND NOT m_carHandChassisDriveUnlock[2])  THEN
+			m_nextCartState :=CartJointState_SlowStop;
+		ELSIF i_cartDataPool.m_safetyData.m_cartWheelErr THEN
+			m_nextCartState :=CartJointState_Ready;
+		END_IF
+		
+		
+	CartJointState_HangAdjust:
+		IF  m_slaveCart.m_trocarOnFlag<>0 OR (NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_joystickEnable AND NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_cameraJoystickEnable ) THEN
+			m_nextCartState :=CartJointState_SlowStop;
+		END_IF
+		
+		
+	CartJointState_AsepticDeployment:
+		IF m_cartCtrl.isFinished  THEN
+			IF i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_dockingEnable THEN
+				m_slaveCart.cartDockingState := 1;
+			ELSIF i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_drapingEnable THEN
+				m_slaveCart.cartDrapingState := 1;
+			END_IF
+			m_nextCartState :=CartJointState_SlowStop;
+		ELSIF i_cartDataPool.m_safetyData.m_cartAdjustErr OR i_cartDataPool.m_safetyData.m_cartStandColumnErr THEN
+			m_nextCartState :=CartJointState_Ready;
+		ELSIF m_slaveCart.m_trocarOnFlag<>0 OR (NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_dockingEnable AND NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_drapingEnable) THEN
+			m_nextCartState :=CartJointState_SlowStop;
+		END_IF
+		
+		
+	CartJointState_RotaOverhang:
+		IF m_slaveCart.m_rotaOverhangOnFlag <= 1 OR  m_slaveCart.m_trocarOnFlag<>0  THEN
+			m_nextCartState :=CartJointState_SlowStop;
+		ELSIF i_cartDataPool.m_safetyData.m_cartOverhangErr THEN
+			m_nextCartState :=CartJointState_Ready;
+		END_IF
+		
+	CartJointState_StandColuAdjust:
+		IF (m_slaveCart.m_trocarOnFlag<>0 OR i_cartDataPool.m_safetyData.m_cartStandColumnErr) OR  NOT m_slaveCart.m_columnAdjustEnable  THEN
+			m_nextCartState :=CartJointState_SlowStop;
+		END_IF	
+	
+	CartJointState_SlowStop:
+		IF m_cartCtrl.isFinished  THEN
+			m_nextCartState :=CartJointState_Ready;
+		END_IF
+		
+	CartJointState_SupportLeg:
+		IF m_cartCtrl.isFinished  THEN
+			IF NOT( m_slaveCart.m_supportLegSensor[1] AND m_slaveCart.m_supportLegSensor[2]) THEN
+				m_supportLegFinshed := FALSE;
+			ELSE
+				m_supportLegFinshed := TRUE;
+			END_IF
+			
+			m_nextCartState :=CartJointState_Ready;
+		END_IF
+END_CASE
+
+// Controller transit
+IF m_nextCartState<> m_cartState THEN
+	//reset current controller
+	m_cartCtrl.reset();
+	
+	// transit to new controller
+	m_lastCartState:=m_cartState;
+	m_cartState:=m_nextCartState;
+	m_cartCtrl:=m_cartCtrlFactory[m_cartState];
+	
+	//init next controller
+	m_cartCtrl.Init(m_slaveCart, m_cartCtrlCmds);
+	m_slaveCart.updateCmds(m_cartCtrlCmds);
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_CartRobot">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartRobot.getStatus">
+      <LineId Id="69" Count="14" />
+      <LineId Id="15" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartRobot.init">
+      <LineId Id="144" Count="31" />
+      <LineId Id="57" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartRobot.laserIO">
+      <LineId Id="3" Count="12" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartRobot.run">
+      <LineId Id="93" Count="20" />
+      <LineId Id="51" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartRobot.stateMachine">
+      <LineId Id="313" Count="128" />
+      <LineId Id="22" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

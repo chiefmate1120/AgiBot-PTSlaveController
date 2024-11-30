@@ -1,0 +1,192 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_SlaveCtrlSelfCheckTransport" Id="{592bc92e-cbc4-4a7d-9575-5546a0e31711}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Slave Arm Run Self-check Trajectory After Transportation
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlSelfCheckTransport EXTENDS FB_SlaveArmCtrlBase
+VAR CONSTANT
+	m_selfCheckMotionNum :INT :=2;
+END_VAR
+VAR
+	// slave self-check motion parameters
+	m_selfCheckPosture:ARRAY [1..m_selfCheckMotionNum, 1..g_sJntNum] OF LREAL:=[0.0, 	-PI/2, GVL_SlaveMotorParameters.g_maxDHJntPos[3], 	5(-g_2pi)];
+	m_selfCheckDeltaPosture	:ARRAY[1..g_sJntNum] OF LREAL :=[0.1, 0.1, 0.1, 5(g_2pi)];														//PI/4, -PI/4, 0.3, pi, pi, pi, pi, pi];
+	m_selfCheckMaxjntVel:Vec8d:=	 [2(40*g_deg2Rad), 0.05, 5(2*pi)];
+	m_selfCheckMaxjntAcc:Vec8d:=[2(80*g_deg2Rad), 	0.1, 5(4*pi)];
+	m_selfCheckMaxjntJerk:Vec8d:=[2(160*g_deg2Rad),	0.4, 5(8*pi)];
+	
+	m_selfCheckTrajIdx: INT := 1;
+	m_slefCheckPlanner: ARRAY[1..m_selfCheckMotionNum] OF FB_TrajMoveJ;
+	
+   // wait time for joint enable
+   m_enableWaitTime :LREAL := 1.0;
+
+   // time gap between enable and motion
+   m_jntMotionTimeGap :LREAL := 0.5;
+
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{a3254449-a565-46dc-9636-4679bab23a71}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR 
+	i :INT;
+	curJntVel :Vec8d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check if planner is ready
+IF m_slefCheckPlanner[m_selfCheckTrajIdx].isGene = FALSE THEN
+	calcCmdJntPos:=FALSE;
+	RETURN;
+END_IF
+
+// arms enable successively
+IF m_timePeriod > m_enableWaitTime THEN
+       m_jntEnableFlag :=g_onesVec8i;
+END_IF
+
+IF m_timePeriod < m_enableWaitTime + m_jntMotionTimeGap THEN
+	RETURN;
+END_IF
+
+// traj plan
+calcCmdJntPos :=m_slefCheckPlanner[m_selfCheckTrajIdx].evaluate(m_timePeriod-m_enableWaitTime-m_jntMotionTimeGap, jntPos=> m_cmdJntPos, jntVel=>m_cmdJntVel, jntAcc=> m_cmdJntAcc);
+
+// check if to transit to next segment
+curJntVel :=i_slaveArm.curJntVel;
+IF(m_timePeriod - m_enableWaitTime - m_jntMotionTimeGap > m_slefCheckPlanner[m_selfCheckTrajIdx].duration  AND norm(curJntVel)<7*GVL_SlaveControlParameters.g_jntStaticVelThres) THEN
+	m_selfCheckTrajIdx:=m_selfCheckTrajIdx+1;
+	m_timePeriod:=0;
+END_IF
+
+// check if to terminated
+IF(m_selfCheckTrajIdx > m_selfCheckMotionNum) THEN
+	m_isFinished:=TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{68b4ffd4-3a13-47b5-9e79-ffc5a3d542de}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+
+VAR
+	i,j :INT;
+	startJntPos,endJntPos :Vec8d;
+	baseJntPos:Vec8d;
+	cycleNum :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+//m_jntEnableFlag :=g_zeroVec8i;
+
+//set different wait time for each arm, so the arms would run self-check successively
+m_enableWaitTime := i_slaveArm.armIdx-1;
+
+// determine base joint position for instrument joint
+baseJntPos :=g_zeroVec8d;
+FOR i:=4 TO g_sJntNum DO
+	cycleNum := FLOOR(i_slaveArm.curJntPos[i]/g_2pi);
+	baseJntPos[i]:=cycleNum* g_2Pi;
+END_FOR
+
+// traj plan
+// fisrt segment
+// TODO: joint1/2 stay still in case arms collision
+m_selfCheckTrajIdx :=1;
+startJntPos:=i_slaveArm.curJntPos;
+FOR j:=1 TO g_sJntNum DO 
+	endJntPos[j]:=startJntPos[j] - m_selfCheckDeltaPosture[j];
+END_FOR
+m_slefCheckPlanner[1].init(startJntPos,endJntPos,m_selfCheckMaxjntVel, m_selfCheckMaxjntAcc,m_selfCheckMaxjntJerk);
+
+// other segments
+IF m_selfCheckMotionNum>= 2 THEN
+	FOR i:=2 TO m_selfCheckMotionNum DO
+		 startJntPos := endJntPos;
+		FOR j:=1 TO 7 DO 			
+			endJntPos[j]:= startJntPos[j] +  EXPT(-1,i)* m_selfCheckDeltaPosture[j] ;
+		END_FOR
+		m_slefCheckPlanner[i].init(startJntPos,endJntPos,m_selfCheckMaxjntVel, m_selfCheckMaxjntAcc,m_selfCheckMaxjntJerk);
+	END_FOR
+END_IF;
+
+// update commands to arm
+copyCmds(r_slaveArmCtrlCmd);]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveCtrlSelfCheckTransport">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlSelfCheckTransport.calcCmdJntPos">
+      <LineId Id="41" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="39" Count="1" />
+      <LineId Id="173" Count="0" />
+      <LineId Id="167" Count="5" />
+      <LineId Id="153" Count="0" />
+      <LineId Id="152" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="96" Count="2" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlSelfCheckTransport.init">
+      <LineId Id="57" Count="0" />
+      <LineId Id="218" Count="0" />
+      <LineId Id="199" Count="2" />
+      <LineId Id="233" Count="0" />
+      <LineId Id="232" Count="0" />
+      <LineId Id="237" Count="0" />
+      <LineId Id="234" Count="1" />
+      <LineId Id="254" Count="0" />
+      <LineId Id="236" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="217" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="159" Count="0" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="253" Count="0" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="131" Count="2" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="154" Count="1" />
+      <LineId Id="152" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

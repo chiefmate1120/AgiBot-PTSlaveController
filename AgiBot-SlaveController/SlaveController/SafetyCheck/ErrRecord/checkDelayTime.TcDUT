@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="checkDelayTime" Id="{1842a9f8-6be9-44f3-b29d-ddeaee55cb3b}">
+    <Declaration><![CDATA[TYPE checkDelayTime :
+STRUCT
+	//motor encoder and joint encoder deviation delay time
+	Ti_armJntEncErr:TIME:=T#0.1S;
+	//drive error delay time
+	Ti_driveErr:TIME:=T#0.1S;
+	//joint encoder ununuited delay time
+	Ti_linkEncErr:TIME:=T#5S;
+	//joint status error delay time 
+	Ti_jntStatusErr:TIME:=T#1S;
+	//motor current is not update delay time
+	Ti_currentIsNotUpdate:TIME:=T#20S;
+	//joint postion out of limit
+	Ti_outOfLimit:TIME:=T#0.1S;
+	//joint follow error delay time
+	Ti_armJntFollowErr:TIME:=T#0.1S;
+	//joint vel error delay time
+	Ti_jntVelErr:TIME:=T#0.05S;
+	//joint current error  delay time
+	Ti_jntCurrentErr:TIME:=T#3S;
+	//fixed point postion change of  master-slave state 
+	Ti_fixedPointErr:TIME:=T#0.1S;
+	//space pose error  delay time
+	Ti_spacePoseErr:TIME:=T#0.1S;
+	//commend joint position saltation delay time
+	Ti_jntCmdSaltationErr:TIME:=T#0.002S;
+	//Deviation between command current and feedback current
+	Ti_jntCmdCurrentErr:TIME:=T#0.5S;
+
+	
+	Ti_CarDualEncDev:TIME:=T#0.02S;
+	Ti_CarDriveErr:TIME:=T#1S;
+	Ti_CarActSec:TIME:=T#10S;
+	Ti_CarJntStatus:TIME:=T#1S;
+	Ti_CarTorMotor:TIME:=T#20S;
+	Ti_CaroutofLimit:TIME:=T#0.1S;
+	Ti_CarFollowDev:TIME:=T#0.02S;
+	Ti_CarJntVel:TIME:=T#0.05S;
+	Ti_CarJntCurrent:TIME:=T#1S;
+	Ti_CarMZDriveErr:TIME:=T#1S;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

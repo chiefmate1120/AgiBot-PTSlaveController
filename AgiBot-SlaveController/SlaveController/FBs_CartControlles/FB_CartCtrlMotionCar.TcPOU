@@ -1,0 +1,455 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_CartCtrlMotionCar" Id="{d05e52e3-1460-4326-9432-80246d34dd7a}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_CartCtrlMotionCar EXTENDS FB_CartCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	m_driveForce: ARRAY [1..6] OF LREAL;
+	m_forceLpf : ARRAY [1..6] OF LREAL;
+	m_driveForceOffset: ARRAY [1..6] OF LREAL := [0,0,4(0)];
+	m_driveForceLimit :ARRAY [1..3] OF  INT := [100,100,20];
+	m_acc : ARRAY [1..2] OF LREAL;
+	m_vel,m_velLast : ARRAY [1..2] OF LREAL;
+	m_pos,m_posLast : ARRAY [1..2] OF LREAL;
+	m_forceWheel : ARRAY [1..2] OF LREAL;
+	M : UINT := 8;
+	B : UINT := 13;
+	m_fricyion :ARRAY [1..2] OF  LREAL;
+	m_curJntVel : Vec8d;
+	
+	// input drive force filter
+	m_driveVelLpf : ARRAY [1..4] OF FB_LowPassFilter;
+	
+	//cart motion trajectory velocity
+	m_tarJntVel : ARRAY [1..2] OF LREAL;
+	
+	m_tarJntPos : ARRAY [1..2] OF LREAL;
+	m_initJntPos : ARRAY [1..2] OF LREAL;
+	// time threshold to drive wheel after it's enabled
+	m_cartWheelDriveWaitTime :LREAL := 0.2;
+	
+	//wheel motion  time 
+	m_wheelMotionTime:ARRAY [1..2] OF LREAL;
+	
+	// filter cut-off frequency for cart drive force 
+	m_cmdJntVelLpfCutoffFreq : LREAL :=8;
+	
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+
+]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntVel" Id="{764cdcc2-44fc-4de0-8a50-0d1f87c1ea9c}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntVel : BOOL
+VAR_IN_OUT CONSTANT
+	// slave cart joint data
+	i_slaveCart :FB_SlaveCart;
+END_VAR
+
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i := 1 TO 3 DO
+	m_driveForce[i] :=LIMIT(-m_driveForceLimit[i], forceDataAnalysis(number:= i_slaveCart.m_driveForce[i])*10 + m_driveForceOffset[i],m_driveForceLimit[i]);  
+	m_forceLpf[i] :=  m_driveVelLpf[i].run(i_rawData:= m_driveForce[i]);
+END_FOR
+
+//m_trajVel := judgeQuadrant(m_forceLpf,i_slaveCart );
+m_wheelMotionTime[1] := LIMIT(0, m_wheelMotionTime[1] + g_cartCtrlCycleTime, 1);
+IF m_wheelMotionTime[1] > m_cartWheelDriveWaitTime THEN
+	m_tarJntVel := forceIntegral( m_forceLpf, i_slaveCart.curJntVel);
+	
+	FOR i := 1 TO 2 DO
+		m_cmdJntVel[i+2] := m_tarJntVel[i];
+	END_FOR
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="forceDataAnalysis" Id="{40fc9c46-0fbb-4c32-b63e-2b8d816a336a}">
+      <Declaration><![CDATA[METHOD forceDataAnalysis : LREAL
+VAR_INPUT
+	number : DINT;
+END_VAR
+
+
+VAR
+	exponrnt : DINT;
+	sign : UDINT;
+	mantissa :UDINT;
+	value :REAL :=0.5;
+	mantissa2 :REAL := 0.0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[sign :=SHR(number,31);
+exponrnt := (( SHR(number,23) AND 16#FF )) - (16#7F);
+mantissa := SHL(number,9);
+WHILE  mantissa<>0 DO
+	IF (mantissa AND 16#80000000) = 16#80000000 THEN
+		mantissa2 := mantissa2 + value;
+	END_IF
+	mantissa := SHL(mantissa,1);
+	value := value *0.5;
+END_WHILE
+value := (1+mantissa2)*( EXPT(2,exponrnt));
+
+IF sign<>0 THEN
+	value := -value;
+END_IF
+forceDataAnalysis := value;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="forceIntegral" Id="{a54be792-3c4c-46d3-8314-0501b01e7a5d}">
+      <Declaration><![CDATA[METHOD forceIntegral : ARRAY [1..2] OF LREAL
+VAR_INPUT
+	i_force : ARRAY [1..6] OF LREAL;
+	i_curJntVel : Vec8d;
+END_VAR
+
+VAR_STAT
+	forceY : LREAL;
+	forceX : LREAL;
+	forceRZ : LREAL;
+	forceR : LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+//IF ABS(i_force[1]) > 5 THEN
+//	forceX := i_force[1] - 5*sign(i_force[1]);
+//END_IF;
+//IF ABS(i_force[3]) > 20 THEN
+//	forceRZ := i_force[3] - 20*sign(i_force[3]);
+//END_IF
+forceRZ := 0;
+IF ABS(i_force[2]) > 4 THEN
+	forceY := i_force[2] - 4 * sign(i_force[2]);
+END_IF
+
+IF ABS (i_force[1] + i_force[3]) > 5 THEN
+	forceR := i_force[1] + i_force[3] - 5 * sign(i_force[1] + i_force[3]);
+ELSE
+	forceR := 0;
+END_IF
+
+
+m_curJntVel := i_curJntVel;
+IF forceR >= 0 AND  forceY >= 0 THEN
+	m_forceWheel[1] := forceY - forceRZ;
+	m_forceWheel[2] := forceY + forceR;
+
+ELSIF forceR < 0 AND forceY > 0 THEN
+	m_forceWheel[1] := forceY - forceR;
+	m_forceWheel[2] := forceY + forceRZ;
+	
+ELSIF forceR < 0 AND forceY < 0 THEN
+	m_forceWheel[1] := forceY - forceRZ;
+	m_forceWheel[2] := forceY + forceR;
+	
+ELSIF forceR >= 0 AND forceY < 0 THEN
+	m_forceWheel[1] := forceY - forceR;
+	m_forceWheel[2] := forceY + forceRZ;
+END_IF
+
+IF ABS(m_curJntVel[3]) > 0.3 THEN
+	m_fricyion[1] := m_curJntVel[3] * B;
+ELSE
+	m_fricyion[1] := 0;//5 * sign(m_forceWheel[1]);
+	//IF ABS(m_fricyion[1]) > ABS(m_forceWheel[1]) THEN
+	//	m_fricyion[1] := m_forceWheel[1];
+	//END_IF
+END_IF
+
+IF ABS(m_curJntVel[4]) > 0.3 THEN
+	m_fricyion[2] := m_curJntVel[4] * B;
+	
+ELSE
+	m_fricyion[2] :=0;//5 * sign(m_forceWheel[2]);
+	//IF ABS(m_fricyion[2]) > ABS(m_forceWheel[2]) THEN
+	//	m_fricyion[2] := m_forceWheel[2];
+	//END_IF
+END_IF
+
+m_acc[1] := (m_forceWheel[1] - m_fricyion[1])/M;
+m_acc[2] := (m_forceWheel[2] - m_fricyion[2])/M;
+
+m_vel[1] :=LIMIT(-GVL_CartControlParameters.g_maxJntVel[3], m_velLast[1] + m_acc[1] * g_cartCtrlCycleTime , GVL_CartControlParameters.g_maxJntVel[3]); m_velLast[1] := m_vel[1];
+m_vel[2] :=LIMIT(-GVL_CartControlParameters.g_maxJntVel[4], m_velLast[2] + m_acc[2] * g_cartCtrlCycleTime , GVL_CartControlParameters.g_maxJntVel[4]); m_velLast[2] := m_vel[2];
+
+m_pos[1] := m_posLast[1] + m_vel[1] * g_cartCtrlCycleTime; m_posLast[1] := m_pos[1];
+m_pos[2] := m_posLast[2] + m_vel[2] * g_cartCtrlCycleTime; m_posLast[2] := m_pos[2];
+
+forceIntegral := m_vel;
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{940ec1c0-b19a-4580-a204-bbc4e9c523a4}">
+      <Declaration><![CDATA[// override this function in each exact controller
+// NOTICE: set joint control mode here, and do some initialization if needed
+METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveCart	:FB_SlaveCart;
+END_VAR
+VAR_IN_OUT 
+	r_cartCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
+//m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
+SUPER^.init(i_slaveCart,r_cartCtrlCmd);
+
+m_jntEnableFlag[3] :=1;
+m_jntEnableFlag[4] :=1;
+
+m_jntOPMode[3]:= DriverOPMode_csvMZ;
+m_jntOPMode[4]:= DriverOPMode_csvMZ;
+
+
+m_initJntPos[1] := i_slaveCart.curJntPos[3];
+m_initJntPos[2] := i_slaveCart.curJntPos[4];
+
+m_acc[1] := 0;
+m_acc[2] := 0;
+
+m_velLast[1] := 0;
+m_velLast[2] := 0;
+
+m_tarJntPos[1] := 0; //m_initJntPos[1];
+m_tarJntPos[2] := 0 ;//m_initJntPos[2];
+
+m_posLast[1] := m_initJntPos[1];
+m_posLast[2] := m_initJntPos[2];
+
+m_cmdJntPos[3] := m_tarJntPos[1];
+m_cmdJntPos[4] := m_tarJntPos[2];
+
+m_driveVelLpf[1].init(i_filterOrd:= 1, i_cutoffFreq:= m_cmdJntVelLpfCutoffFreq, i_sampleFreq:= 8000);
+m_driveVelLpf[2].init(i_filterOrd:= 1, i_cutoffFreq:= m_cmdJntVelLpfCutoffFreq, i_sampleFreq:= 8000);
+m_driveVelLpf[3].init(i_filterOrd:= 1, i_cutoffFreq:= m_cmdJntVelLpfCutoffFreq, i_sampleFreq:= 8000);
+m_driveVelLpf[4].init(i_filterOrd:= 1, i_cutoffFreq:= m_cmdJntVelLpfCutoffFreq, i_sampleFreq:= 8000);
+
+m_driveVelLpf[1].run(i_rawData:=0);
+m_driveVelLpf[2].run(i_rawData:=0);
+
+
+m_wheelMotionTime[1]:=0;
+m_wheelMotionTime[2]:=0;
+// update commands to arm
+copyCmds(r_cartCtrlCmd);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="judgeQuadrant" Id="{08d37ad9-db9f-4290-803a-c83cbdba0830}">
+      <Declaration><![CDATA[METHOD judgeQuadrant : ARRAY [1..2] OF LREAL
+VAR_INPUT
+	i_vel : ARRAY [1..6] OF LREAL;
+	i_slaveCart :FB_SlaveCart;
+END_VAR
+VAR_STAT
+	vel1 : LREAL;
+	vel2 : LREAL;
+	vel2_1 : LREAL;
+	vel3 : LREAL;
+END_VAR
+VAR
+	acclast : LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//	judgeQuadrant[1] := i_vel[2] - i_vel[1]  ;
+//	judgeQuadrant[2] := i_vel[2] + i_vel[1];
+IF ABS(i_vel[1]+i_vel[3])/2 < 0.1 THEN
+	vel2 := i_vel[2] ;
+	vel1 := 0;
+	vel3 := 0;
+ELSE
+	vel1 := i_vel[1]/5;
+	vel3 := i_vel[3] /5;
+END_IF
+IF ABS(i_vel[2]) < 0.2 THEN
+	vel2_1 := 0;
+ELSE
+	IF i_vel[2]>=0.2 THEN
+		vel2_1 :=  i_vel[2]-0.2;
+	ELSIF i_vel[2]<=-0.2 THEN
+		vel2_1 :=  i_vel[2]+0.2;
+	END_IF
+	
+END_IF
+
+IF i_vel[1] >= 0 AND  vel2 >= 0 THEN
+	judgeQuadrant[1] := vel2_1 - vel3;
+	judgeQuadrant[2] := vel2_1 + vel1 + vel3;
+
+ELSIF i_vel[1] < 0 AND vel2 > 0 THEN
+	judgeQuadrant[1] := vel2_1 - vel1 - vel3;
+	judgeQuadrant[2] := vel2_1 + vel3;
+	
+ELSIF i_vel[1] < 0 AND vel2 < 0 THEN
+	judgeQuadrant[1] := vel2_1 - vel3;
+	judgeQuadrant[2] := vel2_1 + vel1 + vel3;
+	
+ELSIF i_vel[1] > 0 AND vel2 < 0 THEN
+	judgeQuadrant[1] := vel2_1 - vel1 - vel3;
+	judgeQuadrant[2] := vel2_1 + vel3;
+END_IF
+
+//IF i_vel[1] >= 0 AND i_vel[2] >= 0 THEN
+//	judgeQuadrant[1] := i_vel[2]  ;
+//	judgeQuadrant[2] := i_vel[2] + i_vel[1];
+//
+//ELSIF i_vel[1] < 0 AND i_vel[2] > 0 THEN
+//	judgeQuadrant[1] := i_vel[2] - i_vel[1];
+//	judgeQuadrant[2] := i_vel[2];
+//	
+//ELSIF i_vel[1] < 0 AND i_vel[2] < 0 THEN
+//	judgeQuadrant[1] := i_vel[2];
+//	judgeQuadrant[2] := i_vel[2] + i_vel[1];
+//	
+//ELSIF i_vel[1] > 0 AND i_vel[2] < 0 THEN
+//	judgeQuadrant[1] := i_vel[2] - i_vel[1];
+//	judgeQuadrant[2] := i_vel[2];
+//END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_CartCtrlMotionCar">
+      <LineId Id="52" Count="1" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlMotionCar.calcCmdJntVel">
+      <LineId Id="17" Count="1" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="75" Count="1" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="122" Count="1" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlMotionCar.forceDataAnalysis">
+      <LineId Id="87" Count="14" />
+      <LineId Id="26" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlMotionCar.forceIntegral">
+      <LineId Id="149" Count="6" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="133" Count="1" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="86" Count="1" />
+      <LineId Id="131" Count="1" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="22" Count="15" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="69" Count="1" />
+      <LineId Id="105" Count="1" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="66" Count="1" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="100" Count="2" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="45" Count="3" />
+      <LineId Id="44" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlMotionCar.init">
+      <LineId Id="79" Count="0" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="176" Count="0" />
+      <LineId Id="175" Count="0" />
+      <LineId Id="177" Count="0" />
+      <LineId Id="162" Count="0" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="163" Count="0" />
+      <LineId Id="104" Count="1" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="148" Count="0" />
+      <LineId Id="147" Count="0" />
+      <LineId Id="149" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="30" Count="1" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="21" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlMotionCar.judgeQuadrant">
+      <LineId Id="145" Count="0" />
+      <LineId Id="86" Count="1" />
+      <LineId Id="99" Count="1" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="126" Count="1" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="101" Count="1" />
+      <LineId Id="178" Count="0" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="171" Count="1" />
+      <LineId Id="174" Count="1" />
+      <LineId Id="173" Count="0" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="103" Count="15" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="55" Count="2" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="59" Count="11" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

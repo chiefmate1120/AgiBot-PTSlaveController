@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_SlaveMotorParameters" Id="{cf487053-15bb-46bd-a4ed-bbb1df690beb}">
+    <Declaration><![CDATA[{attribute 'global_init_slot' := '49991'}
+{attribute 'qualified_only'}
+VAR_GLOBAL CONSTANT
+	// encoder resolution
+	g_incEncoderRes :ARRAY[1..g_sJntNum] OF DINT :=[2(65536),4096,5(65536)];
+	g_absEncoderRes :ARRAY[1..g_sJntNum] OF DINT :=[2(16777216),6(65536)];
+	g_absEncoderResFR :ARRAY[1..g_sJntNum] OF DINT :=[2(131072),6(65536)];
+	
+	// reduction ratio
+	g_motorReduction :ARRAY[1..g_sJntNum] OF LREAL :=[ 81,81,  2*pi/0.006, 5(388125.0/4693)];
+	g_absEncoderReduction :ARRAY[1..g_sJntNum] OF LREAL :=[2(1.0), 2*PI/0.5364, 5(1.0)];//8 0.5364
+	
+	// motor parameters
+	g_motorTrqConst :ARRAY[1..g_sJntNum] OF LREAL :=[ 0.9/5.6,0.9/5.6, 0.032,5(0.0193)];
+	g_motorMaxCurrent :ARRAY[1..g_sJntNum] OF LREAL :=[ 5600,5600,  1300, 5(250)];//mA
+	
+	// motor encoder direction
+	g_motorDir :ARRAY[1..g_sJntNum] OF INT :=[-1, 1, -1, 1, 1, 1, 1, 1];
+																 
+	// joint position limit
+	g_minJntPos: ARRAY[1..g_sJntNum] OF LREAL:=[-2.7,	-2.94,	0.235, 	5(-g_largeNum)];	
+	g_maxJntPos: ARRAY[1..g_sJntNum] OF LREAL:=[2.7,		-0.2, 	0.535, 	5(g_largeNum)];
+	
+	// DH joint position limit
+	//NOTE: wrist pitch and yaw angle is reset after instrument is mounted 
+	g_minDHJntPos : ARRAY[1..6] OF LREAL :=[-2.7,	-2.94,	0.235, -5.5, -PI/2 - 75*g_deg2Rad , -PI/2];
+	g_maxDHJntPos : ARRAY[1..6] OF LREAL :=[2.7,	-0.2, 	0.535, 5.5, -PI/2 + 75*g_deg2Rad, PI/2];
+	
+	// joint velocity limit
+	g_maxJntVel :ARRAY[1..g_sJntNum] OF LREAL :=[1.25, 1.25, 0.5, 5(7.0)];
+		
+END_VAR
+]]></Declaration>
+  </GVL>
+</TcPlcObject>

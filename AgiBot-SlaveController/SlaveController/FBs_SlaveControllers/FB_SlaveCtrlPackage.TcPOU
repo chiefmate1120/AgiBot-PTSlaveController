@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SlaveCtrlPackage" Id="{f1b722f8-ced5-4c88-9461-cc1a45d6acc0}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Slave Arm move to Package posture
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlPackage EXTENDS FB_SlaveArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	m_packagePlanner : FB_TrajMoveJ;
+	
+	// packageDHJntPos
+	m_packageJntPosSlave :ARRAY[1..g_sArmNum] OF ARRAY[1..g_sJntNum] OF LREAL := 
+	[4([0.0, 1.13-pi/2, 0.535, 0, 0, 0, 0, 0])];
+	m_packageMaxJntVel: Vec8d := [2(20*g_deg2Rad), 0.05, 5(20*g_deg2Rad)];
+	m_packageMaxJntAcc: Vec8d := [2(40*g_deg2Rad), 0.1, 5(40*g_deg2Rad)];
+	m_packageMaxJntJerk: Vec8d := [2(80*g_deg2Rad),0.4, 5(80*g_deg2Rad)];
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{5a4931eb-3ea0-408d-a661-3a3f375fd93d}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	// endoscope pose in cart coordinate
+	i_endoscopePose : ST_Frame;
+	
+	// master arm data
+	i_masterStatus :ST_MasterStatus;
+	
+	// setup arm data
+	i_setupStatus: ST_SetupStatus;
+	
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR 
+	i :INT;
+	curJntVel :Vec8d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF m_packagePlanner.isGene = FALSE THEN
+	calcCmdJntPos:=FALSE;
+	RETURN;
+END_IF
+
+// traj plan
+calcCmdJntPos := m_packagePlanner.evaluate(m_timePeriod, jntPos=> m_cmdJntPos, jntVel=>m_cmdJntVel, jntAcc=> m_cmdJntAcc);
+
+// check IF TO terminate
+curJntVel :=i_slaveArm.curJntVel;
+m_isFinished :=m_timePeriod > m_packagePlanner.duration  AND norm(curJntVel)<7*g_jntStaticVelThres;
+
+//IF m_isFinished THEN
+//	GVL_interactUI.
+//END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{b23724e4-deb7-4c43-8ea2-717cb3ca8f89}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+
+VAR
+	i :INT;
+	startJntPos,endJntPos :Vec8d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check if to hold the command joint position unchanged
+m_holdLastCmds := checkToHoldLastCmds(i_slaveArm);
+
+//init
+SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+
+//traj plan
+startJntPos:= i_slaveArm.curJntPos;
+endJntPos := i_slaveArm.curJntPos;
+
+FOR i := 1 TO 3 DO
+	endJntPos[i] := m_packageJntPosSlave[i_slaveArm.armIdx][i];
+END_FOR
+m_packagePlanner.init(startJntPos,endJntPos,m_packageMaxJntVel,m_packageMaxjntAcc,m_packageMaxjntJerk);
+
+// update commands to arm
+copyCmds(r_slaveArmCtrlCmd);]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveCtrlPackage">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlPackage.calcCmdJntPos">
+      <LineId Id="61" Count="2" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="65" Count="5" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="93" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlPackage.init">
+      <LineId Id="67" Count="3" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="82" Count="10" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

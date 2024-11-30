@@ -1,0 +1,183 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="CartControl" Id="{c247957a-c15a-480d-acbc-bde71223345b}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM CartControl
+VAR
+	// cart instance
+	m_cartRobot :FB_CartRobot;
+	
+	// Output cart status
+	m_cartStatus AT%Q* : ST_CartStatus;
+	
+	// cart joint data
+	m_cartJointsData AT %Q* :ST_CartJointData;
+	
+	m_cartDataPool: ST_CartInputDataPool;
+	
+	// wait time before cart init for ethercat to be statble 
+	m_cartInitWaitTime : LREAL:=0;
+	
+	// cart init flag
+	m_cartInit :BOOL :=FALSE;
+	
+	m_workHeartTon0 : TON;
+	m_workHeartTon1 : TON;
+	
+	m_cartInSterileStateTon :Ton;
+	m_cartInSterileState :BOOL;
+	//Aseptic sleeve is installed flag
+	m_asepticInstalledFlag : Vec4b;
+	m_slaveArmDisableFlag : Vec4b;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// wait communication to be stable
+IF(m_cartInitWaitTime<g_robotInitWaitTime) THEN
+	m_cartInitWaitTime := m_cartInitWaitTime+g_cartCtrlCycleTime;
+	RETURN;
+END_IF
+
+// cart init
+IF m_cartInit =FALSE THEN
+	m_cartRobot.Init();
+	m_cartInit:=TRUE;
+END_IF
+
+// input from UI
+UIInputProcess();
+
+// cart run
+m_cartRobot.run(m_cartDataPool);
+
+m_cartRobot.getStatus(m_cartStatus,m_cartJointsData);
+
+
+UIOutputProcess();
+]]></ST>
+    </Implementation>
+    <Method Name="UIInputProcess" Id="{90031281-ad03-48e9-82ab-c27609373d51}">
+      <Declaration><![CDATA[// tranform data from UI(global variable write by ADS) to ST_UIData
+METHOD UIInputProcess : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:int;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// cart Joystick data
+m_cartDataPool.m_UIData.m_joystickDataFromUI := GVL_interactUI.g_joystickSignalArray;
+
+m_cartDataPool.m_UIData.m_ctrlEnableFromUI := GVL_interactUI.g_uiCtrl;
+
+//limit_height:UINT;  上位机的高度值单位是mm，系统的高度值单位是m，底座高度是1805mm
+//打开ui_control.limit_height_adjusting后可以调整立柱，并实时将立柱当前高度上传
+IF (GVL_interactUI.g_uiCtrl.m_heightLimitAdjustEnable=TRUE) THEN
+	m_cartDataPool.m_UIData.m_standColumnHightLimit := GVL_CartMotorParameters.g_maxJntPos[5];
+ELSIF  (GVL_interactUI.g_uiCtrl.m_heightLimitAdjustEnable=FALSE) AND GVL_interactUI.g_heightLimitEnbale AND ABS((m_cartDataPool.m_UIData.m_standColumnHightLimit *1000+1850)-GVL_interactUI.g_heightLimitFromUI)>5 THEN
+	m_cartDataPool.m_UIData.m_standColumnHightLimit := UINT_TO_LREAL(GVL_interactUI.g_heightLimitFromUI-GVL_CartControlParameters.g_cartInitialHeight)/1000;
+ELSIF GVL_interactUI.g_heightLimitEnbale=FALSE THEN
+	m_cartDataPool.m_UIData.m_standColumnHightLimit := GVL_CartMotorParameters.g_maxJntPos[5];
+END_IF
+GVL_interactUI.g_heightLimit :=LREAL_TO_UINT (m_cartRobot.m_slaveCart.curJntPos[5] * 1000 + GVL_CartControlParameters.g_cartInitialHeight);
+
+//Surgical orientation selection
+m_cartDataPool.m_UIData.m_surgicalSite := GVL_interactUI.g_surgicalSite;
+m_cartDataPool.m_UIData.m_surgicalLocation := GVL_interactUI.g_surgicalLocation;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="UIOutputProcess" Id="{27946789-ba17-4b7b-ba83-4bc0e56b91c4}">
+      <Declaration><![CDATA[METHOD UIOutputProcess : BOOL
+VAR_INPUT
+END_VAR
+VAR 
+	i : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//TODO
+//work heart
+m_workHeartTon0(IN:= GVL_interactUI.g_heartBeat = 1, PT:= T#1S, Q=> , ET=> );
+m_workHeartTon1(IN:= GVL_interactUI.g_heartBeat = 0, PT:= T#1S, Q=> , ET=> );
+IF m_workHeartTon0.Q THEN
+	GVL_interactUI.g_heartBeat :=0 ;
+ELSIF m_workHeartTon1.Q THEN
+	GVL_interactUI.g_heartBeat  :=1 ;
+END_IF
+
+GVL_interactUI.g_cartOperation.m_drapingAdjustState := m_cartRobot.m_slaveCart.m_cartDataFromUI.m_cartDrapingState;
+GVL_interactUI.g_cartOperation.m_dockingAdjustState := m_cartRobot.m_slaveCart.m_cartDataFromUI.m_cartDockingState;
+
+GVL_interactUI.g_trocarStatus := INT_TO_BOOL(m_cartRobot.m_slaveCart.m_trocarOnFlag);
+
+GVL_interactUI.g_slaveRunAlone := NOT SlaveArmControl.m_slaveRobot.m_masterOnLine;
+GVL_interactUI.g_joysticksTrigger := SafetyCheck.m_joysticksTrigger;
+
+IF GVL_interactUI.g_surgicalStatus = 1 THEN
+	IF NOT SlaveArmControl.m_slaveRobotData.m_slaveAllowInMS THEN
+		m_slaveArmDisableFlag := g_zeroVec4b;
+	END_IF
+	GVL_interactUI.g_cartOperation.m_setupSterileState := BOOL_TO_UINT(m_asepticInstalledFlag[1]) OR BOOL_TO_UINT(m_asepticInstalledFlag[2]) OR BOOL_TO_UINT(m_asepticInstalledFlag[3]) OR BOOL_TO_UINT(m_asepticInstalledFlag[4]) ;
+ELSE
+	GVL_interactUI.g_cartOperation.m_setupSterileState := BOOL_TO_UINT(m_asepticInstalledFlag[1]) AND BOOL_TO_UINT(m_asepticInstalledFlag[2]) AND BOOL_TO_UINT(m_asepticInstalledFlag[3]) AND BOOL_TO_UINT(m_asepticInstalledFlag[4]) ;
+	m_slaveArmDisableFlag := SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag;	
+	GVL_interactUI.g_InstruSeriesRecord := g_zeroVec100i;
+END_IF
+
+FOR i := 1 TO g_sArmNum BY 1 DO
+	m_asepticInstalledFlag[i] := m_slaveArmDisableFlag[i] OR SlaveArmControl.m_slaveRobot.m_panelMountedFlag[i];
+END_FOR
+
+GVL_interactUI.g_cartOperation.m_setupSterileStateArm1 := BOOL_TO_UINT(m_asepticInstalledFlag[1]); 
+GVL_interactUI.g_cartOperation.m_setupSterileStateArm2 := BOOL_TO_UINT(m_asepticInstalledFlag[2]); 
+GVL_interactUI.g_cartOperation.m_setupSterileStateArm3 := BOOL_TO_UINT(m_asepticInstalledFlag[3]); 
+GVL_interactUI.g_cartOperation.m_setupSterileStateArm4 := BOOL_TO_UINT(m_asepticInstalledFlag[4]); 
+
+GVL_interactUI.g_cartOperation.m_scopeInstalled := BOOL_TO_UINT(m_cartDataPool.m_slaveStatus.m_endoscopeMounted);
+
+FOR i := 1 TO 4 BY 1 DO
+	IF SlaveArmControl.m_slaveRobot.m_slaveArms[i].instrument.Instrutype<>InstruType_endoscope THEN
+		IF SlaveArmControl.m_slaveRobot.m_instrumentMountedFlag[i] AND SlaveArmControl.m_slaveRobot.m_endoscopeMounted AND GVL_interactUI.g_cartOperation.m_setupSterileState = 1 THEN
+			GVL_interactUI.g_cartOperation.m_inSurgicalAllowed := 1;
+			EXIT;
+		ELSE
+			GVL_interactUI.g_cartOperation.m_inSurgicalAllowed := 0;
+		END_IF	
+	END_IF	
+END_FOR
+
+
+//Cart_static_in_sterile_state:UINT; //台车进入无菌区，并且台车停止运动(连续10s没有运动)，0：没有完成，1：完成
+IF m_cartRobot.m_slaveCart.m_cartDataFromUI.m_cartDockingState = 1 THEN
+	IF m_cartRobot.m_CartState = CartJointState_Movement THEN
+		m_cartInSterileState := FALSE;
+	ELSIF m_cartRobot.m_lastCartState = CartJointState_Movement THEN
+		m_cartInSterileState := TRUE;
+	END_IF
+ELSE
+	m_cartInSterileState := FALSE;
+	GVL_interactUI.g_cartOperation.m_cartInSterileState:=0;
+END_IF
+m_cartInSterileStateTon(IN:= m_cartInSterileState, PT:= T#10S, Q=> , ET=> );
+IF m_cartInSterileStateTon.Q THEN
+	GVL_interactUI.g_cartOperation.m_cartInSterileState:=1;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="CartControl">
+      <LineId Id="145" Count="21" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="CartControl.UIInputProcess">
+      <LineId Id="82" Count="18" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="68" Count="0" />
+    </LineIds>
+    <LineIds Name="CartControl.UIOutputProcess">
+      <LineId Id="281" Count="66" />
+      <LineId Id="95" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

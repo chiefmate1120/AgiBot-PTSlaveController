@@ -1,0 +1,168 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SlaveCtrlInstruRetract" Id="{596332da-68eb-4244-8a80-7e3d57b3bb9f}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Slave Arm joint3 retract to up limit
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlInstruRetract EXTENDS FB_SlaveArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// wait time before retract, ensure instruments is removed 
+	m_waitTime :LREAL :=2.0;
+		
+	// motion planning
+	m_jnt3OTG : FB_secOrdTrajFilter;
+	m_jnt3TargetPos :LREAL;
+	m_retractVel: LREAL:= 0.1;
+	m_retractAcc: LREAL:= 0.2;
+	
+	// instrument joint motion planning
+	m_instruJntOTG :ARRAY[1..5] OF FB_secOrdTrajFilter;
+	m_instruJntTargetPos :Vec5d;
+	m_instruJntVel :LREAL := 2*PI;
+	m_instruJntAcc : LREAL := 4*PI;
+	
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{7b11d094-8bfe-4cb8-971c-9702c727740e}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR 
+	i :INT;
+	trackErr:LREAL;
+	curJntVel:Vec8d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// if instrument is on again, wait and re-plan the traj
+IF i_slaveArm.instruNear THEN
+	m_cmdJntVel:=g_zeroVec8d;
+	m_cmdJntAcc := g_zeroVec8d;
+	
+	// init traj filter
+	m_jnt3OTG.init(m_cmdJntPos[3], 0, m_retractVel, m_retractAcc, g_slaveArmCtrlCycleTime);
+	FOR i:=1 TO 5 DO
+		m_instruJntOTG[i].init(m_cmdJntPos[i+3], 0,m_instruJntVel, m_instruJntAcc, g_slaveArmCtrlCycleTime);
+	END_FOR
+
+	m_timePeriod := 0;
+	RETURN;
+END_IF
+
+// wait
+IF m_timePeriod< m_waitTime THEN
+	RETURN;
+END_IF
+
+// traj plan
+m_jnt3OTG.run(m_jnt3TargetPos, 0.0, o_cmdAcc=>m_cmdJntAcc[3],o_cmdVel=>m_cmdJntVel[3],o_cmdPos=>m_cmdJntPos[3]);
+FOR i:=1 TO 5 DO
+	m_instruJntOTG[i].run(m_instruJntTargetPos[i], 0.0, o_cmdAcc=>m_cmdJntAcc[i+3],o_cmdVel=>m_cmdJntVel[i+3],o_cmdPos=>m_cmdJntPos[i+3]);
+END_FOR
+
+// reach target check
+trackErr :=0;
+FOR i:=1 TO 5 DO 
+	trackErr := MAX(trackErr, ABS(m_cmdJntPos[i+3]-m_instruJntTargetPos[i]));
+END_FOR
+curJntVel := i_slaveArm.curJntVel;
+m_isFinished := (ABS(m_cmdJntPos[3] - m_jnt3TargetPos) <g_cartCtrlPosTolLow AND trackErr < g_jntCtrlAngTolLoW 
+			AND norm(curJntVel) <g_jntStaticVelThres);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{7aae2cb5-3dc8-47a4-84c8-fce1eb91d921}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+
+VAR
+	i:INT;
+	cycleNum:LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check if to hold the command joint position unchanged
+m_holdLastCmds := checkToHoldLastCmds(i_slaveArm);
+
+SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+
+// decide target position
+m_jnt3TargetPos := GVL_SlaveMotorParameters.g_maxDHJntPos[3];
+
+// init traj filter
+m_jnt3OTG.init(m_cmdJntPos[3], 0, m_retractVel, m_retractAcc, g_slaveArmCtrlCycleTime);
+
+// set wait time before start retract
+IF SlaveArmControl.m_slaveRobot.m_lastSlaveArmState[i_slaveArm.armIdx] = SlaveArmState_PanelReady THEN
+	m_waitTime := 0;
+ELSE
+	m_waitTime :=1.0;
+END_IF
+
+// decide instrument joint zero position and init traj filter
+FOR i:=1 TO 5 DO
+	cycleNum := FLOOR(i_slaveArm.curJntPos[i+3]/g_2pi);
+	m_instruJntTargetPos[i]:=cycleNum* g_2Pi;
+	m_instruJntOTG[i].init(m_cmdJntPos[i+3], 0,m_instruJntVel, m_instruJntAcc, g_slaveArmCtrlCycleTime);
+END_FOR
+
+// update commands to arm
+copyCmds(r_slaveArmCtrlCmd);]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveCtrlInstruRetract">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlInstruRetract.calcCmdJntPos">
+      <LineId Id="154" Count="0" />
+      <LineId Id="156" Count="1" />
+      <LineId Id="159" Count="0" />
+      <LineId Id="196" Count="0" />
+      <LineId Id="198" Count="1" />
+      <LineId Id="225" Count="0" />
+      <LineId Id="228" Count="0" />
+      <LineId Id="224" Count="0" />
+      <LineId Id="162" Count="0" />
+      <LineId Id="171" Count="0" />
+      <LineId Id="203" Count="0" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="188" Count="0" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="139" Count="1" />
+      <LineId Id="190" Count="2" />
+      <LineId Id="230" Count="1" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="141" Count="0" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="205" Count="0" />
+      <LineId Id="232" Count="0" />
+      <LineId Id="235" Count="0" />
+      <LineId Id="234" Count="0" />
+      <LineId Id="208" Count="0" />
+      <LineId Id="211" Count="0" />
+      <LineId Id="236" Count="0" />
+      <LineId Id="98" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlInstruRetract.init">
+      <LineId Id="301" Count="25" />
+      <LineId Id="191" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_UltrosonicKnifeControl" Id="{675f3909-c472-4838-a346-da9f4950f3d4}" SpecialFunc="None">
+    <Declaration><![CDATA[// instrument joints control
+FUNCTION_BLOCK FB_UltrosonicKnifeControl
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// instrument PID control paramters
+	m_instruKp:ARRAY[1..5] OF LREAL:=[5(5)];
+	m_instruKd:ARRAY[1..5] OF LREAL:=[5(0.25)];
+	m_instruKi:ARRAY[1..5] OF LREAL:=[5(10.0)];
+	m_instruKiLimit:ARRAY[1..5] OF LREAL:=[5(50.0)];
+	m_instruCtrlLimit:ARRAY[1..5] OF LREAL:=[4(55.0), 200.0];
+	
+	// max grip force/current(mA)
+	m_maxGripForce:LREAL;
+	m_maxGripCurrent:LREAL:=55.0;
+	
+	// PID for instrument joint position
+	m_instruJntCtrl:ARRAY[1..5] OF FB_PID;
+
+	// command instrument joint position and velocity
+	m_instruCmdJntPos:Vec5d;
+	m_instruLastCmdJntPos:Vec5d;
+	m_instruCmdJntVel:Vec5d;
+	
+	// current instrument joint position and velocity
+	m_instruCurJntPos: Vec5d;
+	m_instruCurJntVel:Vec5d;
+	
+	// grasp force level
+	m_graspForceLevel:Lreal :=0;
+	
+	// instrument joint control torque(when gripper is open)
+	m_instruJntCtrlTrq:Vec5d:=[5(0.0)];
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+	]]></ST>
+    </Implementation>
+    <Method Name="init" Id="{6e920412-a4cf-4cf4-9a5a-71c3a35e14a6}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm:FB_SlaveArm;
+END_VAR
+
+VAR
+	i,j:INT;
+	currentRatioMotor2Jnt:LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_graspForceLevel:=0;
+
+// init controller
+currentRatioMotor2Jnt:=GVL_SlaveMotorParameters.g_motorTrqConst[4]*GVL_SlaveMotorParameters.g_motorReduction[4]/1000;
+m_maxGripForce := m_maxGripCurrent * currentRatioMotor2Jnt;
+FOR i:=1 TO 5 DO
+	m_instruCmdJntPos[i]:=i_slaveArm.curJntPos[i+3];
+	m_instruLastCmdJntPos[i]:=m_instruCmdJntPos[i];
+	m_instruCmdJntVel[i]:=0;
+	
+	m_instruJntCtrl[i].init(g_slaveArmCtrlCycleTime,m_instruKp[i],m_instruKd[i],m_instruKi[i],
+		m_instruKiLimit[i]* currentRatioMotor2Jnt,	m_instruCtrlLimit[i]*currentRatioMotor2Jnt);
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{21647c6f-a530-4d8b-818e-e8fe9b57826d}">
+      <Declaration><![CDATA[METHOD run : BOOL
+VAR_IN_OUT CONSTANT
+	// instrument joint command position
+	i_cmdInstruJntPos :Vec5d;
+	
+	// instrument joint command velocity
+	i_cmdInstruJntVel :Vec5d;
+	
+	// command grip force level
+	i_cmdGripForceLevel:LREAL;
+	
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR_OUTPUT
+	// joint control torque
+	o_cmdJntTrq:Vec5d;
+END_VAR
+
+VAR
+	i: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_graspForceLevel:=LIMIT(0,i_cmdGripForceLevel ,  100)	;
+
+// joint position control
+FOR i:=1 TO 5 DO	
+	m_instruCmdJntPos[i]:=i_cmdInstruJntPos[i];
+	m_instruCmdJntVel[i]:=i_cmdInstruJntVel[i];
+	m_instruCurJntPos[i]:=i_slaveArm.curJntPos[i+3];
+	m_instruCurJntVel[i]:= i_slaveArm.curJntVel[i+3];
+	m_instruJntCtrlTrq[i]:=m_instruJntCtrl[i].run(m_instruCmdJntPos[i],m_instruCurJntPos[i], m_instruCmdJntVel[i], m_instruCurJntVel[i]);
+END_FOR
+m_instruJntCtrlTrq[1]:=0;
+m_instruJntCtrlTrq[2]:=0;
+m_instruJntCtrlTrq[4]:=0;
+
+// exert grip force 
+IF m_graspForceLevel >0  THEN
+	m_instruJntCtrlTrq[3]:= -m_maxGripForce*m_graspForceLevel/100.0;	
+END_IF
+
+o_cmdJntTrq := m_instruJntCtrlTrq;
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_UltrosonicKnifeControl">
+      <LineId Id="53" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_UltrosonicKnifeControl.init">
+      <LineId Id="102" Count="2" />
+      <LineId Id="114" Count="1" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="107" Count="5" />
+      <LineId Id="101" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_UltrosonicKnifeControl.run">
+      <LineId Id="77" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="46" Count="1" />
+      <LineId Id="223" Count="1" />
+      <LineId Id="178" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="52" Count="1" />
+      <LineId Id="404" Count="2" />
+      <LineId Id="362" Count="0" />
+      <LineId Id="179" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="403" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="255" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="70" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
