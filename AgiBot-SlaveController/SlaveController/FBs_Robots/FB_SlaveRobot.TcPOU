@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveRobot
 VAR_INPUT
@@ -80,6 +80,7 @@ VAR
 	m_armStop :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlStop;
 	m_poweroff :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlPowerOff;
 	m_selfCheckTransport :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlSelfCheckTransport;
+	m_PrecisionTest :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlPrecisionTest;
 	
 	// arm controller interface
 	m_armCtrl :ARRAY[1..g_sArmNum] OF I_SlaveArmCtrl;
@@ -224,7 +225,7 @@ END_VAR
 	m_armCtrlFactory[i,SlaveArmState_Stop] := m_armStop[i];
 	m_armCtrlFactory[i,SlaveArmState_PowerOff] := m_poweroff[i];
 	m_armCtrlFactory[i,SlaveArmState_SelfCheckTransport] := m_selfCheckTransport[i];
-	
+	m_armCtrlFactory[i,SlaveArmState_PrecisionTest] := m_PrecisionTest[i];
 	
 	// assign controller
 	m_armCtrl[i]:=m_armCtrlFactory[i,m_slaveArmState[i]];
@@ -637,7 +638,18 @@ FOR i:=1 TO g_sArmNum DO
 			IF m_armCtrl[i].isFinished THEN
 				m_nextSlaveArmState[i] :=SlaveArmState_Standby;
 			END_IF
+			
+		//SlaveArmState_PrecisionTest
+		SlaveArmState_PrecisionTest:
+			IF (GVL_AccuracyTestVar.g_enterPrecisionTestMode[i]=FALSE) THEN
+				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
+			END_IF
 	END_CASE
+	
+	// to precision test
+	IF (GVL_AccuracyTestVar.g_enterPrecisionTestMode[i]=TRUE) AND NOT(m_slaveArmState[i]=SlaveArmState_PrecisionTest) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_PrecisionTest;
+	END_IF	
 	
 	// control is forbidden if setup arm is not in Hold
 	IF SetupArmState_Hold <> i_slavesInputDataPool.m_setupStatus.m_armState[i] AND
@@ -722,7 +734,15 @@ m_lastEndoScopePostureUI := GVL_interactUI.g_scopeUpDown;
       <LineId Id="22" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.stateMachine">
-      <LineId Id="2162" Count="354" />
+      <LineId Id="2162" Count="334" />
+      <LineId Id="2530" Count="0" />
+      <LineId Id="2532" Count="3" />
+      <LineId Id="2531" Count="0" />
+      <LineId Id="2497" Count="1" />
+      <LineId Id="2527" Count="2" />
+      <LineId Id="2524" Count="0" />
+      <LineId Id="2526" Count="0" />
+      <LineId Id="2499" Count="17" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.updateScopeUIInfo">
