@@ -431,6 +431,12 @@ END_FOR
 
 //determine DH joint position
 vecAdd(m_initDHPos,m_DHjntInc,m_endDHPos);
+FOR i:=1 TO 2 BY 1 DO
+	m_endDHPos[i] := LIMIT(GVL_SlaveMotorParameters.g_minJntPos[i] - 5*g_deg2Rad , m_endDHPos[i], GVL_SlaveMotorParameters.g_maxJntPos[i] + 5*g_deg2Rad);
+END_FOR
+m_endDHPos[3] := LIMIT(GVL_SlaveMotorParameters.g_minJntPos[3] - 0.002, m_endDHPos[i], GVL_SlaveMotorParameters.g_maxJntPos[3] + 0.002);
+
+//IK
 i_slaveArm.instrument.instruIK(m_endDHPos,0, o_jntPos=>m_endJntPos);
 
 //copy the value
@@ -993,6 +999,10 @@ rpy2rot(i_rpy:= rpyVec, o_rot=> o_frame.m_rot) ;
       <LineId Id="17" Count="1" />
       <LineId Id="11" Count="1" />
       <LineId Id="25" Count="0" />
+      <LineId Id="53" Count="2" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="51" Count="0" />
       <LineId Id="22" Count="0" />
       <LineId Id="41" Count="0" />
       <LineId Id="40" Count="0" />

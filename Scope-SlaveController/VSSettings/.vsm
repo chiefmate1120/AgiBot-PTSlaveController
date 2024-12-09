@@ -10,7 +10,7 @@
       <Children>
         <Node>
           <Title>DataPool</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
@@ -125,12 +125,12 @@
         </Node>
         <Node>
           <Title>YT Chart</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -161,7 +161,7 @@
             </Node>
             <Node>
               <Title>Axis Group (1)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -194,12 +194,12 @@
         </Node>
         <Node>
           <Title>YT Chart (1)</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group (2)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -230,7 +230,7 @@
             </Node>
             <Node>
               <Title>Axis Group (3)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -288,7 +288,7 @@
       <Children>
         <Node>
           <Title>DataPool</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
@@ -511,12 +511,12 @@
         </Node>
         <Node>
           <Title>Arm1</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -579,12 +579,12 @@
         </Node>
         <Node>
           <Title>Arm2</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group (1)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -647,12 +647,12 @@
         </Node>
         <Node>
           <Title>Arm3</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group (2)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -715,12 +715,12 @@
         </Node>
         <Node>
           <Title>Arm4</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group (3)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -796,7 +796,7 @@
       <Children>
         <Node>
           <Title>DataPool</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
@@ -1043,12 +1043,12 @@
         </Node>
         <Node>
           <Title>Arm1</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -1117,12 +1117,12 @@
         </Node>
         <Node>
           <Title>Arm2</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group (1)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -1191,12 +1191,12 @@
         </Node>
         <Node>
           <Title>Arm3</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group (2)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -1265,12 +1265,12 @@
         </Node>
         <Node>
           <Title>Arm4</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group (3)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -1352,7 +1352,7 @@
       <Children>
         <Node>
           <Title>DataPool</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
@@ -1395,12 +1395,12 @@
         </Node>
         <Node>
           <Title>Arm1</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>SetupJoint</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -1439,12 +1439,12 @@
         </Node>
         <Node>
           <Title>Arm4</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group (7)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -1457,7 +1457,7 @@
             </Node>
             <Node>
               <Title>Axis Group (4)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -1472,12 +1472,12 @@
         </Node>
         <Node>
           <Title>Arm2</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group (6)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -1496,7 +1496,7 @@
             </Node>
             <Node>
               <Title>Axis Group (1)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -1511,7 +1511,7 @@
         </Node>
         <Node>
           <Title>Arm3</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
