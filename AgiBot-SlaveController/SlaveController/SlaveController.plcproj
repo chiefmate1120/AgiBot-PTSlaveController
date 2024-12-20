@@ -481,6 +481,9 @@
     <Compile Include="FBs_Robots\FB_SetupArm.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_Robots\FB_SetupRobot.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_Robots\FB_SlaveCart.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -490,7 +493,7 @@
     <Compile Include="FBs_Robots\FB_SetupJoint.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_Robots\FB_SetupRobot.TcPOU">
+    <Compile Include="FBs_Robots\FB_SlaveRobot.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_SetupControllers\FB_SetupCtrlDisable.TcPOU">
@@ -532,9 +535,6 @@
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlPowerOff.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlPrecisionTest.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlScopeToggle.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -542,9 +542,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlStop.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlTest.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlPackage.TcPOU">
@@ -613,6 +610,66 @@
     <Compile Include="FBs_SetupControllers\I_SetupArmCtrl.TcIO">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_TestForAccuracy\FB_BasicFun.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_TestForAccuracy\FB_CSV_TextMode_ReadWrite.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_TestForAccuracy\FB_SlaveCtrlPrecisionTest.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_TestForAccuracy\GVL_AccuracyTest.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="FBs_TestForAccuracy\GVL_AccuracyTestVar.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="FBs_TestForAccuracy\GVL_AccurMonitor.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="FBs_TestForAccuracy\GVL_HmiMid.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="FBs_TestForAccuracy\Robot_Jog_Arm1.TcVIS">
+      <SubType>Code</SubType>
+      <DependentUpon>视图管理器.TcVMO</DependentUpon>
+    </Compile>
+    <Compile Include="FBs_TestForAccuracy\Robot_Jog_Arm2.TcVIS">
+      <SubType>Code</SubType>
+      <DependentUpon>视图管理器.TcVMO</DependentUpon>
+    </Compile>
+    <Compile Include="FBs_TestForAccuracy\Robot_Jog_Arm3.TcVIS">
+      <SubType>Code</SubType>
+      <DependentUpon>视图管理器.TcVMO</DependentUpon>
+    </Compile>
+    <Compile Include="FBs_TestForAccuracy\Robot_Jog_Arm4.TcVIS">
+      <SubType>Code</SubType>
+      <DependentUpon>视图管理器.TcVMO</DependentUpon>
+    </Compile>
+    <Compile Include="FBs_TestForCycle\FB_CartCtrlCycleTest.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_TestForCycle\FB_SetupCtrlCycleTest.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_TestForCycle\FB_SlaveArmCtrlCycleTest.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_TestForCycle\GVL_TestCycle.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="FBs_TestForCycle\Vec5di.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_TestForSingleArm\FB_SlaveCtrlTest.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_TrajectoryPlanning\FB_BasicDoubleS.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -651,18 +708,6 @@
     </Compile>
     <Compile Include="GlobalTextList.TcGTLO">
       <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="GVLs\Accuracy\GVL_AccuracyTest.TcGVL">
-      <SubType>Code</SubType>
-      <LinkAlways>true</LinkAlways>
-    </Compile>
-    <Compile Include="GVLs\Accuracy\GVL_AccuracyTestVar.TcGVL">
-      <SubType>Code</SubType>
-      <LinkAlways>true</LinkAlways>
-    </Compile>
-    <Compile Include="GVLs\Accuracy\GVL_HmiMid.TcGVL">
-      <SubType>Code</SubType>
-      <LinkAlways>true</LinkAlways>
     </Compile>
     <Compile Include="GVLs\CartJoints\GVL_CartControlParameters.TcGVL">
       <SubType>Code</SubType>
@@ -785,9 +830,6 @@
     <Compile Include="FBs_Robots\FB_SlaveArm.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_Robots\FB_SlaveRobot.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlInit.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -841,6 +883,9 @@
       <LinkAlways>true</LinkAlways>
     </Compile>
     <Compile Include="Mains\CartControl.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mains\MainTestPart.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Mains\SafetyCheck.TcPOU">
@@ -915,22 +960,6 @@
     <Compile Include="TaskSlaveArmControl.TcTTO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="VISUs\Robot_Jog_Arm1.TcVIS">
-      <SubType>Code</SubType>
-      <DependentUpon>视图管理器.TcVMO</DependentUpon>
-    </Compile>
-    <Compile Include="VISUs\Robot_Jog_Arm2.TcVIS">
-      <SubType>Code</SubType>
-      <DependentUpon>视图管理器.TcVMO</DependentUpon>
-    </Compile>
-    <Compile Include="VISUs\Robot_Jog_Arm3.TcVIS">
-      <SubType>Code</SubType>
-      <DependentUpon>视图管理器.TcVMO</DependentUpon>
-    </Compile>
-    <Compile Include="VISUs\Robot_Jog_Arm4.TcVIS">
-      <SubType>Code</SubType>
-      <DependentUpon>视图管理器.TcVMO</DependentUpon>
-    </Compile>
     <Compile Include="视图管理器.TcVMO">
       <SubType>Code</SubType>
     </Compile>
@@ -947,6 +976,9 @@
     <Folder Include="DUTs\Structure" />
     <Folder Include="FBs_CartControlles" />
     <Folder Include="FBs_SetupControllers" />
+    <Folder Include="FBs_TestForAccuracy" />
+    <Folder Include="FBs_TestForCycle" />
+    <Folder Include="FBs_TestForSingleArm" />
     <Folder Include="FBs_TrajectoryPlanning" />
     <Folder Include="FBs_RobotDynamics" />
     <Folder Include="FBs_Filters" />
@@ -962,7 +994,6 @@
     <Folder Include="GVLs\configs\robot3" />
     <Folder Include="GVLs\configs\robot5" />
     <Folder Include="GVLs\configs\robot4" />
-    <Folder Include="GVLs\Accuracy" />
     <Folder Include="GVLs\SetupArms" />
     <Folder Include="GVLs\SlaveArms" />
     <Folder Include="FBs_Auxiliary" />
@@ -1062,8 +1093,8 @@
   <ProjectExtensions>
     <PlcProjectOptions>
       <XmlArchive>
-  <Data>
-    <o xml:space="preserve" t="OptionKey">
+        <Data>
+          <o xml:space="preserve" t="OptionKey">
       <v n="Name">"&lt;ProjectRoot&gt;"</v>
       <d n="SubKeys" t="Hashtable" ckt="String" cvt="OptionKey">
         <v>{192FAD59-8248-4824-A8DE-9177C94C195A}</v>
@@ -1167,14 +1198,14 @@
       </d>
       <d n="Values" t="Hashtable" />
     </o>
-  </Data>
-  <TypeList>
-    <Type n="Boolean">System.Boolean</Type>
-    <Type n="Hashtable">System.Collections.Hashtable</Type>
-    <Type n="OptionKey">{54dd0eac-a6d8-46f2-8c27-2f43c7e49861}</Type>
-    <Type n="String">System.String</Type>
-  </TypeList>
-</XmlArchive>
+        </Data>
+        <TypeList>
+          <Type n="Boolean">System.Boolean</Type>
+          <Type n="Hashtable">System.Collections.Hashtable</Type>
+          <Type n="OptionKey">{54dd0eac-a6d8-46f2-8c27-2f43c7e49861}</Type>
+          <Type n="String">System.String</Type>
+        </TypeList>
+      </XmlArchive>
     </PlcProjectOptions>
   </ProjectExtensions>
 </Project>

@@ -11,7 +11,7 @@ VAR_GLOBAL
 	
 	//control Mode
 	g_controlMode:ARRAY[1..g_sArmNum] OF INT;
-	
+		
 	//next step button
 	g_nextStep:ARRAY[1..g_sArmNum] OF BOOL;
 	
@@ -45,10 +45,22 @@ VAR_GLOBAL
 	//target space velocity for control mode 4---Continuous motion in operating space
 	g_spatialVel:ARRAY[1..g_sArmNum] OF Vec6d;
 	
+	//actual joint position
+	g_actDHJntPos:ARRAY[1..g_sArmNum] OF Vec6d;
+		
+	//drag joint flags
+	g_dragJntFlag:ARRAY[1..g_sArmNum] OF Vec6i;
+	
+	//write data
+	g_writeData:ARRAY[1..g_mArmNum] OF BOOL;
+	
 	//slave arm spatial pose frame
 	g_frontPose:ARRAY[1..4] OF ST_Frame;
 	g_endPose:ARRAY[1..4] OF ST_Frame;
 	g_slaveArmPose:ARRAY[1..4] OF ST_Frame;
+	
+	//ui signal
+	g_uiArmMode:ARRAY[1..g_sArmNum,0..gvl_accuracyTest.g_controlModeNum] OF BOOL;
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

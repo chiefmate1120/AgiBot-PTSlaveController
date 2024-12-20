@@ -2,7 +2,10 @@
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_AccuracyTest" Id="{cf747bed-c98f-4034-9edf-cccd140613d8}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
-VAR_GLOBAL CONSTANT	
+VAR_GLOBAL CONSTANT
+		//control mode number for UI
+		g_controlModeNum:INT:=8;
+		
 		//Test points for the spatial cube, with specific locations given by MATLAB
         g_testPointNum:INT:=5;
 		

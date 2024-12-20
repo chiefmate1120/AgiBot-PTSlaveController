@@ -101,6 +101,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"22"</v>
+              <v n="TextDefault">"不动点精度测试"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"402"</v>
               <v n="TextDefault">"二号臂"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -151,6 +156,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"989"</v>
+              <v n="TextDefault">"导出前置矩阵"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"897"</v>
               <v n="TextDefault">"当前循环次数"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -196,6 +206,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"362"</v>
+              <v n="TextDefault">"进入单关节拖拽"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"359"</v>
               <v n="TextDefault">"进入单臂精度               测试状态5"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -203,6 +218,11 @@
             <o>
               <v n="TextID">"96"</v>
               <v n="TextDefault">"进入精度测试模式"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"445"</v>
+              <v n="TextDefault">"需要拖动填1，反之填0"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
           </l>

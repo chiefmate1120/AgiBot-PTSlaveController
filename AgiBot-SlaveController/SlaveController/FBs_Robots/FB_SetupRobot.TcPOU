@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SetupRobot" Id="{41d3f45b-28bf-4672-9f4d-c2ea05b7f776}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SetupRobot
 VAR_INPUT
@@ -7,9 +7,6 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
-	// 	flag if robot self-check passed
-	m_armPackageFinished :ARRAY[1..g_sArmNum] OF BOOL :=[4(FALSE)];	
-
 	// setup arms, responsible for arm kinematic and control
 	m_setupArms :ARRAY[1..g_sArmNum] OF FB_SetupArm;
 	
@@ -34,9 +31,10 @@ VAR
 	m_armJnt3GraCali :ARRAY[1..g_sArmNum] OF FB_SetupCtrlJnt3GraCali;
 	m_armJnt5GraCali :ARRAY[1..g_sArmNum] OF FB_SetupCtrlJnt5GraCali;
 	m_armDisable :ARRAY[1..g_sArmNum] OF FB_SetupCtrlDisable;
+	
+	//add code
 	m_Performance :ARRAY[1..g_sArmNum] OF FB_SetupCtrlPerformance;
-	m_armStop :ARRAY[1..g_sArmNum] OF FB_SetupCtrlStop;
-	m_selfCheckTransport :ARRAY[1..g_sArmNum] OF FB_SetupCtrlSelfCheckTransport;
+	m_setupStateCycleTest :ARRAY[1..g_sArmNum] OF FB_SetupCtrlCycleTest;
 	
 	
 	// arm controller interface
@@ -152,9 +150,13 @@ END_VAR
 	m_armCtrlFactory[i,SetupArmState_jnt3GravityCali] := m_armJnt3GraCali[i];
 	m_armCtrlFactory[i,SetupArmState_jnt5GravityCali] := m_armJnt5GraCali[i];
 	m_armCtrlFactory[i,SetupArmState_Disable] := m_armDisable[i];
+	
+	
+	//add code
 	m_armCtrlFactory[i,SetupArmState_Performance] := m_Performance[i];
-	m_armCtrlFactory[i,SetupArmState_Sotp] := m_armStop[i];
-	m_armCtrlFactory[i,SetupArmState_SelfCheckTransport] := m_selfCheckTransport[i];
+	m_armCtrlFactory[i,SetupArmState_TestCycle] := m_setupStateCycleTest[i];
+	
+	
 	
 	// assign controller
 	m_armCtrl[i]:=m_armCtrlFactory[i,m_setupArmState[i]];
@@ -214,14 +216,7 @@ VAR
 	i:INT;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// check package state
-GVL_interactUI.g_cartOperation.m_armStorageCompleted := BOOL_TO_UINT(m_armPackageFinished[1]);
-FOR  i:=2 TO g_sArmNum DO
-	GVL_interactUI.g_cartOperation.m_armStorageCompleted := GVL_interactUI.g_cartOperation.m_armStorageCompleted AND BOOL_TO_UINT(m_armPackageFinished[i]);
-END_FOR
-GVL_interactUI.g_cartOperation.m_armStorageCompleted :=GVL_interactUI.g_cartOperation.m_armStorageCompleted AND BOOL_TO_UINT(SlaveArmControl.m_slaveRobot.m_slavePackageFinished) ;
-
-FOR i:=1 TO g_sArmNum DO
+        <ST><![CDATA[FOR i:=1 TO g_sArmNum DO
 	// State machine transit 
 	CASE m_setupArmState[i] OF
 		// error
@@ -252,22 +247,14 @@ FOR i:=1 TO g_sArmNum DO
 			// to manual adjust
 			IF m_setupArms[i].manualAdjustOn OR m_setupArms[i].m_jnt5AdjustDir<>0 THEN
 				m_nextSetupArmState[i]:=SetupArmState_ManualAdjust;
-			// to package	
-			ELSIF  GVL_interactUI.g_uiCtrl.m_packageEnable AND SlaveArmControl.m_slaveRobot.m_slavePackageFinished 
-						AND NOT m_armPackageFinished[i] THEN
-				m_nextSetupArmState[i]:= SetupArmState_Package;
-			// to selfcheck
-			ELSIF GVL_interactUI.g_salveSelfCheckTransportEnable THEN
-					m_nextSetupArmState[i] := SetupArmState_SelfCheckTransport;	
 			END_IF
 			
 		
 		// manual adjust
 		SetupArmState_ManualAdjust:
-			m_armPackageFinished[i] := FALSE;
 			// to hold
 			IF NOT(m_setupArms[i].manualAdjustOn) AND m_setupArms[i].jnt5AdjustDir=0 THEN
-				m_nextSetupArmState[i] := SetupArmState_Sotp;
+				m_nextSetupArmState[i] := SetupArmState_Hold;
 			END_IF
 			
 		// auto adjust
@@ -275,12 +262,6 @@ FOR i:=1 TO g_sArmNum DO
 				
 		//package
 		SetupArmState_Package:
-			IF m_armCtrl[i].isFinished  THEN
-				m_nextSetupArmState[i]:=SetupArmState_Hold;
-				m_armPackageFinished[i]  := TRUE;
-			ELSIF  NOT GVL_interactUI.g_uiCtrl.m_packageEnable THEN
-				m_nextSetupArmState[i]:=SetupArmState_Sotp;
-			END_IF
 		
 		//cart
 		SetupArmState_Cart:
@@ -303,26 +284,33 @@ FOR i:=1 TO g_sArmNum DO
 				m_nextSetupArmState[i]:= SetupArmState_Hold;
 			END_IF
 			
+			
+			
+		//*****************add code for test************************//
 		//arm Performance
 		SetupArmState_Performance:
 			// to hold
 			IF  m_armCtrl[i].isFinished THEN
 				m_nextSetupArmState[i]:=SetupArmState_Hold;
-			END_IF	
-
-		//arm Stop
-		SetupArmState_Sotp:
-			// to hold
-			IF  m_armCtrl[i].isFinished THEN
-				m_nextSetupArmState[i]:=SetupArmState_Hold;
-			END_IF
+			END_IF				
 			
-		SetupArmState_SelfCheckTransport:
+		//SetupArmState_TestCycle
+		SetupArmState_TestCycle:
 			// to hold
-			IF  m_armCtrl[i].isFinished THEN
+			IF (GVL_TestCycle.g_enterCycleTestMode[i]=FALSE) THEN
 				m_nextSetupArmState[i]:=SetupArmState_Hold;
-			END_IF							
+			END_IF			
 	END_CASE
+	
+	
+	//*****************add code for test************************//
+	// to SlaveArmState_TestCycle
+	IF (GVL_TestCycle.g_enterCycleTestMode[i]=TRUE) AND NOT(m_setupArmState[i]=SetupArmState_TestCycle) THEN
+		m_nextSetupArmState[i] := SetupArmState_TestCycle;
+	END_IF
+	
+	
+	
 	
 	// arm disable
 	IF SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i] THEN
@@ -353,7 +341,7 @@ END_VAR]]></Declaration>
 //工具更换引导正在进行中-----绿色闪烁
 //未通电、已禁用、已收起----------关
 //系统正常运行-----蓝色常亮
-//灯光颜色--0-灯灭、1蓝灯常亮、2蓝灯闪烁、3琥珀色闪烁、4红灯闪烁、5绿灯常亮、6绿灯闪烁、7红灯常亮、8琥珀色常亮、9蓝灯脉动式闪烁  20关机灯灭
+//灯光颜色--0-灯灭、1蓝灯常亮、2蓝灯闪烁、3琥珀色闪烁、4红灯闪烁、5绿灯常亮、6绿灯闪烁、7红灯常亮、8琥珀色常亮、9蓝灯脉动式闪烁
 FOR i := 1 TO g_sArmNum BY 1 DO
 	slaveArmState := i_setupInputDataPool.m_slaveStatus.m_armState[i];
 	IF slaveArmState = SlaveArmState_Error OR m_setupArmState[i] = SlaveArmState_Error THEN
@@ -362,17 +350,14 @@ FOR i := 1 TO g_sArmNum BY 1 DO
 		ELSIF SafetyCheck.m_SafetyCheck.m_armErrFlag[i,2] THEN
 			m_lightCrlWord[i] := ArmLight_AmberBlink;
 		END_IF
-	ELSIF slaveArmState = SlaveArmState_PowerOff THEN
-		m_lightCrlWord[i] := ArmLight_PowerOff;
-	ELSIF slaveArmState = SlaveArmState_Disable THEN
-		m_lightCrlWord[i] := ArmLight_Off;
 	ELSIF slaveArmState = SlaveArmState_MountPanel OR slaveArmState = SlaveArmState_MountInstru THEN
 		m_lightCrlWord[i] := ArmLight_BluePulse;
-	ELSIF slaveArmState = SlaveArmState_InstruRetract OR slaveArmState = SlaveArmState_Adjust OR slaveArmState = SlaveArmState_SelfCheck 
- 		OR slaveArmState = SlaveArmState_Package OR m_setupArmState[i] = SetupArmState_Package OR m_setupArmState[i] = SetupArmState_ManualAdjust  THEN
+	ELSIF slaveArmState = SlaveArmState_InstruRetract OR slaveArmState = SlaveArmState_Adjust OR m_setupArmState[i] = SetupArmState_ManualAdjust THEN
 		m_lightCrlWord[i] := ArmLight_BlueBlink;
 	ELSIF slaveArmState = SlaveArmState_InstruInvasion THEN
 		m_lightCrlWord[i] := ArmLight_GreenBlink;
+	ELSIF slaveArmState = SlaveArmState_Disable THEN
+		m_lightCrlWord[i] := ArmLight_Off;
 	ELSE
 		m_lightCrlWord[i] := ArmLight_BlueOn;
 	END_IF
@@ -411,7 +396,14 @@ END_FOR
       <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.Init">
-      <LineId Id="184" Count="34" />
+      <LineId Id="145" Count="26" />
+      <LineId Id="186" Count="1" />
+      <LineId Id="189" Count="0" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="188" Count="0" />
+      <LineId Id="173" Count="0" />
+      <LineId Id="184" Count="1" />
+      <LineId Id="174" Count="3" />
       <LineId Id="61" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.run">
@@ -419,11 +411,23 @@ END_FOR
       <LineId Id="22" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.stateMachine">
-      <LineId Id="670" Count="116" />
+      <LineId Id="457" Count="67" />
+      <LineId Id="557" Count="2" />
+      <LineId Id="525" Count="5" />
+      <LineId Id="560" Count="0" />
+      <LineId Id="563" Count="4" />
+      <LineId Id="561" Count="0" />
+      <LineId Id="531" Count="1" />
+      <LineId Id="547" Count="1" />
+      <LineId Id="554" Count="2" />
+      <LineId Id="549" Count="0" />
+      <LineId Id="553" Count="0" />
+      <LineId Id="550" Count="2" />
+      <LineId Id="533" Count="6" />
       <LineId Id="16" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.updateArmLight">
-      <LineId Id="82" Count="33" />
+      <LineId Id="3" Count="30" />
       <LineId Id="2" Count="0" />
     </LineIds>
   </POU>

@@ -26,11 +26,14 @@
 	SlaveArmState_ScopeToggle :=21,
 	SlaveArmState_Performance:=22,
 	SlaveArmState_Stop :=23,
-	SlaveArmState_PowerOff := 24,
-	SlaveArmState_SelfCheckTransport := 25,
-	SlaveArmState_PrecisionTest:=26,
 	
-	SlaveArmState_totalNum :=SlaveArmState_PrecisionTest
+	
+	
+	SlaveArmState_PrecisionTest:=24,
+	SlaveArmState_TestCycle:=50,
+	
+	
+	SlaveArmState_totalNum :=SlaveArmState_TestCycle
 );
 END_TYPE
 ]]></Declaration>

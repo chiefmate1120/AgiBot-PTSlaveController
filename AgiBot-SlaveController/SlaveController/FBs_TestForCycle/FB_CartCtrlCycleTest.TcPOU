@@ -1,0 +1,300 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_CartCtrlCycleTest" Id="{99854da5-3f45-4be2-9a18-7634fd1e0491}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_CartCtrlCycleTest EXTENDS FB_CartCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	//左支撑-右支撑-左轮-右轮-立柱升降-横梁旋转-横梁伸缩-悬吊旋转
+	//In this method, 5 represents the pillar postion , 6 represents the beam rotation angle ,7 represents the beam stretch position ,8 represents the overhang angle
+	
+	//test step
+	m_testStep:INT:=-1;
+	
+	//motion start
+	m_startMotion:BOOL;
+	m_startMotionLast:BOOL;
+	
+	//time
+	m_time:LREAL;
+	
+	//test point
+	m_testPoint:INT;
+	
+	//DH joint position	
+	m_homeDHJntPos,m_startDHJntPos,m_endDHJntPos:Vec8d;
+	
+	//startJntPos,endJntPos :Vec8d;
+	m_initJntPos,m_startJntPos,m_endJntPos :Vec8d;
+	
+	//joint position gap
+	m_jntDist:Vec8d:=[0,0,0,0,   0.030,30.0*g_deg2Rad,0.030,30.0*g_deg2Rad];	
+	
+	//planner
+	m_Planner: FB_TrajMoveJ;
+	
+	//trajectory velocity/acceleration/jerk
+	m_maxjntVel:Vec8d;
+	m_maxjntAcc:Vec8d;
+	m_maxjntJerk:Vec8d;
+	
+	//arm id
+	m_armId:INT:=1;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{c0afa16c-ada2-4295-bd74-c6bdc944908b}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	// slave cart joint data
+	i_slaveCart :FB_SlaveCart;
+END_VAR
+
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+//init parameters flag
+m_startMotion:=gvl_testCycle.g_startMotion[m_armId];
+IF (m_startMotionLast=FALSE) AND (m_startMotion=TRUE)THEN
+	m_testStep:=0;
+END_IF
+m_startMotionLast:=m_startMotion;
+
+//frequency test and step test
+testMotion(i_slaveCart);
+
+//update the information
+updateInfo(i_slaveCart);
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdJntVel" Id="{b87b7c02-2d47-4dc1-86ad-3a2bed30521e}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntVel : BOOL
+VAR_IN_OUT CONSTANT
+	// slave cart joint data
+	i_slaveCart :FB_SlaveCart;
+END_VAR
+
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{ed6c333b-7154-4610-a992-b6c9412a831b}">
+      <Declaration><![CDATA[// override this function in each exact controller
+// NOTICE: set joint control mode here, and do some initialization if needed
+METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveCart	:FB_SlaveCart;
+END_VAR
+VAR_IN_OUT 
+	r_cartCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+SUPER^.init(i_slaveCart,r_cartCtrlCmd);
+
+//Drive the last four joints
+m_jntEnableFlag :=g_zeroVec8i;
+FOR i:=5 TO 8 BY 1 DO
+	m_jntEnableFlag[i] :=1;
+END_FOR
+
+//operation mode
+m_jntOPMode:=g_slaveAllPosMode;
+m_jntOPMode[5]:= DriverOPMode_csvMZ;
+m_jntOPMode[6]:= DriverOPMode_Pos;
+m_jntOPMode[7]:= DriverOPMode_Pos;
+m_jntOPMode[8]:= DriverOPMode_Pos;
+
+// update commands to arm
+copyCmds(r_cartCtrlCmd);
+
+//target DH joint position
+FOR i:=1 TO g_cartJntNum BY 1 DO
+	m_homeDHJntPos[i]:=(GVL_CartMotorParameters.g_minJntPos[i]+GVL_CartMotorParameters.g_maxJntPos[i])/2;
+	m_startDHJntPos[i]:=m_homeDHJntPos[i]-m_jntDist[i];
+	m_endDHJntPos[i]:=m_homeDHJntPos[i]+m_jntDist[i];
+END_FOR
+
+//Keep the first four joints still
+FOR i:=1 TO 4 BY 1 DO
+	m_homeDHJntPos[i]:=i_slaveCart.curJntPos[i];
+	m_startDHJntPos[i]:=m_homeDHJntPos[i];
+	m_endDHJntPos[i]:=m_homeDHJntPos[i];
+END_FOR
+
+//velocity and acceleration
+vecMultiNum(GVL_CartControlParameters.g_maxJntVel,0.1,m_maxjntVel);
+vecMultiNum(m_maxjntVel,5,m_maxjntAcc);
+vecMultiNum(m_maxjntAcc,5,m_maxjntJerk);
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="testMotion" Id="{6e8ecf5d-fabb-43ba-ae29-74f22c17afbb}">
+      <Declaration><![CDATA[METHOD testMotion : BOOL
+VAR_INPUT
+	// slave cart joint data
+	i_slaveCart :FB_SlaveCart;
+END_VAR
+VAR
+	homeDHPos,startDHPos,endDHPos :Vec8d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+CASE m_testStep OF
+	0: //init
+		m_testPoint:=1;		
+		m_testStep:=10;
+
+
+	10: //Trajectory parameter initialization
+		startDHPos:=i_slaveCart.curJntPos;
+		IF (m_testPoint=1) THEN
+			endDHPos:=m_startDHJntPos;
+		ELSIF (m_testPoint=2) THEN
+			endDHPos:=m_homeDHJntPos;
+		ELSIF (m_testPoint=3) THEN
+			endDHPos:=m_endDHJntPos;
+		END_IF
+		
+		m_startJntPos:=startDHPos;
+		m_endJntPos:=endDHPos;
+		m_Planner.init(i_startJntPos:= m_startJntPos, 	i_targetJntPos:= m_endJntPos, 	i_maxJntVel:= m_maxjntVel, 	i_maxJntAcc:= m_maxjntAcc, 	i_maxJntJerk:= m_maxjntJerk);
+		IF (m_Planner.isGene=FALSE) THEN
+			m_testStep:=30;
+		ELSE
+			m_time:=0; m_testStep:=20;
+		END_IF
+				
+	
+	20: //start motion
+		m_time:=m_time+g_setupArmCtrlCycleTime;
+		m_Planner.evaluate(t:= m_time, jntPos=> m_cmdJntPos, jntVel=> m_cmdJntVel, jntAcc=> m_cmdJntAcc);
+		
+		IF (m_time>m_Planner.duration) THEN
+			m_testStep:=10;			
+			m_testPoint:=m_testPoint+1;
+			IF (m_testPoint>3) THEN
+				m_testPoint:=1;
+			END_IF
+		END_IF		
+		
+		//end the motion
+		IF (m_startMotion=FALSE) THEN
+			m_testStep:=30;
+		END_IF
+		
+		
+	30: //end the motion
+		m_testStep:=-1;
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="updateInfo" Id="{90874ae2-ed01-460f-a393-888f892e546a}">
+      <Declaration><![CDATA[METHOD updateInfo : BOOL
+VAR_INPUT
+	// slave cart joint data
+	i_slaveCart :FB_SlaveCart;
+END_VAR
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+FOR i:=1 TO g_cartJntNum BY 1 DO
+	gvl_TestCycle.g_cartMotorEncoder[m_armId][i]:=i_slaveCart.m_cartJoints[i].m_motorInputs.m_motorEncoder;
+	gvl_TestCycle.g_cartjntEncoder[m_armId][i]:=i_slaveCart.m_cartJoints[i].m_motorInputs.m_linkEncoder;
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_CartCtrlCycleTest">
+      <LineId Id="52" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlCycleTest.calcCmdJntPos">
+      <LineId Id="126" Count="1" />
+      <LineId Id="129" Count="11" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="71" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlCycleTest.calcCmdJntVel">
+      <LineId Id="102" Count="2" />
+      <LineId Id="71" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlCycleTest.init">
+      <LineId Id="251" Count="1" />
+      <LineId Id="275" Count="0" />
+      <LineId Id="274" Count="0" />
+      <LineId Id="240" Count="0" />
+      <LineId Id="253" Count="0" />
+      <LineId Id="272" Count="1" />
+      <LineId Id="276" Count="0" />
+      <LineId Id="271" Count="0" />
+      <LineId Id="203" Count="0" />
+      <LineId Id="206" Count="3" />
+      <LineId Id="279" Count="0" />
+      <LineId Id="193" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="256" Count="0" />
+      <LineId Id="259" Count="5" />
+      <LineId Id="283" Count="0" />
+      <LineId Id="285" Count="4" />
+      <LineId Id="284" Count="0" />
+      <LineId Id="265" Count="1" />
+      <LineId Id="281" Count="0" />
+      <LineId Id="267" Count="0" />
+      <LineId Id="257" Count="1" />
+      <LineId Id="254" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlCycleTest.testMotion">
+      <LineId Id="8" Count="1" />
+      <LineId Id="22" Count="1" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="34" Count="7" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="53" Count="1" />
+      <LineId Id="48" Count="4" />
+      <LineId Id="45" Count="1" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="55" Count="18" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlCycleTest.updateInfo">
+      <LineId Id="7" Count="0" />
+      <LineId Id="9" Count="2" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

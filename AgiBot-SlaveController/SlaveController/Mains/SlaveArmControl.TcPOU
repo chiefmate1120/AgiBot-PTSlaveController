@@ -67,53 +67,8 @@ UIOutputProcess();
 
 m_codeTime(START:=FALSE);
 
-HmiMid();
 ]]></ST>
     </Implementation>
-    <Method Name="HmiMid" Id="{9a887a90-c99e-4390-abdb-ad0ecd202ca8}">
-      <Declaration><![CDATA[METHOD HmiMid : BOOL
-VAR_INPUT
-END_VAR
-VAR
-	I : INT;
-	iArm : INT;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[FOR I:=1 TO 4  DO
-	FOR iARM:=1 TO 6 DO 
-		A1_Arm1Mode_TRIG[i,iARM](CLK:=A1_Arm1Mode[I,iARM],Q=>);
-		IF A1_Arm1Mode_TRIG[i,iARM].Q THEN 
-			A1_Arm1Mode:=A1_Arm1Mode_Mid;
-			GVL_AccuracyTestVar.g_controlMode[i]:=iARM;
-			A1_Arm1Mode[i,iARM]:=TRUE;
-		END_IF		
-		A1_Arm1Mode_F_TRIG[i,iARM](CLK:=A1_Arm1Mode[I,iARM]);		
-	END_FOR
-	
-	IF A1_Arm1Mode_F_TRIG[i,2].Q OR A1_Arm1Mode_F_TRIG[i,4].Q THEN
-		GVL_AccuracyTestVar.g_controlMode[i]:=0;
-		A1_Arm1Mode:=A1_Arm1Mode_Mid;
-	END_IF	
-END_FOR
-
-
-A1_Arm1ModeL:=A1_Arm1Mode_Mid;
-A1_Arm1ModeL[1,GVL_AccuracyTestVar.g_controlMode[1]]:=TRUE;
-A1_Arm1ModeL[2,GVL_AccuracyTestVar.g_controlMode[2]]:=TRUE;
-A1_Arm1ModeL[3,GVL_AccuracyTestVar.g_controlMode[3]]:=TRUE;
-A1_Arm1ModeL[4,GVL_AccuracyTestVar.g_controlMode[4]]:=TRUE;
-
-
-FOR i:=1 TO 4  DO
-	IF GVL_AccuracyTestVar.g_controlMode[i]<>0 THEN
-		GVL_AccuracyTestVar.g_startMotion[i]:=TRUE;
-	ELSE
-		GVL_AccuracyTestVar.g_startMotion[i]:=FALSE;
-	END_IF
-END_FOR]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="masterInputDataCast" Id="{688f8323-8b5a-4cc7-b4b2-cb5f74424c3f}">
       <Declaration><![CDATA[// convert from MSCommu_Mastertatus for master-slave communication to local ST_MasterStatus for control
 METHOD masterInputDataCast : BOOL
@@ -372,24 +327,7 @@ END_FOR
       <LineId Id="211" Count="0" />
       <LineId Id="88" Count="0" />
       <LineId Id="87" Count="0" />
-      <LineId Id="243" Count="0" />
-      <LineId Id="242" Count="0" />
-      <LineId Id="244" Count="0" />
-    </LineIds>
-    <LineIds Name="SlaveArmControl.HmiMid">
-      <LineId Id="142" Count="7" />
-      <LineId Id="151" Count="0" />
-      <LineId Id="158" Count="0" />
-      <LineId Id="180" Count="0" />
-      <LineId Id="174" Count="2" />
-      <LineId Id="172" Count="0" />
-      <LineId Id="159" Count="0" />
-      <LineId Id="178" Count="0" />
-      <LineId Id="177" Count="0" />
-      <LineId Id="160" Count="4" />
-      <LineId Id="179" Count="0" />
-      <LineId Id="165" Count="6" />
-      <LineId Id="97" Count="0" />
+      <LineId Id="243" Count="1" />
     </LineIds>
     <LineIds Name="SlaveArmControl.masterInputDataCast">
       <LineId Id="86" Count="16" />
