@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="vecSelfMultiNum" Id="{8965e60b-9e28-4b9c-9ec6-21311af54a9f}" SpecialFunc="None">
     <Declaration><![CDATA[// vecA*=num
 FUNCTION vecSelfMultiNum : BOOL

@@ -15,10 +15,13 @@
 	SetupArmState_jnt5GravityCali := 10,
 	SetupArmState_Disable := 11,
 	SetupArmState_Performance:=12,
+	SetupArmState_Sotp:=13,
+	SetupArmState_SelfCheckTransport :=14,
 	
-	
-	SetupArmState_TestCycle:=50,	
-	SetupArmState_totalNum :=SetupArmState_TestCycle
+	SetupArmState_TestCycle:=50,
+	SetupArmState_TestFriction:=51,
+	SetupArmState_TestJnt:=52,
+	SetupArmState_totalNum :=SetupArmState_TestJnt
 );
 END_TYPE
 ]]></Declaration>

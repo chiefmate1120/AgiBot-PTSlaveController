@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="TrapezoIDal_velocity_trajectory" Id="{40b394c2-ad7f-4060-aa1b-5902f6e4807c}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK TrapezoIDal_velocity_trajectory
 VAR_INPUT

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="invMat3" Id="{8dbea4d9-fd4f-487a-ad00-22dc84496133}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION invMat3 : bool
 VAR_IN_OUT CONSTANT

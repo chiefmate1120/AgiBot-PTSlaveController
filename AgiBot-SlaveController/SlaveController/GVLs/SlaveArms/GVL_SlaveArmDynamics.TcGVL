@@ -4,7 +4,7 @@
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49992'}
 {attribute 'qualified_only'}
 // Robot3 --dynamic parameters of slave arms
-VAR_GLOBAL CONSTANT
+VAR_GLOBAL 
 	
 	// arm gravity parameters
 (*graParam=[ 9.8*m5,...
@@ -20,9 +20,7 @@ VAR_GLOBAL CONSTANT
 	  7.4582,    3.7191,   -3.346,     8.295,    3.6851,
 	  7.4582,    3.7191,   -3.346,     8.295,    3.6851];
 	 
-	g_gravityTrocar :ARRAY[1..5] OF REAL :=[0.1661, -0.4124,  0.0964,   -0.7987,   -0.6999 ];
-	g_gravityInstrument :ARRAY[1..5] OF REAL :=[ 3.1217,  -0.3099,   0.0778,   -1.2498,   -0.8041];
-	g_gravityEndoscope :ARRAY[1..5] OF REAL :=[10.8619,  -0.8575,   -1.0274,   -0.2425,   -0.0869];
+	
 	
 	// joint friction(with instrument mounted)
 	g_slaveJntFriction :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF LREAL :=
@@ -30,10 +28,15 @@ VAR_GLOBAL CONSTANT
 			  4.5927,    9.6040,    3.7367, 0.03, 0.03, 0.03, 0,
 		      4.3557,    8.4286,    5.9078,  0.03, 0.03, 0.03, 0.03, 0,
               4.1447,    7.2202,    6.8253,  0.03, 0.03, 0.03, 0.03, 0	 ];
-			  
+END_VAR
+	VAR_GLOBAL CONSTANT		  
 	//################ DO NOT modify parameters below ###########################
 	//################ dynamic reference model parameters below ###########################
 	// link mass [m1, m2, m3, m4, m5]
+	g_gravityTrocar :ARRAY[1..5] OF REAL :=[0.1661, -0.4124,  0.0964,   -0.7987,   -0.6999 ];
+	g_gravityInstrument :ARRAY[1..5] OF REAL :=[ 3.1217,  -0.3099,   0.0778,   -1.2498,   -0.8041];
+	g_gravityEndoscope :ARRAY[1..5] OF REAL :=[10.8619,  -0.8575,   -1.0274,   -0.2425,   -0.0869];
+	
 	g_linkMass :ARRAY[1..5] OF LREAL :=[5.6565, 1.4613, 1.149, 1.5362, 0.6679] ;
 	
 	// lin center of amss

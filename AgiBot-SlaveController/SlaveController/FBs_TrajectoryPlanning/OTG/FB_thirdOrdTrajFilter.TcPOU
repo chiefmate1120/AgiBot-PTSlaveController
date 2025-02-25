@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_thirdOrdTrajFilter" Id="{a9e84a09-bcd5-4b04-bd05-9b76d4fe4fcc}" SpecialFunc="None">
     <Declaration><![CDATA[// reference: trajectory planning for automatic machines and robots
 FUNCTION_BLOCK FB_thirdOrdTrajFilter

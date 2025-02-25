@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlAdjust" Id="{065dc40e-4d51-49bc-8f28-94a80cbbd0fd}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm Adjust
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlAdjust EXTENDS FB_SlaveArmCtrlBase
@@ -8,10 +8,10 @@ VAR
 	m_maxAdjustVel :Vec3d := [1.2, 1.2, 0.3];
 	
 	// velocity start to enable damping
-	m_velLBForDamp :Vec3d := [1.0, 1.0, 0.2];
+	m_velLBForDamp :Vec3d := [0.7, 0.7, 0.1];
 	
 	// max damp
-	m_maxDamp :Vec3d := [50,50,100];//50, 50, 500
+	m_maxDamp :Vec3d := [1,1,100];//50, 50, 500
 	
 	// distance buffer from joint limit to start damp
 	m_limitBufferForDamp :Vec3d :=[20*g_deg2Rad, 20*g_deg2Rad, 0.03];
@@ -30,17 +30,19 @@ VAR_IN_OUT CONSTANT
 	i_setupStatus: ST_SetupStatus;
 	i_slaveArm :FB_SlaveArm;
 END_VAR
+VAR
+	i:INT;
+END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_cmdJntPos[1]:=i_slaveArm.curJntPos[1];
 m_cmdJntPos[2]:=i_slaveArm.curJntPos[2];
 m_cmdJntPos[3]:=i_slaveArm.curJntPos[3];
-IF m_jntOPMode[8] = DriverOPMode_Trq THEN
-	m_cmdJntPos[8]:=i_slaveArm.curJntPos[8];
-END_IF
-IF m_jntOPMode[7] = DriverOPMode_Trq THEN
-	m_cmdJntPos[7]:=i_slaveArm.curJntPos[7];
-END_IF
+FOR i:= 6 TO 8 DO
+	IF m_jntOPMode[i] = DriverOPMode_Trq THEN
+		m_cmdJntPos[i]:=i_slaveArm.curJntPos[i];
+	END_IF
+END_FOR
 
 m_cmdCartPose:=i_slaveArm.curCartPose;]]></ST>
       </Implementation>
@@ -65,10 +67,13 @@ END_VAR
 m_cmdJntTrq := g_zeroVec8d;
 
 // enable endoscope rotation joint if external torque exceed specific value
-IF i_slaveArm.instrument.onChipData.m_InstruReadSucceed AND i_slaveArm.instrument.instruType = InstruType_Endoscope AND ABS(i_slaveArm.filtJntCurrent[8]) > 100 THEN
-		m_jntOPMode[8]:=DriverOPMode_Trq;
+IF i_slaveArm.instrument.onChipData.m_InstruReadSucceed AND i_slaveArm.instrument.instruType = InstruType_Endoscope THEN
+		FOR i:=6 TO 8 DO 
+			IF ABS(i_slaveArm.filtJntCurrent[i]) > 100 THEN
+				m_jntOPMode[i]:=DriverOPMode_Trq;
+			END_IF
+		END_FOR
 END_IF
-
 
 // add damp near joint limit
 FOR i:=1 TO 3 DO
@@ -144,34 +149,16 @@ copyCmds(r_slaveArmCtrlCmd);
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlAdjust.calcCmdJntPos">
-      <LineId Id="27" Count="0" />
-      <LineId Id="57" Count="1" />
-      <LineId Id="76" Count="2" />
-      <LineId Id="80" Count="1" />
-      <LineId Id="79" Count="0" />
-      <LineId Id="67" Count="0" />
+      <LineId Id="90" Count="2" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="116" Count="1" />
+      <LineId Id="114" Count="1" />
+      <LineId Id="101" Count="0" />
       <LineId Id="39" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlAdjust.calcCmdJntTrq">
-      <LineId Id="5" Count="0" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="155" Count="5" />
-      <LineId Id="119" Count="0" />
-      <LineId Id="118" Count="0" />
-      <LineId Id="120" Count="0" />
-      <LineId Id="148" Count="1" />
-      <LineId Id="151" Count="0" />
-      <LineId Id="153" Count="0" />
-      <LineId Id="152" Count="0" />
-      <LineId Id="150" Count="0" />
-      <LineId Id="125" Count="1" />
-      <LineId Id="105" Count="0" />
-      <LineId Id="62" Count="0" />
-      <LineId Id="68" Count="0" />
-      <LineId Id="73" Count="1" />
-      <LineId Id="76" Count="0" />
-      <LineId Id="75" Count="0" />
-      <LineId Id="71" Count="0" />
+      <LineId Id="217" Count="0" />
+      <LineId Id="175" Count="28" />
       <LineId Id="53" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlAdjust.init">

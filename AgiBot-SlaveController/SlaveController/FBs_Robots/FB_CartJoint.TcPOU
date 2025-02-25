@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_CartJoint" Id="{28a097bf-9305-41bd-b49b-5cc15db4c0fc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CartJoint EXTENDS FB_JointBase
 VAR_INPUT
@@ -16,6 +16,7 @@ VAR
 
 	m_cmdAcc:LREAL;
 	
+	m_initReset : BOOL := TRUE;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -33,6 +34,20 @@ END_VAR
       <Implementation>
         <ST><![CDATA[cmd2motorMZ:=LREAL_TO_DINT(i_cmd / m_motorEnc2PosRatio);//*i_controlCycleTime
 ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="disableMZ" Id="{60f4defb-0512-4886-98de-12baf1e7440a}">
+      <Declaration><![CDATA[METHOD PUBLIC disableMZ : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_motorOutputs.m_controlWord:=DriverCtrlWord_INIT;
+IF GVL_interactUI.g_uiFaultReset=1 OR SafetyCheck.m_masterRobotData.m_uiResetFault = 1 OR m_initReset THEN
+	m_initReset := FALSE;
+	m_motorOutputs.m_controlWord:=DriverCtrlWord_FaultReset;
+END_IF
+disableMZ:=TRUE;]]></ST>
       </Implementation>
     </Method>
     <Method Name="enableMZ" Id="{c7c05849-8175-4bda-9e85-19e05e090d36}">
@@ -207,6 +222,12 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
     <LineIds Name="FB_CartJoint.cmd2motorMZ">
       <LineId Id="20" Count="0" />
       <LineId Id="14" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartJoint.disableMZ">
+      <LineId Id="10" Count="1" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="12" Count="1" />
+      <LineId Id="6" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartJoint.enableMZ">
       <LineId Id="23" Count="2" />

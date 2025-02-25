@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <GVL Name="GVL_UIData" Id="{64e88e01-f0c9-4682-9994-b5aa2920e88c}">
+    <Declaration><![CDATA[//{attribute 'qualified_only'}
+VAR_GLOBAL
+	A1_Arm1Mode:ARRAY[1..4,0..GVL_Const.g_controlModeNum] OF BOOL;	
+	A1_Arm1ModeL:ARRAY[1..4,0..GVL_Const.g_controlModeNum] OF BOOL;	
+	
+	//basic motion test variables
+	g_motionTest:ST_MotionTest;
+	
+	//friction test for slave arm
+	g_frictionTest:ST_FrictionTest;
+	
+	//friction test for setup arm
+	g_frictionTestSetup:ST_FrictionTestSetup;
+	
+	//cycle test
+	g_cycleTest:ST_CycleTest;
+	
+	//information update
+	g_systemInfo:ST_InfoUpdate;
+	
+	//special signals
+	g_specialSignal:ST_highLevelCtrlSig;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

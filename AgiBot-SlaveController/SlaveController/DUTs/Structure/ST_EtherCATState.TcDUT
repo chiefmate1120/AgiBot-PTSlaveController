@@ -4,9 +4,9 @@
     <Declaration><![CDATA[TYPE ST_EtherCATState :
 STRUCT
 	EtherCATState : BOOL;
-	CRCPortA :UDINT;
-	CRCPortB :UDINT;
-	CRCPortC :UDINT;
+	CRCPortA :DINT;
+	CRCPortB :DINT;
+	CRCPortC :DINT;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

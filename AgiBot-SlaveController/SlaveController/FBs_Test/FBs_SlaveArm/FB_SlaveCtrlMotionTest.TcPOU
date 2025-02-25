@@ -1,0 +1,1580 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_SlaveCtrlMotionTest" Id="{1902434d-be0a-47a5-87d4-f277642374f0}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveCtrlMotionTest EXTENDS FB_SlaveArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	//arm id
+	m_armId:INT;	
+	
+	//Precision calculation pre matrix
+	m_frontPose:ST_Frame;
+	
+	//Precision calculation post matrix
+	m_endPose:ST_Frame;
+	
+	//single arm pose
+	m_slaveArmPose:ST_Frame;
+	
+	//control mode:  1---Joint space single point motion   2---Continuous joint space motion   3---Single point motion in operating space
+	//4---Continuous motion in operating space   5---precision test   6---back to origin position
+	m_controlMode:INT:=1;
+	
+	//test step
+	m_testStep:INT;
+	
+	//DH joint position
+	m_initDHPos,m_startDHPos,m_endDHPos :Vec6d;
+	
+	//startJntPos,endJntPos :Vec8d;
+	m_initJntPos,m_startJntPos,m_endJntPos :Vec8d;
+	
+	//motion distance
+	m_motDist:Vec8d;
+	
+	//Trajectory planner
+	m_Planner: FB_TrajMoveJ;
+	
+	//motion parameters
+	m_maxjntVel,m_maxjntAcc,m_maxjntJerk:Vec8d;
+	
+	// joint velocity limit
+	m_DHJntVel :ARRAY[1..6] OF LREAL :=[1, 1, 0.5, 1,1,1];
+	m_maxDHJntVel :ARRAY[1..6] OF LREAL :=[1, 1, 0.5, 1,1,1];	
+	m_velFactor:ARRAY[1..2] OF LREAL:=[0.1,1];//lowVel  highVel
+	
+	//time
+	m_time:LREAL;
+	
+	//joint motion incresement
+	m_DHjntInc:Vec6d;
+	
+	//moiton parameters
+	m_jntMotionDir:Vec6i:=[0,0,0,0,0,0];
+	m_jntVel:Vec6d:=[0.1,0.1,0.01,0.2,0.2,0.2];
+	m_defaultJntVel:Vec6d:=[0.1,0.1,0.01,0.1,0.1,0.1];
+	
+	//motion start
+	m_startMotion:BOOL;
+	m_startMotionLast:BOOL;
+	
+	//target spatial position
+	m_targetSpatialPos:ST_Frame;
+	
+	//spatial motion parameters
+	m_spatialMotionDir,m_spatialMotionDirInit:Vec6i;
+	m_spatialVel:Vec6d;
+	m_spatialMotionDirSum:INT;
+	m_defaultSpatialVel:Vec6d:=[0.01,0.01,0.01,0.1,0.1,0.1];
+	
+	//spatial position incresement
+	m_spatialPosInc:Vec6d;
+	
+	//initial spatial position
+	m_initSpatialPos:ST_Frame;
+	
+	//target position variables
+	m_posInc:Vec3d;
+	m_axis:Vec3d;
+	m_angle:LREAL;
+	
+	//accuracy test variables
+	m_pointNum:INT;
+	m_pointSum:INT;
+	m_motionCycleNum:INT;
+	m_targetPosArr:ARRAY[1..5] OF ST_Frame;
+	
+	//Has the inverse kinematics been successfully solved
+	m_IKSucceed:BOOL;	
+	
+	//Numerical method for inverse solution of related variables
+	//m_cmdCartPose:ST_Frame;
+	m_slavePosErr :Vec3d;
+	m_slaveRotErr :Mat3d;
+	m_errAngle : LREAL;
+	m_errAxisLocal, m_errAxis :Vec3d;
+	m_masterSlavePoseError :Vec6d;
+	
+	// pose track control kp
+	m_posTrackKp :REAL := 100;
+	m_oriTrackKp :REAL := 100;
+	
+	// velocity for slave to track motion
+	m_slaveCmdVel, m_slaveCmdWVel : Vec3d;
+	invJaco :Mat6d;
+	
+	//spatial velocity limit
+	m_linearVelLimit:LREAL:=0.1;
+	m_angularVelLimit:LREAL:=5*g_deg2Rad;
+	
+	// simulated DH joint position
+	m_simDHJntPos : Vec6d;
+	
+	// simulated slave twist of DH joint
+	m_simDHJointVel :Vec6d;
+	
+	// command joint position filter
+	m_cmdJntPosLpf:ARRAY[1..8] OF FB_LowPassFilter;
+	
+	// filter cut-off frequency for control
+	m_macroCmdJntPosLpfCutoffFreq : LREAL :=5;
+	m_microCmdJntPosLpfCutoffFreq : LREAL :=15;
+	
+	//position and posture error limit
+	m_distErrLimit:LREAL:=0.001*0.1;
+	m_poseErrLimit:LREAL:=0.01*g_deg2Rad;
+	m_delayTimeLimit:LREAL:=1;
+	m_errTime:LREAL;
+	
+	//original joint position
+	m_originJntPos:Vec6d;
+	
+	//motion status
+	m_motionFinished:BOOL;
+	
+	//drag joint flag
+	m_dragJntFlag:Vec6i;
+	m_dragJntFlagLast,m_dragJntFlagInit:Vec6i;
+	
+	//basic function
+	m_basicFun:FB_BasicFun;
+	
+	//unit function
+	m_unitFun:FB_UnitTransform;
+	
+	//mutiply joint position test
+	m_MutiDHJntPosArr :ARRAY[1..11] OF Vec6d;
+	m_jntBuffer:Vec6d:=[5*g_deg2Rad,5*g_deg2Rad,0.005,5*g_deg2Rad,5*g_deg2Rad,5*g_deg2Rad];
+	m_MutiDHJntPosNum:INT:=11;
+	m_jntDist:Vec6d;
+	
+	//motor parameters
+	m_motorReduction :LREAL;
+	m_trqConst :LREAL;
+	m_motorDir :INT;
+	m_trq2CurrentRatio:LREAL;
+	m_current2TrqRatio:LREAL;
+	m_armCurrent2TrqRatio:Vec8d;
+	m_jntGravity : Vec8d:=g_zeroVec8d;	
+	
+	//last command
+	m_lastCmdJntPos:Vec8d;
+	
+	// commmand yaw angle and velocity
+	m_cmdYawAngle :LREAL;
+	m_cmdYawVel :LREAL;
+	
+	// comand yaw angle and velocity filter
+	m_cmdYawAngLpf : FB_LowPassFilter;
+	m_cmdYawVelLpf : FB_LowPassFilter;
+	
+	// instrument controller
+	m_basicInstruController : FB_BasicInstruControl;
+	m_usKnifeController : FB_UltrosonicKnifeControl;
+	m_slaveCmdGripForceLevel:LREAL;
+	
+	//mode1 and mode2
+	m_slaveMode1:Vec8i:=[3(DriverOPMode_PosTrq),5(DriverOPMode_Trq)];
+	m_slaveMode2:Vec8i:=g_slaveAllPosMode;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="accuracyTest" Id="{0a89f2b7-69f4-48e8-9e4f-4df31d757009}">
+      <Declaration><![CDATA[METHOD accuracyTest : BOOL
+VAR_INPUT
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR 
+	i,j:INT;
+	poseVec:Vec6d;
+	originPose:ST_Frame;
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE m_testStep OF
+	0: //data initial
+		m_pointNum:=1;
+		m_pointSum:=GVL_Const.g_testPointNum;
+		m_motionCycleNum:=1;
+		m_errTime:=0;
+		vecMultiNum(m_DHJntVel,m_velFactor[1],m_maxDHJntVel); //low velocity	
+		
+		//init the simulate joint position
+		m_cmdJntPos:=i_slaveArm.curJntPos;
+		m_simJntPos:=m_cmdJntPos; //copy value to sim jntpos
+		
+		//init operation mode
+		m_lastCmdJntPos :=m_cmdJntPos;
+		SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+		m_jntOPMode:=m_slaveMode1;		
+		m_testStep:=10;
+		
+		
+	10: //motion
+		m_targetSpatialPos:=m_targetPosArr[m_pointNum];
+		m_cmdCartPose:=m_targetSpatialPos;
+		numericalIK(i_slaveArm);
+		calJntTrq(i_slaveArm:= i_slaveArm);
+		
+		//Determine if the error is less than the set value
+		IF (norm(m_slavePosErr)<m_distErrLimit) AND (m_errAngle<m_poseErrLimit) THEN
+			m_errTime:=m_errTime+g_slaveArmCtrlCycleTime;
+			IF (m_errTime>m_delayTimeLimit) THEN
+				m_errTime:=0;
+				m_testStep:=15;
+			END_IF
+		ELSE
+			m_errTime:=0;
+		END_IF
+	
+		
+	15: //Waiting for confirmation and measurement
+		numericalIK(i_slaveArm);
+		calJntTrq(i_slaveArm:= i_slaveArm);
+		
+		IF (g_motionTest.m_nextStep[m_armId]=TRUE) THEN
+			g_motionTest.m_nextStep[m_armId]:=FALSE;
+			m_testStep:=20;
+		END_IF
+		
+		//exit
+		IF (g_motionTest.m_uiArmMode[m_armId,5]=FALSE) THEN
+			m_testStep:=30;
+		END_IF
+	
+		
+	20: //Record the motion cycle
+		m_pointNum:=m_pointNum+1;
+		IF (m_pointNum>m_pointSum) THEN
+			m_pointNum:=1;
+			m_motionCycleNum:=m_motionCycleNum+1;
+			IF (m_motionCycleNum>GVL_Const.g_testMotCycNum) THEN
+				m_testStep:=30;
+			ELSE
+				m_testStep:=10;
+			END_IF
+		ELSE
+			m_testStep:=10;
+		END_IF				
+		
+	
+	30: //stop
+		m_testStep:=-1;	
+		m_motionFinished:=TRUE;	
+		
+		//return the operation mode
+		SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+		m_jntOPMode:=m_slaveMode2;	
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="back2origin" Id="{9ec190e9-bfb3-4e1c-bdd7-56aa92acda9b}">
+      <Declaration><![CDATA[METHOD back2origin : BOOL
+VAR_INPUT
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+CASE m_testStep OF
+	0: //Trajectory parameter initialization
+		m_startJntPos:=i_slaveArm.curJntPos;
+		m_endDHPos:=m_originJntPos;		
+		i_slaveArm.instrument.instruIK(m_endDHPos,0, o_jntPos=>m_endJntPos);
+		m_Planner.init(i_startJntPos:= m_startJntPos, 	i_targetJntPos:= m_endJntPos, 	i_maxJntVel:= m_maxjntVel, 	i_maxJntAcc:= m_maxjntAcc, 	i_maxJntJerk:= m_maxjntJerk);
+		IF (m_Planner.isGene=FALSE) THEN
+			m_testStep:=20;
+		ELSE
+			m_time:=0; m_testStep:=10;
+		END_IF		
+		
+		
+	10: //start motion
+		m_time:=m_time+g_slaveArmCtrlCycleTime;
+		m_Planner.evaluate(t:= m_time, jntPos=> m_cmdJntPos, jntVel=> m_cmdJntVel, jntAcc=> m_cmdJntAcc);
+		m_simJntPos:=m_cmdJntPos; //copy value to sim jntpos
+		IF (m_time>m_Planner.duration) THEN
+			m_testStep:=20;
+		END_IF		
+		
+		
+	20: //end the motion
+		m_testStep:=-1;		
+		m_motionFinished:=TRUE;
+END_CASE
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdJntPos" Id="{45ff5261-3263-4c0a-bada-e4386f88b1cb}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	// endoscope pose in cart coordinate
+	i_endoscopePose : ST_Frame;
+	
+	// master arm data
+	i_masterStatus :ST_MasterStatus;
+	
+	// setup arm data
+	i_setupStatus: ST_SetupStatus;
+	
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR
+	i:INT;
+	tmpFrame:ST_Frame;
+	r_angle:LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Basic information update---front pose frame and end pose frame 
+tmpFrame:=invFrame(i_endoscopePose);
+i:=i_slaveArm.armIdx;
+m_frontPose:=transform(tmpFrame,i_setupStatus.m_curEndPose[i]);
+m_endPose.m_pos:=g_zeroVec3d;  m_endPose.m_rot:=g_eye3d;
+m_slaveArmPose:=i_slaveArm.curCartPose;
+
+
+
+//copy to global variables
+g_motionTest.m_frontPose[m_armId]:=m_frontPose;
+g_motionTest.m_endPose[m_armId]:=m_endPose;
+g_motionTest.m_slaveArmPose[m_armId]:=m_slaveArmPose;
+
+//joint postion
+g_motionTest.m_actDHJntPos[m_armId]:=m_unitFun.slaveArmUnit2User(i_dataSystem:= i_slaveArm.curDHJntPos);
+g_motionTest.m_actJntPos[m_armId]:=m_unitFun.slaveArmUnit2UserN8(i_dataSystem:= i_slaveArm.curJntPos);
+g_motionTest.m_actJntCurrent[m_armId]:=i_slaveArm.filtJntCurrent;
+
+
+//joint enable
+m_jntEnableFlag:=g_motionTest.m_jntEnable[m_armId];
+
+
+//Initialization of motion parameters
+m_startMotion:=g_motionTest.m_startMotion[m_armId];
+m_controlMode:=g_motionTest.m_controlMode[m_armId];
+
+IF (m_startMotionLast=FALSE) AND (m_startMotion=TRUE) THEN
+	m_testStep:=0;	
+	m_motionFinished:=FALSE;
+	m_maxDHJntVel:=m_DHJntVel;
+END_IF
+m_startMotionLast:=m_startMotion;
+
+
+
+//Select different programs based on different control modes
+IF (m_controlMode=1) THEN
+	jntSinglePoint(i_slaveArm);
+	
+ELSIF (m_controlMode=2) THEN
+	jntContinuousPoint(i_slaveArm);
+	
+ELSIF (m_controlMode=3) THEN
+	spaceSinglePoint(i_slaveArm);
+	
+ELSIF (m_controlMode=4) THEN
+	spaceContinuousPoint(i_slaveArm);
+	
+ELSIF (m_controlMode=5) THEN
+	accuracyTest(i_slaveArm);
+	
+ELSIF (m_controlMode=6) THEN
+	back2origin(i_slaveArm);
+	
+ELSIF (m_controlMode=7) THEN
+	drag(i_slaveArm);
+	
+ELSIF (m_controlMode=8) THEN
+	jntMutiPoint(i_slaveArm);
+	
+ELSIF (m_controlMode=9) THEN
+	jntCurrentMode(i_slaveArm);
+END_IF
+
+
+
+//show the motion step
+IF (m_controlMode=5) OR (m_controlMode=8) THEN
+	g_motionTest.m_curStep[m_armId]:=m_testStep;
+	g_motionTest.m_testPointId[m_armId]:=m_pointNum;
+	g_motionTest.m_testCycleId[m_armId]:=m_motionCycleNum;
+ELSE
+	g_motionTest.m_curStep[m_armId]:=-1;
+	g_motionTest.m_testPointId[m_armId]:=0;
+	g_motionTest.m_testCycleId[m_armId]:=0;
+END_IF
+
+
+
+// feedback the motion status
+IF (m_controlMode=1) OR (m_controlMode=3) OR (m_controlMode=5) OR (m_controlMode=6) OR (m_controlMode=7) THEN
+	//IF (m_testStep=-1) AND (m_motionFinished=TRUE) THEN		
+	IF (m_testStep=-1) THEN	
+		g_motionTest.m_controlMode[m_armId]:=0;	
+	END_IF
+	
+ELSIF (m_controlMode=2) OR (m_controlMode=4) OR (m_controlMode=8) OR (m_controlMode=9)THEN
+	IF (m_testStep=-1) THEN
+		g_motionTest.m_controlMode[m_armId]:=0;
+	END_IF
+END_IF
+
+
+
+//cover the command joint position
+IF (g_motionTest.m_coverCmdPos[m_armId]=TRUE) THEN
+	g_motionTest.m_targetJntPosN8[m_armId]:=m_unitFun.slaveArmUnit2UserN8(i_dataSystem:= i_slaveArm.curJntPos);
+END_IF
+
+
+
+//*******************monitor part which can be delete*********************//
+GVL_Monitor.g_stateMachine[m_armId]:=SlaveArmControl.m_slaveRobot.m_slaveArmState[m_armId];
+i_slaveArm.instrument.instruFK(i_slaveArm.curJntPos,GVL_Monitor.g_jntPos[m_armId],r_angle);
+
+GVL_Monitor.g_step[m_armId]:=m_testStep;
+GVL_Monitor.g_time[m_armId]:=m_time;
+GVL_Monitor.g_targetPos[m_armId]:=m_simDHJntPos;
+
+GVL_Monitor.g_pointNum[m_armId]:=m_pointNum;
+GVL_Monitor.g_motMode[m_armId]:=m_controlMode;
+GVL_Monitor.g_motStart[m_armId]:=m_startMotion;
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdJntTrq" Id="{d83b9ac7-bb8d-4283-89e8-8c2040c9c5db}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntTrq : BOOL
+VAR_IN_OUT CONSTANT
+	// endoscope pose in cart coordinate
+	i_endoscopePose : ST_Frame;
+	
+	// master arm data
+	i_masterStatus :ST_MasterStatus;
+	
+	// setup arm data
+	i_setupStatus: ST_SetupStatus;
+	
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//Be sure to keep it, otherwise the parent class will assign the instruction current to 0
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calJntTrq" Id="{fdf97a5a-01e1-4bee-ab44-daf6c441558a}">
+      <Declaration><![CDATA[METHOD calJntTrq : BOOL
+VAR_IN_OUT CONSTANT
+	//i_endoscopePose : ST_Frame;
+	//i_masterStatus :ST_MasterStatus;
+	//i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	i :INT ;
+	instruCmdGripAngle, instruCmdGripForceLevel :LREAL;
+	instruCmdJntPos, instruCmdJntVel : Vec5d;	
+	instruJntCtrlTrq :Vec5d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// set joint torque to zero in default
+m_cmdJntTrq := g_zeroVec8d;
+
+// instrument joint control
+FOR i:=1 TO 5 DO 
+	instruCmdJntPos[i]:=m_cmdJntPos[i+3];
+	instruCmdJntVel[i]:=m_cmdJntVel[i+3];
+END_FOR
+m_cmdYawAngle := m_cmdYawAngLpf.run(m_simDHJntPos[6]);
+m_cmdYawVel := m_cmdYawVelLpf.run(m_simDHJointVel[6]);
+
+IF i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeS OR i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeU THEN
+	m_usKnifeController.run(instruCmdJntPos,instruCmdJntVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
+ELSE
+	m_basicInstruController.run(instruCmdJntPos,instruCmdJntVel, m_cmdYawAngle, m_cmdYawVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
+END_IF
+
+FOR i:=1 TO 5 DO
+	m_cmdJntTrq[i+3]:=instruJntCtrlTrq[i];
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="drag" Id="{a0093f31-0b52-4614-a88c-9141fdb1d552}">
+      <Declaration><![CDATA[METHOD drag : BOOL
+VAR_INPUT
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR
+	i:INT;
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;	
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+//update the drag flag
+m_dragJntFlag:=g_motionTest.m_dragJntFlag[m_armId];
+
+
+CASE m_testStep OF
+	0: //Switch control mode
+		SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);		
+		
+		FOR i:=1 TO 3 BY 1 DO
+			IF (m_dragJntFlag[i]=1) THEN				
+				m_jntOPMode[i]:=DriverOPMode_Trq;
+				m_cmdJntTrq[i]:=0; //set joint torque to zero in default
+			END_IF
+		END_FOR		
+		copyCmds(r_slaveArmCtrlCmd); // update commands to arm
+		
+		m_time:=0;
+		m_testStep:=10;
+		
+		
+	10: //Normal drag and drop
+		m_time:=m_time+g_slaveArmCtrlCycleTime;	
+		FOR i:=1 TO 3 BY 1 DO
+			IF (m_dragJntFlag[i]=m_dragJntFlagLast[i]) THEN
+				//
+			ELSE
+				m_testStep:=0; //Switch drag joints
+				EXIT;
+			END_IF
+		END_FOR
+		
+		//copy the actual position to command position
+		FOR i:=1 TO 3 BY 1 DO
+			IF (m_dragJntFlag[i]=1) THEN
+				m_cmdJntPos[i]:=i_slaveArm.curJntPos[i];
+			END_IF
+		END_FOR		
+		
+		//if all joint exit drag mode
+		IF (m_dragJntFlag[1]=0) AND (m_dragJntFlag[2]=0) AND (m_dragJntFlag[3]=0) THEN
+			//m_testStep:=20;
+		END_IF
+		
+		//if swith the control mode
+		IF (g_motionTest.m_uiArmMode[m_armId,7]=FALSE) THEN
+			m_testStep:=20;
+		END_IF
+		
+		
+	20: //Switch to normal state
+		SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+		copyCmds(r_slaveArmCtrlCmd); // update commands to arm		
+		m_motionFinished:=TRUE;
+		m_testStep:=-1;
+		
+		
+	-1: //
+END_CASE
+
+
+//update the drag flag
+m_dragJntFlagLast:=m_dragJntFlag;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{0d0573e4-bcf6-41e5-aaae-f56a6c51570f}">
+      <Declaration><![CDATA[// override this function in each exact controller
+// NOTICE: set joint control mode here, and do some initialization if needed
+METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;	
+END_VAR
+
+VAR	
+	i,j:INT;
+	poseVec:Vec6d;
+	originPose:ST_Frame;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+
+//variable initialization
+m_armId:=i_slaveArm.armIdx;
+m_testStep:=-1;
+
+//joint enable
+g_motionTest.m_jntEnable[m_armId]:=g_onesVec8i;
+
+
+//original joint position
+m_originJntPos:=GVL_Const.g_originJntPos;
+
+
+// init filter
+FOR i:=1 TO 3 DO
+	m_cmdJntPosLpf[i].init(1, m_macroCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+END_FOR
+FOR i:=4 TO g_sJntNum DO
+	m_cmdJntPosLpf[i].init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+END_FOR
+
+
+//velocity---acceleration---jerk
+vecMultiNum(GVL_SlaveMotorParameters.g_maxJntVel,0.2,m_maxjntVel);
+vecMultiNum(m_maxjntVel,3,m_maxjntAcc);
+vecMultiNum(m_maxjntAcc,3,m_maxjntJerk);
+
+
+//Obtain the position and posture of the test point location
+FOR i:=1 TO 5 BY 1 DO
+	FOR j:=1 TO 6 BY 1 DO
+		poseVec[j]:=GVL_Const.g_testSpacePoint[i,j];
+	END_FOR
+	m_basicFun.xyzrpy2Frame(i_posVec:= poseVec, o_frame=> m_targetPosArr[i]);
+	
+	m_basicFun.forwardKinematic(i_DHJntPos:= m_originJntPos, m_instrument:= i_slaveArm.m_instrument, r_cartPose:= originPose);
+	m_targetPosArr[i].m_rot:=originPose.m_rot;
+END_FOR
+
+
+//Multiple points in joint space
+FOR i:=1 TO 3 BY 1 DO
+	m_startDHPos[i]:=GVL_SlaveMotorParameters.g_minJntPos[i] + m_jntBuffer[i];
+	m_endDHPos[i]:=GVL_SlaveMotorParameters.g_maxJntPos[i] - m_jntBuffer[i];
+	m_jntDist[i]:=(m_endDHPos[i]-m_startDHPos[i])/(m_MutiDHJntPosNum-1);
+END_FOR
+
+//point value copy
+FOR i:=1 TO m_MutiDHJntPosNum BY 1 DO
+	FOR j:=1 TO 3 BY 1 DO
+		m_MutiDHJntPosArr[i][j]:=m_startDHPos[j]+m_jntDist[j]*(i-1);
+	END_FOR	
+END_FOR
+
+
+//init grip force
+m_slaveCmdGripForceLevel:=0;
+
+// init filter
+FOR i:=1 TO 3 DO
+	m_cmdJntPosLpf[i].init(1, m_macroCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+END_FOR
+FOR i:=4 TO g_sJntNum DO
+	m_cmdJntPosLpf[i].init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+END_FOR
+m_cmdYawAngLpf.init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+m_cmdYawVelLpf.init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+
+// init controller
+m_basicInstruController.init(i_slaveArm);
+m_usKnifeController.init(i_slaveArm);
+//m_instruType := i_slaveArm.instrument.instruType;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="jntContinuousPoint" Id="{fbcb4435-cae6-4265-9904-f0248e46b86e}">
+      <Declaration><![CDATA[METHOD PROTECTED jntContinuousPoint : BOOL
+VAR_INPUT
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+CASE m_testStep OF
+	0:  //init
+		m_initDHPos:=i_slaveArm.curDHJntPos;
+		m_DHjntInc:=g_zeroVec6d;
+		m_jntMotionDir:=g_motionTest.m_jntMotionDir[m_armId];
+		m_jntVel:=m_unitFun.slaveArmUnit2System(i_dataTest:= g_motionTest.m_jntVel[m_armId]);
+		
+		//If the joint motion direction is specified and the specified speed is 0, then the default speed is used
+		FOR i:=1 TO 6 BY 1 DO
+			m_jntVel[i]:=LIMIT(-m_defaultJntVel[i],m_jntVel[i],m_defaultJntVel[i]);
+			IF (ABS(m_jntMotionDir[i])>0) AND (m_jntVel[i]<g_smallNum) THEN
+				m_jntVel[i]:=m_defaultJntVel[i];
+			END_IF
+		END_FOR
+		m_testStep:=10;
+		
+		
+	10: //joint motion incresement calculation		
+		FOR i:=1 TO 6 BY 1 DO
+			m_DHjntInc[i]:=m_DHjntInc[i]+m_jntMotionDir[i]*m_jntVel[i]*g_slaveArmCtrlCycleTime;
+		END_FOR
+		
+		//determine DH joint position
+		vecAdd(m_initDHPos,m_DHjntInc,m_endDHPos);
+		FOR i:=1 TO 2 BY 1 DO
+			m_endDHPos[i] := LIMIT(GVL_SlaveMotorParameters.g_minJntPos[i] - 5*g_deg2Rad , m_endDHPos[i], GVL_SlaveMotorParameters.g_maxJntPos[i] + 5*g_deg2Rad);
+		END_FOR
+		m_endDHPos[3] := LIMIT(GVL_SlaveMotorParameters.g_minJntPos[3] - 0.002, m_endDHPos[i], GVL_SlaveMotorParameters.g_maxJntPos[3] + 0.002);
+		i_slaveArm.instrument.instruIK(m_endDHPos,0, o_jntPos=>m_endJntPos);
+		
+		//copy the value
+		m_cmdJntPos:=m_endJntPos;
+		m_simJntPos:=m_cmdJntPos; //copy value to sim jntpos
+		
+		//exit
+		IF (g_motionTest.m_uiArmMode[m_armId,2]=FALSE) THEN
+			m_testStep:=-1;
+		END_IF			
+	
+		
+	-1: //
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="jntCurrentMode" Id="{db216e40-0b67-47cb-bd78-52da051f9711}">
+      <Declaration><![CDATA[METHOD jntCurrentMode : BOOL
+VAR_INPUT
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	i:INT;
+	i_jntIdx:INT;
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;	
+	targetTrq:ARRAY[1..8] OF LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+CASE m_testStep OF
+	0: //init
+		FOR i_jntIdx:=1 TO 8 BY 1 DO
+			m_motorReduction :=GVL_SlaveMotorParameters.g_motorReduction[i_jntIdx];
+			m_trqConst :=GVL_SlaveMotorParameters.g_motorTrqConst[i_jntIdx];
+			m_motorDir :=GVL_SlaveMotorParameters.g_motorDir[i_jntIdx];
+			m_trq2CurrentRatio:=m_motorDir * 1000.0/(m_trqConst*m_motorReduction);
+			m_current2TrqRatio:=m_motorDir * (m_trqConst*m_motorReduction)/1000.0;
+			m_armCurrent2TrqRatio[i_jntIdx]:=m_current2TrqRatio;
+		END_FOR
+		
+		//update the torque
+		m_jntGravity:=i_slaveArm.jntGravity;
+		
+		SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);		
+		FOR i:=1 TO 8 BY 1 DO
+			m_jntOPMode[i]:=DriverOPMode_Trq;
+			targetTrq[i]:=g_motionTest.m_targetJntCurrentN8[m_armId][i]*m_armCurrent2TrqRatio[i];
+			m_cmdJntTrq[i]:=targetTrq[i]-m_jntGravity[i];
+		END_FOR
+		copyCmds(r_slaveArmCtrlCmd); // update commands to arm
+		
+		m_time:=0;
+		m_testStep:=10;
+		
+		
+	10: //update the joint current
+		m_jntGravity:=i_slaveArm.jntGravity;
+		FOR i:=1 TO 8 BY 1 DO
+			targetTrq[i]:=g_motionTest.m_targetJntCurrentN8[m_armId][i]*m_armCurrent2TrqRatio[i];
+			m_cmdJntTrq[i]:=targetTrq[i]-m_jntGravity[i];
+		END_FOR
+		
+		//actual joint position copy to command joint posoition
+		m_cmdJntPos:=i_slaveArm.curJntPos;
+		
+		//exit
+		IF (g_motionTest.m_uiArmMode[m_armId,9]=FALSE) THEN
+			m_testStep:=20;
+		END_IF
+		
+	
+	20: //Switch to normal state
+		SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+		copyCmds(r_slaveArmCtrlCmd); // update commands to arm		
+		m_motionFinished:=TRUE;
+		m_testStep:=-1;
+		
+		
+	-1: //
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="jntMutiPoint" Id="{1deb80f6-4c6f-4912-9c82-dede84b5d82a}">
+      <Declaration><![CDATA[METHOD jntMutiPoint : BOOL
+VAR_INPUT
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+CASE m_testStep OF
+	0: //init
+		m_pointNum:=2;
+		m_motionCycleNum:=1;
+		m_pointSum:=m_MutiDHJntPosNum;
+		m_testStep:=10;
+		
+		
+	10: //Trajectory parameter initialization
+		m_startJntPos:=i_slaveArm.curJntPos;
+		m_endDHPos:=m_MutiDHJntPosArr[m_pointNum];
+		
+		i_slaveArm.instrument.instruIK(m_endDHPos,0, o_jntPos=>m_endJntPos);
+		m_Planner.init(i_startJntPos:= m_startJntPos, 	i_targetJntPos:= m_endJntPos, 	i_maxJntVel:= m_maxjntVel, 	i_maxJntAcc:= m_maxjntAcc, 	i_maxJntJerk:= m_maxjntJerk);
+		IF (m_Planner.isGene=FALSE) THEN
+			m_testStep:=100;
+		ELSE
+			m_time:=0; m_testStep:=20;
+		END_IF		
+		
+		
+	20: //start motion
+		m_time:=m_time+g_slaveArmCtrlCycleTime;
+		m_Planner.evaluate(t:= m_time, jntPos=> m_cmdJntPos, jntVel=> m_cmdJntVel, jntAcc=> m_cmdJntAcc);
+		m_simJntPos:=m_cmdJntPos; //copy value to sim jntpos
+		IF (m_time>m_Planner.duration) THEN
+			m_testStep:=30;
+		END_IF	
+		
+		//exit
+		IF (g_motionTest.m_uiArmMode[m_armId,8]=FALSE) THEN
+			m_testStep:=-1;
+		END_IF
+		
+		
+	30: //confirm
+		m_pointNum:=m_pointNum+1;		
+		IF (m_pointNum>(m_pointSum-1)) THEN
+			m_motionCycleNum:=m_motionCycleNum+1;
+			m_pointNum:=2;
+		END_IF
+		m_testStep:=15;
+		
+		
+	15: //Waiting for confirmation and measurement
+		IF (g_motionTest.m_nextStep[m_armId]=TRUE) THEN
+			g_motionTest.m_nextStep[m_armId]:=FALSE;
+			m_testStep:=10;
+		END_IF		
+		
+		//exit
+		IF (g_motionTest.m_uiArmMode[m_armId,8]=FALSE) THEN
+			m_testStep:=-1;
+		END_IF
+		
+		
+	100: //end the motion
+		m_testStep:=-1;
+		
+		
+	-1: //
+END_CASE
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="jntSinglePoint" Id="{0dd167e7-64df-41a9-986a-68e28cb0e649}">
+      <Declaration><![CDATA[METHOD jntSinglePoint : BOOL
+VAR_INPUT
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	m_targetJntPosIncN8:Vec8d;
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+CASE m_testStep OF
+	0: //Trajectory parameter initialization
+		m_startJntPos:=i_slaveArm.curJntPos;
+		m_endDHPos:=m_unitFun.slaveArmUnit2System(i_dataTest:= g_motionTest.m_targetJntPos[m_armId]);
+		i_slaveArm.instrument.instruIK(m_endDHPos,0, o_jntPos=>m_endJntPos);
+		
+		//joint test mode
+		IF (g_motionTest.m_singleMotorControl[m_armId]=TRUE) THEN
+			m_endJntPos:=m_unitFun.slaveArmUnit2SystemN8(i_dataTest:= g_motionTest.m_targetJntPosN8[m_armId]);
+			m_maxjntVel:=m_unitFun.slaveArmUnit2SystemN8(i_dataTest:=g_motionTest.m_targetJntVel[m_armId]);
+			
+			FOR i:=1 TO 8 BY 1 DO
+				IF ABS(m_maxjntVel[i])<g_smallNum THEN
+					m_maxjntVel[i]:=g_motionTest.m_defultTargetJntVel[i];
+				END_IF
+			END_FOR
+			
+			vecMultiNum(m_maxjntVel,3,m_maxjntAcc);
+			vecMultiNum(m_maxjntAcc,3,m_maxjntJerk);
+		END_IF
+		
+		//incresement position
+		IF (g_motionTest.m_singleMotorIncControl[m_armId]=TRUE) THEN
+			m_targetJntPosIncN8:=m_unitFun.slaveArmUnit2SystemN8(i_dataTest:=g_motionTest.m_targetJntPosIncN8[m_armId]);
+			vecAdd(m_startJntPos,m_targetJntPosIncN8,m_endJntPos);
+		END_IF
+		
+		//motion distance judgement
+		vecSub(m_endJntPos,m_startJntPos,m_motDist);
+		IF (norm(m_motDist)<g_smallNum) THEN
+			m_testStep:=20;
+			RETURN;
+		END_IF		
+		
+		m_Planner.init(i_startJntPos:= m_startJntPos, 	i_targetJntPos:= m_endJntPos, 	i_maxJntVel:= m_maxjntVel, 	i_maxJntAcc:= m_maxjntAcc, 	i_maxJntJerk:= m_maxjntJerk);
+		IF (m_Planner.isGene=FALSE) THEN
+			m_testStep:=20;
+		ELSE
+			m_time:=0; m_testStep:=10;
+		END_IF		
+		
+		
+	10: //start motion
+		m_time:=m_time+g_slaveArmCtrlCycleTime;
+		m_Planner.evaluate(t:= m_time, jntPos=> m_cmdJntPos, jntVel=> m_cmdJntVel, jntAcc=> m_cmdJntAcc);
+		m_simJntPos:=m_cmdJntPos; //copy value to sim jntpos
+		IF (m_time>m_Planner.duration) THEN
+			m_testStep:=20;
+		END_IF		
+		
+		
+	20: //end the motion
+		m_testStep:=-1;		
+		m_motionFinished:=TRUE;
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="numericalIK" Id="{338e4e28-3e43-4c80-8233-1764e66a46e4}">
+      <Declaration><![CDATA[METHOD numericalIK : BOOL
+VAR_INPUT
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR
+	i:INT;
+	tmpMat3d:Mat3d;
+	linearVelScale:LREAL;
+	angularVelScale:LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+		//Solve the error term
+		vecSub(m_cmdCartPose.m_pos, i_slaveArm.simCartPose.m_pos, m_slavePosErr);
+		matTranspose(i_slaveArm.simCartPose.m_rot, tmpMat3d);
+		matMultiply(tmpMat3d, m_cmdCartPose.m_rot, m_slaveRotErr);
+		rot2AngAxis(m_slaveRotErr, angle=>m_errAngle, axis=>m_errAxisLocal);
+		matMultiVec(i_slaveArm.simCartPose.m_rot, m_errAxisLocal, m_errAxis);
+		
+		// pose track control
+		vecMultiNum(m_slavePosErr, m_posTrackKp, m_slaveCmdVel);
+		vecMultiNum(m_errAxis, m_errAngle*m_oriTrackKp, m_slaveCmdWVel);
+		
+		
+		//Limit spatial linear velocity and angular velocity
+		linearVelScale:=norm(m_slaveCmdVel)/m_linearVelLimit;
+		angularVelScale:=norm(m_slaveCmdWVel)/m_angularVelLimit;	
+		IF (linearVelScale)>1 THEN
+			vecSelfMultiNum(m_slaveCmdVel,1.0/linearVelScale);
+		END_IF
+		IF (angularVelScale)>1 THEN
+			vecSelfMultiNum(m_slaveCmdWVel,1.0/angularVelScale);
+		END_IF
+		
+		
+		// final command twist
+		FOR i:=1 TO 3 DO 
+			m_cmdCartTwist[i] := m_slaveCmdVel[i];
+			m_cmdCartTwist[i+3] := m_slaveCmdWVel[i];
+		END_FOR
+		
+		// compute command velocity for DH joints
+		invJaco := i_slaveArm.simJacoInv;
+		matMultiVec(invJaco, m_cmdCartTwist, m_simDHJointVel);
+		
+		// limit DH joints velocity and integrate command DH joint position
+		FOR i:=1 TO 6 DO 
+			m_simDHJointVel[i] := LIMIT(-m_maxDHJntVel[i], m_simDHJointVel[i], m_maxDHJntVel[i]);
+			
+			m_simDHJntPos[i] := i_slaveArm.simDHJntPos[i] + m_simDHJointVel[i]*g_slaveArmCtrlCycleTime;
+			IF (m_simDHJntPos[i]>GVL_SlaveMotorParameters.g_maxDHJntPos[i]) OR (m_simDHJntPos[i]<GVL_SlaveMotorParameters.g_minDHJntPos[i]) THEN
+				m_simDHJointVel[i]:=0;
+				m_simDHJntPos[i] := i_slaveArm.simDHJntPos[i];
+			END_IF
+		END_FOR
+		
+		// calculate target motor joint position/velocity from DH joint position
+		i_slaveArm.instrument.instruIK(m_simDHJntPos,0, o_jntPos=>m_simJntPos);
+		
+		// filt command joint position
+		FOR i:=1 TO g_sJntNum DO 
+			//m_cmdJntPos[i] := m_cmdJntPosLpf[i].run(m_simJntPos[i]);
+		END_FOR
+		m_cmdJntPos:=m_simJntPos;
+		
+		// compute command joint velocity
+		vecSub(m_cmdJntPos, m_lastCmdJntPos, m_cmdJntVel);
+		vecSelfMultiNum(m_cmdJntVel, g_slaveArmCtrlFreq);
+		m_lastCmdJntPos:=m_cmdJntPos;
+		
+		FOR i:=1 TO 6 BY 1 DO
+			IF (i<=3) THEN
+				GVL_Monitor.g_posErr[m_armId][i]:=m_slavePosErr[i];
+			ELSE
+				GVL_Monitor.g_posErr[m_armId][i]:=m_errAxis[i]*m_errAngle;
+			END_IF			
+		END_FOR
+						]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="spaceContinuousPoint" Id="{a761fe40-0c83-4c79-9e02-31b1555561ae}">
+      <Declaration><![CDATA[METHOD spaceContinuousPoint : BOOL
+VAR_INPUT
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR
+	i:INT;	
+	rotMatrix:Mat3d;
+	tmpFrame:ST_Frame;
+	testVec6d:Vec6d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+CASE m_testStep OF
+	0://init
+		m_spatialMotionDir:=g_motionTest.m_spatialMotionDir[m_armId];
+		m_spatialVel:=m_unitFun.spacePos2System(i_dataSystem:= g_motionTest.m_spatialVel[m_armId]);
+		m_initSpatialPos:=i_slaveArm.curCartPose;
+		m_spatialPosInc:=g_zeroVec6d;
+		vecMultiNum(m_DHJntVel,m_velFactor[2],m_maxDHJntVel); //high velocity
+		
+		//Only one direction of movement is allowed at a time
+		m_spatialMotionDirSum:=0;
+		FOR i:=1 TO 6 BY 1 DO
+			m_spatialMotionDirSum:=m_spatialMotionDirSum+m_spatialMotionDir[i]*m_spatialMotionDir[i];
+		END_FOR
+		IF (m_spatialMotionDirSum)>1.0 THEN
+			m_spatialMotionDir:=m_spatialMotionDirInit;
+		END_IF
+		
+		//If the spatial motion direction is specified and the specified speed is 0, then the default speed is used
+		FOR i:=1 TO 6 BY 1 DO
+			m_spatialVel[i]:=LIMIT(-m_defaultSpatialVel[i],m_spatialVel[i],m_defaultSpatialVel[i]);
+			IF (ABS(m_spatialMotionDir[i])>0) AND (m_spatialVel[i]<g_smallNum) THEN
+				m_spatialVel[i]:=m_defaultSpatialVel[i];
+			END_IF
+		END_FOR
+		m_testStep:=10;
+		
+	
+	10://spatial motion incresement calculation		
+		FOR i:=1 TO 6 BY 1 DO
+			m_spatialPosInc[i]:=m_spatialPosInc[i]+m_spatialMotionDir[i]*m_spatialVel[i]*g_slaveArmCtrlCycleTime;
+		END_FOR
+		
+		//Calculate the target pose matrix
+		FOR i:=1 TO 3 BY 1 DO
+			m_posInc[i]:=m_spatialPosInc[i];
+			m_axis[i]:=m_spatialMotionDir[i+3];
+		END_FOR
+		m_angle:=norm(m_spatialPosInc);
+		tmpFrame.m_pos:=m_posInc;
+		tmpFrame.m_rot:=angAxis2Rot(m_angle,m_axis);
+		m_targetSpatialPos:=transform(m_initSpatialPos,tmpFrame);
+		
+		// Numerical method for inverse solution
+		m_cmdCartPose:=m_targetSpatialPos;
+		numericalIK(i_slaveArm);
+		
+		//exit
+		IF (g_motionTest.m_uiArmMode[m_armId,4]=FALSE) THEN
+			m_testStep:=-1;
+		END_IF		
+		
+		
+	-1://
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="spaceSinglePoint" Id="{e95481d5-fc1a-4f39-b6aa-ed5875ff2314}">
+      <Declaration><![CDATA[METHOD spaceSinglePoint : BOOL
+VAR_INPUT
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR
+	tmpMat3d:Mat3d;
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+CASE m_testStep OF
+	0: //init
+		vecMultiNum(m_DHJntVel,m_velFactor[1],m_maxDHJntVel); //low velocity
+		m_testStep:=10;
+		
+		
+	10: //Numerical method for inverse solution
+		m_targetSpatialPos:=g_motionTest.m_targetSpatialPos[m_armId];
+		m_cmdCartPose:=m_targetSpatialPos;
+		numericalIK(i_slaveArm);
+		
+		//Determine if the error is less than the set value
+		IF (norm(m_slavePosErr)<m_distErrLimit) AND (m_errAngle<m_poseErrLimit) THEN
+			m_errTime:=m_errTime+g_slaveArmCtrlCycleTime;
+			IF (m_errTime>m_delayTimeLimit) THEN
+				m_errTime:=0;
+				m_testStep:=20;
+			END_IF
+		ELSE
+			m_errTime:=0;
+		END_IF
+		
+		
+	20: //end the motion
+		m_testStep:=-1;	
+		m_motionFinished:=TRUE;	
+END_CASE
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveCtrlMotionTest">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMotionTest.accuracyTest">
+      <LineId Id="284" Count="6" />
+      <LineId Id="354" Count="0" />
+      <LineId Id="390" Count="1" />
+      <LineId Id="388" Count="1" />
+      <LineId Id="355" Count="0" />
+      <LineId Id="352" Count="0" />
+      <LineId Id="356" Count="1" />
+      <LineId Id="291" Count="7" />
+      <LineId Id="353" Count="0" />
+      <LineId Id="299" Count="12" />
+      <LineId Id="374" Count="0" />
+      <LineId Id="376" Count="0" />
+      <LineId Id="375" Count="0" />
+      <LineId Id="312" Count="28" />
+      <LineId Id="359" Count="3" />
+      <LineId Id="341" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMotionTest.back2origin">
+      <LineId Id="6" Count="0" />
+      <LineId Id="9" Count="15" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="25" Count="6" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="7" Count="1" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMotionTest.calcCmdJntPos">
+      <LineId Id="526" Count="6" />
+      <LineId Id="627" Count="0" />
+      <LineId Id="533" Count="4" />
+      <LineId Id="770" Count="0" />
+      <LineId Id="769" Count="0" />
+      <LineId Id="747" Count="0" />
+      <LineId Id="794" Count="0" />
+      <LineId Id="539" Count="0" />
+      <LineId Id="795" Count="0" />
+      <LineId Id="817" Count="2" />
+      <LineId Id="772" Count="0" />
+      <LineId Id="540" Count="3" />
+      <LineId Id="624" Count="0" />
+      <LineId Id="545" Count="6" />
+      <LineId Id="626" Count="0" />
+      <LineId Id="552" Count="1" />
+      <LineId Id="555" Count="19" />
+      <LineId Id="651" Count="0" />
+      <LineId Id="653" Count="0" />
+      <LineId Id="652" Count="0" />
+      <LineId Id="723" Count="0" />
+      <LineId Id="725" Count="0" />
+      <LineId Id="724" Count="0" />
+      <LineId Id="575" Count="19" />
+      <LineId Id="701" Count="0" />
+      <LineId Id="596" Count="1" />
+      <LineId Id="679" Count="0" />
+      <LineId Id="675" Count="0" />
+      <LineId Id="677" Count="1" />
+      <LineId Id="676" Count="0" />
+      <LineId Id="603" Count="1" />
+      <LineId Id="848" Count="0" />
+      <LineId Id="605" Count="0" />
+      <LineId Id="628" Count="0" />
+      <LineId Id="845" Count="2" />
+      <LineId Id="843" Count="1" />
+      <LineId Id="606" Count="2" />
+      <LineId Id="610" Count="3" />
+      <LineId Id="617" Count="6" />
+      <LineId Id="255" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMotionTest.calcCmdJntTrq">
+      <LineId Id="17" Count="1" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="16" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMotionTest.calJntTrq">
+      <LineId Id="18" Count="0" />
+      <LineId Id="22" Count="14" />
+      <LineId Id="19" Count="1" />
+      <LineId Id="37" Count="1" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMotionTest.drag">
+      <LineId Id="20" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="50" Count="1" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="22" Count="1" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="75" Count="2" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="103" Count="1" />
+      <LineId Id="106" Count="1" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="79" Count="2" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="87" Count="2" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="47" Count="2" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMotionTest.init">
+      <LineId Id="12" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="215" Count="0" />
+      <LineId Id="277" Count="1" />
+      <LineId Id="280" Count="0" />
+      <LineId Id="279" Count="0" />
+      <LineId Id="112" Count="2" />
+      <LineId Id="163" Count="0" />
+      <LineId Id="115" Count="6" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="162" Count="0" />
+      <LineId Id="123" Count="3" />
+      <LineId Id="122" Count="0" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="127" Count="7" />
+      <LineId Id="136" Count="1" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="142" Count="0" />
+      <LineId Id="141" Count="0" />
+      <LineId Id="169" Count="1" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="181" Count="0" />
+      <LineId Id="171" Count="0" />
+      <LineId Id="200" Count="0" />
+      <LineId Id="167" Count="0" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="183" Count="2" />
+      <LineId Id="166" Count="0" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="231" Count="1" />
+      <LineId Id="236" Count="9" />
+      <LineId Id="233" Count="1" />
+      <LineId Id="260" Count="2" />
+      <LineId Id="235" Count="0" />
+      <LineId Id="157" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMotionTest.jntContinuousPoint">
+      <LineId Id="120" Count="0" />
+      <LineId Id="65" Count="1" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="103" Count="3" />
+      <LineId Id="142" Count="0" />
+      <LineId Id="108" Count="5" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="76" Count="1" />
+      <LineId Id="85" Count="13" />
+      <LineId Id="78" Count="1" />
+      <LineId Id="130" Count="2" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="29" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMotionTest.jntCurrentMode">
+      <LineId Id="7" Count="2" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="54" Count="4" />
+      <LineId Id="52" Count="1" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="32" Count="2" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="68" Count="1" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="72" Count="2" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="76" Count="3" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMotionTest.jntMutiPoint">
+      <LineId Id="6" Count="2" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="19" Count="2" />
+      <LineId Id="30" Count="1" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="34" Count="14" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="111" Count="2" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="53" Count="1" />
+      <LineId Id="57" Count="1" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="68" Count="1" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="73" Count="3" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="101" Count="2" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMotionTest.jntSinglePoint">
+      <LineId Id="57" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="138" Count="3" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="143" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="116" Count="2" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="147" Count="4" />
+      <LineId Id="144" Count="0" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="55" Count="1" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="51" Count="2" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="58" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMotionTest.numericalIK">
+      <LineId Id="54" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="12" Count="9" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="105" Count="7" />
+      <LineId Id="103" Count="1" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="22" Count="11" />
+      <LineId Id="66" Count="1" />
+      <LineId Id="35" Count="12" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="132" Count="2" />
+      <LineId Id="127" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="84" Count="1" />
+      <LineId Id="87" Count="1" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="79" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMotionTest.spaceContinuousPoint">
+      <LineId Id="124" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="160" Count="4" />
+      <LineId Id="187" Count="0" />
+      <LineId Id="165" Count="14" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="180" Count="0" />
+      <LineId Id="135" Count="1" />
+      <LineId Id="141" Count="15" />
+      <LineId Id="137" Count="1" />
+      <LineId Id="200" Count="2" />
+      <LineId Id="181" Count="0" />
+      <LineId Id="183" Count="0" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMotionTest.spaceSinglePoint">
+      <LineId Id="9" Count="1" />
+      <LineId Id="167" Count="0" />
+      <LineId Id="171" Count="0" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="168" Count="0" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="145" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="136" Count="1" />
+      <LineId Id="139" Count="1" />
+      <LineId Id="144" Count="0" />
+      <LineId Id="141" Count="2" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="42" Count="1" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

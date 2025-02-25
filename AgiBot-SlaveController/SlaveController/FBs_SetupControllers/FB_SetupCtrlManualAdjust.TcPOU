@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SetupCtrlManualAdjust" Id="{a66618bf-53b6-41ea-9ead-5a7cf0054c7f}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Setup Arm Adjust
 FUNCTION_BLOCK PUBLIC FB_SetupCtrlManualAdjust EXTENDS FB_SetupArmCtrlBase
@@ -13,11 +13,11 @@ VAR
 	
 	// velocity threshold for friction compensation 
 	m_jnt3FrictionCompVelLow :LREAL := 0.0005;
-	m_frictionScaleLow :LREAL :=0.4;
+	m_frictionScaleLow :LREAL :=0.1;
 	m_jnt3FrictionCompVelMiddle :LREAL := 0.005;
-	m_frictionScaleMiddle :LREAL :=0.5;
+	m_frictionScaleMiddle :LREAL :=0.2;
 	m_jnt3FrictionCompVelHigh :LREAL := 0.05;
-	m_frictionScaleHigh :LREAL :=0.6;
+	m_frictionScaleHigh :LREAL :=0.3;
 	
 	// jnt5 adjust velocity
 	m_jnt5MaxAdjustVel :LREAL:=2.5*g_deg2Rad;

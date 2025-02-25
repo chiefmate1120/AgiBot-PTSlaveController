@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="ST_CartJointData" Id="{bdea55cd-8a57-4f91-b0f7-e6f9cb33fd84}">
     <Declaration><![CDATA[TYPE ST_CartJointData :
 STRUCT

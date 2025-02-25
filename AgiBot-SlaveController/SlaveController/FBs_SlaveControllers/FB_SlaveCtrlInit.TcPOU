@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlInit" Id="{2f1b91d8-ebd5-4b63-92d8-450fe3a94973}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm Init
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlInit EXTENDS FB_SlaveArmCtrlBase
@@ -13,7 +13,7 @@ VAR
 	// SDO writer
 	m_MotorCurrentSDOWrite: ARRAY[1..5] OF FB_EcCoESdoWrite;
 	// power box joint motor rated current
-	m_wristJntRatedCurrent : DINT := 200;
+	m_wristJntRatedCurrent : DINT := 490;
 END_VAR
 ]]></Declaration>
     <Implementation>

@@ -5,13 +5,13 @@
 // Robot3 --joints parameters of setup arms
 VAR_GLOBAL
 	// absolute encoder value at minimal joint positon  2873378  289000
-	g_minLinkEncoder :ARRAY[1..g_cartJntNum] OF DINT :=[0, 0, 0, 0, 27616627, 78529, 22410851, 114258];
+	g_minLinkEncoder :ARRAY[1..g_cartJntNum] OF DINT :=[0, 0, 0, 0, 27616627, 83474, 22410851, 7884];    //joint6 78529   joint8 54770
 		 
 	// absolute encoder value at maximum joint positon
-	g_maxLinkEncoder :ARRAY[1..g_cartJntNum] OF DINT :=[0, 0, 0, 0, 24720108, 101778, 24474011, 105483 ];
+	g_maxLinkEncoder :ARRAY[1..g_cartJntNum] OF DINT :=[0, 0, 0, 0, 24720108, 106905, 24474011, 14693 ]; //joint6 101778   joint8 47830
 	
 	// absolute encoder value at calibrated positon
-	g_caliLinkEncoder :ARRAY[1..g_cartJntNum] OF DINT :=[0, 0, 0, 0, 27616627, 90321, 24474011, 43437];
+	g_caliLinkEncoder :ARRAY[1..g_cartJntNum] OF DINT :=[0, 0, 0, 0, 27616627, 94963, 24474011, 76756];  //joint6 90321   joint8 107818
 	
 	 // if absolute encoder value cross zeros within joint motion range
 	g_linkEncZeroCross :ARRAY[1..g_cartJntNum] OF INT :=[0, 0, 0, 0, 0, 0, 0, 1];

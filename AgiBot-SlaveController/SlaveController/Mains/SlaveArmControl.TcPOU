@@ -18,11 +18,15 @@ VAR
 	// slave robot joint data, output to other tasks
 	m_slaveJointsData AT %Q* :ST_slaveJointData;
 	
+	//slave motor in_output to safety check
+	m_slaveMotorData AT %Q* : ST_slaveMotorData;
+	
 	// flag to init robot
 	m_robotInit :BOOL :=FALSE;
 	
 	// wait time before robot init  for ethercat to be statble 
 	m_robotInitWaitTime : LREAL:=0;
+	m_armEtherCATOPTime : LREAL:=0;
 	
 	// slave robot
 	m_slaveRobot:FB_SlaveRobot;
@@ -30,10 +34,22 @@ VAR
 	// code execute time measure
 	m_codeTime : Profiler;
 	
+	//recipe read-write commands
+	RecipeManCommands:   RecipeManCommands;
+	m_bReadRecipeStep:   INT := 1;
+	m_bWriteRecipeStep:   INT := 1;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[m_codeTime(START:=TRUE, RESET:=TRUE);
+// load config file
+loadConfigFile();
+	
+IF NOT m_slaveInputDataPool.m_safetyData.m_armEtherCATAllOP AND NOT m_robotInit THEN
+	m_armEtherCATOPTime := m_armEtherCATOPTime + g_slaveArmCtrlCycleTime;
+	RETURN;
+END_IF
 
 // wait communication to be stable
 IF(m_robotInitWaitTime<g_robotInitWaitTime) THEN
@@ -57,7 +73,7 @@ masterInputDataCast(m_masterRobotData, m_slaveInputDataPool.m_masterStatus);
 m_slaveRobot.run(m_slaveInputDataPool);
 
 // update data pool
-m_slaveRobot.getStatus(m_slaveStatus,m_slaveJointsData);
+m_slaveRobot.getStatus(m_slaveStatus,m_slaveMotorData,m_slaveJointsData);
 
 // slave output data cast
 slaveOutputDataCast(m_slaveInputDataPool.m_setupStatus, m_slaveStatus, m_slaveRobotData);
@@ -65,10 +81,33 @@ slaveOutputDataCast(m_slaveInputDataPool.m_setupStatus, m_slaveStatus, m_slaveRo
 // output to UI
 UIOutputProcess();
 
-m_codeTime(START:=FALSE);
-
-]]></ST>
+m_codeTime(START:=FALSE);]]></ST>
     </Implementation>
+    <Method Name="loadConfigFile" Id="{5c63924c-757a-4fbb-aaf9-c7598f387c5a}">
+      <Declaration><![CDATA[METHOD loadConfigFile : BOOL
+VAR
+	ReturnDwordRead:DWORD;
+	ReturnDwordWrite:DWORD;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//read recipe
+IF (m_bReadRecipeStep<=g_sArmNum*2 AND m_bReadRecipeStep>0) THEN
+	//The method loads a recipe from the specified recipe file.  It subsequently writes the recipe into the PLC variables.
+     ReturnDwordRead:=RecipeManCommands.LoadAndWriteRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionName[m_bReadRecipeStep] , RecipeName:='RecipeRecord');	 
+     m_bReadRecipeStep:=m_bReadRecipeStep+1; 
+END_IF 
+
+
+//write recipe
+(*IF (m_bWriteRecipeStep<=g_sArmNum*2 AND m_bWriteRecipeStep>0) THEN	
+	//This method creates a new recipe in the specified recipe definition. It subsequently reads the current PLC values into the new recipe and saves it as a recipe file with a standard name.
+	 RecipeManCommands.CreateRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionName[m_bWriteRecipeStep] , RecipeName:='RecipeRecord' );
+	 ReturnDwordWrite:=RecipeManCommands.ReadAndSaveRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionName[m_bWriteRecipeStep] , RecipeName:='RecipeRecord' );
+	 m_bWriteRecipeStep:=m_bWriteRecipeStep+1;
+END_IF*)]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="masterInputDataCast" Id="{688f8323-8b5a-4cc7-b4b2-cb5f74424c3f}">
       <Declaration><![CDATA[// convert from MSCommu_Mastertatus for master-slave communication to local ST_MasterStatus for control
 METHOD masterInputDataCast : BOOL
@@ -131,7 +170,7 @@ END_IF
 
 FOR i := 1 TO g_sArmNum DO
 	slaveOutputData.m_slaveAllowInMS :=(SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i] OR SlaveArmControl.m_slaveRobot.m_panelMountedFlag[i])
-								AND (m_slaveInputDataPool.m_UIData.m_masterSlaveFlag OR GVL_interactUI.g_dumpEnergyUPS > 30) ;	
+								AND (m_slaveInputDataPool.m_UIData.m_masterSlaveFlag OR SafetyCheck.m_dumpEnergy > 30) ;	
 	IF NOT slaveOutputData.m_slaveAllowInMS THEN
 		EXIT;
 	END_IF
@@ -149,7 +188,7 @@ FOR i:= 1 TO g_sArmNum DO
 	slaveOutputData.m_instruStauts[i].m_fingerAngle := slaveStatus.m_instruStauts[i].m_fingerAngle;
 	slaveOutputData.m_instruStauts[i].m_ready := slaveStatus.m_instruStauts[i].m_ready;
 	slaveOutputData.m_instruStauts[i].m_type := slaveStatus.m_instruStauts[i].m_type;
-	slaveOutputData.m_instruEnergyType[i] := m_slaveRobot.m_slaveArms[i].m_instrument.isEnergyType;
+	slaveOutputData.m_instruEnergyType[i] := m_slaveRobot.m_slaveArms[i].m_instrument.instruTypeInfo.m_energyType;
 	slavePoseInCart := transform(setupStatus.m_curEndPose[i], slaveStatus.m_curArmPose[i]);
 	tmpFrame :=invFrame(slaveStatus.m_endoscopePose);
 	slavePoseInScope := transform(tmpFrame, slavePoseInCart);
@@ -196,6 +235,7 @@ END_VAR
 
 VAR
 	i , j: INT;
+	teleSlaveArmIdx :ARRAY[1..g_mArmNum] OF E_MatchedSlaveArmIdx;
 END_VAR
 
 VAR_STAT
@@ -240,6 +280,17 @@ ELSE
 	GVL_interactUI.g_slaveSelfCheckStatus := 0;
 END_IF
 
+//endoScope turn over enable
+GVL_interactUI.g_scopeTurnOverEnable := FALSE;
+FOR i := 1 TO g_sArmNum BY 1 DO
+	IF m_slaveStatus.m_instruStauts[i].m_type = InstruType_Endoscope THEN
+		GVL_interactUI.g_scopeTurnOverEnable := (m_slaveStatus.m_armState[i] = SlaveArmState_ScopeReady OR m_slaveStatus.m_armState[i] = SlaveArmState_PanelReady)
+			AND NOT (m_slaveInputDataPool.m_setupStatus.m_armState[i]=SetupArmState_ManualAdjust);
+		EXIT;
+	END_IF
+END_FOR
+	
+
 //instrument information export to UI
 FOR i := 1 TO g_sArmNum DO
 	GVL_interactUI.g_instruInformatiom[i].m_instruIsConnected:=m_slaveStatus.m_instruStauts[i].m_ready;
@@ -248,34 +299,28 @@ FOR i := 1 TO g_sArmNum DO
 		GVL_interactUI.g_instruInformatiom[i].m_instruType := 4;
 		GVL_interactUI.g_scopeGravityAngle := m_slaveRobot.m_slaveArms[i].curDHJntPos[4];
 	ELSE
-		GVL_interactUI.g_instruInformatiom[i].m_instruType := m_slaveRobot.m_slaveArms[i].m_instrument.isEnergyType;
+		GVL_interactUI.g_instruInformatiom[i].m_instruType := m_slaveRobot.m_slaveArms[i].m_instrument.instruTypeInfo.m_energyType;
 	END_IF
 	
 	GVL_interactUI.g_instruInformatiom[i].m_armId := i;
 	GVL_interactUI.g_instruInformatiom[i].m_instruSerialNum :=  m_slaveRobot.m_slaveArms[i].m_instrument.onChipData.m_InstruseriesNum;
-	GVL_interactUI.g_instruInformatiom[i].m_instruID := m_slaveRobot.m_slaveArms[i].m_instrument.onChipData.m_InstruID;
-	GVL_interactUI.g_instruInformatiom[i].m_nameEn := m_slaveRobot.m_slaveArms[i].m_instrument.instruName;
-	GVL_interactUI.g_instruInformatiom[i].m_nameCh := m_slaveRobot.m_slaveArms[i].m_instrument.instruNameCH;
+	GVL_interactUI.g_instruInformatiom[i].m_instruID := m_slaveRobot.m_slaveArms[i].m_instrument.instruType;
+	GVL_interactUI.g_instruInformatiom[i].m_nameEn := m_slaveRobot.m_slaveArms[i].m_instrument.instruTypeInfo.m_instruName;
+	GVL_interactUI.g_instruInformatiom[i].m_nameCh := m_slaveRobot.m_slaveArms[i].m_instrument.instruTypeInfo.m_instruNameCH;
 	
 	//instrument pedal hover and pedal active
 	GVL_interactUI.g_instruInformatiom[i].m_pedalHover:=FALSE;
 	GVL_interactUI.g_instruInformatiom[i].m_pedalActive := 0;
 	FOR j := 1 TO g_mArmNum BY 1 DO
-		 IF  m_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx[j] > 0 AND   m_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx[j] <= 4  THEN
+		teleSlaveArmIdx[j] := m_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx[j];
+		 IF  teleSlaveArmIdx[j] > 0 AND teleSlaveArmIdx[j] <= 4  THEN
 			IF m_slaveInputDataPool.m_masterStatus.m_pedalHover[j] = TRUE THEN
-				GVL_interactUI.g_instruInformatiom[m_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx[j]].m_pedalHover:=TRUE;
+				GVL_interactUI.g_instruInformatiom[teleSlaveArmIdx[j]].m_pedalHover:=TRUE;
 			ELSE
-				GVL_interactUI.g_instruInformatiom[m_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx[j]].m_pedalHover:=FALSE;
+				GVL_interactUI.g_instruInformatiom[teleSlaveArmIdx[j]].m_pedalHover:=FALSE;
 			END_IF
 			
-			IF m_slaveRobot.m_slaveArms[m_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx[j]].m_instrument.isEnergyType > 0 THEN
-				IF m_slaveInputDataPool.m_masterStatus.m_electricKnifePedalTrigger[j] = 1 THEN 
-					GVL_interactUI.g_instruInformatiom[m_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx[j]].m_pedalActive := 1;
-				ELSIF m_slaveInputDataPool.m_masterStatus.m_electricKnifePedalTrigger[j] = 2 THEN 
-					GVL_interactUI.g_instruInformatiom[m_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx[j]].m_pedalActive := 2;
-				END_IF
-			END_IF
-			
+			GVL_interactUI.g_instruInformatiom[teleSlaveArmIdx[j]].m_pedalActive := m_slaveRobot.m_slaveArms[teleSlaveArmIdx[j]].updatePedalActive(teleSlaveArmIdx[j] , m_slaveInputDataPool.m_masterStatus.m_electricKnifePedalTrigger[j]);
 		END_IF
 	END_FOR
 	
@@ -289,7 +334,7 @@ FOR i := 1 TO g_sArmNum DO
 	m_slaveRobot.m_slaveArms[i].m_instrument.writeNumOfUseToChip(GVL_interactUI.g_instruInformatiom[i].m_useLifeplc + 1 =  GVL_interactUI.g_instruInformatiom[i].m_useLifeUi AND m_slaveRobot.m_slaveArms[i].m_instrument.onChipData.m_InstruReadSucceed, GVL_interactUI.g_instruInformatiom[i].m_useLifeUi);
 
 	//intrument total number of use
-	GVL_interactUI.g_instruInformatiom[i].m_instruTotalLife := m_slaveRobot.m_slaveArms[i].m_instrument.m_onChipData.m_InstrumaxUsageCounts;
+	GVL_interactUI.g_instruInformatiom[i].m_instruTotalLife := m_slaveRobot.m_slaveArms[i].m_instrument.instruTypeInfo.m_maxUseNum;
 	//The coordinates of the instrument relative to the endoscope for UI display
 END_FOR
 
@@ -299,6 +344,12 @@ END_FOR
     </Method>
     <LineIds Name="SlaveArmControl">
       <LineId Id="85" Count="0" />
+      <LineId Id="294" Count="0" />
+      <LineId Id="293" Count="0" />
+      <LineId Id="295" Count="0" />
+      <LineId Id="243" Count="0" />
+      <LineId Id="335" Count="0" />
+      <LineId Id="245" Count="1" />
       <LineId Id="117" Count="0" />
       <LineId Id="112" Count="1" />
       <LineId Id="141" Count="0" />
@@ -327,7 +378,17 @@ END_FOR
       <LineId Id="211" Count="0" />
       <LineId Id="88" Count="0" />
       <LineId Id="87" Count="0" />
-      <LineId Id="243" Count="1" />
+    </LineIds>
+    <LineIds Name="SlaveArmControl.loadConfigFile">
+      <LineId Id="6" Count="0" />
+      <LineId Id="34" Count="2" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="15" Count="1" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="43" Count="3" />
+      <LineId Id="14" Count="0" />
     </LineIds>
     <LineIds Name="SlaveArmControl.masterInputDataCast">
       <LineId Id="86" Count="16" />
@@ -342,14 +403,7 @@ END_FOR
       <LineId Id="69" Count="0" />
     </LineIds>
     <LineIds Name="SlaveArmControl.UIOutputProcess">
-      <LineId Id="263" Count="5" />
-      <LineId Id="272" Count="75" />
-      <LineId Id="372" Count="0" />
-      <LineId Id="348" Count="0" />
-      <LineId Id="371" Count="0" />
-      <LineId Id="352" Count="1" />
-      <LineId Id="383" Count="0" />
-      <LineId Id="354" Count="3" />
+      <LineId Id="419" Count="96" />
       <LineId Id="34" Count="0" />
     </LineIds>
   </POU>

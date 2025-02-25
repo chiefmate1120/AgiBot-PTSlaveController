@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_CycleTest" Id="{4d9eb782-72d4-4cf6-b3fc-606540001649}">
+    <Declaration><![CDATA[TYPE ST_CycleTest :
+STRUCT
+	//enter cycle test mode
+	m_enterCycleTestMode:ARRAY[1..g_sArmNum] OF BOOL;
+	m_enterESDTest:ARRAY[1..g_sArmNum] OF BOOL;
+	
+	//enter cycle test mode
+	m_enterCycleTestModeSetup:ARRAY[1..g_sArmNum] OF BOOL;
+	m_enterESDTestSetup:ARRAY[1..g_sArmNum] OF BOOL;
+	
+	//enter car cycle mode
+	m_carEnterCycleTest:BOOL;
+	m_carEnterESDTest:BOOL;
+	
+	//start motion flag
+	m_startMotion:ARRAY[1..g_sArmNum] OF BOOL;
+	
+	//start motion flag
+	m_startMotionSetup:ARRAY[1..g_sArmNum] OF BOOL;
+	m_startMotionCar:BOOL;
+	
+	//slave arm motor encoder and joint encoder
+	m_slaveArmMotorEncoder:ARRAY[1..g_sArmNum] OF Vec8di;
+	m_slaveArmjntEncoder:ARRAY[1..g_sArmNum] OF Vec8di;
+	
+	//setup arm motor encoder and joint encoder
+	m_setupArmMotorEncoder:ARRAY[1..g_sArmNum] OF Vec5di;
+	m_setupArmjntEncoder:ARRAY[1..g_sArmNum] OF Vec5di;
+	
+	//car joint motor encoder and joint encoder
+	m_cartMotorEncoder:Vec8di;
+	m_cartjntEncoder:Vec8di;
+	
+	//communication status
+	m_comStatus:ARRAY[1..g_sArmNum] OF Vec8b;
+	
+	//actual joint position
+	m_actJntPos:ARRAY[1..g_sArmNum] OF Vec8d;
+	m_actJntPosSetup:ARRAY[1..g_sArmNum] OF Vec5d;
+	m_actJntPosCar:Vec8d;
+	
+	//target joint position
+	m_targetJntPos:ARRAY[1..g_sArmNum,1..10] OF Vec8d;
+	m_targetJntPosSetup:ARRAY[1..g_sArmNum,1..10] OF Vec5d;
+	m_targetJntPosCar:ARRAY[1..10] OF Vec8d;
+	
+	//point sum
+	m_pointSum:ARRAY[1..g_sArmNum] OF INT;
+	m_pointSumCar:INT;
+	
+	//cycle number and motion point number
+	m_targetCycleNum:ARRAY[1..g_sArmNum] OF INT;
+	m_curCycleNum:ARRAY[1..g_sArmNum] OF INT;
+	m_curPointNum:ARRAY[1..g_sArmNum] OF INT;
+	
+	//cycle time
+	m_tgtCycleTime:ARRAY[1..g_sArmNum] OF LREAL; //hour
+	m_curCycleTime:ARRAY[1..g_sArmNum] OF LREAL; //hour
+	
+	//cycle number and motion point number of car
+	m_targetCycleNumCar:INT;
+	m_curCycleNumCar:INT;
+	m_curPointNumCar:INT;
+	
+	//step number
+	m_stepNum:ARRAY[1..g_sArmNum] OF INT;
+	m_stepNumSetup:ARRAY[1..g_sArmNum] OF INT;
+	m_stepNumCar:INT;
+	
+	//motion pause and finish
+	m_pause:ARRAY[1..g_sArmNum] OF BOOL;
+	m_finish:ARRAY[1..g_sArmNum] OF BOOL;
+	m_pauseCar:BOOL;
+	m_finishCar:BOOL;
+	
+	//arrive flag
+	m_arrived:ARRAY[1..g_sArmNum] OF BOOL;
+	
+	//joint enable
+	m_jntEnable:ARRAY[1..g_sArmNum] OF Vec8i;
+	m_jntEnableSetup:ARRAY[1..g_sArmNum] OF Vec5i;
+	
+	//cover command position
+	m_coverCmdPos:ARRAY[1..g_sArmNum] OF BOOL;
+	
+	//point id for cover command position
+	m_pntIdForCoverCmd:ARRAY[1..g_sArmNum] OF INT;
+	
+	//cover command position---car
+	m_coverCmdPosCar:BOOL;
+	
+	//point id for cover command position---car
+	m_pntIdForCoverCmdCar:INT;
+	
+	//target joint velocity
+	m_targetJntVelN8:ARRAY[1..g_sArmNum] OF Vec8d;
+	
+	//setuparm target joint velocity
+	m_targetJntVelSetup:ARRAY[1..g_sArmNum] OF Vec5d;
+	
+	//target joint velocity
+	m_targetJntVelCar:Vec8d;
+	
+	//defult target joint velocity
+	m_defultTargetJntVel:Vec8d:=[0.5,0.5,0.05,0.5,0.5,0.5,0.5,0.5];
+	
+	//defult target joint velocity
+	m_defultTargetJntVelSetup:Vec5d:=[1,1,0.050,0.5,0.5];
+	
+	//defult target joint velocity
+	m_defultTargetJntVelCar:Vec8d:=[1,1,1,1,  0.050,0.5,0.050,0.5];
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

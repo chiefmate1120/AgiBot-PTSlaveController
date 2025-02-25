@@ -39,7 +39,7 @@ END_VAR
         <ST><![CDATA[//m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
 m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
 SUPER^.init(i_slaveCart,r_cartCtrlCmd);
-
+m_cmdJntPos[5]:=i_slaveCart.m_curJntPos[5];
 // update commands to arm
 copyCmds(r_cartCtrlCmd);]]></ST>
       </Implementation>
@@ -51,10 +51,7 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="8" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlReady.init">
-      <LineId Id="34" Count="0" />
-      <LineId Id="33" Count="0" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="22" Count="1" />
+      <LineId Id="44" Count="4" />
       <LineId Id="21" Count="0" />
     </LineIds>
   </POU>

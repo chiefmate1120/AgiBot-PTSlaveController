@@ -25,18 +25,7 @@ END_VAR
 m_jntIdx:=i_jntIdx;
 m_cycleTime := i_controlCycleTime;
 
-// hardware parameters
-IF m_armIdx =3 THEN
-	m_linkEncoderRes :=GVL_SetupMotorParameters.g_absEncoderResFR[i_jntIdx];
-	m_linkEncoderDir :=GVL_SetupJointEncoderCaliData.g_asbEncoderDirFR[i_jntIdx];
-	m_linkEncLimitBuffer := GVL_SetupJointEncoderCaliData.g_linkEncLimitBufferFR[i_jntIdx];
-ELSE
-	m_linkEncoderRes :=GVL_SetupMotorParameters.g_absEncoderRes[i_jntIdx];
-	m_linkEncoderDir :=GVL_SetupJointEncoderCaliData.g_asbEncoderDir[i_jntIdx];
-	m_linkEncLimitBuffer := GVL_SetupJointEncoderCaliData.g_linkEncLimitBuffer[i_jntIdx];
-END_IF
-
-
+m_linkEncoderRes :=GVL_SetupMotorParameters.g_absEncoderRes[i_jntIdx];
 m_motorEncoderRes :=GVL_SetupMotorParameters.g_incEncoderRes[i_jntIdx];
 m_motorReduction :=GVL_SetupMotorParameters.g_motorReduction[i_jntIdx];
 m_linkEncoderReduction :=GVL_SetupMotorParameters.g_absEncoderReduction[i_jntIdx];
@@ -47,6 +36,8 @@ m_minJntPos	:=GVL_SetupMotorParameters.g_minJntPos[m_armIdx,i_jntIdx];
 m_maxJntPos	:=GVL_SetupMotorParameters.g_maxJntPos[m_armIdx,i_jntIdx];
 
 //link encoder calibartion data
+m_linkEncoderDir :=GVL_SetupJointEncoderCaliData.g_asbEncoderDir[i_jntIdx];
+m_linkEncLimitBuffer := GVL_SetupJointEncoderCaliData.g_linkEncLimitBuffer[i_jntIdx];
 m_minLinkEncoder :=GVL_SetupJointEncoderCaliData.g_minLinkEncoder[i_armIdx, i_jntIdx] - m_linkEncoderDir*m_linkEncLimitBuffer; // expand limit
 m_maxLinkEncoder :=GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncoderDir*m_linkEncLimitBuffer; // expand limit
 m_caliLinkEncoder :=GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[i_armIdx, i_jntIdx];
@@ -131,18 +122,14 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
     </LineIds>
     <LineIds Name="FB_SetupJoint.init">
       <LineId Id="170" Count="1" />
-      <LineId Id="155" Count="1" />
-      <LineId Id="89" Count="0" />
-      <LineId Id="187" Count="1" />
-      <LineId Id="190" Count="0" />
-      <LineId Id="200" Count="0" />
-      <LineId Id="191" Count="2" />
-      <LineId Id="201" Count="0" />
-      <LineId Id="189" Count="0" />
+      <LineId Id="155" Count="0" />
       <LineId Id="185" Count="1" />
       <LineId Id="90" Count="0" />
       <LineId Id="92" Count="4" />
-      <LineId Id="98" Count="19" />
+      <LineId Id="98" Count="3" />
+      <LineId Id="216" Count="0" />
+      <LineId Id="215" Count="0" />
+      <LineId Id="102" Count="15" />
       <LineId Id="122" Count="6" />
       <LineId Id="178" Count="0" />
       <LineId Id="130" Count="1" />

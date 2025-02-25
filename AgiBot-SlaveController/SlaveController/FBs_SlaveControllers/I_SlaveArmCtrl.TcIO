@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <Itf Name="I_SlaveArmCtrl" Id="{f0c76191-353c-4edd-a51a-aab3c6b7f25c}">
     <Declaration><![CDATA[INTERFACE I_SlaveArmCtrl
 ]]></Declaration>

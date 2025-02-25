@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlMasterSlave" Id="{5b96f309-da76-444d-a9fb-2d4321895cd7}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm MasterSlave controller
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMasterSlave EXTENDS FB_SlaveArmCtrlBase
@@ -123,7 +123,10 @@ VAR
 	// code execute time measure
 	m_codeTime : Profiler;
 	
-	
+	//init salve instrument angle
+	m_initInstruAngle : LREAL;
+	m_gripperMatchAngMin : LREAL:=g_largeNum;
+	matchedSlaveGripAngle:LREAL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -272,8 +275,8 @@ matMultiVec(armJntJacoInv, velByArmJnt, armDHJntVel);
 m_reachMacroJntLimit:=false;
 FOR i:=1 TO 3 DO
 	IF i=3 THEN
-		jnt3Limit := i_slaveArm.instrument.kinematicParameters.m_rodLength+i_slaveArm.instrument.kinematicParameters.m_headLength
-											+ i_slaveArm.instrument.kinematicParameters.m_fingerLength - GVL_SlaveArmKinematic.g_minInstruRCDis;
+		jnt3Limit := i_slaveArm.instrument.instruTypeInfo.m_rodLength+i_slaveArm.instrument.instruTypeInfo.m_headLength
+											+ i_slaveArm.instrument.instruTypeInfo.m_fingerLength - GVL_SlaveArmKinematic.g_minInstruRCDis;
 		jntDynaUB := MAX( 0, (jnt3Limit - i_slaveArm.simDHJntPos[i])/g_slaveArmCtrlCycleTime);
 	ELSE
 		jntDynaUB := MAX( 0, (GVL_SlaveMotorParameters.g_maxDHJntPos[i] - i_slaveArm.simDHJntPos[i])/g_slaveArmCtrlCycleTime);
@@ -318,7 +321,15 @@ vecSub(m_cmdJntPos, m_lastCmdJntPos, m_cmdJntVel);
 vecSelfMultiNum(m_cmdJntVel, g_slaveArmCtrlFreq);
 m_lastCmdJntPos:=m_cmdJntPos;
 
-m_codeTime(START:=FALSE);]]></ST>
+m_codeTime(START:=FALSE);
+
+
+//add code for precision test
+tmpFrame:=invFrame(i_endoscopePose);
+i:=i_slaveArm.armIdx;
+g_motionTest.m_frontPose[i]:=transform(tmpFrame,i_setupStatus.m_curEndPose[i]);
+
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="calcCmdJntTrq" Id="{7e4ee3d4-b523-42da-85be-6cc39e889508}">
@@ -411,7 +422,7 @@ VAR_IN_OUT CONSTANT
 END_VAR
 
 VAR
-	matchedSlaveGripAngle:LREAL;
+	//matchedSlaveGripAngle:LREAL;
 	matchedSlaveGripForce:LREAL;
 	masterGripVelThres :LREAL := 5.0 *g_deg2Rad;
 END_VAR
@@ -426,9 +437,11 @@ IF m_gripperCtrlFlag THEN
 	RETURN;
 ELSE
 	//m_gripperCtrlFlag := (ABS(m_masterGripAngleVel) >masterGripVelThres) AND  (m_masterGripAngleVel * (matchedSlaveGripAngle-i_slaveArm.curGripAngle)>0);
+	m_gripperMatchAngMin := MIN(m_gripperMatchAngMin, ABS(matchedSlaveGripAngle-m_initInstruAngle));
 	m_gripperCtrlFlag := ABS(matchedSlaveGripAngle-i_slaveArm.curGripAngle)<m_gripperMatchAngThres OR 
-	     (matchedSlaveGripAngle>=i_SlaveArm.instrument.kinematicParameters.m_maxGripAngle - m_gripperMatchAngThres AND i_slaveArm.curGripAngle>=matchedSlaveGripAngle) OR 
-		(matchedSlaveGripAngle<=i_SlaveArm.instrument.kinematicParameters.m_minGripAngle + m_gripperMatchAngThres AND i_slaveArm.curGripAngle<=matchedSlaveGripAngle);
+	     (matchedSlaveGripAngle>=i_SlaveArm.instrument.instruTypeInfo.m_maxGripAngle - m_gripperMatchAngThres AND i_slaveArm.curGripAngle>=matchedSlaveGripAngle) OR 
+		(matchedSlaveGripAngle<=g_minSlaveGripAngle + m_gripperMatchAngThres AND i_slaveArm.curGripAngle<=matchedSlaveGripAngle) OR
+		ABS(ABS(matchedSlaveGripAngle-m_initInstruAngle) - m_gripperMatchAngMin) > 10 * g_deg2Rad ;
 END_IF]]></ST>
       </Implementation>
     </Method>
@@ -481,6 +494,10 @@ m_instruType := i_slaveArm.instrument.instruType;
 // init interpolation data
 m_firstInterpolate :=TRUE;
 m_curInterpolateCylce := 1;
+
+//init instrument angle 
+m_initInstruAngle := i_slaveArm.curGripAngle;
+m_gripperMatchAngMin := g_largeNum;
 
 // update commands to arm
 copyCmds(r_slaveArmCtrlCmd);
@@ -593,6 +610,17 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Property Name="simDHJntPos" Id="{5527a713-292b-49c0-a5f8-7003007877ae}">
+      <Declaration><![CDATA[PROPERTY simDHJntPos : Vec6d]]></Declaration>
+      <Get Name="Get" Id="{bbf81dda-000a-4108-91e1-460142ac49a0}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[simDHJntPos := m_simDHJntPos;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Method Name="wristLimitSolve" Id="{c70fa8fe-1dd4-478f-914d-e766c2627136}">
       <Declaration><![CDATA[// calculate optimized wrist joint velocity when joint limit is violated
 METHOD wristLimitSolve : BOOL
@@ -635,8 +663,8 @@ matMultiVec(wristJaco, wristJntVel, dsrWVel);
 // check which joint reaches limit
 FOR i:=4 TO 6 DO
 	m_jntLimitFlag[i] := FALSE;
-	jntDynaUB := MAX( 0, (i_slaveArm.instrument.kinematicParameters.m_wristMaxDHJntPos[i-3] - i_slaveArm.simDHJntPos[i])/g_slaveArmCtrlCycleTime);
-	jntDynaLB := MIN( 0, (i_slaveArm.instrument.kinematicParameters.m_wristMinDHJntPos[i-3] - i_slaveArm.simDHJntPos[i])/g_slaveArmCtrlCycleTime);
+	jntDynaUB := MAX( 0, (i_slaveArm.instrument.m_wristMaxDHJntPos[i-3] - i_slaveArm.simDHJntPos[i])/g_slaveArmCtrlCycleTime);
+	jntDynaLB := MIN( 0, (i_slaveArm.instrument.m_wristMinDHJntPos[i-3] - i_slaveArm.simDHJntPos[i])/g_slaveArmCtrlCycleTime);
 	IF m_simDHJointVel[i] >= jntDynaUB OR m_simDHJointVel[i]<=jntDynaLB THEN
 		m_simDHJointVel[i]:=LIMIT(jntDynaLB, m_simDHJointVel[i], jntDynaUB);
 		m_jntLimitFlag[i]:=TRUE;
@@ -819,8 +847,8 @@ END_IF
 
 // check which joint reaches limit
 FOR i:=4 TO 6 DO
-	jntDynaUB := MAX( 0, (i_slaveArm.instrument.kinematicParameters.m_wristMaxDHJntPos[i-3] - i_slaveArm.simDHJntPos[i])/g_slaveArmCtrlCycleTime);
-	jntDynaLB := MIN( 0, (i_slaveArm.instrument.kinematicParameters.m_wristMinDHJntPos[i-3] - i_slaveArm.simDHJntPos[i])/g_slaveArmCtrlCycleTime);
+	jntDynaUB := MAX( 0, (i_slaveArm.instrument.m_wristMaxDHJntPos[i-3] - i_slaveArm.simDHJntPos[i])/g_slaveArmCtrlCycleTime);
+	jntDynaLB := MIN( 0, (i_slaveArm.instrument.m_wristMinDHJntPos[i-3] - i_slaveArm.simDHJntPos[i])/g_slaveArmCtrlCycleTime);
 	IF m_simDHJointVel[i] >= jntDynaUB OR m_simDHJointVel[i]<=jntDynaLB THEN
 		m_simDHJointVel[i]:=LIMIT(jntDynaLB, m_simDHJointVel[i], jntDynaUB);
 		m_jntLimitFlag[i]:=TRUE;
@@ -836,6 +864,10 @@ END_FOR
     <LineIds Name="FB_SlaveCtrlMasterSlave.calcCmdJntPos">
       <LineId Id="1977" Count="160" />
       <LineId Id="206" Count="0" />
+      <LineId Id="2164" Count="2" />
+      <LineId Id="2170" Count="1" />
+      <LineId Id="2167" Count="1" />
+      <LineId Id="2163" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.calcCmdJntTrq">
       <LineId Id="173" Count="22" />
@@ -846,19 +878,20 @@ END_FOR
       <LineId Id="28" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.gripperControl">
-      <LineId Id="23" Count="0" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="5" Count="1" />
-      <LineId Id="27" Count="1" />
-      <LineId Id="13" Count="1" />
-      <LineId Id="41" Count="0" />
-      <LineId Id="53" Count="0" />
-      <LineId Id="42" Count="0" />
+      <LineId Id="64" Count="8" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="73" Count="2" />
+      <LineId Id="87" Count="0" />
       <LineId Id="7" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.init">
-      <LineId Id="331" Count="38" />
+      <LineId Id="331" Count="35" />
+      <LineId Id="381" Count="0" />
+      <LineId Id="380" Count="0" />
+      <LineId Id="382" Count="0" />
+      <LineId Id="367" Count="0" />
+      <LineId Id="393" Count="0" />
+      <LineId Id="368" Count="1" />
       <LineId Id="12" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.InstruBacklash.Get">
@@ -904,8 +937,11 @@ END_FOR
     <LineIds Name="FB_SlaveCtrlMasterSlave.masterSlavePoseErr.Get">
       <LineId Id="7" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave.simDHJntPos.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.wristLimitSolve">
-      <LineId Id="272" Count="205" />
+      <LineId Id="503" Count="205" />
       <LineId Id="2" Count="0" />
     </LineIds>
   </POU>

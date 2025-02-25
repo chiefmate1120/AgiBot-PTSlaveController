@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="vecDot" Id="{dd510cc3-aa03-4332-b7d2-fe1b23cb1742}" SpecialFunc="None">
     <Declaration><![CDATA[// vecB=VecA*num
 FUNCTION vecDot : LREAL

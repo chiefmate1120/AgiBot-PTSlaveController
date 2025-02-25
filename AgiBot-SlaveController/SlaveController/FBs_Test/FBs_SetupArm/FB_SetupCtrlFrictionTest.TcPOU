@@ -1,0 +1,472 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_SetupCtrlFrictionTest" Id="{222b90d2-d593-4108-8c91-e640d3f1f235}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SetupCtrlFrictionTest EXTENDS FB_SetupArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+
+VAR CONSTANT
+	//max number of data recording points
+	//3deg/s(360dge)=120s
+	//record cycle(0.001s)
+	m_dataSum:INT:=13000;
+	m_JntNum:INT:=5;
+END_VAR
+
+VAR
+	//arm id
+	m_armId:INT;			
+	
+	//test step
+	m_testStep:INT:=-1;
+	
+	//motion start
+	m_startMotion:BOOL;
+	m_startMotionLast:BOOL;
+	
+	//time
+	m_time:LREAL;
+	
+	//test joint id
+	m_jntId:INT;
+	
+	//trajectory id
+	m_trajId:INT;
+	
+	//DH joint position	
+	m_homeDHJntPos,m_startDHJntPos,m_endDHJntPos:Vec5d;
+	
+	//DH joint position	
+	m_targetDHPos :Vec5d;
+	
+	//startJntPos,endJntPos :Vec8d;
+	m_initJntPos,m_startJntPos,m_endJntPos :Vec5d;
+	
+	//planner
+	m_Planner: FB_setupTrajMoveJ;
+	
+	//trajectory velocity/acceleration/jerk
+	m_maxjntVel:Vec5d:=[2(1),0.01, 2(5*g_deg2Rad)];
+	m_maxjntAcc:Vec5d:=[2(1),0.5,2(0.5)];
+	m_maxjntJerk:Vec5d:=[2(1),1.0,2(2.0)];
+	
+	//motion status
+	m_motionFinished:BOOL;
+	
+	//joint LimitBuffer
+	m_limitBuffer:LREAL:=0.0*g_deg2Rad;
+	
+	//data sum
+	m_dataRecordSum:INT;
+		
+	//sampling interval
+	m_samplingInterval:INT:=4;
+	
+	//discard time
+	m_discardDuration:LREAL:=1;
+	
+	//Number of data records
+	m_RecordNumD2,m_RecordNumD3,m_RecordNumD2Init:ARRAY[1..5] OF INT;
+	
+	//valid number
+	m_validNum:ARRAY[1..5] OF INT;
+	
+	//joint gap
+	m_jntGap,m_jntGapInit:ARRAY[1..5] OF LREAL;
+	
+	//The current values of the second and third trajectories
+	m_cmdDHJntPosD2,m_jntPosD2,m_jntTrqD2,m_jntCurD2,m_jntCurD2_Init:ARRAY[1..5,1..gvl_const.g_recordDataNum] OF LREAL;
+	m_cmdDHJntPosD3,m_jntPosD3,m_jntTrqD3,m_jntCurD3,m_jntCurD3_Init:ARRAY[1..5,1..gvl_const.g_recordDataNum] OF LREAL;
+	m_jntTrqD3_Reverse,m_jntCurD3_Reverse:ARRAY[1..5,1..gvl_const.g_recordDataNum] OF LREAL;
+	
+	//friction record value
+	m_CoulombFriction,m_CoulombFrictionInit:ARRAY[1..5,1..gvl_const.g_recordDataNum] OF LREAL;
+	m_CoulombFrictionSum,m_CoulombFrictionSumInit:ARRAY[1..5] OF LREAL;
+	m_CoulombFrictionAve,m_CoulombFrictionRatio:ARRAY[1..5] OF LREAL;
+	
+	//max joint friction and it's joint position
+	m_CoulombFrictionMax,m_CoulombFrictionMax_JntPos:ARRAY[1..g_setupJntNum] OF LREAL;
+	
+	//counter
+	m_counter:INT;
+	m_pointNum:INT;
+	m_pointNumLast:INT;	
+	
+	//unit transform
+	m_unitTransform:FB_UnitTransform;	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="basicTestMotion" Id="{86e8ada6-86a6-428c-ac15-85f33434f5ca}">
+      <Declaration><![CDATA[METHOD basicTestMotion : BOOL
+VAR_INPUT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+VAR
+	i,j,k:INT;
+	id:INT;
+	validNum:INT;	
+	gap:LREAL;
+	curDHJntPos:Vec5d;
+	ratio:LREAL;
+	cmdGripAngle:LREAL;
+	homeDHPos,startDHPos,endDHPos :Vec5d;
+	m_startDHPos,m_endDHPos :Vec5d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+CASE m_testStep OF 
+	0: //init the trajectory
+		g_frictionTestSetup.m_jntIdStart[m_armId]:=LIMIT(4,g_frictionTestSetup.m_jntIdStart[m_armId],5);
+		g_frictionTestSetup.m_jntIdEnd[m_armId]:=LIMIT(4,g_frictionTestSetup.m_jntIdEnd[m_armId],5);
+		
+		m_jntId:=g_frictionTestSetup.m_jntIdStart[m_armId];
+		m_trajId:=1;
+		m_jntCurD2:=m_jntCurD2_Init;		m_jntTrqD2:=m_jntCurD2_Init;		m_jntPosD2:=m_jntCurD2_Init;
+		m_jntCurD3:=m_jntCurD3_Init;		m_jntTrqD3:=m_jntCurD3_Init;		m_jntPosD3:=m_jntCurD3_Init;
+		m_CoulombFriction:=m_CoulombFrictionInit;
+		
+		m_CoulombFrictionSum:=m_CoulombFrictionSumInit;
+		m_jntGap:=m_jntGapInit;
+		m_RecordNumD2:=m_RecordNumD2Init; m_RecordNumD3:=m_RecordNumD2Init;
+		m_motionFinished:=FALSE;
+		m_testStep:=10;
+		
+		
+	10: //Plan the trajectory		
+		curDHJntPos:=i_setupArm.curJntPos;
+		m_startDHPos:=m_homeDHJntPos;
+		m_endDHPos:=m_homeDHJntPos;
+		
+		IF (m_trajId=1) THEN
+			//m_startDHPos[m_jntId]:=curDHJntPos[m_jntId];
+			m_startDHPos:=curDHJntPos;
+			m_endDHPos[m_jntId]:=m_startDHJntPos[m_jntId];
+		ELSIF (m_trajId=2) THEN
+			m_startDHPos[m_jntId]:=m_startDHJntPos[m_jntId];
+			m_endDHPos[m_jntId]:=m_endDHJntPos[m_jntId];
+		ELSIF (m_trajId=3) THEN
+			m_startDHPos[m_jntId]:=m_endDHJntPos[m_jntId];
+			m_endDHPos[m_jntId]:=m_startDHJntPos[m_jntId];
+		ELSIF (m_trajId=4) THEN
+			m_startDHPos[m_jntId]:=m_startDHJntPos[m_jntId];
+			m_endDHPos[m_jntId]:=m_homeDHJntPos[m_jntId];
+		END_IF
+		
+		m_Planner.init(i_startJntPos:= m_startDHPos, 	i_targetJntPos:= m_endDHPos, 	i_maxJntVel:= m_maxjntVel, 	i_maxJntAcc:= m_maxjntAcc, 	i_maxJntJerk:= m_maxjntJerk);
+		IF (m_Planner.isGene=FALSE) THEN
+			m_time:=0; m_testStep:=50;
+		ELSE
+			m_time:=0; m_testStep:=20;
+			m_dataRecordSum:=0;
+			m_counter:=0;
+			m_pointNum:=0;
+			m_pointNumLast:=0;
+		END_IF
+		
+		
+	20: //start the motion
+		m_time:=m_time+g_slaveArmCtrlCycleTime;
+		m_Planner.evaluate(t:= m_time, jntPos=> m_cmdJntPos, jntVel=> m_cmdJntVel, jntAcc=> m_cmdJntAcc);
+		IF (m_time>m_Planner.duration) THEN
+			m_testStep:=30;
+		END_IF		
+		
+		//updata the value of counter
+		m_counter:=m_counter+1;
+		IF (m_counter>=4*20) THEN
+			m_counter:=0;
+			m_pointNum:=m_pointNum+1;
+		END_IF
+		
+		//Discard the first and last paragraphs of data
+		IF (m_time<m_discardDuration) OR (m_time>(m_Planner.duration-m_discardDuration)) THEN
+			m_counter:=0;
+			m_pointNum:=m_pointNumLast;
+		END_IF
+		m_pointNumLast:=m_pointNum;
+		
+		//current DH joint position
+		curDHJntPos:=i_setupArm.curJntPos;	
+		
+		//command DH joint position
+		m_targetDHPos:=m_cmdJntPos;
+		
+		//record the data---Move in the positive direction
+		IF (m_trajId=2) AND (m_counter=0) AND (m_pointNum<=gvl_const.g_recordDataNum) AND (m_pointNum>0) THEN
+			m_RecordNumD2[m_jntId]:=m_pointNum;
+			m_jntCurD2[m_jntId,m_pointNum]:=i_setupArm.filtJntCurrent[m_jntId]*GVL_SetupMotorParameters.g_motorDir[m_jntId];
+			m_jntTrqD2[m_jntId,m_pointNum]:=i_setupArm.curJntTrq[m_jntId];
+			m_jntPosD2[m_jntId,m_pointNum]:=curDHJntPos[m_jntId];
+			m_cmdDHJntPosD2[m_jntId,m_pointNum]:=m_targetDHPos[m_jntId];
+			
+			g_frictionTestSetup.m_cmdDHJntPosD2[m_armId,m_jntId,m_pointNum]:=m_cmdDHJntPosD2[m_jntId,m_pointNum];
+			g_frictionTestSetup.m_jntPosD2[m_armId,m_jntId,m_pointNum]:=m_jntPosD2[m_jntId,m_pointNum];
+			g_frictionTestSetup.m_jntTrqD2[m_armId,m_jntId,m_pointNum]:=m_jntTrqD2[m_jntId,m_pointNum];
+		END_IF
+		
+		//record the data---Move in the negative direction
+		IF (m_trajId=3) AND (m_counter=0) AND (m_pointNum<=gvl_const.g_recordDataNum) AND (m_pointNum>0) THEN
+			m_RecordNumD3[m_jntId]:=m_pointNum;
+			m_jntCurD3[m_jntId,m_pointNum]:=i_setupArm.filtJntCurrent[m_jntId]*GVL_SetupMotorParameters.g_motorDir[m_jntId];
+			m_jntTrqD3[m_jntId,m_pointNum]:=i_setupArm.curJntTrq[m_jntId];
+			m_jntPosD3[m_jntId,m_pointNum]:=curDHJntPos[m_jntId];
+			m_cmdDHJntPosD3[m_jntId,m_pointNum]:=m_targetDHPos[m_jntId];
+			
+			g_frictionTestSetup.m_cmdDHJntPosD3[m_armId,m_jntId,m_pointNum]:=m_cmdDHJntPosD3[m_jntId,m_pointNum];
+			g_frictionTestSetup.m_jntPosD3[m_armId,m_jntId,m_pointNum]:=m_jntPosD3[m_jntId,m_pointNum];
+			g_frictionTestSetup.m_jntTrqD3[m_armId,m_jntId,m_pointNum]:=m_jntTrqD3[m_jntId,m_pointNum];
+		END_IF
+		
+		//update the joint gap
+		FOR i:=1 TO m_JntNum BY 1 DO
+			gap:=ABS(i_setupArm.curJntPos[i]-i_setupArm.curLinkPos[i]);
+			IF (gap>m_jntGap[i]) THEN
+				m_jntGap[i]:=gap;
+			END_IF
+		END_FOR
+		
+		//output the joint gap
+		//g_frictionTestSetup.m_jntGap[m_armId]:=m_jntGap;
+		g_frictionTestSetup.m_jntGap[m_armId]:=m_unitTransform.setupArmUnit2User(m_jntGap);
+		
+		
+	30: //Update joint and trajectory numbers
+		m_trajId:=m_trajId+1;
+		IF (m_trajId<=4) THEN			
+			m_testStep:=10;
+		ELSE
+			m_testStep:=40;
+		END_IF
+					
+		
+	40: //Calculate technical indicators
+		i:=m_jntId;
+		
+		//FOR i:=1 TO m_JntNum BY 1 DO
+			IF (m_RecordNumD2[i]>m_RecordNumD3[i]) THEN
+				validNum:=m_RecordNumD3[i];
+			ELSE
+				validNum:=m_RecordNumD2[i];
+			END_IF
+			m_validNum[i]:=validNum;
+			
+			//Sort the third test data in reverse order
+			FOR j:=1 TO validNum BY 1 DO
+				id:=m_RecordNumD3[i]-j+1;
+				m_jntCurD3_Reverse[i,j]:=m_jntCurD3[i,id];
+				m_jntTrqD3_Reverse[i,j]:=m_jntTrqD3[i,id];
+			END_FOR
+			
+			//Calculate frictional force
+			FOR j:=1 TO validNum BY 1 DO
+				//for positive direciton:T2=G-F-----for nagative direction:T3=G+F,  so F=(T3-T2)/2---G=(T2+T3)/2
+				m_CoulombFriction[i,j]:=(m_jntTrqD3_Reverse[i,j]-m_jntTrqD2[i,j])/2;
+				m_CoulombFrictionSum[i]:=m_CoulombFrictionSum[i]+m_CoulombFriction[i,j];										
+			END_FOR		
+			
+			//calculate the max joint friction
+			m_CoulombFrictionMax[i]:=m_CoulombFriction[i,1];
+			m_CoulombFrictionMax_JntPos[i]:=m_jntPosD2[i,1];
+			FOR j:=1 TO validNum BY 1 DO
+				IF (m_CoulombFriction[i,j]>m_CoulombFrictionMax[i]) THEN
+					m_CoulombFrictionMax[i]:=m_CoulombFriction[i,j];
+					m_CoulombFrictionMax_JntPos[i]:=m_jntPosD2[i,j];
+				END_IF
+			END_FOR			
+			
+			//calculate the average of friction and ratio
+			m_CoulombFrictionRatio[i]:=0;
+			m_CoulombFrictionAve[i]:=m_CoulombFrictionSum[i]/validNum;
+			FOR j:=1 TO validNum BY 1 DO
+				ratio:=m_CoulombFriction[i,j]/m_CoulombFrictionSum[i];
+				IF (ratio>0) AND (ratio>m_CoulombFrictionRatio[i]) THEN
+					m_CoulombFrictionRatio[i]:=ratio;
+				END_IF
+			END_FOR
+			g_frictionTestSetup.m_CoulombFrictionAve[m_armId,i]:=m_CoulombFrictionAve[i];
+			g_frictionTestSetup.m_CoulombFrictionRatio[m_armId,i]:=m_CoulombFrictionRatio[i];		
+		//END_FOR			
+		
+		//output to global variables		
+		g_frictionTestSetup.m_CoulombFrictionMax[m_armId]:=m_CoulombFrictionMax;
+		g_frictionTestSetup.m_CoulombFrictionMax_JntPos[m_armId]:=m_unitTransform.setupArmUnit2User(i_dataSystem:= m_CoulombFrictionMax_JntPos);
+				
+		//next step
+		m_testStep:=50;
+		
+		
+	50: //update the joint id
+		m_jntId:=m_jntId+1;
+		m_trajId:=1;
+		IF (m_jntId<=g_frictionTestSetup.m_jntIdEnd[m_armId]) THEN
+			m_testStep:=10;
+		ELSE
+			m_testStep:=40;
+		END_IF
+		
+		
+	60:
+		m_testStep:=-1;
+		m_motionFinished:=TRUE;
+		g_frictionTestSetup.m_writeData[m_armId]:=TRUE; //output the data to txt file
+		
+		
+	-1: //	
+END_CASE
+
+
+//output the test information
+g_frictionTestSetup.m_jntId[m_armId]:=m_jntId;
+g_frictionTestSetup.m_trajId[m_armId]:=m_trajId;
+g_frictionTestSetup.m_testStep[m_armId]:=m_testStep;
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdJntPos" Id="{a1692406-15a1-4e20-8859-507fd5c3d1fe}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//show the joint angle
+g_frictionTestSetup.m_armActJntPos[m_armId]:=i_setupArm.curJntPos;
+g_frictionTestSetup.m_armDHJntPos[m_armId]:=i_setupArm.curJntPos;
+
+
+//start motion flag
+m_startMotion:=g_frictionTestSetup.m_startMotion[m_armId];
+IF (m_startMotionLast=FALSE) AND (m_startMotion=TRUE) THEN
+	m_testStep:=0;
+	m_motionFinished:=FALSE;
+END_IF
+m_startMotionLast:=m_startMotion;
+
+
+//transform to arm test motion
+IF (m_startMotion=TRUE) THEN
+	basicTestMotion(i_setupArm);
+END_IF
+
+
+//return the motion status
+IF (m_testStep=-1) AND (m_motionFinished=TRUE) THEN
+	g_frictionTestSetup.m_startMotion[m_armId]:=FALSE;		
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{97f070fc-46f3-49fc-b290-8aea62d5b728}">
+      <Declaration><![CDATA[// override this function in each exact controller
+// NOTICE: set joint control mode here, and do some initialization if needed
+METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+VAR_IN_OUT 
+	r_setupArmCtrlCmd :ST_SetupArmCtrlCmds;
+END_VAR
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_setupArm,r_setupArmCtrlCmd);
+m_jntEnableFlag:=g_onesVec5i; m_jntEnableFlag[1]:=0; m_jntEnableFlag[2]:=0;
+m_jntOPMode:= g_setupAllPosMode;
+
+
+//basic parameter init
+m_armId:=i_setupArm.armIdx;
+m_startMotionLast:=FALSE;
+
+
+//target DH joint position
+FOR i:=1 TO 5 BY 1 DO
+	m_homeDHJntPos[i]:=(GVL_SetupMotorParameters.g_minJntPos[m_armId,i]+GVL_SetupMotorParameters.g_maxJntPos[m_armId,i])/2;
+	m_startDHJntPos[i]:=GVL_SetupMotorParameters.g_minJntPos[m_armId,i];
+	m_endDHJntPos[i]:=GVL_SetupMotorParameters.g_maxJntPos[m_armId,i];
+END_FOR
+
+
+//velocity and acceleration
+vecMultiNum(GVL_SetupMotorParameters.g_maxJntVel,0.1,m_maxjntVel);
+vecMultiNum(m_maxjntVel,3,m_maxjntAcc);
+vecMultiNum(m_maxjntAcc,3,m_maxjntJerk);
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SetupCtrlFrictionTest">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlFrictionTest.basicTestMotion">
+      <LineId Id="9" Count="2" />
+      <LineId Id="228" Count="2" />
+      <LineId Id="12" Count="19" />
+      <LineId Id="231" Count="0" />
+      <LineId Id="32" Count="11" />
+      <LineId Id="48" Count="36" />
+      <LineId Id="213" Count="0" />
+      <LineId Id="86" Count="37" />
+      <LineId Id="232" Count="0" />
+      <LineId Id="124" Count="5" />
+      <LineId Id="136" Count="2" />
+      <LineId Id="148" Count="1" />
+      <LineId Id="243" Count="1" />
+      <LineId Id="150" Count="21" />
+      <LineId Id="248" Count="7" />
+      <LineId Id="245" Count="0" />
+      <LineId Id="247" Count="0" />
+      <LineId Id="172" Count="12" />
+      <LineId Id="258" Count="2" />
+      <LineId Id="256" Count="0" />
+      <LineId Id="185" Count="3" />
+      <LineId Id="242" Count="0" />
+      <LineId Id="236" Count="5" />
+      <LineId Id="233" Count="2" />
+      <LineId Id="189" Count="15" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlFrictionTest.calcCmdJntPos">
+      <LineId Id="172" Count="0" />
+      <LineId Id="175" Count="0" />
+      <LineId Id="173" Count="1" />
+      <LineId Id="176" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="153" Count="18" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlFrictionTest.init">
+      <LineId Id="11" Count="0" />
+      <LineId Id="62" Count="1" />
+      <LineId Id="177" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="174" Count="0" />
+      <LineId Id="176" Count="0" />
+      <LineId Id="86" Count="1" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="90" Count="1" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="175" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="129" Count="1" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="98" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

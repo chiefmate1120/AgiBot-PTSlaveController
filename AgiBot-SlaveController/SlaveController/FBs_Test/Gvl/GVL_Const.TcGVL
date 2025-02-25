@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <GVL Name="GVL_Const" Id="{cf747bed-c98f-4034-9edf-cccd140613d8}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL CONSTANT
+		//control mode number for UI
+		g_controlModeNum:INT:=9;
+		
+		//Test points for the spatial cube, with specific locations given by MATLAB
+        g_testPointNum:INT:=5;
+		
+		//test motion cycle number for precision test
+		g_testMotCycNum:INT:=20;
+		
+		//single arm precision test point
+        g_testSpacePoint:ARRAY [1..5,1..7] OF LREAL:=[
+        -0.1660,   -0.8046,        0,          1.5708,0,-3.1416,0,
+        -0.0820,   -0.8886,   -0.0840,     1.5708,0,-3.1416,0,
+        -0.2500,   -0.8886,   -0.0840,     1.5708,0,-3.1416,0,
+        -0.2500,   -0.7206,    0.0840,      1.5708,0,-3.1416,0,
+        -0.0820,   -0.7206,    0.0840,      1.5708,0,-3.1416,0];
+		
+		//original joint position
+		g_originJntPos:Vec6d:=[0,-pi/2,(0.23+0.58)/2,0,-pi/2,0];
+		
+		//data number for record and write													
+		g_recordDataNum:INT:=13000;
+		g_writeDataNum:INT:=5500;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

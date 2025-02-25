@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_SlaveMotorData" Id="{1596ba65-5522-4bcb-90f0-32b6c5ae7d7e}">
+    <Declaration><![CDATA[TYPE ST_SlaveMotorData :
+STRUCT
+	
+	m_slaveMotorInput :ARRAY[1..g_sArmNum,1..g_sJntNum] OF ST_MotorInputs;
+	
+	m_slaveMotorOutput :ARRAY[1..g_sArmNum,1..g_sJntNum] OF ST_MotorOutputs;
+	
+	//motor encoder salta value
+	m_motorEncSalta :ARRAY[1..g_sArmNum] OF Vec8di;
+	
+	m_hallAngleAndEncoderAngle :ARRAY[1..g_sArmNum,1..g_sJntNum] OF UDINT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

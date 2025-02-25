@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlPowerOff" Id="{b0cad51b-1034-45d6-ad2f-1d015e8e9e88}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm PowerOff
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlPowerOff EXTENDS FB_SlaveArmCtrlBase
@@ -34,6 +34,9 @@ END_VAR
         <ST><![CDATA[IF m_timePeriod > i_slaveArm.armIdx THEN
 	m_jntEnableFlag :=g_zeroVec8i;
 	m_isFinished := TRUE;
+	IF m_timePeriod  > 4 THEN
+		GVL_interactUI.g_plcPowerOffEnable := TRUE;
+	END_IF
 END_IF]]></ST>
       </Implementation>
     </Method>
@@ -64,9 +67,7 @@ SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlPowerOff.calcCmdJntPos">
-      <LineId Id="17" Count="0" />
-      <LineId Id="19" Count="0" />
-      <LineId Id="21" Count="0" />
+      <LineId Id="37" Count="5" />
       <LineId Id="20" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlPowerOff.init">

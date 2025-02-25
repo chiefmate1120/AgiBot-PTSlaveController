@@ -1,0 +1,3887 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <RecipeManager Name="RecipeManager" Id="{8a5f01bd-852f-4de3-8ca5-3987de625644}">
+    <XmlArchive>
+      <Data>
+        <o xml:space="preserve" t="RecipeManObject">
+          <o n="LMGuids" t="LanguageModelGuidHelper">
+            <d n="NamesAndGuids" t="Hashtable" ckt="String" cvt="Guid">
+              <v>RECIPEFACTORYFB_INIT</v>
+              <v>3bbbf45f-5bc6-4830-81a8-aa21e0a2222b</v>
+              <v>GVL_RECIPEMANAGEMENT_3300</v>
+              <v>22f4ead0-b70d-43dd-8c1c-d281bf39baed</v>
+              <v>RECIPEMANAGEMENTINITFB_INIT</v>
+              <v>ebb61394-9937-484f-bdd7-93a8ed0abd3c</v>
+              <v>RECIPEFACTORYFREERECIPE</v>
+              <v>9856d77c-bcc6-41ba-be37-87303c9e9bcc</v>
+              <v>RECIPEFACTORY</v>
+              <v>5872e2fb-6c70-4a4e-9d5a-541b56f57205</v>
+              <v>RECIPEMANAGEMENTINITFB_REINIT</v>
+              <v>51e32012-5b71-4c9f-8272-d553a56a0adc</v>
+              <v>RECIPEMANAGEMENTINIT</v>
+              <v>14614a94-1490-450d-b58a-7b8ede6266eb</v>
+              <v>RECIPEMANAGEMENTINITINITIALIZE</v>
+              <v>9a484fef-ae4c-49e0-996a-caf5a3f16a6c</v>
+              <v>RECIPEFACTORYCREATERECIPE</v>
+              <v>ce9acd52-e7ef-4755-ae7d-9ef0b51bd88b</v>
+            </d>
+          </o>
+          <o n="StorageSettings" t="RecipeManagerStorageSettings">
+            <v n="StorageType">1U</v>
+            <v n="LoadType">0U</v>
+            <v n="WriteType">0U</v>
+            <v n="FileExtension">".txtrecipe"</v>
+            <v n="FilePath">"C:\TwinCAT"</v>
+            <v n="TokenSeparator">":="</v>
+            <v n="ColumnList">"0|1"</v>
+            <v n="AutoSaveRecipes">true</v>
+          </o>
+          <v n="RecipesInPlc">true</v>
+          <v n="RecipesInPlcAssigned">false</v>
+        </o>
+      </Data>
+      <TypeList>
+        <Type n="Boolean">System.Boolean</Type>
+        <Type n="Guid">System.Guid</Type>
+        <Type n="Hashtable">System.Collections.Hashtable</Type>
+        <Type n="LanguageModelGuidHelper">{3bce4913-f2c1-4b54-84e8-6d7ec1809176}</Type>
+        <Type n="RecipeManagerStorageSettings">{9af4bea6-fc90-45e0-8fd7-eb50506b56da}</Type>
+        <Type n="RecipeManObject">{09ecc42e-586d-4a08-932f-5bdcac20bb55}</Type>
+        <Type n="String">System.String</Type>
+        <Type n="UInt32">System.UInt32</Type>
+      </TypeList>
+    </XmlArchive>
+    <RecipeDefinition Name="Arm1Dynamics" Id="{8c031572-db61-43d1-acf7-2bfee26db41e}">
+      <XmlArchive>
+        <Data>
+          <o xml:space="preserve" t="RecipeDefinitionObject">
+            <v n="UniqueIdGenerator">"135"</v>
+            <o n="Recipes" t="RecipeList">
+              <l n="Recipes" t="ArrayList" />
+            </o>
+            <o n="RecipeVariables" t="RecipeVariableList">
+              <l n="Variables" t="ArrayList" cet="RecipeVariable">
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3FrictionParams[1, 1]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">LReal</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">1</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3FrictionParams[1, 2]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">2</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3FrictionParams[1, 3]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">3</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3FrictionParams[1, 4]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">4</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityParams[1, 1]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">17</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityParams[1, 2]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">18</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityParams[1, 3]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">19</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityParams[1, 4]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">20</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityPosRange[1, 1]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">33</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityPosRange[1, 2]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">34</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt5GravityParam[1, 1]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">41</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt5GravityParam[1, 2]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">42</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJntGravityOffset[1, 1]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">49</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJntGravityOffset[1, 2]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">50</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJntGravityOffset[1, 3]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">51</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJntGravityOffset[1, 4]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">52</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJntGravityOffset[1, 5]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">53</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_gravityParam[1, 1]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">79</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_gravityParam[1, 2]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">80</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_gravityParam[1, 3]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">81</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_gravityParam[1, 4]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">82</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_gravityParam[1, 5]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">83</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[1, 1]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">104</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[1, 2]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">105</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[1, 3]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">106</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[1, 4]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">107</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[1, 5]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">108</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[1, 6]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">109</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[1, 7]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">110</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[1, 8]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">111</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+              </l>
+            </o>
+            <o n="LMGuids" t="LanguageModelGuidHelper">
+              <d n="NamesAndGuids" t="Hashtable" ckt="String" cvt="Guid">
+                <v>VALUESINIT</v>
+                <v>d41ed089-f487-4980-821a-5eebc1097d06</v>
+                <v>FILLDESCRIPTION</v>
+                <v>8160df61-ee2d-4421-92e9-9c1d7fe1a7ba</v>
+                <v>NAMESET</v>
+                <v>61b0d586-8805-4b15-b506-867b8f6174c0</v>
+                <v>PRVFILLDATASERVERSTRUCTURES</v>
+                <v>e62e8f38-0b90-4e0b-89a9-7c4c1b70e6cd</v>
+                <v>NAME</v>
+                <v>bebacf11-2d3c-45f5-922e-0e22f893df35</v>
+                <v>UPDATEFROMDESCRIPTION</v>
+                <v>e50db638-d97f-468b-a7af-9f2081db00b5</v>
+                <v>WRITE</v>
+                <v>e57a192b-28cf-4ddc-a6f6-a3916377108a</v>
+                <v>REC_DS_PRG__B2CE9E3706D94478A8B6EF5AC4B200D0</v>
+                <v>872e615e-a56a-4719-8085-b1fe9b1524a5</v>
+                <v>READ</v>
+                <v>53087dfd-7c41-426d-8428-232e24f75865</v>
+              </d>
+            </o>
+          </o>
+        </Data>
+        <TypeList>
+          <Type n="ArrayList">System.Collections.ArrayList</Type>
+          <Type n="Guid">System.Guid</Type>
+          <Type n="Hashtable">System.Collections.Hashtable</Type>
+          <Type n="Int32">System.Int32</Type>
+          <Type n="LanguageModelGuidHelper">{3bce4913-f2c1-4b54-84e8-6d7ec1809176}</Type>
+          <Type n="RecipeDefinitionObject">{6b3dfb6a-1865-4356-a39b-1fe0ef89651c}</Type>
+          <Type n="RecipeList">{361612e3-b6f9-4397-98a8-756875b9e479}</Type>
+          <Type n="RecipeVariable">{53eb36d9-3360-453b-901e-ca88bd8f0cba}</Type>
+          <Type n="RecipeVariableBoundaries">{27f9af88-23e7-4a13-82aa-c97c4e06a71a}</Type>
+          <Type n="RecipeVariableList">{97841042-ff4f-47b5-923e-538f1387df5a}</Type>
+          <Type n="String">System.String</Type>
+          <Type n="TypeClass">{16f7aa24-038f-444e-9d81-b001bc091d35}</Type>
+        </TypeList>
+      </XmlArchive>
+    </RecipeDefinition>
+    <RecipeDefinition Name="arm1LinkEncValue" Id="{737d84bf-ed60-4ec0-8d1e-39342e319685}">
+      <XmlArchive>
+        <Data>
+          <o xml:space="preserve" t="RecipeDefinitionObject">
+            <v n="UniqueIdGenerator">"410"</v>
+            <o n="Recipes" t="RecipeList">
+              <l n="Recipes" t="ArrayList" />
+            </o>
+            <o n="RecipeVariables" t="RecipeVariableList">
+              <l n="Variables" t="ArrayList" cet="RecipeVariable">
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_minLinkEncoder[1, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">102</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_minLinkEncoder[1, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">103</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_minLinkEncoder[1, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">104</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_minLinkEncoder[1, 4]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">105</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_minLinkEncoder[1, 5]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">106</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[1, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">122</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[1, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">123</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[1, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">124</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[1, 4]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">125</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[1, 5]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">126</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[1, 1]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">142</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[1, 2]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">143</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[1, 3]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">144</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[1, 4]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">145</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[1, 5]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">146</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[1, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">162</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[1, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">163</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[1, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">164</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[1, 4]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">165</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[1, 5]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">166</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_minLinkEncoder[1, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">182</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_minLinkEncoder[1, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">183</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_minLinkEncoder[1, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">184</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_maxLinkEncoder[1, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">214</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_maxLinkEncoder[1, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">215</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_maxLinkEncoder[1, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">216</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[1, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">278</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[1, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">279</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[1, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">280</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[1, 4]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">281</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[1, 5]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">282</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[1, 6]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">283</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[1, 7]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">284</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[1, 8]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">285</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[1, 1]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">Int</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">310</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[1, 2]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">311</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[1, 3]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">312</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[1, 4]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">313</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[1, 5]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">314</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[1, 6]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">315</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[1, 7]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">Int</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">316</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[1, 8]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">410</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+              </l>
+            </o>
+            <o n="LMGuids" t="LanguageModelGuidHelper">
+              <d n="NamesAndGuids" t="Hashtable" ckt="String" cvt="Guid">
+                <v>VALUESINIT</v>
+                <v>9b0a0a67-b8e9-4673-b7aa-0b001ebb0e8e</v>
+                <v>FILLDESCRIPTION</v>
+                <v>4c11cdd6-fb55-41cf-8dc9-b68e33c18a90</v>
+                <v>NAMESET</v>
+                <v>11948808-d266-47da-ba11-b7ca0b780dfe</v>
+                <v>PRVFILLDATASERVERSTRUCTURES</v>
+                <v>0af93a09-1709-4d41-bffd-33f10ff59c43</v>
+                <v>NAME</v>
+                <v>c5df65c0-5071-4964-aead-2fe62306c3e0</v>
+                <v>UPDATEFROMDESCRIPTION</v>
+                <v>16c3ef98-a6bd-4897-8039-2afe7552f340</v>
+                <v>WRITE</v>
+                <v>9afe28ca-0362-4e05-af4b-7332ab0bc14c</v>
+                <v>REC_DS_PRG__23DA9B6565EA4BE5B8D4DC96C0B26A8A</v>
+                <v>d0b91108-f888-428a-896e-41980fb191e2</v>
+                <v>READ</v>
+                <v>0a629aba-3983-496e-84ba-ed590b009477</v>
+              </d>
+            </o>
+          </o>
+        </Data>
+        <TypeList>
+          <Type n="ArrayList">System.Collections.ArrayList</Type>
+          <Type n="Guid">System.Guid</Type>
+          <Type n="Hashtable">System.Collections.Hashtable</Type>
+          <Type n="Int32">System.Int32</Type>
+          <Type n="LanguageModelGuidHelper">{3bce4913-f2c1-4b54-84e8-6d7ec1809176}</Type>
+          <Type n="RecipeDefinitionObject">{6b3dfb6a-1865-4356-a39b-1fe0ef89651c}</Type>
+          <Type n="RecipeList">{361612e3-b6f9-4397-98a8-756875b9e479}</Type>
+          <Type n="RecipeVariable">{53eb36d9-3360-453b-901e-ca88bd8f0cba}</Type>
+          <Type n="RecipeVariableBoundaries">{27f9af88-23e7-4a13-82aa-c97c4e06a71a}</Type>
+          <Type n="RecipeVariableList">{97841042-ff4f-47b5-923e-538f1387df5a}</Type>
+          <Type n="String">System.String</Type>
+          <Type n="TypeClass">{16f7aa24-038f-444e-9d81-b001bc091d35}</Type>
+        </TypeList>
+      </XmlArchive>
+    </RecipeDefinition>
+    <RecipeDefinition Name="Arm2Dynamics" Id="{f71a8e59-e3e4-4e8c-83d0-0ba331f05274}">
+      <XmlArchive>
+        <Data>
+          <o xml:space="preserve" t="RecipeDefinitionObject">
+            <v n="UniqueIdGenerator">"120"</v>
+            <o n="Recipes" t="RecipeList">
+              <l n="Recipes" t="ArrayList" />
+            </o>
+            <o n="RecipeVariables" t="RecipeVariableList">
+              <l n="Variables" t="ArrayList" cet="RecipeVariable">
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3FrictionParams[2, 1]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">5</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3FrictionParams[2, 2]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">6</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3FrictionParams[2, 3]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">7</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3FrictionParams[2, 4]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">8</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityParams[2, 1]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">21</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityParams[2, 2]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">22</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityParams[2, 3]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">23</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityParams[2, 4]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">24</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityPosRange[2, 1]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">35</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityPosRange[2, 2]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">36</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt5GravityParam[2, 1]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">43</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt5GravityParam[2, 2]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">44</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJntGravityOffset[2, 1]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">54</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJntGravityOffset[2, 2]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">55</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJntGravityOffset[2, 3]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">56</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJntGravityOffset[2, 4]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">57</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_gravityParam[2, 1]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">74</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_gravityParam[2, 2]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">75</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_gravityParam[2, 3]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">76</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_gravityParam[2, 4]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">77</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_gravityParam[2, 5]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">78</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[2, 1]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">97</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[2, 2]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">98</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[2, 3]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">99</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[2, 4]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">100</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[2, 5]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">101</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[2, 6]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">102</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[2, 7]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">103</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[2, 8]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">104</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+              </l>
+            </o>
+            <o n="LMGuids" t="LanguageModelGuidHelper">
+              <d n="NamesAndGuids" t="Hashtable" ckt="String" cvt="Guid">
+                <v>VALUESINIT</v>
+                <v>28fb7e54-1a19-4703-9991-4e401de2cfd0</v>
+                <v>FILLDESCRIPTION</v>
+                <v>82f4e1e6-426c-4a72-a5dc-98e6fc167f19</v>
+                <v>REC_DS_PRG__4D69379D6DCE479EB00970633DA2A8AF</v>
+                <v>6624fd34-0858-40a8-968c-2fe59dc0833f</v>
+                <v>PRVFILLDATASERVERSTRUCTURES</v>
+                <v>44b4ee44-d6aa-4078-b253-5c0755092f3f</v>
+                <v>NAME</v>
+                <v>f0526851-7faa-4375-ba70-d27de66ba9a5</v>
+                <v>UPDATEFROMDESCRIPTION</v>
+                <v>e6e7069c-12d7-4260-906f-b736753fe93b</v>
+                <v>WRITE</v>
+                <v>9a57f9d5-70b1-40d5-b85d-b8601e2d81fb</v>
+                <v>READ</v>
+                <v>1ea60d22-efbf-4c6e-8dfa-30eafd7de55c</v>
+                <v>NAMESET</v>
+                <v>f4e73b82-1302-4697-9a05-c8f1f09b042c</v>
+              </d>
+            </o>
+          </o>
+        </Data>
+        <TypeList>
+          <Type n="ArrayList">System.Collections.ArrayList</Type>
+          <Type n="Guid">System.Guid</Type>
+          <Type n="Hashtable">System.Collections.Hashtable</Type>
+          <Type n="Int32">System.Int32</Type>
+          <Type n="LanguageModelGuidHelper">{3bce4913-f2c1-4b54-84e8-6d7ec1809176}</Type>
+          <Type n="RecipeDefinitionObject">{6b3dfb6a-1865-4356-a39b-1fe0ef89651c}</Type>
+          <Type n="RecipeList">{361612e3-b6f9-4397-98a8-756875b9e479}</Type>
+          <Type n="RecipeVariable">{53eb36d9-3360-453b-901e-ca88bd8f0cba}</Type>
+          <Type n="RecipeVariableList">{97841042-ff4f-47b5-923e-538f1387df5a}</Type>
+          <Type n="String">System.String</Type>
+          <Type n="TypeClass">{16f7aa24-038f-444e-9d81-b001bc091d35}</Type>
+        </TypeList>
+      </XmlArchive>
+    </RecipeDefinition>
+    <RecipeDefinition Name="arm2LinkEncValue" Id="{7a06f686-bcb0-4731-b52b-57c17e1c30f8}">
+      <XmlArchive>
+        <Data>
+          <o xml:space="preserve" t="RecipeDefinitionObject">
+            <v n="UniqueIdGenerator">"564"</v>
+            <o n="Recipes" t="RecipeList">
+              <l n="Recipes" t="ArrayList" />
+            </o>
+            <o n="RecipeVariables" t="RecipeVariableList">
+              <l n="Variables" t="ArrayList" cet="RecipeVariable">
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_minLinkEncoder[2, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">262</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_minLinkEncoder[2, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">263</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_minLinkEncoder[2, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">264</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_minLinkEncoder[2, 4]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">265</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_minLinkEncoder[2, 5]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">266</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[2, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">282</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[2, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">283</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[2, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">284</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[2, 4]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">285</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[2, 5]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">286</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[2, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">302</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[2, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">303</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[2, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">304</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[2, 4]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">305</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[2, 5]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">306</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[2, 1]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">322</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[2, 2]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">323</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[2, 3]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">324</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[2, 4]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">325</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[2, 5]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">326</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_minLinkEncoder[2, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">345</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_minLinkEncoder[2, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">346</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_minLinkEncoder[2, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">347</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_maxLinkEncoder[2, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">377</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_maxLinkEncoder[2, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">378</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_maxLinkEncoder[2, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">379</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[2, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">509</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[2, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">510</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[2, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">511</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[2, 4]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">512</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[2, 5]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">513</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[2, 6]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">514</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[2, 7]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">515</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[2, 8]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">516</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[2, 1]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">541</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[2, 2]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">542</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[2, 3]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">543</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[2, 4]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">544</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[2, 5]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">545</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[2, 6]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">546</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[2, 7]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">547</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[2, 8]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">548</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+              </l>
+            </o>
+            <o n="LMGuids" t="LanguageModelGuidHelper">
+              <d n="NamesAndGuids" t="Hashtable" ckt="String" cvt="Guid">
+                <v>VALUESINIT</v>
+                <v>8207ca2a-0bf0-4ea7-8521-329887f29d66</v>
+                <v>FILLDESCRIPTION</v>
+                <v>2b7baae3-1461-4ce1-98e2-8d79e410b34d</v>
+                <v>NAMESET</v>
+                <v>ab753774-0694-434d-b3ba-baac565cbe39</v>
+                <v>REC_DS_PRG__8143DD0BE159447386680DBFB16102C5</v>
+                <v>c32c18f1-0bba-42cd-a205-04d2ce6866f2</v>
+                <v>PRVFILLDATASERVERSTRUCTURES</v>
+                <v>3dbcc238-dd0a-4a2a-b173-1ce84f4d1b5a</v>
+                <v>NAME</v>
+                <v>940001a5-6563-4359-8fe0-0ca439183770</v>
+                <v>UPDATEFROMDESCRIPTION</v>
+                <v>5e4ed2ca-1f0f-43e7-81ce-5012c168df41</v>
+                <v>WRITE</v>
+                <v>b5dd9464-ce4d-423a-9d1d-652c331b39a0</v>
+                <v>READ</v>
+                <v>7144e981-2b11-4a30-bcbd-26282206fc00</v>
+              </d>
+            </o>
+          </o>
+        </Data>
+        <TypeList>
+          <Type n="ArrayList">System.Collections.ArrayList</Type>
+          <Type n="Guid">System.Guid</Type>
+          <Type n="Hashtable">System.Collections.Hashtable</Type>
+          <Type n="Int32">System.Int32</Type>
+          <Type n="LanguageModelGuidHelper">{3bce4913-f2c1-4b54-84e8-6d7ec1809176}</Type>
+          <Type n="RecipeDefinitionObject">{6b3dfb6a-1865-4356-a39b-1fe0ef89651c}</Type>
+          <Type n="RecipeList">{361612e3-b6f9-4397-98a8-756875b9e479}</Type>
+          <Type n="RecipeVariable">{53eb36d9-3360-453b-901e-ca88bd8f0cba}</Type>
+          <Type n="RecipeVariableList">{97841042-ff4f-47b5-923e-538f1387df5a}</Type>
+          <Type n="String">System.String</Type>
+          <Type n="TypeClass">{16f7aa24-038f-444e-9d81-b001bc091d35}</Type>
+        </TypeList>
+      </XmlArchive>
+    </RecipeDefinition>
+    <RecipeDefinition Name="Arm3Dynamics" Id="{5cd95413-086a-4f34-9d67-b11a8f2c40a1}">
+      <XmlArchive>
+        <Data>
+          <o xml:space="preserve" t="RecipeDefinitionObject">
+            <v n="UniqueIdGenerator">"120"</v>
+            <o n="Recipes" t="RecipeList">
+              <l n="Recipes" t="ArrayList" />
+            </o>
+            <o n="RecipeVariables" t="RecipeVariableList">
+              <l n="Variables" t="ArrayList" cet="RecipeVariable">
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3FrictionParams[3, 1]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">9</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3FrictionParams[3, 2]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">10</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3FrictionParams[3, 3]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">11</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3FrictionParams[3, 4]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">12</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityParams[3, 1]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">25</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityParams[3, 2]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">26</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityParams[3, 3]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">27</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityParams[3, 4]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">28</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityPosRange[3, 1]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">37</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityPosRange[3, 2]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">38</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt5GravityParam[3, 1]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">45</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt5GravityParam[3, 2]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">46</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJntGravityOffset[3, 1]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">59</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJntGravityOffset[3, 2]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">60</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJntGravityOffset[3, 3]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">61</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJntGravityOffset[3, 4]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">62</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJntGravityOffset[3, 5]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">63</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_gravityParam[3, 1]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">79</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_gravityParam[3, 2]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">80</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_gravityParam[3, 3]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">81</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_gravityParam[3, 4]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">82</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_gravityParam[3, 5]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">83</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[3, 1]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">105</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[3, 2]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">106</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[3, 3]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">107</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[3, 4]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">108</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[3, 5]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">109</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[3, 6]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">110</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[3, 7]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">111</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[3, 8]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">112</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+              </l>
+            </o>
+            <o n="LMGuids" t="LanguageModelGuidHelper">
+              <d n="NamesAndGuids" t="Hashtable" ckt="String" cvt="Guid">
+                <v>VALUESINIT</v>
+                <v>98e42344-ee67-4aec-9de2-50b5ca299b08</v>
+                <v>FILLDESCRIPTION</v>
+                <v>540ccfa3-3030-4c85-a271-50d46be6dcb0</v>
+                <v>NAMESET</v>
+                <v>987ca2c1-61b7-4b21-b611-75e64f37404b</v>
+                <v>PRVFILLDATASERVERSTRUCTURES</v>
+                <v>f81ff84e-0e9f-44bc-a145-818006c185d5</v>
+                <v>NAME</v>
+                <v>aed42ee3-a4c0-4531-8ab2-79b4e9323e65</v>
+                <v>UPDATEFROMDESCRIPTION</v>
+                <v>052829b8-cf02-4d94-b277-4aa3756c56e1</v>
+                <v>WRITE</v>
+                <v>a5843fc3-a602-46f8-805c-f28631bcad55</v>
+                <v>REC_DS_PRG__4ABA3E8353F14A2082872170D6B5559C</v>
+                <v>6db2b69a-6a5f-4399-a1ff-2213f9849035</v>
+                <v>READ</v>
+                <v>5ebf7c8d-f65c-43bd-be7c-6f11a69797e1</v>
+              </d>
+            </o>
+          </o>
+        </Data>
+        <TypeList>
+          <Type n="ArrayList">System.Collections.ArrayList</Type>
+          <Type n="Guid">System.Guid</Type>
+          <Type n="Hashtable">System.Collections.Hashtable</Type>
+          <Type n="Int32">System.Int32</Type>
+          <Type n="LanguageModelGuidHelper">{3bce4913-f2c1-4b54-84e8-6d7ec1809176}</Type>
+          <Type n="RecipeDefinitionObject">{6b3dfb6a-1865-4356-a39b-1fe0ef89651c}</Type>
+          <Type n="RecipeList">{361612e3-b6f9-4397-98a8-756875b9e479}</Type>
+          <Type n="RecipeVariable">{53eb36d9-3360-453b-901e-ca88bd8f0cba}</Type>
+          <Type n="RecipeVariableList">{97841042-ff4f-47b5-923e-538f1387df5a}</Type>
+          <Type n="String">System.String</Type>
+          <Type n="TypeClass">{16f7aa24-038f-444e-9d81-b001bc091d35}</Type>
+        </TypeList>
+      </XmlArchive>
+    </RecipeDefinition>
+    <RecipeDefinition Name="arm3LinkEncValue" Id="{275853b8-c0f4-4db5-b4f9-9cc130c6a35a}">
+      <XmlArchive>
+        <Data>
+          <o xml:space="preserve" t="RecipeDefinitionObject">
+            <v n="UniqueIdGenerator">"529"</v>
+            <o n="Recipes" t="RecipeList">
+              <l n="Recipes" t="ArrayList" />
+            </o>
+            <o n="RecipeVariables" t="RecipeVariableList">
+              <l n="Variables" t="ArrayList" cet="RecipeVariable">
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_minLinkEncoder[3, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">139</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_minLinkEncoder[3, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">140</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_minLinkEncoder[3, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">141</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_minLinkEncoder[3, 4]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">142</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_minLinkEncoder[3, 5]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">143</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[3, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">249</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[3, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">250</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[3, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">251</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[3, 4]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">252</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[3, 5]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">253</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[3, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">274</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[3, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">275</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[3, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">276</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[3, 4]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">277</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[3, 5]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">278</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[3, 1]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">294</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[3, 2]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">295</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[3, 3]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">296</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[3, 4]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">297</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[3, 5]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">298</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_minLinkEncoder[3, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">320</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_minLinkEncoder[3, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">321</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_minLinkEncoder[3, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">322</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_maxLinkEncoder[3, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">352</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_maxLinkEncoder[3, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">353</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_maxLinkEncoder[3, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">354</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[3, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">467</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"Invalid Type"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[3, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">469</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"Invalid Type"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[3, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">471</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"Invalid Type"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[3, 4]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">473</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"Invalid Type"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[3, 5]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">475</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"Invalid Type"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[3, 6]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">477</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"Invalid Type"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[3, 7]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">479</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"Invalid Type"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[3, 8]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">481</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"Invalid Type"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[3, 1]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">514</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[3, 2]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">515</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[3, 3]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">516</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[3, 4]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">517</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[3, 5]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">518</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[3, 6]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">519</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[3, 7]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">520</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[3, 8]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">521</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+              </l>
+            </o>
+            <o n="LMGuids" t="LanguageModelGuidHelper">
+              <d n="NamesAndGuids" t="Hashtable" ckt="String" cvt="Guid">
+                <v>VALUESINIT</v>
+                <v>969e0b07-19e4-4e0d-8198-7fd754c3a873</v>
+                <v>FILLDESCRIPTION</v>
+                <v>2a369665-ec01-47ed-989e-db3247d9efa3</v>
+                <v>NAMESET</v>
+                <v>197048e6-b131-4b48-a1d3-e6fb41daa016</v>
+                <v>PRVFILLDATASERVERSTRUCTURES</v>
+                <v>c70e1b1a-a77e-44d8-9c96-6470fffa5213</v>
+                <v>NAME</v>
+                <v>adfbac77-3b29-4622-8ed7-13f7bd968065</v>
+                <v>REC_DS_PRG__270D1825258642EC8A29DD4819B61E95</v>
+                <v>3ff6c2b0-a551-49b3-82a4-5d858147d56d</v>
+                <v>UPDATEFROMDESCRIPTION</v>
+                <v>155a266e-6cfd-41c3-86d2-f45642ed49dd</v>
+                <v>WRITE</v>
+                <v>711ec9e1-5e61-44e3-a1a1-ff64ef03d64e</v>
+                <v>READ</v>
+                <v>14194500-8002-4c1a-b4d4-111c49d69126</v>
+              </d>
+            </o>
+          </o>
+        </Data>
+        <TypeList>
+          <Type n="ArrayList">System.Collections.ArrayList</Type>
+          <Type n="Guid">System.Guid</Type>
+          <Type n="Hashtable">System.Collections.Hashtable</Type>
+          <Type n="Int32">System.Int32</Type>
+          <Type n="LanguageModelGuidHelper">{3bce4913-f2c1-4b54-84e8-6d7ec1809176}</Type>
+          <Type n="RecipeDefinitionObject">{6b3dfb6a-1865-4356-a39b-1fe0ef89651c}</Type>
+          <Type n="RecipeList">{361612e3-b6f9-4397-98a8-756875b9e479}</Type>
+          <Type n="RecipeVariable">{53eb36d9-3360-453b-901e-ca88bd8f0cba}</Type>
+          <Type n="RecipeVariableList">{97841042-ff4f-47b5-923e-538f1387df5a}</Type>
+          <Type n="String">System.String</Type>
+          <Type n="TypeClass">{16f7aa24-038f-444e-9d81-b001bc091d35}</Type>
+        </TypeList>
+      </XmlArchive>
+    </RecipeDefinition>
+    <RecipeDefinition Name="Arm4Dynamics" Id="{f46d4eb2-a5d8-4125-9efd-3d20649addd4}">
+      <XmlArchive>
+        <Data>
+          <o xml:space="preserve" t="RecipeDefinitionObject">
+            <v n="UniqueIdGenerator">"120"</v>
+            <o n="Recipes" t="RecipeList">
+              <l n="Recipes" t="ArrayList" />
+            </o>
+            <o n="RecipeVariables" t="RecipeVariableList">
+              <l n="Variables" t="ArrayList" cet="RecipeVariable">
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3FrictionParams[4, 1]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">13</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3FrictionParams[4, 2]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">14</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3FrictionParams[4, 3]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">15</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3FrictionParams[4, 4]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">16</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityParams[4, 1]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">29</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityParams[4, 2]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">30</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityParams[4, 3]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">31</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityParams[4, 4]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">32</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityPosRange[4, 1]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">39</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt3GravityPosRange[4, 2]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">40</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt5GravityParam[4, 1]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">47</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJnt5GravityParam[4, 2]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">48</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJntGravityOffset[4, 1]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">64</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJntGravityOffset[4, 2]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">65</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJntGravityOffset[4, 3]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">66</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJntGravityOffset[4, 4]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">67</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupArmDynamics.g_setupJntGravityOffset[4, 5]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">68</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_gravityParam[4, 1]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">84</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_gravityParam[4, 2]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">85</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_gravityParam[4, 3]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">86</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_gravityParam[4, 4]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">87</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_gravityParam[4, 5]"</v>
+                  <v n="VarType" t="TypeClass">Real</v>
+                  <v n="VarTypeAsString">"REAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">88</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"REAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[4, 1]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">113</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[4, 2]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">114</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[4, 3]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">115</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[4, 4]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">116</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[4, 5]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">117</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[4, 6]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">118</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[4, 7]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">119</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveArmDynamics.g_slaveJntFriction[4, 8]"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">120</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+              </l>
+            </o>
+            <o n="LMGuids" t="LanguageModelGuidHelper">
+              <d n="NamesAndGuids" t="Hashtable" ckt="String" cvt="Guid">
+                <v>VALUESINIT</v>
+                <v>df55b08d-ccd4-4b11-81f1-810e561617f6</v>
+                <v>FILLDESCRIPTION</v>
+                <v>d7153ba2-931b-47bf-b450-034c55ff170f</v>
+                <v>NAMESET</v>
+                <v>738e2081-6344-40ee-8fac-153cd14d99e4</v>
+                <v>PRVFILLDATASERVERSTRUCTURES</v>
+                <v>93bc4a32-e431-45c3-85df-3e3b51c5f7bd</v>
+                <v>REC_DS_PRG__CFB1AF86BB554DFF97984472F0091701</v>
+                <v>10291c27-ca10-4d22-bb17-1cc361038741</v>
+                <v>NAME</v>
+                <v>92b2b701-c07b-4daf-b530-ba3f3837fa25</v>
+                <v>UPDATEFROMDESCRIPTION</v>
+                <v>1525bb05-ccf5-4191-a9b7-7523f66f34a2</v>
+                <v>WRITE</v>
+                <v>542f65b7-216c-49a7-a00b-df0d02c5bc17</v>
+                <v>READ</v>
+                <v>2386ec77-05b7-4bec-a91d-fa8524365158</v>
+              </d>
+            </o>
+          </o>
+        </Data>
+        <TypeList>
+          <Type n="ArrayList">System.Collections.ArrayList</Type>
+          <Type n="Guid">System.Guid</Type>
+          <Type n="Hashtable">System.Collections.Hashtable</Type>
+          <Type n="Int32">System.Int32</Type>
+          <Type n="LanguageModelGuidHelper">{3bce4913-f2c1-4b54-84e8-6d7ec1809176}</Type>
+          <Type n="RecipeDefinitionObject">{6b3dfb6a-1865-4356-a39b-1fe0ef89651c}</Type>
+          <Type n="RecipeList">{361612e3-b6f9-4397-98a8-756875b9e479}</Type>
+          <Type n="RecipeVariable">{53eb36d9-3360-453b-901e-ca88bd8f0cba}</Type>
+          <Type n="RecipeVariableList">{97841042-ff4f-47b5-923e-538f1387df5a}</Type>
+          <Type n="String">System.String</Type>
+          <Type n="TypeClass">{16f7aa24-038f-444e-9d81-b001bc091d35}</Type>
+        </TypeList>
+      </XmlArchive>
+    </RecipeDefinition>
+    <RecipeDefinition Name="arm4LinkEncValue" Id="{594bfe55-c13c-415d-b7dc-2e909fa4b1c4}">
+      <XmlArchive>
+        <Data>
+          <o xml:space="preserve" t="RecipeDefinitionObject">
+            <v n="UniqueIdGenerator">"529"</v>
+            <o n="Recipes" t="RecipeList">
+              <l n="Recipes" t="ArrayList" />
+            </o>
+            <o n="RecipeVariables" t="RecipeVariableList">
+              <l n="Variables" t="ArrayList" cet="RecipeVariable">
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_minLinkEncoder[4, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">139</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_minLinkEncoder[4, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">140</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_minLinkEncoder[4, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">141</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_minLinkEncoder[4, 4]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">142</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_minLinkEncoder[4, 5]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">143</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[4, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">249</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[4, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">250</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[4, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">251</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[4, 4]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">252</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[4, 5]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">253</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[4, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">274</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[4, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">275</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[4, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">276</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[4, 4]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">277</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[4, 5]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">278</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[4, 1]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">Int</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">294</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[4, 2]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">Int</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">295</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[4, 3]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">Int</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">296</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[4, 4]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">Int</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">297</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[4, 5]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">Int</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">298</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_minLinkEncoder[4, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">320</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_minLinkEncoder[4, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">321</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_minLinkEncoder[4, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">322</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_maxLinkEncoder[4, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">352</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_maxLinkEncoder[4, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">353</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_maxLinkEncoder[4, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">354</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[4, 1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">467</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"Invalid Type"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[4, 2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">469</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"Invalid Type"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[4, 3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">471</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"Invalid Type"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[4, 4]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">473</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"Invalid Type"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[4, 5]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">475</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"Invalid Type"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[4, 6]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">477</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"Invalid Type"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[4, 7]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">479</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"Invalid Type"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[4, 8]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">DInt</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">481</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"Invalid Type"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[4, 1]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">Int</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">514</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[4, 2]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">Int</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">515</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[4, 3]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">Int</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">516</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[4, 4]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">Int</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">517</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[4, 5]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">Int</v>
+                    <n n="LowerBound" />
+                    <n n="UpperBound" />
+                  </o>
+                  <v n="Id">518</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[4, 6]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">Int</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">519</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[4, 7]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">Int</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">520</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[4, 8]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">Int</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">521</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+              </l>
+            </o>
+            <o n="LMGuids" t="LanguageModelGuidHelper">
+              <d n="NamesAndGuids" t="Hashtable" ckt="String" cvt="Guid">
+                <v>VALUESINIT</v>
+                <v>d4a8cadc-8a68-4b24-9b0d-f6e4cfa787ad</v>
+                <v>FILLDESCRIPTION</v>
+                <v>ada4604c-e525-4d57-b5ca-8c0d82f1831e</v>
+                <v>NAMESET</v>
+                <v>c177b35a-0130-4fe1-ab4e-802d65620ac3</v>
+                <v>PRVFILLDATASERVERSTRUCTURES</v>
+                <v>f3d19942-4532-4dc6-98be-ad5ee8cc083f</v>
+                <v>NAME</v>
+                <v>037dcf40-ec18-4df9-8599-3c2240169a76</v>
+                <v>REC_DS_PRG__CAD63F31DBC844FCA34F377DFDDF72A8</v>
+                <v>1204a246-78ba-400a-af7d-c89cf772c1cd</v>
+                <v>UPDATEFROMDESCRIPTION</v>
+                <v>8396a4d3-a868-47a5-86b7-471c6af5161c</v>
+                <v>WRITE</v>
+                <v>9cee3420-e425-46c8-9ba0-347006a79900</v>
+                <v>READ</v>
+                <v>af8adcf4-1b7d-4d99-bc74-a62b5705a446</v>
+              </d>
+            </o>
+          </o>
+        </Data>
+        <TypeList>
+          <Type n="ArrayList">System.Collections.ArrayList</Type>
+          <Type n="Guid">System.Guid</Type>
+          <Type n="Hashtable">System.Collections.Hashtable</Type>
+          <Type n="Int32">System.Int32</Type>
+          <Type n="LanguageModelGuidHelper">{3bce4913-f2c1-4b54-84e8-6d7ec1809176}</Type>
+          <Type n="RecipeDefinitionObject">{6b3dfb6a-1865-4356-a39b-1fe0ef89651c}</Type>
+          <Type n="RecipeList">{361612e3-b6f9-4397-98a8-756875b9e479}</Type>
+          <Type n="RecipeVariable">{53eb36d9-3360-453b-901e-ca88bd8f0cba}</Type>
+          <Type n="RecipeVariableBoundaries">{27f9af88-23e7-4a13-82aa-c97c4e06a71a}</Type>
+          <Type n="RecipeVariableList">{97841042-ff4f-47b5-923e-538f1387df5a}</Type>
+          <Type n="String">System.String</Type>
+          <Type n="TypeClass">{16f7aa24-038f-444e-9d81-b001bc091d35}</Type>
+        </TypeList>
+      </XmlArchive>
+    </RecipeDefinition>
+    <RecipeDefinition Name="SlaveCartEncValue" Id="{0ddaec2c-5c6a-447c-9b3c-8afde0de24d1}">
+      <XmlArchive>
+        <Data>
+          <o xml:space="preserve" t="RecipeDefinitionObject">
+            <v n="UniqueIdGenerator">"32"</v>
+            <o n="Recipes" t="RecipeList">
+              <l n="Recipes" t="ArrayList" />
+            </o>
+            <o n="RecipeVariables" t="RecipeVariableList">
+              <l n="Variables" t="ArrayList" cet="RecipeVariable">
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_minLinkEncoder[1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">1</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_minLinkEncoder[2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">2</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_minLinkEncoder[3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">3</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_minLinkEncoder[4]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">4</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_minLinkEncoder[5]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">5</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_minLinkEncoder[6]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">6</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_minLinkEncoder[7]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">7</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_minLinkEncoder[8]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">8</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_maxLinkEncoder[1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">9</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_maxLinkEncoder[2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">10</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_maxLinkEncoder[3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">11</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_maxLinkEncoder[4]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">12</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_maxLinkEncoder[5]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">13</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_maxLinkEncoder[6]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">14</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_maxLinkEncoder[7]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">15</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_maxLinkEncoder[8]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">16</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_caliLinkEncoder[1]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">17</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_caliLinkEncoder[2]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">18</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_caliLinkEncoder[3]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">19</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_caliLinkEncoder[4]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">20</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_caliLinkEncoder[5]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">21</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_caliLinkEncoder[6]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">22</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_caliLinkEncoder[7]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">23</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_caliLinkEncoder[8]"</v>
+                  <v n="VarType" t="TypeClass">DInt</v>
+                  <v n="VarTypeAsString">"DINT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">24</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"DINT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_linkEncZeroCross[1]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">25</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_linkEncZeroCross[2]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">26</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_linkEncZeroCross[3]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">27</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_linkEncZeroCross[4]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">28</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_linkEncZeroCross[5]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">29</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_linkEncZeroCross[6]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">30</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_linkEncZeroCross[7]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">31</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+                <o>
+                  <v n="VarName">"GVL_CartJointEncoderCaliData.g_linkEncZeroCross[8]"</v>
+                  <v n="VarType" t="TypeClass">Int</v>
+                  <v n="VarTypeAsString">"INT"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">32</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"INT"</v>
+                </o>
+              </l>
+            </o>
+            <o n="LMGuids" t="LanguageModelGuidHelper">
+              <d n="NamesAndGuids" t="Hashtable" ckt="String" cvt="Guid">
+                <v>VALUESINIT</v>
+                <v>3c1f6ebc-b039-4c14-aa6e-b203dcd744e7</v>
+                <v>FILLDESCRIPTION</v>
+                <v>cd6f4920-0481-430e-83ef-b353addf949c</v>
+                <v>NAMESET</v>
+                <v>89bc79f0-b68d-4fc7-82c8-aef4842c45e0</v>
+                <v>PRVFILLDATASERVERSTRUCTURES</v>
+                <v>7d3f8b33-d71f-4e2e-8bb8-a6fcdc1d9dc1</v>
+                <v>REC_DS_PRG__5BD33948FAC247F3BCD7A0E6DA31CCE0</v>
+                <v>410e55ea-8ff5-414d-acc5-4550ad27387e</v>
+                <v>NAME</v>
+                <v>c5245ce1-3642-4d8e-a785-7fb4e8720823</v>
+                <v>UPDATEFROMDESCRIPTION</v>
+                <v>67c94a2b-f87c-49d2-a244-c5e1e1029f3c</v>
+                <v>WRITE</v>
+                <v>64fe314e-b0b5-4cbb-949c-01a3f4a34bf9</v>
+                <v>READ</v>
+                <v>23796086-460a-4626-b10a-86e78e723c77</v>
+              </d>
+            </o>
+          </o>
+        </Data>
+        <TypeList>
+          <Type n="ArrayList">System.Collections.ArrayList</Type>
+          <Type n="Guid">System.Guid</Type>
+          <Type n="Hashtable">System.Collections.Hashtable</Type>
+          <Type n="Int32">System.Int32</Type>
+          <Type n="LanguageModelGuidHelper">{3bce4913-f2c1-4b54-84e8-6d7ec1809176}</Type>
+          <Type n="RecipeDefinitionObject">{6b3dfb6a-1865-4356-a39b-1fe0ef89651c}</Type>
+          <Type n="RecipeList">{361612e3-b6f9-4397-98a8-756875b9e479}</Type>
+          <Type n="RecipeVariable">{53eb36d9-3360-453b-901e-ca88bd8f0cba}</Type>
+          <Type n="RecipeVariableList">{97841042-ff4f-47b5-923e-538f1387df5a}</Type>
+          <Type n="String">System.String</Type>
+          <Type n="TypeClass">{16f7aa24-038f-444e-9d81-b001bc091d35}</Type>
+        </TypeList>
+      </XmlArchive>
+    </RecipeDefinition>
+  </RecipeManager>
+</TcPlcObject>

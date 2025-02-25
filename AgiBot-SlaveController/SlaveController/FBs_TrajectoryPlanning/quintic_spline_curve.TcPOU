@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="quintic_spline_curve" Id="{d7a7a047-e938-4af1-ae38-721f9083a5b7}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK quintic_spline_curve
 VAR_INPUT

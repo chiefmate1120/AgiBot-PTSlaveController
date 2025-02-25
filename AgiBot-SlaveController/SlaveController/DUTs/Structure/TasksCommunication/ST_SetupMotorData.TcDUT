@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_SetupMotorData" Id="{3a547c09-558d-447b-b487-267d843980b9}">
+    <Declaration><![CDATA[TYPE ST_SetupMotorData :
+STRUCT
+	
+	m_setupMotorInput :ARRAY[1..g_sArmNum,1..g_setupJntNum] OF ST_MotorInputs;
+	
+	m_setupMotorOutput :ARRAY[1..g_sArmNum,1..g_setupJntNum] OF ST_MotorOutputs;
+	
+	//motor encoder salta value
+	m_motorEncSalta :ARRAY[1..g_sArmNum] OF Vec5di;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

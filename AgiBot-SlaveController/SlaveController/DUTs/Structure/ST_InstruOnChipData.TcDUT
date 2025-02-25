@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="ST_InstruOnChipData" Id="{24a5a89b-c2a6-4796-bae1-11e8082d9094}">
     <Declaration><![CDATA[TYPE ST_InstruOnChipData :
 STRUCT
@@ -12,7 +12,6 @@ STRUCT
 	
 	// current and max usage counts
 	m_InstruUsageCounts :ULINT;
-	m_InstrumaxUsageCounts :UINT:=20;
 	
 	//Instrument Zero augular offset
 	m_InstruPos:Vec5d;

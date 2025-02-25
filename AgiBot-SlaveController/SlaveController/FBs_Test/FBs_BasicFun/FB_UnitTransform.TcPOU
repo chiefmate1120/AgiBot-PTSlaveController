@@ -1,0 +1,306 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_UnitTransform" Id="{b2cab317-8158-4beb-a4e1-992e4900046c}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_UnitTransform
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="carArmUnit2User" Id="{018681f4-07e3-4c93-b65c-b6c37786ea2c}">
+      <Declaration><![CDATA[METHOD carArmUnit2User : Vec8d;
+VAR_INPUT
+	i_dataSystem:Vec8d;
+END_VAR
+
+VAR
+	i:INT;
+	unit_Transform:Vec8d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO 8 BY 1 DO
+	unit_Transform[i]:=g_rad2Deg;
+END_FOR
+unit_Transform[1]:=1000; //m to mm
+unit_Transform[2]:=1000; //m to mm
+unit_Transform[5]:=1000; //m to mm
+
+FOR i:=1 TO 8 BY 1 DO
+	carArmUnit2User[i]:=i_dataSystem[i]*unit_Transform[i];
+END_FOR
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="carUnit2System" Id="{488b7e86-25bf-46e5-9b24-28fd44813bcb}">
+      <Declaration><![CDATA[METHOD carUnit2System : Vec8d
+VAR_INPUT
+	i_dataTest:Vec8d;
+END_VAR
+VAR
+	i:INT;
+	unit_Transform:Vec8d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO 8 BY 1 DO
+	unit_Transform[i]:=g_deg2Rad;
+END_FOR
+unit_Transform[1]:=0.001; //mm to m
+unit_Transform[2]:=0.001; //mm to m
+unit_Transform[5]:=0.001; //mm to m
+
+FOR i:=1 TO 8 BY 1 DO
+	carUnit2System[i]:=i_dataTest[i]*unit_Transform[i];
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="setupArmUnit2System" Id="{b23d2ba9-378b-47ac-aaa8-6625d71dc347}">
+      <Declaration><![CDATA[METHOD setupArmUnit2System : Vec5d
+VAR_INPUT
+	i_dataTest:Vec5d;
+END_VAR
+VAR
+	i:INT;
+	unit_Transform:Vec5d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO 5 BY 1 DO
+	unit_Transform[i]:=g_deg2Rad;
+END_FOR
+unit_Transform[3]:=0.001; //mm to m
+
+FOR i:=1 TO 5 BY 1 DO
+	setupArmUnit2System[i]:=i_dataTest[i]*unit_Transform[i];
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="setupArmUnit2User" Id="{1f7e98d7-e190-4955-afd2-42c2ffd6ea9f}">
+      <Declaration><![CDATA[METHOD setupArmUnit2User : Vec5d;
+VAR_INPUT
+	i_dataSystem:Vec5d;
+END_VAR
+
+VAR
+	i:INT;
+	unit_Transform:Vec5d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO 5 BY 1 DO
+	unit_Transform[i]:=g_rad2Deg;
+END_FOR
+unit_Transform[3]:=1000; //m to mm
+
+FOR i:=1 TO 5 BY 1 DO
+	setupArmUnit2User[i]:=i_dataSystem[i]*unit_Transform[i];
+END_FOR
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="slaveArmUnit2System" Id="{ec1ab7d8-2bf3-4929-b0d3-f044bcca1269}">
+      <Declaration><![CDATA[METHOD slaveArmUnit2System : Vec6d
+VAR_INPUT
+	i_dataTest:Vec6d;
+END_VAR
+VAR
+	i:INT;
+	unit_Transform:Vec6d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO 6 BY 1 DO
+	unit_Transform[i]:=g_deg2Rad;
+END_FOR
+unit_Transform[3]:=0.001; //mm to m
+
+FOR i:=1 TO 6 BY 1 DO
+	slaveArmUnit2System[i]:=i_dataTest[i]*unit_Transform[i];
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="slaveArmUnit2SystemN8" Id="{cb460ae7-4551-4490-bddf-66e780cc7698}">
+      <Declaration><![CDATA[METHOD slaveArmUnit2SystemN8 : Vec8d
+VAR_INPUT
+	i_dataTest:Vec8d;
+END_VAR
+VAR
+	i:INT;
+	unit_Transform:Vec8d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO 8 BY 1 DO
+	unit_Transform[i]:=g_deg2Rad;
+END_FOR
+unit_Transform[3]:=0.001; //mm to m
+
+FOR i:=1 TO 8 BY 1 DO
+	slaveArmUnit2SystemN8[i]:=i_dataTest[i]*unit_Transform[i];
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="slaveArmUnit2User" Id="{91aba2c5-e9a8-463e-8027-226986584c3f}">
+      <Declaration><![CDATA[METHOD slaveArmUnit2User : Vec6d;
+VAR_INPUT
+	i_dataSystem:Vec6d;
+END_VAR
+
+VAR
+	i:INT;
+	unit_Transform:Vec6d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO 6 BY 1 DO
+	unit_Transform[i]:=g_rad2Deg;
+END_FOR
+unit_Transform[3]:=1000; //m to mm
+
+FOR i:=1 TO 6 BY 1 DO
+	slaveArmUnit2User[i]:=i_dataSystem[i]*unit_Transform[i];
+END_FOR
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="slaveArmUnit2UserN8" Id="{74ef93ae-52c5-4302-93d0-d2c8c188dad7}">
+      <Declaration><![CDATA[METHOD slaveArmUnit2UserN8 : Vec8d;
+VAR_INPUT
+	i_dataSystem:Vec8d;
+END_VAR
+
+VAR
+	i:INT;
+	unit_Transform:Vec8d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO 8 BY 1 DO
+	unit_Transform[i]:=g_rad2Deg;
+END_FOR
+unit_Transform[3]:=1000; //m to mm
+
+FOR i:=1 TO 8 BY 1 DO
+	slaveArmUnit2UserN8[i]:=i_dataSystem[i]*unit_Transform[i];
+END_FOR
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="spacePos2System" Id="{778ab550-36ad-480d-bda2-836266480f89}">
+      <Declaration><![CDATA[METHOD spacePos2System : Vec6d;
+VAR_INPUT
+	i_dataSystem:Vec6d;
+END_VAR
+
+VAR
+	i:INT;
+	unit_Transform:Vec6d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO 6 BY 1 DO
+	IF (i<=3) THEN
+		unit_Transform[3]:=0.001; //mm to m
+	ELSE
+		unit_Transform[i]:=g_deg2Rad;
+	END_IF	
+END_FOR
+
+FOR i:=1 TO 6 BY 1 DO
+	spacePos2System[i]:=i_dataSystem[i]*unit_Transform[i];
+END_FOR
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="spacePos2User" Id="{cd215b84-9cfc-46d7-9d96-484cee1a79cc}">
+      <Declaration><![CDATA[METHOD spacePos2User : Vec6d;
+VAR_INPUT
+	i_dataSystem:Vec6d;
+END_VAR
+
+VAR
+	i:INT;
+	unit_Transform:Vec6d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO 6 BY 1 DO
+	IF (i<=3) THEN
+		unit_Transform[3]:=1000; //m to mm
+	ELSE
+		unit_Transform[i]:=g_rad2Deg;
+	END_IF	
+END_FOR
+
+FOR i:=1 TO 6 BY 1 DO
+	spacePos2User[i]:=i_dataSystem[i]*unit_Transform[i];
+END_FOR
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_UnitTransform">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_UnitTransform.carArmUnit2User">
+      <LineId Id="46" Count="2" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="49" Count="5" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_UnitTransform.carUnit2System">
+      <LineId Id="49" Count="2" />
+      <LineId Id="64" Count="1" />
+      <LineId Id="52" Count="4" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_UnitTransform.setupArmUnit2System">
+      <LineId Id="13" Count="7" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_UnitTransform.setupArmUnit2User">
+      <LineId Id="46" Count="8" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_UnitTransform.slaveArmUnit2System">
+      <LineId Id="13" Count="7" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_UnitTransform.slaveArmUnit2SystemN8">
+      <LineId Id="13" Count="7" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_UnitTransform.slaveArmUnit2User">
+      <LineId Id="46" Count="8" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_UnitTransform.slaveArmUnit2UserN8">
+      <LineId Id="46" Count="8" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_UnitTransform.spacePos2System">
+      <LineId Id="46" Count="0" />
+      <LineId Id="63" Count="1" />
+      <LineId Id="66" Count="1" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="50" Count="4" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_UnitTransform.spacePos2User">
+      <LineId Id="46" Count="0" />
+      <LineId Id="63" Count="1" />
+      <LineId Id="66" Count="1" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="50" Count="4" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

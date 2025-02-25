@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SetupCtrlInit" Id="{eac05193-39e5-4249-a95b-72d2422e8330}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Setup Arm Init
 FUNCTION_BLOCK PUBLIC FB_SetupCtrlInit EXTENDS FB_SetupArmCtrlBase

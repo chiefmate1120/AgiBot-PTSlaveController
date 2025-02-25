@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_JointBase" Id="{9ce08388-a134-4497-8af1-f051329728ca}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_JointBase
 VAR_INPUT
@@ -109,10 +109,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_motorOutputs.m_controlWord:=DriverCtrlWord_INIT;
-IF GVL_interactUI.g_uiFaultReset=1 OR SafetyCheck.m_masterRobotData.m_uiResetFault = 1 THEN
-	m_motorOutputs.m_controlWord:=DriverCtrlWord_FaultReset;
-END_IF
-disable:=true;]]></ST>
+disable:=TRUE;]]></ST>
       </Implementation>
     </Method>
     <Method Name="enable" Id="{cf1e8549-8fbc-49c1-a41e-ead1f2db1255}">
@@ -404,7 +401,7 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_JointBase.disable">
-      <LineId Id="10" Count="3" />
+      <LineId Id="10" Count="0" />
       <LineId Id="6" Count="0" />
     </LineIds>
     <LineIds Name="FB_JointBase.enable">

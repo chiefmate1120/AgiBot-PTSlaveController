@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_trajBase" Id="{f82b2b7b-78c8-43b3-8920-9f856daa52d8}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_trajBase
 VAR_INPUT

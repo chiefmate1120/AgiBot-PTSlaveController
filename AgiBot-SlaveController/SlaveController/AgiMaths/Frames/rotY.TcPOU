@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="rotY" Id="{4642df8a-62fa-4796-b707-eab077d12800}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION rotY : mat3d
 VAR_INPUT

@@ -7,6 +7,9 @@
     <PouCall>
       <Name>SlaveArmControl</Name>
     </PouCall>
+    <PouCall>
+      <Name>MainTestPart</Name>
+    </PouCall>
     <TaskFBGuid>{755ecddb-093d-4e5e-8220-f08b740490a4}</TaskFBGuid>
     <Fb_init>{d215542e-0e38-49ed-b8f2-54eedd2217ca}</Fb_init>
     <Fb_exit>{9e9eff68-98b3-4481-a505-6b84ce928437}</Fb_exit>

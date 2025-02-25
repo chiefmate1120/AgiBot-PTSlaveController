@@ -1,0 +1,333 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_SlaveCtrlResponseTest" Id="{640a3f83-915c-4162-96a6-3f9dace817e1}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Slave Arm test
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlResponseTest EXTENDS FB_SlaveArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	//frequency test flag	
+	m_freqTestFlag :ARRAY[1..6] OF BOOL;
+	
+	//step test flag
+	m_stepTestFlag :ARRAY[1..6] OF BOOL;
+	
+	//init DH joint position
+	m_initDHJntPos :Vec6d;
+	
+	//target DH joint position
+	m_targetDHJntPos :Vec6d;
+	
+	//target DH joint position
+	m_targetDHJntVel :Vec6d;
+	
+	//joint motion frequency
+	m_jntMotionFreq :Vec6d :=[0.2, 0.2, 0.1, 3(0.1)];
+	
+	//joint motion range
+	m_jntMotionRange :Vec6d :=[pi/6, pi/6, 0.1, 3(pi/6)];
+	
+	//test joint id
+	m_testJntIdx :INT :=1;	
+	
+	//step test joint angle
+	m_jntStep : LREAL := 3*g_deg2Rad;
+	
+	//arm step test cycle
+	m_stepCycle:LREAL:=5;
+	
+	//step test direction
+	m_stepTestDir :ARRAY[1..6] OF INT:=[1,1,1,1,1,1];
+	
+	//cycle time
+	m_cycleTime:LREAL:=5;
+	
+	//timer
+	m_time:LREAL;
+	
+	//parameters init flag
+	m_paramInitFlag,m_paramInitFlagLast:BOOL;
+	
+	//start motion flag
+	m_startMotion,m_startMotionLast:BOOL;
+	
+	//test step
+	m_testStep:INT:=-1;
+	
+	//last command position
+	m_lastCmdJntPos:Vec8d;
+	
+	// simulated DH joint position
+	m_simDHJntPos : Vec6d;
+	
+	// simulated slave twist of DH joint
+	m_simDHJointVel :Vec6d;
+	
+	// commmand yaw angle and velocity
+	m_cmdYawAngle :LREAL;
+	m_cmdYawVel :LREAL;
+	
+	// instrument controller
+	m_basicInstruController : FB_BasicInstruControl;
+	
+	// slave command grip angle and grip force level
+	m_slaveCmdGripAngle :LREAL;
+	m_slaveCmdGripForceLevel:LREAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="armJntTest" Id="{d9baf111-002b-40c7-b14b-20ccef3a9e53}">
+      <Declaration><![CDATA[METHOD armJntTest : BOOL
+VAR_INPUT
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+CASE m_testStep OF 
+	0://init the parameters
+		m_initDHJntPos:=i_slaveArm.curDHJntPos;
+		m_cmdJntPos:=i_slaveArm.curJntPos;		
+		m_lastCmdJntPos:=m_cmdJntPos;
+		m_cmdJntVel:=g_zeroVec8d;
+		m_time:=0;
+		IF (m_testJntIdx >=1 AND m_testJntIdx <=6) THEN
+			m_testStep:=10;
+		END_IF		
+		
+	
+	10:// start the motion
+		m_time:=m_time+g_slaveArmCtrlCycleTime;
+		
+		//frequency test
+		IF (m_freqTestFlag[m_testJntIdx]=TRUE) THEN 
+			m_targetDHJntPos[m_testJntIdx]:=m_initDHJntPos[m_testJntIdx]+m_jntMotionRange[m_testJntIdx]/2
+												+0.5*m_jntMotionRange[m_testJntIdx]*SIN(2*pi*m_jntMotionFreq[m_testJntIdx]*m_time-pi/2);
+			m_targetDHJntVel[m_testJntIdx]:=0.5*m_jntMotionRange[m_testJntIdx]*2*pi*m_jntMotionFreq[m_testJntIdx]*COS(2*pi*m_jntMotionFreq[m_testJntIdx]*m_time-pi/2);
+		END_IF
+		
+		//step test
+		IF (m_stepTestFlag[m_testJntIdx]=TRUE) THEN
+			IF (m_time>m_cycleTime) THEN	
+				m_time:=0;			
+				IF (m_stepTestDir[m_testJntIdx]=1) THEN
+					m_stepTestDir[m_testJntIdx]:=-1;
+				ELSE
+					m_stepTestDir[m_testJntIdx]:=1;
+				END_IF
+				//update the target joint position
+				m_targetDHJntPos[m_testJntIdx]:=m_initDHJntPos[m_testJntIdx]+0.5*m_jntStep*m_stepTestDir[m_testJntIdx];
+				m_targetDHJntVel[m_testJntIdx]:=0;
+			END_IF		
+		END_IF
+		
+		// calculate target motor joint position/velocity from DH joint position
+		m_simDHJntPos:=m_targetDHJntPos;
+		m_simDHJointVel:=m_targetDHJntVel;
+		i_slaveArm.instrument.instruIK(m_targetDHJntPos,0, o_jntPos=>m_cmdJntPos);
+		
+		// compute command joint velocity
+		vecSub(m_cmdJntPos, m_lastCmdJntPos, m_cmdJntVel);
+		vecSelfMultiNum(m_cmdJntVel, g_slaveArmCtrlFreq);
+		m_lastCmdJntPos:=m_cmdJntPos;
+		
+		//finish the test
+		IF (m_startMotion=FALSE) THEN
+			m_testStep:=20;
+		END_IF
+		
+		
+	20://finish signal
+		m_testStep:=-1;
+		
+	
+	-1: //
+END_CASE
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdJntPos" Id="{22feec14-36e8-43db-bbdf-f70b11050ffc}">
+      <Declaration><![CDATA[METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR 
+	//
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+//init parameters flag
+IF (m_startMotionLast=FALSE) AND (m_startMotion=TRUE)THEN
+	m_testStep:=0;
+END_IF
+m_startMotionLast:=m_startMotion;
+
+//frequency test and step test
+armJntTest(i_slaveArm);
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdJntTrq" Id="{bda90996-bd64-4dc2-a0be-75a556939603}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntTrq : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR 
+	i:INT;
+	instruCmdJntPos, instruCmdJntVel : Vec5d;	
+	instruJntCtrlTrq :Vec5d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// set joint torque to zero in default
+m_cmdJntTrq := g_zeroVec8d;
+
+// instrument joint control
+FOR i:=1 TO 5 DO 
+	instruCmdJntPos[i]:=m_cmdJntPos[i+3];
+	instruCmdJntVel[i]:=m_cmdJntVel[i+3];
+END_FOR
+m_cmdYawAngle := m_simDHJntPos[6];
+m_cmdYawVel := m_simDHJointVel[6];
+
+m_basicInstruController.run(instruCmdJntPos,instruCmdJntVel, m_cmdYawAngle, m_cmdYawVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
+FOR i:=1 TO 5 DO
+	m_cmdJntTrq[i+3]:=instruJntCtrlTrq[i];
+END_FOR
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{f2577074-2358-4a2e-9512-accf337ec1df}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+
+(*
+m_jntOPMode[1] := DriverOPMode_PosTrq;
+m_jntOPMode[2] := DriverOPMode_PosTrq;
+m_jntOPMode[3] := DriverOPMode_PosTrq;
+m_jntOPMode[4] := DriverOPMode_Trq;
+m_jntOPMode[5] := DriverOPMode_Trq;
+m_jntOPMode[6] := DriverOPMode_Trq;
+m_jntOPMode[7] := DriverOPMode_Trq;
+m_jntOPMode[8] := DriverOPMode_Trq;
+*)
+
+// update commands to arm
+copyCmds(r_slaveArmCtrlCmd);
+
+// init controller
+m_basicInstruController.init(i_slaveArm);
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveCtrlResponseTest">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlResponseTest.armJntTest">
+      <LineId Id="112" Count="0" />
+      <LineId Id="7" Count="1" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="105" Count="1" />
+      <LineId Id="58" Count="3" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="19" Count="1" />
+      <LineId Id="56" Count="1" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="72" Count="2" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="62" Count="2" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="83" Count="3" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="89" Count="1" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="117" Count="1" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="102" Count="2" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="107" Count="2" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="114" Count="1" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlResponseTest.calcCmdJntPos">
+      <LineId Id="332" Count="0" />
+      <LineId Id="343" Count="0" />
+      <LineId Id="333" Count="1" />
+      <LineId Id="340" Count="0" />
+      <LineId Id="338" Count="0" />
+      <LineId Id="335" Count="0" />
+      <LineId Id="345" Count="0" />
+      <LineId Id="342" Count="0" />
+      <LineId Id="347" Count="1" />
+      <LineId Id="113" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlResponseTest.calcCmdJntTrq">
+      <LineId Id="195" Count="9" />
+      <LineId Id="177" Count="0" />
+      <LineId Id="208" Count="3" />
+      <LineId Id="207" Count="0" />
+      <LineId Id="213" Count="0" />
+      <LineId Id="212" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlResponseTest.init">
+      <LineId Id="13" Count="0" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="86" Count="6" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="110" Count="1" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

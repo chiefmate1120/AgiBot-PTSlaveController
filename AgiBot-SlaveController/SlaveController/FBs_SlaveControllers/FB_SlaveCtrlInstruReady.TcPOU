@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlInstruReady" Id="{b4863c0c-c549-4967-ab29-6a1152ef3cd8}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Instrument Ready
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlInstruReady EXTENDS FB_SlaveArmCtrlBase

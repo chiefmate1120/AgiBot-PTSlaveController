@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlStop" Id="{03e7bf18-07e1-493d-b46e-00a7fc843560}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm Joint1-3 decelerate to stop
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlStop EXTENDS FB_SlaveArmCtrlBase
@@ -141,6 +141,9 @@ END_VAR
     <LineIds Name="FB_SlaveCtrlStop.init">
       <LineId Id="186" Count="23" />
       <LineId Id="74" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlStop.setInstruBacklash">
+      <LineId Id="2" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

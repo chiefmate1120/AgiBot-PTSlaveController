@@ -1,0 +1,508 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_SlaveCtrlCycleTest" Id="{81d205fb-0875-4a86-a828-a1e7ff543989}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveCtrlCycleTest EXTENDS FB_SlaveArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	//arm id
+	m_armId:INT;			
+	
+	//test step
+	m_testStep:INT:=-1;
+	
+	//DH joint position	
+	m_homeDHJntPos,m_startDHJntPos,m_endDHJntPos:Vec6d;
+	
+	//startJntPos,endJntPos :Vec8d;
+	m_initJntPos,m_startJntPos,m_endJntPos :Vec8d;
+	
+	//motion distance
+	m_motDist:Vec8d;
+	
+	//motion parameters
+	m_maxjntVel,m_maxjntAcc,m_maxjntJerk:Vec8d;
+	
+	//time
+	m_time:LREAL;
+		
+	//test point
+	m_pointNum:INT;
+	
+	//motion start
+	m_startMotion:BOOL;
+	m_startMotionLast:BOOL;
+	
+	//joint position gap
+	m_jntDist:Vec6d:=[30.0*g_deg2Rad,30.0*g_deg2Rad,0.030,30.0*g_deg2Rad,30.0*g_deg2Rad,30.0*g_deg2Rad];	
+	
+	//Trajectory planner
+	m_Planner: FB_TrajMoveJ;
+	
+	//target joint position
+	m_targetJntPos:ARRAY[1..10] OF Vec6d;
+	
+	//point sum
+	m_pointSum:INT;
+	
+	//target cycle number
+	m_motionCycleNum:INT;
+	m_targetCycleNum:INT;
+	
+	//unit function
+	m_unitFun:FB_UnitTransform;
+	
+	//current cycle time---second
+	m_curCycleTime:LREAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{e765b525-c56e-4df7-9941-bd0b34c07d3f}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	// endoscope pose in cart coordinate
+	i_endoscopePose : ST_Frame;
+	
+	// master arm data
+	i_masterStatus :ST_MasterStatus;
+	
+	// setup arm data
+	i_setupStatus: ST_SetupStatus;
+	
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	//
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+//init parameters flag
+IF (g_cycleTest.m_enterESDTest[m_armId]=TRUE) THEN
+	m_startMotion:=TRUE;
+ELSE
+	m_startMotion:=g_cycleTest.m_startMotion[m_armId];	
+END_IF
+
+//joint enable
+m_jntEnableFlag:=g_cycleTest.m_jntEnable[m_armId];
+
+//monitoring signal rising edge
+//m_startMotion:=g_cycleTest.m_startMotion[m_armId];
+IF (m_startMotionLast=FALSE) AND (m_startMotion=TRUE)THEN
+	m_testStep:=0;
+END_IF
+m_startMotionLast:=m_startMotion;
+
+//frequency test and step test
+testMotion(i_slaveArm);
+
+//update the information
+updateInfo(i_slaveArm);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{a68df1fd-fda0-4f57-b897-de892ee6d53d}">
+      <Declaration><![CDATA[// override this function in each exact controller
+// NOTICE: set joint control mode here, and do some initialization if needed
+METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+
+VAR
+	i:INT;
+	targetJntPos:Vec8d;
+	angle:LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+
+//joint enable
+m_jntEnableFlag :=g_cycleTest.m_jntEnable[i_slaveArm.armIdx];
+copyCmds(r_slaveArmCtrlCmd);
+
+
+//variable initialization
+m_armId:=i_slaveArm.armIdx;
+m_startMotionLast:=FALSE;
+
+//joint enable
+g_cycleTest.m_jntEnable[m_armId]:=g_onesVec8i;
+
+
+//velocity---acceleration---jerk
+vecMultiNum(GVL_SlaveMotorParameters.g_maxJntVel,0.2,m_maxjntVel);
+vecMultiNum(m_maxjntVel,3,m_maxjntAcc);
+vecMultiNum(m_maxjntAcc,3,m_maxjntJerk);
+
+
+//target DH joint position
+m_homeDHJntPos:=GVL_Const.g_originJntPos;
+FOR i:=1 TO 6 BY 1 DO
+	m_homeDHJntPos[i]:=i_slaveArm.curDHJntPos[i];
+	//m_jntDist[i]:=(GVL_SlaveMotorParameters.g_maxJntPos[i]-GVL_SlaveMotorParameters.g_minJntPos[i])*0.1;
+	m_startDHJntPos[i]:=m_homeDHJntPos[i]-m_jntDist[i];
+	m_endDHJntPos[i]:=m_homeDHJntPos[i]+m_jntDist[i];
+END_FOR
+
+
+//variable test point number
+IF (g_cycleTest.m_enterESDTest[m_armId]=FALSE) THEN
+	m_pointSum:=g_cycleTest.m_pointSum[m_armId];
+	m_targetCycleNum:=g_cycleTest.m_targetCycleNum[m_armId];
+	FOR i:=1 TO 10 BY 1 DO
+		targetJntPos:=m_unitFun.slaveArmUnit2SystemN8(i_dataTest:= g_cycleTest.m_targetJntPos[m_armId,i]);
+		i_slaveArm.instrument.instruFK(targetJntPos,m_targetJntPos[i],angle);
+	END_FOR	
+ELSE
+	m_pointSum:=3;
+	m_targetCycleNum:=30000;
+	m_targetJntPos[1]:=m_startDHJntPos; 	m_targetJntPos[2]:=m_homeDHJntPos;	m_targetJntPos[3]:=m_endDHJntPos;
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="testMotion" Id="{19b26b72-892d-4dd3-8aad-e8216d36cbf9}">
+      <Declaration><![CDATA[METHOD testMotion : BOOL
+VAR_INPUT
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR
+	homeDHPos,startDHPos,endDHPos :Vec6d;
+	i:INT;
+	targetJntPos:Vec8d;
+	angle:LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+CASE m_testStep OF
+	0: //init
+		IF (g_cycleTest.m_enterESDTest[m_armId]=FALSE) THEN
+			m_pointSum:=g_cycleTest.m_pointSum[m_armId];
+			m_targetCycleNum:=g_cycleTest.m_targetCycleNum[m_armId];
+			FOR i:=1 TO 10 BY 1 DO
+				targetJntPos:=m_unitFun.slaveArmUnit2SystemN8(i_dataTest:= g_cycleTest.m_targetJntPos[m_armId,i]);
+				i_slaveArm.instrument.instruFK(targetJntPos,m_targetJntPos[i],angle);
+			END_FOR
+		END_IF
+	
+		m_maxjntVel:=m_unitFun.slaveArmUnit2SystemN8(i_dataTest:=g_cycleTest.m_targetJntVelN8[m_armId]);
+		FOR i:=1 TO 8 BY 1 DO
+			IF ABS(m_maxjntVel[i])<g_smallNum THEN
+				m_maxjntVel[i]:=g_cycleTest.m_defultTargetJntVel[i];
+			END_IF
+		END_FOR
+		vecMultiNum(m_maxjntVel,3,m_maxjntAcc);
+		vecMultiNum(m_maxjntAcc,3,m_maxjntJerk);
+		
+		m_pointNum:=1;		
+		m_motionCycleNum:=0;	
+		m_curCycleTime:=0;
+		m_testStep:=10;
+		
+		
+	10: //Trajectory parameter initialization
+		startDHPos:=i_slaveArm.curDHJntPos;
+		endDHPos:=m_targetJntPos[m_pointNum];		
+		i_slaveArm.instrument.instruIK(startDHPos,0, o_jntPos=>m_startJntPos);
+		i_slaveArm.instrument.instruIK(endDHPos,0, o_jntPos=>m_endJntPos);
+		
+		//add code for test
+		targetJntPos:=m_unitFun.slaveArmUnit2SystemN8(i_dataTest:= g_cycleTest.m_targetJntPos[m_armId,m_pointNum]);
+		FOR i:=4 TO 8 BY 1 DO
+			m_startJntPos[i]:=i_slaveArm.curJntPos[i];
+			m_endJntPos[i]:=targetJntPos[i];
+		END_FOR
+		
+		//motion distance judgement
+		vecSub(m_endJntPos,m_startJntPos,m_motDist);
+		IF (norm(m_motDist)<g_smallNum) THEN
+			m_testStep:=21;
+			RETURN;
+		END_IF
+		
+		m_Planner.init(i_startJntPos:= m_startJntPos, 	i_targetJntPos:= m_endJntPos, 	i_maxJntVel:= m_maxjntVel, 	i_maxJntAcc:= m_maxjntAcc, 	i_maxJntJerk:= m_maxjntJerk);
+		IF (m_Planner.isGene=FALSE) THEN
+			m_testStep:=30;
+		ELSE
+			m_time:=0; m_testStep:=20;
+		END_IF
+		
+		
+	20: //start motion
+		IF (g_cycleTest.m_pause[m_armId]=TRUE) THEN			
+			RETURN;
+		END_IF
+		
+		//end the motion
+		IF (g_cycleTest.m_finish[m_armId]=TRUE) THEN
+			g_cycleTest.m_finish[m_armId]:=FALSE;
+			m_testStep:=30;
+			RETURN;
+		END_IF	
+		
+		//end the motion
+		IF (m_startMotion=FALSE) THEN
+			m_testStep:=30;
+		END_IF
+				
+		//motion duration
+		m_time:=m_time+g_slaveArmCtrlCycleTime;
+		m_Planner.evaluate(t:= m_time, jntPos=> m_cmdJntPos, jntVel=> m_cmdJntVel, jntAcc=> m_cmdJntAcc);
+		IF (m_time>m_Planner.duration) THEN
+			m_testStep:=21;			
+		END_IF	
+		
+				
+		
+	21: //Synchronize the movement of the adjustment arm and surgical arm		
+		IF (g_cycleTest.m_enterESDTest[m_armId]=FALSE) THEN
+			IF (g_cycleTest.m_stepNumSetup[m_armId]=21) THEN
+				g_cycleTest.m_arrived[m_armId]:=TRUE;
+				m_testStep:=25;
+			END_IF	
+			//m_testStep:=25;		
+		ELSE
+			m_testStep:=25;
+		END_IF		
+				
+		//start motion
+		IF (g_cycleTest.m_pause[m_armId]=TRUE) THEN			
+			RETURN;
+		END_IF
+		
+		//end the motion
+		IF (g_cycleTest.m_finish[m_armId]=TRUE) THEN
+			g_cycleTest.m_finish[m_armId]:=FALSE;
+			m_testStep:=30;
+			RETURN;
+		END_IF	
+		
+		//end the motion
+		IF (m_startMotion=FALSE) THEN
+			m_testStep:=30;
+		END_IF
+		
+		
+	25: //Record the motion cycle
+		m_pointNum:=m_pointNum+1;
+		IF (m_pointNum>m_pointSum) THEN
+			m_pointNum:=1;
+			m_motionCycleNum:=m_motionCycleNum+1;
+			//IF (m_motionCycleNum>m_targetCycleNum) THEN
+			IF (g_cycleTest.m_curCycleTime[m_armId]>g_cycleTest.m_tgtCycleTime[m_armId]) THEN
+				m_testStep:=30;
+			ELSE
+				m_testStep:=10;
+			END_IF
+		ELSE
+			m_testStep:=10;
+		END_IF	
+		
+		
+	30: //end the motion
+		m_testStep:=-1;		
+END_CASE
+m_curCycleTime:=m_curCycleTime+g_slaveArmCtrlCycleTime;
+
+
+//feedback the information to ui
+g_cycleTest.m_curPointNum[m_armId]:=m_pointNum;
+g_cycleTest.m_curCycleNum[m_armId]:=m_motionCycleNum;
+g_cycleTest.m_stepNum[m_armId]:=m_testStep;
+g_cycleTest.m_curCycleTime[m_armId]:=m_curCycleTime/3600;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="updateInfo" Id="{2c3bedc5-efa1-409d-9953-1b6bffd89a98}">
+      <Declaration><![CDATA[METHOD updateInfo : BOOL
+VAR_INPUT
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR
+	i:INT;
+	targetJntPos:Vec8d;
+	angle:LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+FOR i:=1 TO g_sJntNum BY 1 DO
+	g_cycleTest.m_slaveArmMotorEncoder[m_armId][i]:=i_slaveArm.m_joints[i].m_motorInputs.m_motorEncoder;
+	g_cycleTest.m_slaveArmjntEncoder[m_armId][i]:=i_slaveArm.m_joints[i].m_motorInputs.m_linkEncoder;
+END_FOR
+
+//update the joint position
+g_cycleTest.m_actJntPos[m_armId]:=m_unitFun.slaveArmUnit2UserN8(i_dataSystem:= i_slaveArm.curJntPos);
+
+
+//cover the target joint position
+IF (g_cycleTest.m_coverCmdPos[m_armId]=TRUE) THEN
+	i:=g_cycleTest.m_pntIdForCoverCmd[m_armId];
+	IF (i>=1) AND (i<=10) THEN		
+		g_cycleTest.m_targetJntPos[m_armId,i]:=m_unitFun.slaveArmUnit2UserN8(i_dataSystem:= i_slaveArm.curJntPos);
+		targetJntPos:=i_slaveArm.curJntPos;
+		i_slaveArm.instrument.instruFK(targetJntPos,m_targetJntPos[i],angle);
+	END_IF
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveCtrlCycleTest">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlCycleTest.calcCmdJntPos">
+      <LineId Id="18" Count="1" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="65" Count="3" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="22" Count="8" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="106" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlCycleTest.init">
+      <LineId Id="21" Count="1" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="111" Count="1" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="25" Count="1" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="144" Count="2" />
+      <LineId Id="85" Count="1" />
+      <LineId Id="88" Count="2" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="30" Count="1" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="92" Count="4" />
+      <LineId Id="104" Count="1" />
+      <LineId Id="98" Count="4" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="68" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlCycleTest.testMotion">
+      <LineId Id="9" Count="1" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="268" Count="6" />
+      <LineId Id="264" Count="0" />
+      <LineId Id="267" Count="0" />
+      <LineId Id="204" Count="0" />
+      <LineId Id="206" Count="4" />
+      <LineId Id="212" Count="0" />
+      <LineId Id="202" Count="1" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="225" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="71" Count="1" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="246" Count="0" />
+      <LineId Id="252" Count="0" />
+      <LineId Id="248" Count="1" />
+      <LineId Id="253" Count="0" />
+      <LineId Id="250" Count="0" />
+      <LineId Id="247" Count="0" />
+      <LineId Id="156" Count="4" />
+      <LineId Id="152" Count="0" />
+      <LineId Id="155" Count="0" />
+      <LineId Id="14" Count="8" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="96" Count="2" />
+      <LineId Id="176" Count="0" />
+      <LineId Id="99" Count="3" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="173" Count="2" />
+      <LineId Id="170" Count="1" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="23" Count="1" />
+      <LineId Id="104" Count="1" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="130" Count="1" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="142" Count="0" />
+      <LineId Id="140" Count="1" />
+      <LineId Id="193" Count="0" />
+      <LineId Id="136" Count="1" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="177" Count="1" />
+      <LineId Id="180" Count="12" />
+      <LineId Id="162" Count="0" />
+      <LineId Id="169" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="109" Count="5" />
+      <LineId Id="226" Count="0" />
+      <LineId Id="115" Count="5" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="30" Count="2" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="122" Count="0" />
+      <LineId Id="236" Count="0" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="125" Count="1" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="223" Count="0" />
+      <LineId Id="138" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlCycleTest.updateInfo">
+      <LineId Id="7" Count="2" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="26" Count="1" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="39" Count="7" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

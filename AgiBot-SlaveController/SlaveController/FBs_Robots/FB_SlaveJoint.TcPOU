@@ -10,6 +10,8 @@ VAR
 	// power box joint motor rated current
 	m_wristJntRatedCurrent : DINT := 200;
 
+	//motor hall angle and encoder angle;   
+	m_hallAngleAndEncoderAngle AT %I* : UDINT;
 END_VAR
 
 ]]></Declaration>
@@ -33,21 +35,9 @@ m_jntIdx:=i_jntIdx;
 m_cycleTime := i_controlCycleTime;
 m_velCalcCycles :=MAX(i_velCalcCycles,1);
 
-IF m_armIdx =3 THEN
-	m_linkEncoderRes :=GVL_SlaveMotorParameters.g_absEncoderResFR[i_jntIdx];
-	m_linkEncoderDir :=GVL_SlaveJointEncoderCaliData.g_asbEncoderDirFR[i_jntIdx];
-	m_linkEncLimitBuffer := GVL_SlaveJointEncoderCaliData.g_linkEncLimitBufferFR[i_jntIdx];
-ELSE
-	m_linkEncoderRes :=GVL_SlaveMotorParameters.g_absEncoderRes[i_jntIdx];
-	m_linkEncoderDir :=GVL_SlaveJointEncoderCaliData.g_asbEncoderDir[i_jntIdx];
-
-	m_linkEncLimitBuffer := GVL_SlaveJointEncoderCaliData.g_linkEncLimitBuffer[i_jntIdx];
-END_IF
-
-
 // hardware parameters
 m_motorEncoderRes :=GVL_SlaveMotorParameters.g_incEncoderRes[i_jntIdx];
-//m_linkEncoderRes :=GVL_SlaveMotorParameters.g_absEncoderRes[i_jntIdx];
+m_linkEncoderRes :=GVL_SlaveMotorParameters.g_absEncoderRes[i_jntIdx];
 m_motorReduction :=GVL_SlaveMotorParameters.g_motorReduction[i_jntIdx];
 m_linkEncoderReduction :=GVL_SlaveMotorParameters.g_absEncoderReduction[i_jntIdx];
 m_trqConst :=GVL_SlaveMotorParameters.g_motorTrqConst[i_jntIdx];
@@ -57,7 +47,8 @@ m_minJntPos	:=GVL_SlaveMotorParameters.g_minJntPos[i_jntIdx];
 m_maxJntPos	:=GVL_SlaveMotorParameters.g_maxJntPos[i_jntIdx];
 
 //link encoder calibartion data
-//m_linkEncoderDir :=GVL_SlaveJointEncoderCaliData.g_asbEncoderDir[i_jntIdx];
+m_linkEncoderDir :=GVL_SlaveJointEncoderCaliData.g_asbEncoderDir[i_jntIdx];
+m_linkEncLimitBuffer := GVL_SlaveJointEncoderCaliData.g_linkEncLimitBuffer[i_jntIdx];
 m_minLinkEncoder :=GVL_SlaveJointEncoderCaliData.g_minLinkEncoder[i_armIdx, i_jntIdx] - m_linkEncoderDir*m_linkEncLimitBuffer; // expand limit
 m_maxLinkEncoder :=GVL_SlaveJointEncoderCaliData.g_maxLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncoderDir*m_linkEncLimitBuffer; // expand limit
 m_caliLinkEncoder :=GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[i_armIdx, i_jntIdx];
@@ -180,18 +171,11 @@ END_IF
       <LineId Id="186" Count="0" />
       <LineId Id="155" Count="0" />
       <LineId Id="166" Count="0" />
-      <LineId Id="208" Count="3" />
-      <LineId Id="224" Count="0" />
-      <LineId Id="212" Count="1" />
-      <LineId Id="245" Count="0" />
-      <LineId Id="243" Count="0" />
-      <LineId Id="225" Count="0" />
-      <LineId Id="207" Count="0" />
-      <LineId Id="235" Count="0" />
       <LineId Id="156" Count="0" />
       <LineId Id="89" Count="7" />
       <LineId Id="98" Count="3" />
       <LineId Id="176" Count="0" />
+      <LineId Id="270" Count="0" />
       <LineId Id="102" Count="15" />
       <LineId Id="122" Count="6" />
       <LineId Id="197" Count="0" />

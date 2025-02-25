@@ -15,6 +15,8 @@ VAR
 	m_crcError : ST_EcCrcError;
 	
 	m_EtherCATVerify : ST_EtherCATState;
+
+	m_setSlaveState : FB_EcSetSlaveState;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -52,6 +54,17 @@ END_IF
 EtherCATVerify := m_EtherCATVerify;]]></ST>
       </Implementation>
     </Method>
+    <Method Name="setSlaveStatus" Id="{7c770756-e79f-4aa9-9319-7935ec5d023d}">
+      <Declaration><![CDATA[METHOD setSlaveStatus : BOOL
+VAR_INPUT
+	armsNetID:T_AmsNetID;
+	jntAddr:UINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_setSlaveState(sNetId:=armsNetID , nSlaveAddr:= jntAddr, bExecute:= TRUE, tTimeout:= T#5S, reqState:= EC_DEVICE_STATE_OP, currState=> );]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="FB_EtherCATCheck">
       <LineId Id="9" Count="0" />
     </LineIds>
@@ -71,6 +84,9 @@ EtherCATVerify := m_EtherCATVerify;]]></ST>
       <LineId Id="26" Count="0" />
       <LineId Id="23" Count="0" />
       <LineId Id="22" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EtherCATCheck.setSlaveStatus">
+      <LineId Id="5" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

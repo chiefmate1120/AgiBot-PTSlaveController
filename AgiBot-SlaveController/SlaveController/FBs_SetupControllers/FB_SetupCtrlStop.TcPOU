@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SetupCtrlStop" Id="{2b39a0dc-24d1-457b-943f-73080894e676}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: setup Arm Joint3-5 decelerate to stop
 FUNCTION_BLOCK PUBLIC FB_SetupCtrlStop EXTENDS FB_SetupArmCtrlBase

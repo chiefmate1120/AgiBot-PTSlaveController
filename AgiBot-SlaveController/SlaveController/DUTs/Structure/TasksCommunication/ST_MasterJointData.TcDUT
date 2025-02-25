@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="ST_MasterJointData" Id="{481fb358-dbe2-4355-8644-ff68db78f2fc}">
     <Declaration><![CDATA[// Output from master arm control task 
 // Input to safety task and force controller task
