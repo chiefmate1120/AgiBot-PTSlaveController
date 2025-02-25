@@ -71,7 +71,7 @@ END_VAR
       <Implementation>
         <ST><![CDATA[
 //joint enable
-m_jntEnableFlag:=g_motionTest.m_jntEnableSetup[m_armId];
+m_jntEnableFlag:=g_cycleTest.m_jntEnableSetup[m_armId];
 
 //init parameters flag
 IF (g_cycleTest.m_enterESDTestSetup[m_armId]=TRUE) THEN
@@ -130,8 +130,8 @@ m_startMotionLast:=FALSE;
 
 
 //joint enable
-g_motionTest.m_jntEnableSetup[m_armId]:=g_onesVec5i;
-g_motionTest.m_jntEnableSetup[m_armId][1]:=0;  g_motionTest.m_jntEnableSetup[m_armId][2]:=0;  g_motionTest.m_jntEnableSetup[m_armId][3]:=0;
+g_cycleTest.m_jntEnableSetup[m_armId]:=g_onesVec5i;
+g_cycleTest.m_jntEnableSetup[m_armId][1]:=0;  g_cycleTest.m_jntEnableSetup[m_armId][2]:=0;  g_cycleTest.m_jntEnableSetup[m_armId][3]:=0;
 
 
 //target DH joint position
