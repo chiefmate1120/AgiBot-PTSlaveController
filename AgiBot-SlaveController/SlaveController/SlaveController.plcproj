@@ -532,6 +532,9 @@
     <Compile Include="FBs_SetupControllers\FB_SetupArmCtrlBase.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_SetupControllers\FB_SetupCtrlArmCali.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_SetupControllers\FB_SetupCtrlAutoAdjust.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -581,6 +584,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlAdjust.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlArmCali.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlCart.TcPOU">
@@ -732,6 +738,30 @@
     </Compile>
     <Compile Include="FBs_Test\Type\ST_ResponseTest.TcDUT">
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Test\UI\armCail\arm1Cail.TcVIS">
+      <SubType>Code</SubType>
+      <DependentUpon>视图管理器.TcVMO</DependentUpon>
+    </Compile>
+    <Compile Include="FBs_Test\UI\armCail\arm2Cail.TcVIS">
+      <SubType>Code</SubType>
+      <DependentUpon>视图管理器.TcVMO</DependentUpon>
+    </Compile>
+    <Compile Include="FBs_Test\UI\armCail\arm3Cail.TcVIS">
+      <SubType>Code</SubType>
+      <DependentUpon>视图管理器.TcVMO</DependentUpon>
+    </Compile>
+    <Compile Include="FBs_Test\UI\armCail\arm4Cail.TcVIS">
+      <SubType>Code</SubType>
+      <DependentUpon>视图管理器.TcVMO</DependentUpon>
+    </Compile>
+    <Compile Include="FBs_Test\UI\armCail\carCail.TcVIS">
+      <SubType>Code</SubType>
+      <DependentUpon>视图管理器.TcVMO</DependentUpon>
+    </Compile>
+    <Compile Include="FBs_Test\UI\armCail\robotCail.TcVIS">
+      <SubType>Code</SubType>
+      <DependentUpon>视图管理器.TcVMO</DependentUpon>
     </Compile>
     <Compile Include="FBs_Test\UI\CycleTest\cycle_a1.TcVIS">
       <SubType>Code</SubType>
@@ -950,6 +980,14 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
+    <Compile Include="GVLs\robotCail\GVL_armCali.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\robotCail\GVL_IO.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
     <Compile Include="GVLs\SetupArms\GVL_SetupArmDynamics.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
@@ -1099,6 +1137,7 @@
     <Folder Include="FBs_Test\Gvl" />
     <Folder Include="FBs_Test\Type" />
     <Folder Include="FBs_Test\UI" />
+    <Folder Include="FBs_Test\UI\armCail" />
     <Folder Include="FBs_Test\UI\CycleTest" />
     <Folder Include="FBs_Test\UI\frictionTest" />
     <Folder Include="FBs_Test\UI\motionTest" />
@@ -1113,6 +1152,7 @@
     <Folder Include="GVLs\configs\robot5" />
     <Folder Include="GVLs\configs\robot6" />
     <Folder Include="GVLs\Instrument" />
+    <Folder Include="GVLs\robotCail" />
     <Folder Include="GVLs\SetupArms" />
     <Folder Include="GVLs\SlaveArms" />
     <Folder Include="Mains" />

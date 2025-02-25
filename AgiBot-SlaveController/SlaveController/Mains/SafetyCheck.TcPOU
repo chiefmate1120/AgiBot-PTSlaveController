@@ -77,10 +77,20 @@ VAR
 	m_mStopButton : FB_MasterStopButtonDetect;
 	m_sStopButton : FB_MasterStopButtonDetect;
 	
+		//recipe read-write commands
+	RecipeManCommands:   RecipeManCommands;
+	m_bReadRecipeStep:   INT := 1;
+	m_bWriteRecipeStep:   INT := 5;
+	m_bReadRecipe:  BOOL := TRUE;
+	m_bWriteRecipe: BOOL := FALSE;
+	m_caliFileWriteTon :ARRAY [1..g_sArmNum] OF TON ;
+	m_linkPosWriteCaliData:ARRAY [1..4] OF ARRAY [1..8] OF TON ;
+	m_powerBoxWriteCaliData:ARRAY [1..4] OF TON ;
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[// reset data
+loadConfigFile();
 IF FALSE = m_initFlag  THEN
 	FOR i:=1  TO g_sArmNum DO 
 		m_safetyCheckData.m_slaveErrFlag[i]:=FALSE;
@@ -304,6 +314,40 @@ END_FOR
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="jointEncoderCaliCast" Id="{38e8df63-8a70-4816-82e7-e0e3cbf778d9}">
+      <Declaration><![CDATA[METHOD jointEncoderCaliCast : BOOL
+VAR_INPUT
+	armIdx : INT;
+END_VAR
+VAR 
+	i : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+FOR i := 1 TO 8 DO
+	m_linkPosWriteCaliData[armIdx][i](IN:= GVL_armCali.g_linkPosWriteCaliData[armIdx][i], PT:= T#3S, Q=> GVL_armCali.g_linkPosWriteCaliDataTrigger[armIdx][i], ET=> );
+	IF GVL_armCali.g_linkPosWriteCaliDataTrigger[armIdx][i] THEN
+		IF i<=5 THEN
+			GVL_SetupJointEncoderCaliData.g_minLinkEncoder[armIdx,i] := GVL_armCali.g_linkLimitFristPos[armIdx][i];
+			GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[armIdx,i] := GVL_armCali.g_linkLimitSecondPos[armIdx][i];
+			GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[armIdx,i] := GVL_armCali.g_linkHomePos[armIdx][i];
+			GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[armIdx,i] := GVL_armCali.g_linkZeroCrossOrNot[armIdx][i];
+		ELSE
+			GVL_SlaveJointEncoderCaliData.g_minLinkEncoder[armIdx,i-5] := GVL_armCali.g_linkLimitFristPos[armIdx][i];
+			GVL_SlaveJointEncoderCaliData.g_maxLinkEncoder[armIdx,i-5] := GVL_armCali.g_linkLimitSecondPos[armIdx][i];
+			GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[armIdx,i-5] := GVL_armCali.g_linkHomePos[armIdx][i];
+			GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[armIdx,i-5] := GVL_armCali.g_linkZeroCrossOrNot[armIdx][i];
+		END_IF
+	END_IF
+END_FOR
+FOR i := 1 TO 5 DO
+	m_powerBoxWriteCaliData[armIdx](IN:= GVL_armCali.g_powerBoxPosWrite[armIdx], PT:= T#3S, Q=>GVL_armCali.g_powerBoxPosWriteTrigger[armIdx] , ET=> );
+	IF GVL_armCali.g_powerBoxPosWriteTrigger[armIdx] THEN
+		GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[armIdx,i+3] := GVL_armCali.g_powerBoxLinkHomePos[armIdx][i];
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="joystickAdjust" Id="{38ce96d9-75fc-4e3b-9d39-89b30533a7ac}">
       <Declaration><![CDATA[METHOD joystickAdjust : BOOL
 VAR_IN_OUT CONSTANT
@@ -321,6 +365,60 @@ FOR i := 1 TO 4 DO
 		EXIT;
 	END_IF
 END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="loadConfigFile" Id="{a9343549-3fa6-461f-98d4-d8ffc4dbad86}">
+      <Declaration><![CDATA[METHOD loadConfigFile : BOOL
+VAR
+	ReturnDwordRead:DWORD;
+	ReturnDwordWrite:DWORD;
+END_VAR
+VAR
+	i : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//read recipe
+IF (m_bReadRecipeStep<=g_sArmNum*2 AND m_bReadRecipeStep>0) THEN
+	//The method loads a recipe from the specified recipe file.  It subsequently writes the recipe into the PLC variables.
+     ReturnDwordRead:=RecipeManCommands.LoadAndWriteRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionName[m_bReadRecipeStep] , RecipeName:='RecipeRecord');	 
+     m_bReadRecipeStep:=m_bReadRecipeStep+1; 
+END_IF 
+
+
+//write recipe
+FOR i := 1 TO g_sArmNum DO
+	jointEncoderCaliCast(i);
+	m_caliFileWriteTon[i](IN:=GVL_armCali.g_caliDataWrite[i], PT:= T#3S, Q=> GVL_armCali.g_caliDataWriteTrigger[i], ET=> );
+	IF GVL_armCali.g_caliDataWriteTrigger[i] THEN
+		//This method creates a new recipe in the specified recipe definition. It subsequently reads the current PLC values into the new recipe and saves it as a recipe file with a standard name.
+	 	RecipeManCommands.CreateRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionName[i] , RecipeName:='RecipeRecord' );
+	 	ReturnDwordWrite:=RecipeManCommands.ReadAndSaveRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionName[i] , RecipeName:='RecipeRecord' );
+	END_IF
+END_FOR
+
+
+// read Recipe 
+IF (m_bReadRecipe) THEN
+	//The method loads a recipe from the specified recipe file.  It subsequently writes the recipe into the PLC variables.
+     ReturnDwordRead:=RecipeManCommands.LoadAndWriteRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionNameCart, RecipeName:='RecipeRecord');	 
+     m_bReadRecipe:=FALSE; 
+END_IF
+
+
+//IF (m_bWriteRecipeStep<=g_sArmNum*2 AND m_bWriteRecipeStep>0) THEN	
+//	//This method creates a new recipe in the specified recipe definition. It subsequently reads the current PLC values into the new recipe and saves it as a recipe file with a standard name.
+//	 RecipeManCommands.CreateRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionName[m_bWriteRecipeStep] , RecipeName:='RecipeRecord' );
+//	 ReturnDwordWrite:=RecipeManCommands.ReadAndSaveRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionName[m_bWriteRecipeStep] , RecipeName:='RecipeRecord' );
+//	 m_bWriteRecipeStep:=m_bWriteRecipeStep+1;
+//END_IF
+
+//write recipe
+//IF (m_bWriteRecipe) THEN
+//	//This method creates a new recipe in the specified recipe definition. It subsequently reads the current PLC values into the new recipe and saves it as a recipe file with a standard name.
+//	 RecipeManCommands.CreateRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionNameCart , RecipeName:='RecipeRecord' );
+//	 ReturnDwordWrite:=RecipeManCommands.ReadAndSaveRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionNameCart , RecipeName:='RecipeRecord' );
+//	 m_bWriteRecipe:=FALSE;
+//END_IF]]></ST>
       </Implementation>
     </Method>
     <Method Name="readErrFlag" Id="{c6c3fbb5-bc5f-41ea-91b5-687651d637ca}">
@@ -599,6 +697,7 @@ END_IF
       </Implementation>
     </Method>
     <LineIds Name="SafetyCheck">
+      <LineId Id="886" Count="0" />
       <LineId Id="736" Count="6" />
       <LineId Id="744" Count="57" />
       <LineId Id="66" Count="0" />
@@ -645,9 +744,48 @@ END_IF
       <LineId Id="28" Count="0" />
       <LineId Id="46" Count="0" />
     </LineIds>
+    <LineIds Name="SafetyCheck.jointEncoderCaliCast">
+      <LineId Id="11" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="23" Count="2" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="28" Count="2" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="40" Count="2" />
+      <LineId Id="39" Count="0" />
+    </LineIds>
     <LineIds Name="SafetyCheck.joystickAdjust">
       <LineId Id="3" Count="5" />
       <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="SafetyCheck.loadConfigFile">
+      <LineId Id="52" Count="0" />
+      <LineId Id="34" Count="2" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="15" Count="1" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="87" Count="2" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="59" Count="6" />
+      <LineId Id="90" Count="6" />
+      <LineId Id="66" Count="7" />
+      <LineId Id="58" Count="0" />
     </LineIds>
     <LineIds Name="SafetyCheck.readErrFlag">
       <LineId Id="29" Count="7" />

@@ -31,20 +31,13 @@ VAR
 	m_asepticInstalledFlag : Vec4b;
 	m_slaveArmDisableFlag : Vec4b;
 	
-	//recipe read-write commands
-	RecipeManCommands:  RecipeManCommands;
-	m_bReadRecipe:  BOOL := TRUE;;
-	m_bWriteRecipe: BOOL := FALSE;;
-	
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[// load config file
-loadConfigFile();
-
+      <ST><![CDATA[//check cart EtherCAT state is OP
 IF NOT m_cartDataPool.m_safetyData.m_cartEtherCATAllOP AND NOT m_cartInit THEN
 	m_cartEtherCATOPTime := m_cartEtherCATOPTime + g_cartCtrlCycleTime;
-	RETURN;
+	//RETURN;
 END_IF
 
 // wait communication to be stable
@@ -71,32 +64,6 @@ m_cartRobot.getStatus(m_cartStatus,m_cartJointsData);
 UIOutputProcess();
 ]]></ST>
     </Implementation>
-    <Method Name="loadConfigFile" Id="{efa2271f-c139-48aa-87af-6b47e5c8fcbe}">
-      <Declaration><![CDATA[METHOD loadConfigFile : BOOL
-VAR
-	ReturnDwordRead:DWORD;
-	ReturnDwordWrite:DWORD;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[// read Recipe 
-IF (m_bReadRecipe) THEN
-	//The method loads a recipe from the specified recipe file.  It subsequently writes the recipe into the PLC variables.
-     ReturnDwordRead:=RecipeManCommands.LoadAndWriteRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionNameCart, RecipeName:='RecipeRecord');	 
-     m_bReadRecipe:=FALSE; 
-END_IF
-
-
-//write recipe
-IF (m_bWriteRecipe) THEN
-	//This method creates a new recipe in the specified recipe definition. It subsequently reads the current PLC values into the new recipe and saves it as a recipe file with a standard name.
-	 RecipeManCommands.CreateRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionNameCart , RecipeName:='RecipeRecord' );
-	 ReturnDwordWrite:=RecipeManCommands.ReadAndSaveRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionNameCart , RecipeName:='RecipeRecord' );
-	 m_bWriteRecipe:=FALSE;
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="UIInputProcess" Id="{90031281-ad03-48e9-82ab-c27609373d51}">
       <Declaration><![CDATA[// tranform data from UI(global variable write by ADS) to ST_UIData
 METHOD UIInputProcess : BOOL
@@ -205,29 +172,16 @@ m_cartInSterileStateTon(IN:= m_cartInSterileState, PT:= T#10S, Q=> , ET=> );
 IF m_cartInSterileStateTon.Q THEN
 	GVL_interactUI.g_cartOperation.m_cartInSterileState:=1;
 END_IF
-]]></ST>
+
+FOR i := 1 TO 4 DO
+	GVL_IO.g_joint6IO[i][1] := (m_cartRobot.m_slaveCart.m_carRotaOverhangIO[i] AND 16#02) =2;
+	GVL_IO.g_joint6IO[i][2] := (m_cartRobot.m_slaveCart.m_carRotaOverhangIO[i] AND 16#04) =4;
+END_FOR]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="CartControl">
-      <LineId Id="243" Count="0" />
-      <LineId Id="242" Count="0" />
-      <LineId Id="244" Count="0" />
-      <LineId Id="197" Count="1" />
-      <LineId Id="200" Count="0" />
-      <LineId Id="199" Count="0" />
-      <LineId Id="201" Count="0" />
-      <LineId Id="145" Count="21" />
+      <LineId Id="319" Count="27" />
       <LineId Id="5" Count="0" />
-    </LineIds>
-    <LineIds Name="CartControl.loadConfigFile">
-      <LineId Id="43" Count="0" />
-      <LineId Id="61" Count="2" />
-      <LineId Id="65" Count="1" />
-      <LineId Id="42" Count="0" />
-      <LineId Id="15" Count="1" />
-      <LineId Id="69" Count="4" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="14" Count="0" />
     </LineIds>
     <LineIds Name="CartControl.UIInputProcess">
       <LineId Id="82" Count="18" />
@@ -236,7 +190,11 @@ END_IF
     </LineIds>
     <LineIds Name="CartControl.UIOutputProcess">
       <LineId Id="353" Count="66" />
+      <LineId Id="425" Count="0" />
       <LineId Id="95" Count="0" />
+      <LineId Id="426" Count="0" />
+      <LineId Id="428" Count="0" />
+      <LineId Id="427" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

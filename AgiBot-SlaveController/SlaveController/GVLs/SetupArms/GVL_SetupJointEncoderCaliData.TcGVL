@@ -32,13 +32,19 @@ VAR_GLOBAL
 		 0, 0, 0, 1, 0,
 		 1, 0, 0, 1, 1];
 		 
+	// joint SDO address				
+	g_setupArmNetID: ARRAY[1..4] OF T_AmsNetId:=['169.254.0.16.9.1','192.168.2.91.4.1','192.168.2.91.6.1','192.168.2.91.5.1'];
+	g_setupLEDNetPort:ARRAY[1..g_sArmNum] OF UINT :=[4(1001)];	
+END_VAR
+
+VAR_GLOBAL CONSTANT		 
 //################ DO NOT modify parameters below ###########################
 	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
     g_linkEncLimitBuffer : ARRAY [1..g_setupJntNum] OF DINT := [2(2000),100, 2(1000)];
 
 	// absolute encoder direction
 	g_asbEncoderDir :ARRAY[1..g_setupJntNum] OF INT :=[1, -1, 1, -1, 1];
-													
+						
 	// flag if joint can rotate multiple cycles
 	g_multipleCyclesJoint :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF INT :=
 		[0, 0, 0, 0, 0,

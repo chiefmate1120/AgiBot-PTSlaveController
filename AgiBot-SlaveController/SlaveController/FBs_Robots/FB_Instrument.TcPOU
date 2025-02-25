@@ -22,7 +22,8 @@ VAR
 	m_maxReadTries :INT := 2;
 	
 	//IP of operating arm
-	m_armNetId:T_AmsNetId; 	
+	m_armNetId:T_AmsNetId; 
+	m_setupArmNetId:T_AmsNetId; 	
 	
 	//Joint port number
 	m_jointInstruAddr:UINT;	
@@ -228,8 +229,9 @@ END_VAR
       <Implementation>
         <ST><![CDATA[//Update the IP and port number of the operating arm
 m_armNetId:=GVL_SlaveJointEncoderCaliData.g_slaveArmNetID[armIdx];
+m_setupArmNetId := GVL_SetupJointEncoderCaliData.g_setupArmNetID[armIdx];
 m_jointInstruAddr:=GVL_SlaveJointEncoderCaliData.g_slaveJointNetPort[armIdx,4];
-m_LEDAddr := GVL_SlaveJointEncoderCaliData.g_slaveLEDNetPort[armIdx];
+m_LEDAddr := GVL_SetupJointEncoderCaliData.g_setupLEDNetPort[armIdx];
 
 // init joint motion range
 FOR i:=1 TO 3 DO
@@ -969,7 +971,7 @@ CASE m_useNumStep OF
 		
 	40: 
 		m_Value:=ULINT_TO_UDINT( m_useNumSendToLED) ;
-		m_SdoWrite(sNetId:= m_ArmNetId, nSlaveAddr:= m_LEDAddr, nSubIndex:= 06, nIndex:= 16#6090, pSrcBuf:= ADR(m_Value), cbBufLen:= SIZEOF(m_Value), bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
+		m_SdoWrite(sNetId:= m_setupArmNetId, nSlaveAddr:= m_LEDAddr, nSubIndex:= 06, nIndex:= 16#6090, pSrcBuf:= ADR(m_Value), cbBufLen:= SIZEOF(m_Value), bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
 		IF NOT m_SdoWrite.bBusy THEN
 			m_SdoWrite(bExecute:=FALSE);
 			m_onChipData.m_InstruUsageCounts:=m_useNumReadResult;
@@ -1102,7 +1104,9 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="24" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.init">
-      <LineId Id="47" Count="9" />
+      <LineId Id="47" Count="1" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="49" Count="7" />
       <LineId Id="13" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.initInstruJntPos">

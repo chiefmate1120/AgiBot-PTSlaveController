@@ -87,7 +87,7 @@ VAR
 	m_PrecisionTestCycle :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlCycleTest;
 	m_PrecisionTestFriction :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlFrictionTest;
 	m_PrecisionTestResponse :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlResponseTest;
-	
+	m_armCali :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlArmCali;
 	
 	// arm controller interface
 	m_armCtrl :ARRAY[1..g_sArmNum] OF I_SlaveArmCtrl;
@@ -250,6 +250,7 @@ END_VAR
 	m_armCtrlFactory[i,SlaveArmState_TestCycle] := m_PrecisionTestCycle[i];
 	m_armCtrlFactory[i,SlaveArmState_TestFriction] := m_PrecisionTestFriction[i];
 	m_armCtrlFactory[i,SlaveArmState_TestResponse] := m_PrecisionTestResponse[i];
+	m_armCtrlFactory[i,SlaveArmState_armCali] := m_armCali[i];
 	
 	
 	// assign controller
@@ -694,7 +695,7 @@ FOR i:=1 TO g_sArmNum DO
 	IF (g_cycleTest.m_enterCycleTestMode[i]=FALSE) AND (g_cycleTest.m_enterESDTest[i]=FALSE) AND (m_slaveArmState[i]=SlaveArmState_TestCycle) THEN
 		m_nextSlaveArmState[i] := SlaveArmState_Standby;
 	END_IF
-	
+		
 	// to SlaveArmState_TestFriction
 	IF (g_frictionTest.m_testMode[i]=TRUE) AND NOT(m_slaveArmState[i]=SlaveArmState_TestFriction) THEN
 		m_nextSlaveArmState[i] := SlaveArmState_TestFriction;
@@ -704,10 +705,16 @@ FOR i:=1 TO g_sArmNum DO
 	IF (g_frictionTest.m_testMode[i]=FALSE) AND (m_slaveArmState[i]=SlaveArmState_TestFriction) THEN
 		m_nextSlaveArmState[i] := SlaveArmState_Standby;
 	END_IF
+
+	//robot calibration 
+	IF GVL_armCali.g_armEnterCaliMode[i] AND (m_slaveArmState[i]<=SlaveArmState_Standby) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_armCali;
+	ELSIF NOT GVL_armCali.g_armEnterCaliMode[i] AND (m_slaveArmState[i]=SlaveArmState_armCali) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_Init;
+	END_IF	
 	
 	//fault mask
 	IF (g_specialSignal.m_faultMask) THEN
-		//RETURN;
 		CONTINUE;
 	END_IF
 	
@@ -721,17 +728,14 @@ FOR i:=1 TO g_sArmNum DO
 		m_nextSlaveArmState[i]:=SlaveArmState_Standby;
 	END_IF
 	
-	
-	IF (g_specialSignal.m_faultMask=FALSE) THEN
-		// arm disable
-		IF i_slavesInputDataPool.m_UIData.m_slaveArmDisableFlag[i] THEN
-			m_nextSlaveArmState[i] := SlaveArmState_Disable;
-		// error check
-		ELSIF i_slavesInputDataPool.m_safetyData.m_slaveErrFlag[i] AND NOT m_slaveArms[i].adjustOn THEN
-			m_nextSlaveArmState[i]:=SlaveArmState_Error;
-		END_IF
+	// arm disable
+	IF i_slavesInputDataPool.m_UIData.m_slaveArmDisableFlag[i] THEN
+		m_nextSlaveArmState[i] := SlaveArmState_Disable;
+	// error check
+	ELSIF i_slavesInputDataPool.m_safetyData.m_slaveErrFlag[i] AND NOT m_slaveArms[i].adjustOn AND m_nextSlaveArmState[i]<> SlaveArmState_armCali THEN
+		m_nextSlaveArmState[i]:=SlaveArmState_Error;
 	END_IF
-		
+	
 	IF GVL_interactUI.g_uiPowerOffEnable THEN	
 		m_nextSlaveArmState[i]:= SlaveArmState_PowerOff;
 	END_IF
@@ -810,6 +814,7 @@ m_lastEndoScopePostureUI := GVL_interactUI.g_scopeUpDown;
       <LineId Id="245" Count="0" />
       <LineId Id="234" Count="0" />
       <LineId Id="254" Count="0" />
+      <LineId Id="263" Count="0" />
       <LineId Id="256" Count="0" />
       <LineId Id="255" Count="0" />
       <LineId Id="235" Count="3" />
@@ -824,18 +829,14 @@ m_lastEndoScopePostureUI := GVL_interactUI.g_scopeUpDown;
       <LineId Id="4566" Count="1" />
       <LineId Id="4474" Count="0" />
       <LineId Id="4536" Count="29" />
+      <LineId Id="4586" Count="3" />
+      <LineId Id="4597" Count="1" />
       <LineId Id="4505" Count="0" />
+      <LineId Id="4585" Count="0" />
       <LineId Id="4577" Count="0" />
       <LineId Id="4506" Count="0" />
-      <LineId Id="4575" Count="0" />
-      <LineId Id="4591" Count="0" />
-      <LineId Id="4576" Count="0" />
-      <LineId Id="4507" Count="10" />
-      <LineId Id="4588" Count="0" />
-      <LineId Id="4590" Count="0" />
-      <LineId Id="4518" Count="7" />
-      <LineId Id="4585" Count="0" />
-      <LineId Id="4526" Count="2" />
+      <LineId Id="4575" Count="1" />
+      <LineId Id="4507" Count="21" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.updateScopeUIInfo">

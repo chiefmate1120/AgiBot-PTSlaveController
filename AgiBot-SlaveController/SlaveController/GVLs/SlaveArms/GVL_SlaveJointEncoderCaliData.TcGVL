@@ -3,7 +3,7 @@
   <GVL Name="GVL_SlaveJointEncoderCaliData" Id="{7eae507e-05dd-426e-b2d5-321e9d64d4f5}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 // Robot8 --joints parameters of slave arms
-VAR_GLOBAL CONSTANT	
+VAR_GLOBAL	
 	// absolute encoder value at minimal joint positon
 	g_minLinkEncoder :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF DINT :=
 		[14471, 21847, 28333, 0, 0, 0, 0, 0,
@@ -34,13 +34,17 @@ VAR_GLOBAL CONSTANT
 		 1, 1, 0, 1, 1, 1, 1, 1];
 		 
 	 // joint SDO address
-	g_slaveArmNetID: ARRAY[1..4] OF T_AmsNetId:=['169.254.223.120.10.1','192.168.2.91.4.1','192.168.2.91.6.1','192.168.2.91.5.1'];
+	g_slaveArmNetID: ARRAY[1..4] OF T_AmsNetId:=['169.254.0.16.8.1','192.168.2.91.4.1','192.168.2.91.6.1','192.168.2.91.5.1'];
 	g_slaveJointNetPort:ARRAY[1..g_sArmNum,1..g_sJntNum] OF UINT :=[
-		1005,	1006,	1007,	2(1008),	3(1009),
-		1005,	1006,	1007,	2(1008),	3(1009),
-		1005,	1006,	1007,	2(1008),	3(1009),
-		1005,	1006,	1007,	2(1008),	3(1009)];
-	g_slaveLEDNetPort:ARRAY[1..g_sArmNum] OF UINT :=[4(1003)];
+		1001,	1002,	1003,	2(1004),	3(1005),
+		1001,	1002,	1003,	2(1004),	3(1005),
+		1001,	1002,	1003,	2(1004),	3(1005),
+		1001,	1002,	1003,	2(1004),	3(1005)];
+	
+
+END_VAR
+
+VAR_GLOBAL CONSTANT	
 		
 //################ DO NOT modify parameters below ###########################
 	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position

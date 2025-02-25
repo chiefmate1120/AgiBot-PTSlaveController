@@ -34,21 +34,14 @@ VAR
 	// code execute time measure
 	m_codeTime : Profiler;
 	
-	//recipe read-write commands
-	RecipeManCommands:   RecipeManCommands;
-	m_bReadRecipeStep:   INT := 1;
-	m_bWriteRecipeStep:   INT := 1;
-	
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[m_codeTime(START:=TRUE, RESET:=TRUE);
-// load config file
-loadConfigFile();
-	
+//check arms EtherCAT state is OP
 IF NOT m_slaveInputDataPool.m_safetyData.m_armEtherCATAllOP AND NOT m_robotInit THEN
 	m_armEtherCATOPTime := m_armEtherCATOPTime + g_slaveArmCtrlCycleTime;
-	RETURN;
+	//RETURN;
 END_IF
 
 // wait communication to be stable
@@ -83,31 +76,6 @@ UIOutputProcess();
 
 m_codeTime(START:=FALSE);]]></ST>
     </Implementation>
-    <Method Name="loadConfigFile" Id="{5c63924c-757a-4fbb-aaf9-c7598f387c5a}">
-      <Declaration><![CDATA[METHOD loadConfigFile : BOOL
-VAR
-	ReturnDwordRead:DWORD;
-	ReturnDwordWrite:DWORD;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[//read recipe
-IF (m_bReadRecipeStep<=g_sArmNum*2 AND m_bReadRecipeStep>0) THEN
-	//The method loads a recipe from the specified recipe file.  It subsequently writes the recipe into the PLC variables.
-     ReturnDwordRead:=RecipeManCommands.LoadAndWriteRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionName[m_bReadRecipeStep] , RecipeName:='RecipeRecord');	 
-     m_bReadRecipeStep:=m_bReadRecipeStep+1; 
-END_IF 
-
-
-//write recipe
-(*IF (m_bWriteRecipeStep<=g_sArmNum*2 AND m_bWriteRecipeStep>0) THEN	
-	//This method creates a new recipe in the specified recipe definition. It subsequently reads the current PLC values into the new recipe and saves it as a recipe file with a standard name.
-	 RecipeManCommands.CreateRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionName[m_bWriteRecipeStep] , RecipeName:='RecipeRecord' );
-	 ReturnDwordWrite:=RecipeManCommands.ReadAndSaveRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionName[m_bWriteRecipeStep] , RecipeName:='RecipeRecord' );
-	 m_bWriteRecipeStep:=m_bWriteRecipeStep+1;
-END_IF*)]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="masterInputDataCast" Id="{688f8323-8b5a-4cc7-b4b2-cb5f74424c3f}">
       <Declaration><![CDATA[// convert from MSCommu_Mastertatus for master-slave communication to local ST_MasterStatus for control
 METHOD masterInputDataCast : BOOL
@@ -336,6 +304,18 @@ FOR i := 1 TO g_sArmNum DO
 	//intrument total number of use
 	GVL_interactUI.g_instruInformatiom[i].m_instruTotalLife := m_slaveRobot.m_slaveArms[i].m_instrument.instruTypeInfo.m_maxUseNum;
 	//The coordinates of the instrument relative to the endoscope for UI display
+	
+	
+	GVL_IO.g_joint8IO[i][1] := m_slaveRobot.m_slaveArms[i].m_adjustOnFlag;
+	GVL_IO.g_joint8IO[i][2] := SetupArmControl.m_setupRobot.m_setupArms[i].m_jnt5AdjustDir = 1;
+	GVL_IO.g_joint8IO[i][3] := SetupArmControl.m_setupRobot.m_setupArms[i].m_jnt5AdjustDir = -1;
+	GVL_IO.g_joint8IO[i][4] := SetupArmControl.m_setupRobot.m_setupArms[i].m_manualAdjustOnFlag;
+	GVL_IO.g_joint8IO[i][5] := m_slaveRobot.m_slaveArms[i].m_trocarOnFlag;
+	GVL_IO.g_jointPowerBoxIO[i][1] := (m_slaveRobot.m_slaveArms[i].m_panelInstrumentOnIO AND 10#4) = 4;
+	GVL_IO.g_jointPowerBoxIO[i][2] := (m_slaveRobot.m_slaveArms[i].m_panelInstrumentOnIO AND 10#8) = 8;
+	GVL_IO.g_jointPowerBoxIO[i][3] := (m_slaveRobot.m_slaveArms[i].m_panelInstrumentOnIO AND 10#1) = 1;
+	GVL_IO.g_jointPowerBoxIO[i][4] := (m_slaveRobot.m_slaveArms[i].m_panelInstrumentOnIO AND 10#2) = 2;
+	GVL_IO.g_jointPowerBoxIO[i][5] := (m_slaveRobot.m_slaveArms[i].m_panelInstrumentOnIO AND 10#64) = 64;
 END_FOR
 
 
@@ -343,52 +323,8 @@ END_FOR
       </Implementation>
     </Method>
     <LineIds Name="SlaveArmControl">
-      <LineId Id="85" Count="0" />
-      <LineId Id="294" Count="0" />
-      <LineId Id="293" Count="0" />
-      <LineId Id="295" Count="0" />
-      <LineId Id="243" Count="0" />
-      <LineId Id="335" Count="0" />
-      <LineId Id="245" Count="1" />
-      <LineId Id="117" Count="0" />
-      <LineId Id="112" Count="1" />
-      <LineId Id="141" Count="0" />
-      <LineId Id="114" Count="2" />
-      <LineId Id="62" Count="0" />
-      <LineId Id="2" Count="0" />
-      <LineId Id="8" Count="0" />
-      <LineId Id="13" Count="0" />
-      <LineId Id="9" Count="0" />
-      <LineId Id="205" Count="0" />
-      <LineId Id="170" Count="0" />
-      <LineId Id="207" Count="1" />
-      <LineId Id="169" Count="0" />
-      <LineId Id="171" Count="0" />
-      <LineId Id="61" Count="0" />
-      <LineId Id="15" Count="0" />
-      <LineId Id="14" Count="0" />
-      <LineId Id="63" Count="0" />
-      <LineId Id="21" Count="0" />
-      <LineId Id="64" Count="0" />
-      <LineId Id="173" Count="0" />
-      <LineId Id="172" Count="0" />
-      <LineId Id="174" Count="0" />
-      <LineId Id="210" Count="0" />
-      <LineId Id="209" Count="0" />
-      <LineId Id="211" Count="0" />
-      <LineId Id="88" Count="0" />
+      <LineId Id="488" Count="36" />
       <LineId Id="87" Count="0" />
-    </LineIds>
-    <LineIds Name="SlaveArmControl.loadConfigFile">
-      <LineId Id="6" Count="0" />
-      <LineId Id="34" Count="2" />
-      <LineId Id="38" Count="0" />
-      <LineId Id="13" Count="0" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="15" Count="1" />
-      <LineId Id="41" Count="0" />
-      <LineId Id="43" Count="3" />
-      <LineId Id="14" Count="0" />
     </LineIds>
     <LineIds Name="SlaveArmControl.masterInputDataCast">
       <LineId Id="86" Count="16" />
@@ -403,7 +339,9 @@ END_FOR
       <LineId Id="69" Count="0" />
     </LineIds>
     <LineIds Name="SlaveArmControl.UIOutputProcess">
-      <LineId Id="419" Count="96" />
+      <LineId Id="419" Count="93" />
+      <LineId Id="527" Count="11" />
+      <LineId Id="513" Count="2" />
       <LineId Id="34" Count="0" />
     </LineIds>
   </POU>

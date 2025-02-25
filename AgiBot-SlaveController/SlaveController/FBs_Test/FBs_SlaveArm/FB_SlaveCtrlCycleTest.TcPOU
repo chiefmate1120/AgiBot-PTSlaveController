@@ -201,7 +201,7 @@ CASE m_testStep OF
 				i_slaveArm.instrument.instruFK(targetJntPos,m_targetJntPos[i],angle);
 			END_FOR
 		END_IF
-	
+		
 		m_maxjntVel:=m_unitFun.slaveArmUnit2SystemN8(i_dataTest:=g_cycleTest.m_targetJntVelN8[m_armId]);
 		FOR i:=1 TO 8 BY 1 DO
 			IF ABS(m_maxjntVel[i])<g_smallNum THEN

@@ -16,6 +16,9 @@ VAR
 	// arm light control word
 	m_lightCrlWord :ARRAY [1..g_sArmNum] OF UDINT;
 	
+	m_LEDTestCount :ARRAY [1..g_sArmNum] OF UDINT;
+	m_LEDTestTime :ARRAY [1..g_sArmNum] OF LREAL;
+	
 	// arm state
 	m_setupArmState:ARRAY[1..g_sArmNum] OF E_setupArmState:=[4(E_setupArmState.SetupArmState_Error)];
 	m_lastSetupArmState:ARRAY[1..g_sArmNum] OF E_setupArmState:=[4(E_setupArmState.SetupArmState_Error)];
@@ -43,7 +46,7 @@ VAR
 	m_setupStateCycleTest :ARRAY[1..g_sArmNum] OF FB_SetupCtrlCycleTest;
 	m_setupStateFrictionTest :ARRAY[1..g_sArmNum] OF FB_SetupCtrlFrictionTest;
 	m_setupStateJntTest :ARRAY[1..g_sArmNum] OF FB_SetupCtrlMotionTest;
-	
+	m_armCali :ARRAY[1..g_sArmNum] OF FB_SetupCtrlArmCali;
 	
 	// arm controller interface
 	m_armCtrl :ARRAY[1..g_sArmNum] OF I_SetupArmCtrl;
@@ -176,7 +179,7 @@ END_VAR
 	m_armCtrlFactory[i,SetupArmState_TestCycle] := m_setupStateCycleTest[i];
 	m_armCtrlFactory[i,SetupArmState_TestFriction] := m_setupStateFrictionTest[i];
 	m_armCtrlFactory[i,SetupArmState_TestJnt] :=m_setupStateJntTest[i];
-	
+	m_armCtrlFactory[i,SetupArmState_armCali] :=m_armCali[i];
 	
 	// assign controller
 	m_armCtrl[i]:=m_armCtrlFactory[i,m_setupArmState[i]];
@@ -380,21 +383,28 @@ FOR i:=1 TO g_sArmNum DO
 		m_nextSetupArmState[i] := SetupArmState_Hold;
 	END_IF
 
+	//robot calibration 
+	IF GVL_armCali.g_armEnterCaliMode[i] AND (m_setupArmState[i]<=SetupArmState_Hold) THEN
+		m_nextSetupArmState[i] := SetupArmState_armCali;
+	ELSIF NOT GVL_armCali.g_armEnterCaliMode[i] AND (m_setupArmState[i]=SetupArmState_armCali) THEN
+		m_nextSetupArmState[i] := SetupArmState_Init;
+	END_IF	
+	
 	//fault mask
 	IF (g_specialSignal.m_faultMask) THEN
-		//RETURN;
 		CONTINUE;
 	END_IF
-		
-	IF (g_specialSignal.m_faultMask=FALSE) THEN
-		// arm disable
-		IF SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i] THEN
-			m_nextSetupArmState[i] := SetupArmState_Disable;
-		// error check
-		ELSIF i_setupInputDataPool.m_safetyData.m_setupErrFlag[i] AND NOT (m_setupArms[i].manualAdjustOn OR m_setupArms[i].m_jnt5AdjustDir<>0) THEN
-			m_nextSetupArmState[i]:=SetupArmState_Error;
-		END_IF
-	END_IF	
+	
+	
+	
+	
+	// arm disable
+	IF SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i] THEN
+		m_nextSetupArmState[i] := SetupArmState_Disable;
+	// error check
+	ELSIF i_setupInputDataPool.m_safetyData.m_setupErrFlag[i] AND NOT (m_setupArms[i].manualAdjustOn OR m_setupArms[i].m_jnt5AdjustDir<>0) THEN
+		m_nextSetupArmState[i]:=SetupArmState_Error;
+	END_IF
 END_FOR]]></ST>
       </Implementation>
     </Method>
@@ -420,26 +430,68 @@ END_VAR]]></Declaration>
 //灯光颜色--0-灯灭、1蓝灯常亮、2蓝灯闪烁、3琥珀色闪烁、4红灯闪烁、5绿灯常亮、6绿灯闪烁、7红灯常亮、8琥珀色常亮、9蓝灯脉动式闪烁  20关机灯灭
 FOR i := 1 TO g_sArmNum BY 1 DO
 	slaveArmState := i_setupInputDataPool.m_slaveStatus.m_armState[i];
-	IF slaveArmState = SlaveArmState_PowerOff OR slaveArmState = SlaveArmState_Disable THEN
-		m_lightCrlWord[i] := ArmLight_PowerOff;
-	ELSIF i_setupInputDataPool.m_safetyData.m_slaveErrFlag[i] OR i_setupInputDataPool.m_safetyData.m_setupErrFlag[i] THEN
-		IF SafetyCheck.m_SafetyCheck.m_armErrFlag[i,3] THEN
-			m_lightCrlWord[i] := ArmLight_RedBlink;
-		ELSIF SafetyCheck.m_SafetyCheck.m_armErrFlag[i,2] THEN
-			m_lightCrlWord[i] := ArmLight_AmberBlink;
+	IF NOT GVL_IO.g_lightTest[i] THEN
+		IF slaveArmState = SlaveArmState_PowerOff OR slaveArmState = SlaveArmState_Disable THEN
+			m_lightCrlWord[i] := ArmLight_PowerOff;
+		ELSIF i_setupInputDataPool.m_safetyData.m_slaveErrFlag[i] OR i_setupInputDataPool.m_safetyData.m_setupErrFlag[i] THEN
+			IF SafetyCheck.m_SafetyCheck.m_armErrFlag[i,3] THEN
+				m_lightCrlWord[i] := ArmLight_RedBlink;
+			ELSIF SafetyCheck.m_SafetyCheck.m_armErrFlag[i,2] THEN
+				m_lightCrlWord[i] := ArmLight_AmberBlink;
+			END_IF
+		ELSIF slaveArmState = SlaveArmState_MountPanel OR slaveArmState = SlaveArmState_MountInstru THEN
+			m_lightCrlWord[i] := ArmLight_BluePulse;
+		ELSIF slaveArmState = SlaveArmState_InstruRetract OR slaveArmState = SlaveArmState_Adjust OR slaveArmState = SlaveArmState_SelfCheck 
+			OR slaveArmState = SlaveArmState_Package OR m_setupArmState[i] = SetupArmState_Package OR m_setupArmState[i] = SetupArmState_ManualAdjust  THEN
+			m_lightCrlWord[i] := ArmLight_BlueBlink;
+		ELSIF slaveArmState = SlaveArmState_InstruInvasion THEN
+			m_lightCrlWord[i] := ArmLight_GreenBlink;
+		ELSE
+			m_lightCrlWord[i] := ArmLight_BlueOn;
 		END_IF
-	ELSIF slaveArmState = SlaveArmState_MountPanel OR slaveArmState = SlaveArmState_MountInstru THEN
-		m_lightCrlWord[i] := ArmLight_BluePulse;
-	ELSIF slaveArmState = SlaveArmState_InstruRetract OR slaveArmState = SlaveArmState_Adjust OR slaveArmState = SlaveArmState_SelfCheck 
- 		OR slaveArmState = SlaveArmState_Package OR m_setupArmState[i] = SetupArmState_Package OR m_setupArmState[i] = SetupArmState_ManualAdjust  THEN
-		m_lightCrlWord[i] := ArmLight_BlueBlink;
-	ELSIF slaveArmState = SlaveArmState_InstruInvasion THEN
-		m_lightCrlWord[i] := ArmLight_GreenBlink;
 	ELSE
-		m_lightCrlWord[i] := ArmLight_BlueOn;
+		IF GVL_IO.g_armLight_PowerOff[i] THEN
+			m_lightCrlWord[i] := ArmLight_PowerOff;
+		ELSIF GVL_IO.g_armLight_BlueOn[i] THEN
+			m_lightCrlWord[i] := ArmLight_BlueOn;
+		ELSIF GVL_IO.g_armLight_BlueBlink[i] THEN
+			m_lightCrlWord[i] := ArmLight_BlueBlink;
+		ELSIF GVL_IO.g_armLight_AmberBlink[i] THEN
+			m_lightCrlWord[i] := ArmLight_AmberBlink;
+		ELSIF GVL_IO.g_armLight_RedBlink[i] THEN
+			m_lightCrlWord[i] := ArmLight_RedBlink;
+		ELSIF GVL_IO.g_armLight_GreenOn[i] THEN
+			m_lightCrlWord[i] := ArmLight_GreenOn;
+		ELSIF GVL_IO.g_armLight_GreenBlink[i] THEN
+			m_lightCrlWord[i] := ArmLight_GreenBlink;
+		ELSIF GVL_IO.g_armLight_redOn[i] THEN
+			m_lightCrlWord[i] := ArmLight_redOn;
+		ELSIF GVL_IO.g_armLight_AmberOn[i] THEN
+			m_lightCrlWord[i] := ArmLight_AmberOn;
+		ELSIF GVL_IO.g_armLight_BluePulse[i] THEN
+			m_lightCrlWord[i] := ArmLight_BluePulse;
+		ELSE
+			m_lightCrlWord[i] := ArmLight_BlueOn;
+		END_IF
 	END_IF
 
 	m_setupArms[i].checkLight(m_lightCrlWord[i]);
+	
+	IF GVL_IO.g_LEDValueDisplay[i] THEN
+		m_LEDTestTime[i] := m_LEDTestTime[i] + GVL_SystemParameters.g_setupArmCtrlCycleTime;
+		IF m_LEDTestTime[i] > 1 THEN
+			m_LEDTestCount[i] := m_LEDTestCount[i] + 1;
+			//IF m_setupArms[i].checkDisplayLED(m_LEDTestCount[i]) THEN
+			m_LEDTestTime[i] := 0;
+			//END_IF
+		END_IF
+	ELSE
+		m_LEDTestCount[i] := 0;
+	END_IF
+	IF m_LEDTestCount[i] >= 99 THEN
+		GVL_IO.g_LEDValueDisplay[i] := FALSE;
+	END_IF
+	m_setupArms[i].checkDisplayLED(m_LEDTestCount[i]);
 END_FOR
 ]]></ST>
       </Implementation>
@@ -466,14 +518,7 @@ END_FOR
       <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.Init">
-      <LineId Id="184" Count="29" />
-      <LineId Id="229" Count="0" />
-      <LineId Id="225" Count="1" />
-      <LineId Id="214" Count="0" />
-      <LineId Id="228" Count="0" />
-      <LineId Id="236" Count="1" />
-      <LineId Id="244" Count="0" />
-      <LineId Id="215" Count="3" />
+      <LineId Id="294" Count="41" />
       <LineId Id="61" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.run">
@@ -481,23 +526,28 @@ END_FOR
       <LineId Id="22" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.stateMachine">
-      <LineId Id="852" Count="110" />
-      <LineId Id="1014" Count="1" />
-      <LineId Id="963" Count="0" />
-      <LineId Id="1016" Count="12" />
-      <LineId Id="977" Count="0" />
-      <LineId Id="1012" Count="0" />
-      <LineId Id="1029" Count="12" />
-      <LineId Id="992" Count="0" />
-      <LineId Id="1013" Count="0" />
-      <LineId Id="1049" Count="2" />
-      <LineId Id="1062" Count="0" />
-      <LineId Id="993" Count="9" />
-      <LineId Id="1059" Count="0" />
+      <LineId Id="1059" Count="165" />
       <LineId Id="16" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.updateArmLight">
-      <LineId Id="124" Count="31" />
+      <LineId Id="124" Count="10" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="167" Count="16" />
+      <LineId Id="165" Count="0" />
+      <LineId Id="184" Count="2" />
+      <LineId Id="188" Count="15" />
+      <LineId Id="205" Count="3" />
+      <LineId Id="187" Count="0" />
+      <LineId Id="166" Count="0" />
+      <LineId Id="153" Count="1" />
+      <LineId Id="210" Count="1" />
+      <LineId Id="215" Count="2" />
+      <LineId Id="223" Count="0" />
+      <LineId Id="229" Count="1" />
+      <LineId Id="224" Count="4" />
+      <LineId Id="231" Count="1" />
+      <LineId Id="209" Count="0" />
+      <LineId Id="155" Count="0" />
       <LineId Id="2" Count="0" />
     </LineIds>
   </POU>

@@ -33,7 +33,8 @@
 	SlaveArmState_TestCycle:=51,
 	SlaveArmState_TestFriction:=52,
 	SlaveArmState_TestResponse:=53,
-	SlaveArmState_totalNum :=SlaveArmState_TestResponse
+	SlaveArmState_armCali:=54,
+	SlaveArmState_totalNum :=SlaveArmState_armCali
 );
 END_TYPE
 ]]></Declaration>

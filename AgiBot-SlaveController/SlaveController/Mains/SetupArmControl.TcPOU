@@ -28,7 +28,7 @@ END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[IF NOT m_setupInputDataPool.m_safetyData.m_armEtherCATAllOP AND NOT m_robotInit  THEN
-	RETURN;
+	//RETURN;
 END_IF
 
 // wait communication to be stable
@@ -50,7 +50,7 @@ m_setupRobot.run(m_setupInputDataPool);
 m_setupRobot.getStatus(m_setupStatus,m_setupMotorData, m_setupJointsData);]]></ST>
     </Implementation>
     <LineIds Name="SetupArmControl">
-      <LineId Id="213" Count="19" />
+      <LineId Id="286" Count="19" />
       <LineId Id="64" Count="0" />
     </LineIds>
   </POU>

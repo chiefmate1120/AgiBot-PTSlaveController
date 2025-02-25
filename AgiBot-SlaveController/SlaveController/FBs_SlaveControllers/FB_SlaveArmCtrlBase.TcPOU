@@ -264,10 +264,12 @@ END_VAR]]></Declaration>
 	RETURN;
 END_IF
 
+(*
 // check if arm enabled
 IF FALSE = i_slaveArm.isEnabled(m_jntEnableFlag) THEN
 	RETURN;
 END_IF
+*)
 
 // calculate command joint position--Motion control
 calcCmdJntPos(i_endoscopePose, i_masterStatus, i_setupStatus, i_slaveArm);
@@ -370,10 +372,13 @@ END_VAR
       <LineId Id="10" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArmCtrlBase.run">
-      <LineId Id="138" Count="3" />
+      <LineId Id="138" Count="2" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="141" Count="0" />
       <LineId Id="86" Count="0" />
       <LineId Id="88" Count="2" />
       <LineId Id="46" Count="0" />
+      <LineId Id="173" Count="0" />
       <LineId Id="12" Count="0" />
       <LineId Id="14" Count="1" />
       <LineId Id="17" Count="0" />

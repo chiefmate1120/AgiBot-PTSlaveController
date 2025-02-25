@@ -30,8 +30,7 @@
 
 	g_robotSafetyCheckWaitTime : LREAL :=30.0;
 	//recipe
-	RecipeDefinitionName :ARRAY [1..8] OF STRING := ['arm1LinkEncValue', 'arm2LinkEncValue', 'arm3LinkEncValue', 'arm4LinkEncValue',
-'Arm1Dynamics','Arm2Dynamics','Arm3Dynamics','Arm4Dynamics'];
+	RecipeDefinitionName :ARRAY [1..8] OF STRING := ['arm1LinkEncValue', 'arm2LinkEncValue', 'arm3LinkEncValue', 'arm4LinkEncValue','Arm1Dynamics','Arm2Dynamics','Arm3Dynamics','Arm4Dynamics'];
 	RecipeDefinitionNameCart : STRING := 'SlaveCartEncValue';
 	
 	

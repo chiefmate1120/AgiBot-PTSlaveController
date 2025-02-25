@@ -243,9 +243,7 @@ m_lastLinkEncoder:=m_motorInputs.m_linkEncoder;
 // convert link encoder if joint cross zero
 newLinkEnc := m_motorInputs.m_linkEncoder;
 IF 1=m_linkEncZeroCross AND 0 = m_multiCycles THEN
-	IF 1=m_linkEncoderDir AND m_motorInputs.m_linkEncoder < m_minLinkEncoder THEN
-		newLinkEnc := m_motorInputs.m_linkEncoder + m_linkEncoderRes;
-	ELSIF -1=m_linkEncoderDir AND m_motorInputs.m_linkEncoder < m_maxLinkEncoder THEN
+	IF m_motorInputs.m_linkEncoder < m_minLinkEncoder THEN
 		newLinkEnc := m_motorInputs.m_linkEncoder + m_linkEncoderRes;
 	END_IF
 END_IF
@@ -451,7 +449,8 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="9" Count="0" />
       <LineId Id="25" Count="0" />
       <LineId Id="33" Count="0" />
-      <LineId Id="26" Count="5" />
+      <LineId Id="26" Count="2" />
+      <LineId Id="31" Count="0" />
       <LineId Id="24" Count="0" />
       <LineId Id="35" Count="0" />
       <LineId Id="34" Count="0" />
