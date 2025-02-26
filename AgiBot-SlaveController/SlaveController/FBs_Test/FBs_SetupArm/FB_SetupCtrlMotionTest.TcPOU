@@ -221,10 +221,13 @@ CASE m_testStep OF
 		
 	20: //Switch to normal state
 		SUPER^.Init(i_setupArm,r_setupArmCtrlCmd);		
+		m_jntEnableFlag:=g_motionTest.m_jntEnableSetup[m_armId];
+		m_cmdJntPos:=i_setupArm.curJntPos;
+		
 		m_motionFinished:=TRUE;
-		m_testStep:=-1;
 		m_duringCSTMot:=FALSE;
-	
+		m_testStep:=-1;
+		
 		
 	-1: //
 END_CASE
@@ -383,8 +386,10 @@ END_CASE
       <LineId Id="103" Count="1" />
       <LineId Id="86" Count="0" />
       <LineId Id="117" Count="1" />
+      <LineId Id="157" Count="2" />
       <LineId Id="120" Count="0" />
-      <LineId Id="115" Count="1" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="115" Count="0" />
       <LineId Id="26" Count="0" />
       <LineId Id="147" Count="0" />
       <LineId Id="27" Count="0" />
