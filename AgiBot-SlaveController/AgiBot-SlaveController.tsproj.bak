@@ -320,7 +320,7 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{C9E21697-3458-E9E1-5BC3-66911C83866D}" AutoDeleteType="true">E_SetupArmState</Name>
+			<Name GUID="{7B576253-93AB-AE0B-982D-6D48AB59A185}" AutoDeleteType="true">E_SetupArmState</Name>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
 			<EnumInfo>
@@ -396,8 +396,12 @@
 				<Enum>53</Enum>
 			</EnumInfo>
 			<EnumInfo>
+				<Text><![CDATA[SetupArmState_DargFreeTest]]></Text>
+				<Enum>54</Enum>
+			</EnumInfo>
+			<EnumInfo>
 				<Text><![CDATA[SetupArmState_totalNum]]></Text>
-				<Enum>53</Enum>
+				<Enum>54</Enum>
 			</EnumInfo>
 			<Properties>
 				<Property>
@@ -496,11 +500,11 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{78673627-FA31-5B4F-4A12-DAFB13E0F36B}" AutoDeleteType="true">ST_SetupStatus</Name>
+			<Name GUID="{0DC3892A-6CC9-B0E8-9FD4-7E60CCBB3100}" AutoDeleteType="true">ST_SetupStatus</Name>
 			<BitSize>3904</BitSize>
 			<SubItem>
 				<Name>m_armState</Name>
-				<Type GUID="{C9E21697-3458-E9E1-5BC3-66911C83866D}">E_SetupArmState</Type>
+				<Type GUID="{7B576253-93AB-AE0B-982D-6D48AB59A185}">E_SetupArmState</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
 					<Elements>4</Elements>
@@ -2175,7 +2179,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveInputDataPool.m_setupStatus</Name>
 							<Comment><![CDATA[ setup arms infromation;]]></Comment>
-							<Type GUID="{78673627-FA31-5B4F-4A12-DAFB13E0F36B}">ST_SetupStatus</Type>
+							<Type GUID="{0DC3892A-6CC9-B0E8-9FD4-7E60CCBB3100}">ST_SetupStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveInputDataPool.m_slaveDynaData</Name>
@@ -2548,7 +2552,7 @@
 						<Var>
 							<Name>SetupArmControl.m_setupStatus</Name>
 							<Comment><![CDATA[ setup robot information]]></Comment>
-							<Type GUID="{78673627-FA31-5B4F-4A12-DAFB13E0F36B}">ST_SetupStatus</Type>
+							<Type GUID="{0DC3892A-6CC9-B0E8-9FD4-7E60CCBB3100}">ST_SetupStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobotData</Name>
@@ -2736,6 +2740,25 @@
 					<Vars VarGrpType="1" ContextId="2" AreaNo="32">
 						<Name>TaskSetupArmControl Inputs</Name>
 						<Var>
+							<Name>SetupArmControl.m_setupInputDataPool.m_slaveStatus</Name>
+							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
+							<Type GUID="{4D155D3D-6C27-C9E1-07EF-1E9B366EB25B}">ST_SlaveStatus</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupInputDataPool.m_safetyData</Name>
+							<Comment><![CDATA[ safety information, import from safety check task]]></Comment>
+							<Type GUID="{DECD9F57-69F5-04DF-DC39-F93FDC472347}">ST_SafetyData</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupInputDataPool.m_setupJnt3Gravity</Name>
+							<Comment><![CDATA[ slave gravity]]></Comment>
+							<Type GUID="{1731225E-543E-79E3-4A96-A9E6DBEFA803}">ARRAY [1..4] OF LREAL</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupInputDataPool.m_setupJnt5Gravity</Name>
+							<Type GUID="{1731225E-543E-79E3-4A96-A9E6DBEFA803}">ARRAY [1..4] OF LREAL</Type>
+						</Var>
+						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[1].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
 							<Type GUID="{CC09E5C4-B5B4-D7CD-B4FE-AA9C379B3C8A}">ST_MotorInputs</Type>
@@ -2855,28 +2878,19 @@
 							<Comment><![CDATA[ adjust detect]]></Comment>
 							<Type>UDINT</Type>
 						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupInputDataPool.m_slaveStatus</Name>
-							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{4D155D3D-6C27-C9E1-07EF-1E9B366EB25B}">ST_SlaveStatus</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupInputDataPool.m_safetyData</Name>
-							<Comment><![CDATA[ safety information, import from safety check task]]></Comment>
-							<Type GUID="{DECD9F57-69F5-04DF-DC39-F93FDC472347}">ST_SafetyData</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupInputDataPool.m_setupJnt3Gravity</Name>
-							<Comment><![CDATA[ slave gravity]]></Comment>
-							<Type GUID="{1731225E-543E-79E3-4A96-A9E6DBEFA803}">ARRAY [1..4] OF LREAL</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupInputDataPool.m_setupJnt5Gravity</Name>
-							<Type GUID="{1731225E-543E-79E3-4A96-A9E6DBEFA803}">ARRAY [1..4] OF LREAL</Type>
-						</Var>
 					</Vars>
 					<Vars VarGrpType="2" ContextId="2" AreaNo="33">
 						<Name>TaskSetupArmControl Outputs</Name>
+						<Var>
+							<Name>SetupArmControl.m_setupJointsData</Name>
+							<Comment><![CDATA[ setup robot joint data]]></Comment>
+							<Type GUID="{1A915D10-5106-7CE3-481F-ABD7A49B79D6}">ST_SetupJointData</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupMotorData</Name>
+							<Comment><![CDATA[setup motor in_output to safety check]]></Comment>
+							<Type GUID="{0A9186FE-C455-143B-D6DA-F780ACCB07DC}">ST_SetupMotorData</Type>
+						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[1].m_motorOutputs</Name>
 							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
@@ -2976,16 +2990,6 @@
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_lightIO</Name>
 							<Comment><![CDATA[arm light out to drive]]></Comment>
 							<Type>DINT</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupJointsData</Name>
-							<Comment><![CDATA[ setup robot joint data]]></Comment>
-							<Type GUID="{1A915D10-5106-7CE3-481F-ABD7A49B79D6}">ST_SetupJointData</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupMotorData</Name>
-							<Comment><![CDATA[setup motor in_output to safety check]]></Comment>
-							<Type GUID="{0A9186FE-C455-143B-D6DA-F780ACCB07DC}">ST_SetupMotorData</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="1" ContextId="3" AreaNo="48">
@@ -3276,7 +3280,7 @@
 						<Var>
 							<Name>SafetyCheck.m_setupStatus</Name>
 							<Comment><![CDATA[ setup robot information]]></Comment>
-							<Type GUID="{78673627-FA31-5B4F-4A12-DAFB13E0F36B}">ST_SetupStatus</Type>
+							<Type GUID="{0DC3892A-6CC9-B0E8-9FD4-7E60CCBB3100}">ST_SetupStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_setupJointsData</Name>
@@ -3467,12 +3471,15 @@
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
-					<UnrestoredVarLinks ImportTime="2025-02-26T17:12:45">
+					<UnrestoredVarLinks ImportTime="2025-02-26T17:18:03">
+						<OwnerA Name="InputDst" Prefix="TIPC^SlaveController^SlaveController Instance" Type="1">
+							<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
+								<Link VarA="SlaveArmControl.m_slaveInputDataPool.m_setupStatus" TypeA="ST_SetupStatus" InOutA="0" GuidA="{78673627-FA31-5B4F-4A12-DAFB13E0F36B}" VarB="TaskSlaveArmControl Outputs^SetupArmControl.m_setupStatus" RestoreInfo="TypeChanged" IdA="91"/>
+							</OwnerB>
+						</OwnerA>
 						<OwnerA Name="OutputSrc" Prefix="TIPC^SlaveController^SlaveController Instance" Type="2">
 							<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
-								<Link VarA="SlaveArmControl.m_slaveStatus" TypeA="ST_SlaveStatus" InOutA="1" GuidA="{2ABB7EC7-AA83-B2B6-2E3B-4416A4DDEF02}" VarB="TaskCartControl Inputs^CartControl.m_cartDataPool.m_slaveStatus" RestoreInfo="TypeChanged" IdA="720"/>
-								<Link VarA="SlaveArmControl.m_slaveStatus" TypeA="ST_SlaveStatus" InOutA="1" GuidA="{2ABB7EC7-AA83-B2B6-2E3B-4416A4DDEF02}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_slaveStatus" RestoreInfo="TypeChanged" IdA="720"/>
-								<Link VarA="SlaveArmControl.m_slaveStatus" TypeA="ST_SlaveStatus" InOutA="1" GuidA="{2ABB7EC7-AA83-B2B6-2E3B-4416A4DDEF02}" VarB="TaskSetupArmControl Inputs^SetupArmControl.m_setupInputDataPool.m_slaveStatus" RestoreInfo="TypeChanged" IdA="720"/>
+								<Link VarA="SetupArmControl.m_setupStatus" TypeA="ST_SetupStatus" InOutA="1" GuidA="{78673627-FA31-5B4F-4A12-DAFB13E0F36B}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_setupStatus" RestoreInfo="TypeChanged" IdA="498"/>
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
@@ -9464,7 +9471,6 @@
 		</Io>
 	</Project>
 	<Mappings>
-		<MappingInfo Identifier="{00000000-2001-0850-0020-500800205008}" Id="#x02030180"/>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500810000403}" Id="#x02030010"/>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500820000403}" Id="#x02030060"/>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500850000403}" Id="#x020300b0"/>
@@ -9478,6 +9484,7 @@
 		<MappingInfo Identifier="{00000000-2005-0850-0320-500860000403}" Id="#x020300a0"/>
 		<MappingInfo Identifier="{00000000-2005-0850-0320-5008C1000403}" Id="#x02030120"/>
 		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030020" Watchdog="10000000040000000400000004000000"/>
+		<MappingInfo Identifier="{08502001-2003-0850-0020-500802205008}" Id="#x02030180" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2004-0850-0020-500804205008}" Id="#x02030190" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2005-0850-0020-500803205008}" Id="#x020301c0" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502002-2003-0850-0120-500802205008}" Id="#x02030030" Watchdog="04000000040000000400000004000000"/>
@@ -10069,19 +10076,20 @@
 			</OwnerB>
 			<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartDataPool.m_safetyData" VarB="TaskCartControl Outputs^SafetyCheck.m_safetyCheckData"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartDataPool.m_slaveStatus" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_instruInfo" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus^m_instruStauts"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_setupJointData" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupJointsData"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_slaveJointsData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_cartJointsData" VarB="TaskCartControl Outputs^CartControl.m_cartJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_cartStatus" VarB="TaskCartControl Outputs^CartControl.m_cartStatus"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupJointsData" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupJointsData"/>
-				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupStatus" VarB="TaskSlaveArmControl Outputs^SetupArmControl.m_setupStatus"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_slaveJointData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveJointsData"/>
+				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_slaveStatus" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus"/>
 				<Link VarA="TaskSetupArmControl Inputs^SetupArmControl.m_setupInputDataPool.m_safetyData" VarB="TaskCartControl Outputs^SafetyCheck.m_safetyCheckData"/>
 				<Link VarA="TaskSetupArmControl Inputs^SetupArmControl.m_setupInputDataPool.m_setupJnt3Gravity" VarB="TaskDynamic Outputs^RobotDynamics.m_setupJnt3Gravity"/>
 				<Link VarA="TaskSetupArmControl Inputs^SetupArmControl.m_setupInputDataPool.m_setupJnt5Gravity" VarB="TaskDynamic Outputs^RobotDynamics.m_setupJnt5Gravity"/>
+				<Link VarA="TaskSetupArmControl Inputs^SetupArmControl.m_setupInputDataPool.m_slaveStatus" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveInputDataPool.m_safetyData" VarB="TaskCartControl Outputs^SafetyCheck.m_safetyCheckData"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveInputDataPool.m_setupStatus" VarB="TaskSlaveArmControl Outputs^SetupArmControl.m_setupStatus"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveInputDataPool.m_slaveDynaData" VarB="TaskDynamic Outputs^RobotDynamics.m_slaveDynaData"/>
 			</OwnerB>
 		</OwnerA>

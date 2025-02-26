@@ -210,6 +210,10 @@ END_IF
 m_frictionScale := LIMIT(0, m_frictionScale, 1);
 m_cmdJntTrq[3]:=m_frictionScale * sign(i_setupArm.curJntVel[3])*jnt3Friction(i_setupArm.armIdx, i_setupArm.curJntPos[3])+ dampOffset;
 
+//joint 5 torque
+m_cmdJntTrq[5]:=-i_setupArm.jntGravity[5];
+
+
 ]]></ST>
       </Implementation>
     </Method>
@@ -229,6 +233,11 @@ m_jnt5EnableTime :=0;
 
 
 //add code for test
+m_jntEnableFlag :=g_zeroVec5i;
+m_jntEnableFlag[3]:=1;
+m_jntEnableFlag[4]:=1;
+m_jntEnableFlag[5]:=1;
+
 m_jntOPMode:=g_setupAllTrqMode;
 m_DHjntPos:=i_setupArm.curJntPos;
 m_jntPosMin:=m_DHjntPos;
@@ -276,14 +285,23 @@ jnt3Friction:=GVL_SetupArmDynamics.g_setupJnt3FrictionParams[i_armIdx,1]*EXPT(q,
       <LineId Id="363" Count="1" />
       <LineId Id="368" Count="9" />
       <LineId Id="379" Count="3" />
+      <LineId Id="401" Count="0" />
+      <LineId Id="398" Count="0" />
       <LineId Id="366" Count="0" />
+      <LineId Id="399" Count="1" />
       <LineId Id="123" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupCtrlDragFreeTest.init">
       <LineId Id="57" Count="0" />
       <LineId Id="66" Count="0" />
       <LineId Id="75" Count="1" />
-      <LineId Id="79" Count="4" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="80" Count="3" />
       <LineId Id="77" Count="1" />
       <LineId Id="12" Count="0" />
     </LineIds>

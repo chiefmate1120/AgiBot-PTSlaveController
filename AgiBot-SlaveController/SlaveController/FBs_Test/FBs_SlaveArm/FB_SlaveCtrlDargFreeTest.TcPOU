@@ -185,6 +185,7 @@ copyCmds(r_slaveArmCtrlCmd);
 
 
 //add code for test
+m_jntEnableFlag:=g_onesVec8i;
 m_jntOPMode:=g_slaveAllTrqMode;
 m_DHjntPos:=i_slaveArm.curJntPos;
 m_jntPosMin:=m_DHjntPos;
@@ -230,6 +231,7 @@ vecSub(m_jntPosMax,m_jntPosMin,m_jntMotRange);]]></ST>
     <LineIds Name="FB_SlaveCtrlDargFreeTest.init">
       <LineId Id="157" Count="32" />
       <LineId Id="201" Count="2" />
+      <LineId Id="221" Count="0" />
       <LineId Id="206" Count="0" />
       <LineId Id="208" Count="2" />
       <LineId Id="207" Count="0" />
