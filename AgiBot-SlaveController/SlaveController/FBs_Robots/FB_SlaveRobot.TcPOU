@@ -88,6 +88,7 @@ VAR
 	m_PrecisionTestFriction :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlFrictionTest;
 	m_PrecisionTestResponse :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlResponseTest;
 	m_armCali :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlArmCali;
+	m_dragFreeTest :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlDargFreeTest;
 	
 	// arm controller interface
 	m_armCtrl :ARRAY[1..g_sArmNum] OF I_SlaveArmCtrl;
@@ -251,6 +252,7 @@ END_VAR
 	m_armCtrlFactory[i,SlaveArmState_TestFriction] := m_PrecisionTestFriction[i];
 	m_armCtrlFactory[i,SlaveArmState_TestResponse] := m_PrecisionTestResponse[i];
 	m_armCtrlFactory[i,SlaveArmState_armCali] := m_armCali[i];
+	m_armCtrlFactory[i,SlaveArmState_DargFreeTest] := m_dragFreeTest[i];
 	
 	
 	// assign controller
@@ -713,6 +715,16 @@ FOR i:=1 TO g_sArmNum DO
 		m_nextSlaveArmState[i] := SlaveArmState_Init;
 	END_IF	
 	
+	// to SlaveArmState_DargFreeTest
+	IF (g_motionRangeTest.m_testMode[i]=TRUE) AND NOT(m_slaveArmState[i]=SlaveArmState_DargFreeTest) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_DargFreeTest;
+	END_IF
+	
+	// SlaveArmState_DargFreeTest exit
+	IF (g_motionRangeTest.m_testMode[i]=FALSE) AND (m_slaveArmState[i]=SlaveArmState_DargFreeTest) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_Standby;
+	END_IF
+	
 	//fault mask
 	IF (g_specialSignal.m_faultMask) THEN
 		CONTINUE;
@@ -816,6 +828,7 @@ m_lastEndoScopePostureUI := GVL_interactUI.g_scopeUpDown;
       <LineId Id="254" Count="0" />
       <LineId Id="263" Count="0" />
       <LineId Id="256" Count="0" />
+      <LineId Id="270" Count="0" />
       <LineId Id="255" Count="0" />
       <LineId Id="235" Count="3" />
       <LineId Id="61" Count="0" />
@@ -833,6 +846,8 @@ m_lastEndoScopePostureUI := GVL_interactUI.g_scopeUpDown;
       <LineId Id="4597" Count="1" />
       <LineId Id="4505" Count="0" />
       <LineId Id="4585" Count="0" />
+      <LineId Id="4608" Count="7" />
+      <LineId Id="4606" Count="1" />
       <LineId Id="4577" Count="0" />
       <LineId Id="4506" Count="0" />
       <LineId Id="4575" Count="1" />

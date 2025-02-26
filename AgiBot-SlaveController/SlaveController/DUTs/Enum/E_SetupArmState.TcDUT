@@ -22,7 +22,8 @@
 	SetupArmState_TestFriction:=51,
 	SetupArmState_TestJnt:=52,
 	SetupArmState_armCali:=53,
-	SetupArmState_totalNum :=SetupArmState_armCali
+	SetupArmState_DargFreeTest:=54,
+	SetupArmState_totalNum :=SetupArmState_DargFreeTest
 );
 END_TYPE
 ]]></Declaration>

@@ -18,6 +18,9 @@ VAR_GLOBAL
 	//cycle test
 	g_cycleTest:ST_CycleTest;
 	
+	//motion range test
+	g_motionRangeTest:ST_MotionRangeTest;
+	
 	//information update
 	g_systemInfo:ST_InfoUpdate;
 	

@@ -685,7 +685,13 @@
     <Compile Include="FBs_Test\FBs_SetupArm\FB_SetupCtrlFrictionTest.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_Test\FBs_SetupArm\FB_SetupCtrlDragFreeTest.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_Test\FBs_SetupArm\FB_SetupCtrlMotionTest.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Test\FBs_SlaveArm\FB_SlaveCtrlDargFreeTest.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Test\FBs_SlaveArm\FB_SlaveCtrlCycleTest.TcPOU">
@@ -731,6 +737,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Test\Type\ST_JntInfo.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Test\Type\ST_MotionRangeTest.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Test\Type\ST_MotionTest.TcDUT">
@@ -812,6 +821,10 @@
       <DependentUpon>视图管理器.TcVMO</DependentUpon>
     </Compile>
     <Compile Include="FBs_Test\UI\motionTest\slaveArmJntTest.TcVIS">
+      <SubType>Code</SubType>
+      <DependentUpon>视图管理器.TcVMO</DependentUpon>
+    </Compile>
+    <Compile Include="FBs_Test\UI\motRangeTest\motRange_A1.TcVIS">
       <SubType>Code</SubType>
       <DependentUpon>视图管理器.TcVMO</DependentUpon>
     </Compile>
@@ -1141,6 +1154,7 @@
     <Folder Include="FBs_Test\UI\CycleTest" />
     <Folder Include="FBs_Test\UI\frictionTest" />
     <Folder Include="FBs_Test\UI\motionTest" />
+    <Folder Include="FBs_Test\UI\motRangeTest" />
     <Folder Include="FBs_Test\UI\precision" />
     <Folder Include="FBs_TrajectoryPlanning" />
     <Folder Include="FBs_TrajectoryPlanning\OTG" />

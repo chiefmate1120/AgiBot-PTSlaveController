@@ -16,8 +16,23 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"183"</v>
+              <v n="TextDefault">"%发"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"929"</v>
+              <v n="TextDefault">"%负"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"444"</v>
               <v n="TextDefault">"1"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"781"</v>
+              <v n="TextDefault">"1-进入关节活动范围测试模式"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -26,8 +41,18 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"858"</v>
+              <v n="TextDefault">"1号臂进入测试"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"415"</v>
               <v n="TextDefault">"2号臂"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"730"</v>
+              <v n="TextDefault">"2号臂进入测试"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -41,8 +66,18 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"1712"</v>
+              <v n="TextDefault">"3号臂进入测试"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"513"</v>
               <v n="TextDefault">"4号臂"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"1122"</v>
+              <v n="TextDefault">"4号臂进入测试"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -313,6 +348,26 @@
             <o>
               <v n="TextID">"43"</v>
               <v n="TextDefault">"关节位置增量"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"10"</v>
+              <v n="TextDefault">"关节活动范围"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"1401"</v>
+              <v n="TextDefault">"关节活动范围-单位:度/mm"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"597"</v>
+              <v n="TextDefault">"关节活动范围-单位度/mm"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"1424"</v>
+              <v n="TextDefault">"关节活动范围-单位：度/mm"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -778,6 +833,11 @@
             <o>
               <v n="TextID">"600"</v>
               <v n="TextDefault">"运动结束"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"298"</v>
+              <v n="TextDefault">"进入关节活动范围测试模式"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>

@@ -34,7 +34,8 @@
 	SlaveArmState_TestFriction:=52,
 	SlaveArmState_TestResponse:=53,
 	SlaveArmState_armCali:=54,
-	SlaveArmState_totalNum :=SlaveArmState_armCali
+	SlaveArmState_DargFreeTest:=55,
+	SlaveArmState_totalNum :=SlaveArmState_DargFreeTest
 );
 END_TYPE
 ]]></Declaration>

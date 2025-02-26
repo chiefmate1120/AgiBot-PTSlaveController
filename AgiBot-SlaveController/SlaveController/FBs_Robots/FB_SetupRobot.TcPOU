@@ -47,6 +47,7 @@ VAR
 	m_setupStateFrictionTest :ARRAY[1..g_sArmNum] OF FB_SetupCtrlFrictionTest;
 	m_setupStateJntTest :ARRAY[1..g_sArmNum] OF FB_SetupCtrlMotionTest;
 	m_armCali :ARRAY[1..g_sArmNum] OF FB_SetupCtrlArmCali;
+	m_dragFreeTest :ARRAY[1..g_sArmNum] OF FB_SetupCtrlDragFreeTest;
 	
 	// arm controller interface
 	m_armCtrl :ARRAY[1..g_sArmNum] OF I_SetupArmCtrl;
@@ -180,6 +181,7 @@ END_VAR
 	m_armCtrlFactory[i,SetupArmState_TestFriction] := m_setupStateFrictionTest[i];
 	m_armCtrlFactory[i,SetupArmState_TestJnt] :=m_setupStateJntTest[i];
 	m_armCtrlFactory[i,SetupArmState_armCali] :=m_armCali[i];
+	m_armCtrlFactory[i,SetupArmState_DargFreeTest] :=m_dragFreeTest[i];
 	
 	// assign controller
 	m_armCtrl[i]:=m_armCtrlFactory[i,m_setupArmState[i]];
@@ -390,6 +392,16 @@ FOR i:=1 TO g_sArmNum DO
 		m_nextSetupArmState[i] := SetupArmState_Init;
 	END_IF	
 	
+	// to SetupArmState_DargFreeTest
+	IF (g_motionRangeTest.m_testMode[i]=TRUE) AND NOT(m_setupArmState[i]=SetupArmState_DargFreeTest) THEN
+		m_nextSetupArmState[i] := SetupArmState_DargFreeTest;
+	END_IF
+	
+	//SetupArmState_DargFreeTest exit
+	IF (g_motionRangeTest.m_testMode[i]=FALSE) AND (m_setupArmState[i]=SetupArmState_DargFreeTest) THEN
+		m_nextSetupArmState[i] := SetupArmState_Hold;
+	END_IF
+	
 	//fault mask
 	IF (g_specialSignal.m_faultMask) THEN
 		CONTINUE;
@@ -518,7 +530,9 @@ END_FOR
       <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.Init">
-      <LineId Id="294" Count="41" />
+      <LineId Id="294" Count="37" />
+      <LineId Id="342" Count="0" />
+      <LineId Id="332" Count="3" />
       <LineId Id="61" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.run">
@@ -526,7 +540,11 @@ END_FOR
       <LineId Id="22" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.stateMachine">
-      <LineId Id="1059" Count="165" />
+      <LineId Id="1059" Count="150" />
+      <LineId Id="1235" Count="7" />
+      <LineId Id="1234" Count="0" />
+      <LineId Id="1233" Count="0" />
+      <LineId Id="1210" Count="14" />
       <LineId Id="16" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.updateArmLight">
