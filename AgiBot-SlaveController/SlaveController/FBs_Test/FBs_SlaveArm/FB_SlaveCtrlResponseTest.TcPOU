@@ -95,10 +95,10 @@ END_VAR
 CASE m_testStep OF 
 	0://init the parameters
 		m_freqTestFlag:=g_responseTest.m_freqTestFlag;
-		m_stepTestFlag:=g_responseTest.m_stepTestFlag;		
+		m_stepTestFlag:=g_responseTest.m_stepTestFlag;
 		m_jntMotionFreq:=g_responseTest.m_jntMotionFreq;
-		m_jntMotionRange:=g_responseTest.m_jntMotionRange;		
-		m_jntStep:=g_responseTest.m_jntStep;		
+		m_jntMotionRange:=g_responseTest.m_jntMotionRange;
+		m_jntStep:=g_responseTest.m_jntStep;
 		m_testJntIdx:=g_responseTest.m_testJntIdx;
 		m_stepCycle:=g_responseTest.m_stepCycle;
 		

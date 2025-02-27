@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
-  <Visu Name="friction_a1" Id="{5a775795-2dfc-41c7-a1ee-72e1b8a53633}">
+  <Visu Name="friction_a2" Id="{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}">
     <XmlArchive>
       <Data>
         <o xml:space="preserve" t="VisualObject">
           <n n="LastVisuLanguageModelEntry" />
-          <v n="UniqueIdGenerator">"3"</v>
+          <v n="UniqueIdGenerator">"5"</v>
           <o n="VisualElemList" t="VisualElemList">
             <l n="VisualElementList" t="VisualElemCollection" cet="GenericVisualElem">
               <o>
@@ -16,7 +16,7 @@
                       <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                         <o>
                           <v n="Id">1186196937L</v>
-                          <v n="Value">"g_frictionTest.m_testMode[1]"</v>
+                          <v n="Value">"g_frictionTest.m_testMode[2]"</v>
                         </o>
                       </l>
                     </o>
@@ -172,7 +172,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"g_frictionTest.m_testMode[1]"</v>
+                      <v n="Value">"g_frictionTest.m_testMode[2]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -188,7 +188,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{6ff62882-5ec2-47c5-ae89-7887fd4b33be}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">1</v>
@@ -202,7 +202,7 @@
                       <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                         <o>
                           <v n="Id">1186196937L</v>
-                          <v n="Value">"g_frictionTest.m_startMotion[1]"</v>
+                          <v n="Value">"g_frictionTest.m_startMotion[2]"</v>
                         </o>
                       </l>
                     </o>
@@ -358,7 +358,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"g_frictionTest.m_startMotion[1]"</v>
+                      <v n="Value">"g_frictionTest.m_startMotion[2]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -374,7 +374,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{330c54dc-4106-4903-8570-05c15aba9dbd}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">3</v>
@@ -448,7 +448,7 @@
                     </o>
                     <o>
                       <v n="Id">390574330L</v>
-                      <v n="Value">"1号臂"</v>
+                      <v n="Value">"2号臂"</v>
                     </o>
                     <o>
                       <v n="Id">3729828405L</v>
@@ -491,7 +491,7 @@
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
-                      <v n="Value">"789"</v>
+                      <v n="Value">"415"</v>
                     </o>
                   </l>
                 </o>
@@ -503,7 +503,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{a22fdf5d-dc27-44c7-9b1e-a9cfa08b0798}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">0</v>
@@ -656,7 +656,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTest.m_CoulombFrictionMax[1][1]"</v>
+                      <v n="Value">"g_frictionTest.m_CoulombFrictionMax[2][1]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -672,7 +672,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{ddfb7869-9a1f-45f7-bc79-84aec41b3975}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">6</v>
@@ -825,7 +825,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTest.m_CoulombFrictionMax[1][2]"</v>
+                      <v n="Value">"g_frictionTest.m_CoulombFrictionMax[2][2]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -841,7 +841,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{c839304c-5df6-4ae6-ba01-f3bc63677d66}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">22</v>
@@ -994,7 +994,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTest.m_CoulombFrictionMax[1][3]"</v>
+                      <v n="Value">"g_frictionTest.m_CoulombFrictionMax[2][3]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -1010,7 +1010,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{90c23df3-ebd7-476a-b9c5-d6b54e56ac1d}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">24</v>
@@ -1139,7 +1139,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{3bbaf3f1-bcde-4494-adf4-3498c27704f4}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">34</v>
@@ -1292,7 +1292,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTest.m_CoulombFrictionMax_JntPos[1][1]"</v>
+                      <v n="Value">"g_frictionTest.m_CoulombFrictionMax_JntPos[2][1]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -1308,7 +1308,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{4c535e29-f423-410a-879d-2c3d97dbe2ff}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">36</v>
@@ -1461,7 +1461,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTest.m_CoulombFrictionMax_JntPos[1][2]"</v>
+                      <v n="Value">"g_frictionTest.m_CoulombFrictionMax_JntPos[2][2]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -1477,7 +1477,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{8fb20c83-597f-4547-a6e0-3430a96fe644}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">38</v>
@@ -1630,7 +1630,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTest.m_CoulombFrictionMax_JntPos[1][3]"</v>
+                      <v n="Value">"g_frictionTest.m_CoulombFrictionMax_JntPos[2][3]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -1646,7 +1646,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{244918a2-ff60-4d50-befd-38733067d0b6}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">40</v>
@@ -1775,7 +1775,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{ca5dd678-2296-4c4c-9a55-1a4f2aa8a1ce}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">50</v>
@@ -1928,7 +1928,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTest.m_CoulombFrictionRatio[1,1]"</v>
+                      <v n="Value">"g_frictionTest.m_CoulombFrictionRatio[2,1]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -1944,7 +1944,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{5aab3bb0-1bd2-4021-8382-2217b4cce66b}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">52</v>
@@ -2097,7 +2097,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTest.m_CoulombFrictionRatio[1,2]"</v>
+                      <v n="Value">"g_frictionTest.m_CoulombFrictionRatio[2,2]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -2113,7 +2113,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{086de0ea-e8f4-454b-8d46-58ccfdf3d143}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">54</v>
@@ -2266,7 +2266,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTest.m_CoulombFrictionRatio[1,3]"</v>
+                      <v n="Value">"g_frictionTest.m_CoulombFrictionRatio[2,3]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -2282,7 +2282,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{4b43c41f-6b46-4f48-8202-d1dc8355abb8}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">56</v>
@@ -2411,7 +2411,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{48de37dc-7ac2-4349-968c-8a25f74fc2e0}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">66</v>
@@ -2564,7 +2564,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTest.m_armDHJntPos[1][1]"</v>
+                      <v n="Value">"g_frictionTest.m_armDHJntPos[2][1]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -2580,7 +2580,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{fe7a76cb-4c51-4ac4-ac45-070029ccc165}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">68</v>
@@ -2709,7 +2709,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{d866943b-8dd3-414e-84a3-93501a48479a}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">70</v>
@@ -2838,7 +2838,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{4ff54557-6088-4402-9b20-97e39f9e072c}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">72</v>
@@ -2967,7 +2967,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{7c9a2a6a-9c8c-44b5-b8f9-83a5bff5aaf7}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">74</v>
@@ -3120,7 +3120,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTest.m_armDHJntPos[1][2]"</v>
+                      <v n="Value">"g_frictionTest.m_armDHJntPos[2][2]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -3136,7 +3136,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{5df9f9e6-47a5-4adb-a318-7b67cb2155c3}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">84</v>
@@ -3289,7 +3289,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTest.m_armDHJntPos[1][3]"</v>
+                      <v n="Value">"g_frictionTest.m_armDHJntPos[2][3]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -3305,7 +3305,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{995f60ed-5c26-4570-8a3e-31697db01155}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">86</v>
@@ -3434,7 +3434,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{093b3598-4dec-4cbb-8a90-9fed8157a709}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">96</v>
@@ -3563,7 +3563,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{c4fd6b6d-a882-4797-8fc4-e2c6adc9f8d8}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">98</v>
@@ -3716,7 +3716,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTest.m_jntIdStart[1]"</v>
+                      <v n="Value">"g_frictionTest.m_jntIdStart[2]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -3751,7 +3751,7 @@
                   </a>
                 </d>
                 <v n="VisualElementIdentification">{e2ab70f3-7574-4cec-bd76-8909c4263b37}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">100</v>
@@ -3880,7 +3880,7 @@
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
                 <v n="VisualElementIdentification">{f0c93606-500c-466f-9f23-ad4a6b2f007c}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">102</v>
@@ -4033,7 +4033,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTest.m_jntIdEnd[1]"</v>
+                      <v n="Value">"g_frictionTest.m_jntIdEnd[2]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -4068,7 +4068,7 @@
                   </a>
                 </d>
                 <v n="VisualElementIdentification">{5be46a37-6d1c-41a3-bd3f-500b671fbecc}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">104</v>
@@ -4082,7 +4082,7 @@
                       <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                         <o>
                           <v n="Id">1186196937L</v>
-                          <v n="Value">"g_frictionTestSetup.m_testMode[1]"</v>
+                          <v n="Value">"g_frictionTestSetup.m_testMode[2]"</v>
                         </o>
                       </l>
                     </o>
@@ -4149,11 +4149,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">178</v>
+                      <v n="Value">188</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">692</v>
+                      <v n="Value">702</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -4206,11 +4206,11 @@
                     </o>
                     <o>
                       <v n="Id">550940142L</v>
-                      <v n="Value">245</v>
+                      <v n="Value">255</v>
                     </o>
                     <o>
                       <v n="Id">1473355128L</v>
-                      <v n="Value">721</v>
+                      <v n="Value">731</v>
                     </o>
                     <o>
                       <v n="Id">493260384L</v>
@@ -4238,7 +4238,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"g_frictionTestSetup.m_testMode[1]"</v>
+                      <v n="Value">"g_frictionTestSetup.m_testMode[2]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -4253,8 +4253,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{3a67fa43-7064-497d-8731-fbed2752fbf0}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{e1711a44-de9b-4cf1-aa1e-8942221b3a20}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">107</v>
@@ -4268,7 +4268,7 @@
                       <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                         <o>
                           <v n="Id">1186196937L</v>
-                          <v n="Value">"g_frictionTestSetup.m_startMotion[1]"</v>
+                          <v n="Value">"g_frictionTestSetup.m_startMotion[2]"</v>
                         </o>
                       </l>
                     </o>
@@ -4335,11 +4335,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">179</v>
+                      <v n="Value">189</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">814</v>
+                      <v n="Value">824</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -4392,11 +4392,11 @@
                     </o>
                     <o>
                       <v n="Id">550940142L</v>
-                      <v n="Value">249</v>
+                      <v n="Value">259</v>
                     </o>
                     <o>
                       <v n="Id">1473355128L</v>
-                      <v n="Value">842</v>
+                      <v n="Value">852</v>
                     </o>
                     <o>
                       <v n="Id">493260384L</v>
@@ -4424,7 +4424,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"g_frictionTestSetup.m_startMotion[1]"</v>
+                      <v n="Value">"g_frictionTestSetup.m_startMotion[2]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -4439,8 +4439,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{6f44e838-553a-4bf4-8200-fc8a52ce3022}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{95d98772-8ba4-4af8-89dc-52e231339de1}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">109</v>
@@ -4498,11 +4498,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">175</v>
+                      <v n="Value">185</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">611</v>
+                      <v n="Value">621</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -4514,7 +4514,7 @@
                     </o>
                     <o>
                       <v n="Id">390574330L</v>
-                      <v n="Value">"1号臂-调整臂"</v>
+                      <v n="Value">"2号臂-调整臂"</v>
                     </o>
                     <o>
                       <v n="Id">3729828405L</v>
@@ -4557,7 +4557,7 @@
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
-                      <v n="Value">"2012"</v>
+                      <v n="Value">"726"</v>
                     </o>
                   </l>
                 </o>
@@ -4568,8 +4568,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{79565c0b-dc36-46d1-9ed7-7d08117c125c}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{1aa3c42b-431d-4ff2-9101-6c1a2ff4af29}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">111</v>
@@ -4663,11 +4663,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">759</v>
+                      <v n="Value">769</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">732</v>
+                      <v n="Value">742</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -4698,11 +4698,11 @@
                     </o>
                     <o>
                       <v n="Id">550940142L</v>
-                      <v n="Value">832</v>
+                      <v n="Value">842</v>
                     </o>
                     <o>
                       <v n="Id">1473355128L</v>
-                      <v n="Value">753</v>
+                      <v n="Value">763</v>
                     </o>
                     <o>
                       <v n="Id">2678395525L</v>
@@ -4722,7 +4722,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTestSetup.m_CoulombFrictionMax[1][3]"</v>
+                      <v n="Value">"g_frictionTestSetup.m_CoulombFrictionMax[2][3]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -4737,8 +4737,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{38da75b2-cc95-4f73-b28b-ba48588cf1d3}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{ecda67e1-74d5-4242-af58-c31c2850c9a7}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">113</v>
@@ -4832,11 +4832,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">762</v>
+                      <v n="Value">772</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">796</v>
+                      <v n="Value">806</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -4867,11 +4867,11 @@
                     </o>
                     <o>
                       <v n="Id">550940142L</v>
-                      <v n="Value">835</v>
+                      <v n="Value">845</v>
                     </o>
                     <o>
                       <v n="Id">1473355128L</v>
-                      <v n="Value">817</v>
+                      <v n="Value">827</v>
                     </o>
                     <o>
                       <v n="Id">2678395525L</v>
@@ -4891,7 +4891,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTestSetup.m_CoulombFrictionMax[1][4]"</v>
+                      <v n="Value">"g_frictionTestSetup.m_CoulombFrictionMax[2][4]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -4906,8 +4906,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{457bd5e3-e3a8-4d94-97e8-510e67d43294}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{9119a018-50be-45a6-b962-518509375994}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">115</v>
@@ -5001,11 +5001,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">762</v>
+                      <v n="Value">772</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">860</v>
+                      <v n="Value">870</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -5036,11 +5036,11 @@
                     </o>
                     <o>
                       <v n="Id">550940142L</v>
-                      <v n="Value">835</v>
+                      <v n="Value">845</v>
                     </o>
                     <o>
                       <v n="Id">1473355128L</v>
-                      <v n="Value">881</v>
+                      <v n="Value">891</v>
                     </o>
                     <o>
                       <v n="Id">2678395525L</v>
@@ -5060,7 +5060,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTestSetup.m_CoulombFrictionMax[1][5]"</v>
+                      <v n="Value">"g_frictionTestSetup.m_CoulombFrictionMax[2][5]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -5075,8 +5075,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{d3a7c9ea-5b0a-434e-84ae-d8e7b1791d90}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{c59405ee-6bc3-41fc-8ec4-57a819e8ad37}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">117</v>
@@ -5134,11 +5134,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">751</v>
+                      <v n="Value">761</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">670</v>
+                      <v n="Value">680</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -5204,8 +5204,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{f7547c93-3914-4975-bfc1-80f02e7f31a8}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{89291715-10da-412f-9d3b-025e680e1b5d}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">119</v>
@@ -5299,11 +5299,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">969</v>
+                      <v n="Value">979</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">730</v>
+                      <v n="Value">740</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -5334,11 +5334,11 @@
                     </o>
                     <o>
                       <v n="Id">550940142L</v>
-                      <v n="Value">1042</v>
+                      <v n="Value">1052</v>
                     </o>
                     <o>
                       <v n="Id">1473355128L</v>
-                      <v n="Value">751</v>
+                      <v n="Value">761</v>
                     </o>
                     <o>
                       <v n="Id">2678395525L</v>
@@ -5358,7 +5358,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTestSetup.m_CoulombFrictionMax_JntPos[1][3]"</v>
+                      <v n="Value">"g_frictionTestSetup.m_CoulombFrictionMax_JntPos[2][3]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -5373,8 +5373,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{9e8a91d1-f449-4c9f-bc9b-abf4f25acd1e}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{2a107f1d-fd81-4e58-b230-13895e474264}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">121</v>
@@ -5468,11 +5468,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">972</v>
+                      <v n="Value">982</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">794</v>
+                      <v n="Value">804</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -5503,11 +5503,11 @@
                     </o>
                     <o>
                       <v n="Id">550940142L</v>
-                      <v n="Value">1045</v>
+                      <v n="Value">1055</v>
                     </o>
                     <o>
                       <v n="Id">1473355128L</v>
-                      <v n="Value">815</v>
+                      <v n="Value">825</v>
                     </o>
                     <o>
                       <v n="Id">2678395525L</v>
@@ -5527,7 +5527,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTestSetup.m_CoulombFrictionMax_JntPos[1][4]"</v>
+                      <v n="Value">"g_frictionTestSetup.m_CoulombFrictionMax_JntPos[2][4]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -5542,8 +5542,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{e87785c3-d401-47dc-88a4-e03bc066c8cf}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{e74eef7e-93a6-4b99-bde0-4997a3860bd5}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">123</v>
@@ -5637,11 +5637,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">972</v>
+                      <v n="Value">982</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">858</v>
+                      <v n="Value">868</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -5672,11 +5672,11 @@
                     </o>
                     <o>
                       <v n="Id">550940142L</v>
-                      <v n="Value">1045</v>
+                      <v n="Value">1055</v>
                     </o>
                     <o>
                       <v n="Id">1473355128L</v>
-                      <v n="Value">879</v>
+                      <v n="Value">889</v>
                     </o>
                     <o>
                       <v n="Id">2678395525L</v>
@@ -5696,7 +5696,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTestSetup.m_CoulombFrictionMax_JntPos[1][5]"</v>
+                      <v n="Value">"g_frictionTestSetup.m_CoulombFrictionMax_JntPos[2][5]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -5711,8 +5711,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{e9540781-54d7-43c1-bc79-062346f95522}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{3283bb33-ebda-45ad-a052-3dd00505f00a}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">125</v>
@@ -5770,11 +5770,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">926</v>
+                      <v n="Value">936</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">670</v>
+                      <v n="Value">680</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -5840,8 +5840,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{d7563252-232e-417b-bbbb-057add09256a}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{a6a4b4cb-b9d9-4ed9-bb6b-3fef5144debf}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">127</v>
@@ -5935,11 +5935,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">1180</v>
+                      <v n="Value">1190</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">728</v>
+                      <v n="Value">738</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -5970,11 +5970,11 @@
                     </o>
                     <o>
                       <v n="Id">550940142L</v>
-                      <v n="Value">1253</v>
+                      <v n="Value">1263</v>
                     </o>
                     <o>
                       <v n="Id">1473355128L</v>
-                      <v n="Value">749</v>
+                      <v n="Value">759</v>
                     </o>
                     <o>
                       <v n="Id">2678395525L</v>
@@ -5994,7 +5994,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTestSetup.m_CoulombFrictionRatio[1,3]"</v>
+                      <v n="Value">"g_frictionTestSetup.m_CoulombFrictionRatio[2,3]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -6009,8 +6009,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{4f7ee01f-e299-45d3-994f-e0faf75e763c}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{91984332-04f3-4bd5-bf1a-a69436dcca4b}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">129</v>
@@ -6104,11 +6104,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">1183</v>
+                      <v n="Value">1193</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">792</v>
+                      <v n="Value">802</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -6139,11 +6139,11 @@
                     </o>
                     <o>
                       <v n="Id">550940142L</v>
-                      <v n="Value">1256</v>
+                      <v n="Value">1266</v>
                     </o>
                     <o>
                       <v n="Id">1473355128L</v>
-                      <v n="Value">813</v>
+                      <v n="Value">823</v>
                     </o>
                     <o>
                       <v n="Id">2678395525L</v>
@@ -6163,7 +6163,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTestSetup.m_CoulombFrictionRatio[1,4]"</v>
+                      <v n="Value">"g_frictionTestSetup.m_CoulombFrictionRatio[2,4]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -6178,8 +6178,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{00b13bf7-2090-44aa-a399-810d5fe6d986}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{b7c945c3-6b97-4049-aed3-7a5d2ed9d934}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">131</v>
@@ -6273,11 +6273,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">1183</v>
+                      <v n="Value">1193</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">856</v>
+                      <v n="Value">866</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -6308,11 +6308,11 @@
                     </o>
                     <o>
                       <v n="Id">550940142L</v>
-                      <v n="Value">1256</v>
+                      <v n="Value">1266</v>
                     </o>
                     <o>
                       <v n="Id">1473355128L</v>
-                      <v n="Value">877</v>
+                      <v n="Value">887</v>
                     </o>
                     <o>
                       <v n="Id">2678395525L</v>
@@ -6332,7 +6332,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTestSetup.m_CoulombFrictionRatio[1,5]"</v>
+                      <v n="Value">"g_frictionTestSetup.m_CoulombFrictionRatio[2,5]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -6347,8 +6347,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{bf40417d-df85-4a56-997d-8db28b52efed}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{7ef4366c-1eb6-4005-9718-3534459449b0}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">133</v>
@@ -6406,11 +6406,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">1159</v>
+                      <v n="Value">1169</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">673</v>
+                      <v n="Value">683</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -6476,8 +6476,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{90b22a03-0f49-4110-bce2-df5e1fcc8fa2}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{9543094c-14b2-49c4-8f37-5ca647fe1a43}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">135</v>
@@ -6571,11 +6571,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">547</v>
+                      <v n="Value">557</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">735</v>
+                      <v n="Value">745</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -6606,11 +6606,11 @@
                     </o>
                     <o>
                       <v n="Id">550940142L</v>
-                      <v n="Value">620</v>
+                      <v n="Value">630</v>
                     </o>
                     <o>
                       <v n="Id">1473355128L</v>
-                      <v n="Value">756</v>
+                      <v n="Value">766</v>
                     </o>
                     <o>
                       <v n="Id">2678395525L</v>
@@ -6630,7 +6630,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTestSetup.m_armDHJntPos[1][3]"</v>
+                      <v n="Value">"g_frictionTestSetup.m_armDHJntPos[2][3]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -6645,8 +6645,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{0ab674ef-2c5e-44a0-9e8d-7688be02b46c}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{f99eaf63-d3d5-4563-bf67-5fabf6b904b5}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">137</v>
@@ -6704,11 +6704,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">431</v>
+                      <v n="Value">441</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">741</v>
+                      <v n="Value">751</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -6774,8 +6774,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{0393c9ff-0f06-44cb-be14-3838a102a987}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{c9fcc2bb-c23a-46a4-89e7-35afdc43aa6e}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">139</v>
@@ -6833,11 +6833,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">429</v>
+                      <v n="Value">439</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">803</v>
+                      <v n="Value">813</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -6903,8 +6903,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{6ceb8106-0414-4c87-a38c-f3225c5a3cdd}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{201ca1cd-198e-4c31-a2eb-891385bda089}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">141</v>
@@ -6962,11 +6962,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">430</v>
+                      <v n="Value">440</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">870</v>
+                      <v n="Value">880</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -7032,8 +7032,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{083bc7de-17a9-466f-bcf2-f6bb92f653df}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{c13ab6d3-0278-44e7-ae96-644e2965726a}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">143</v>
@@ -7127,11 +7127,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">547</v>
+                      <v n="Value">557</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">799</v>
+                      <v n="Value">809</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -7162,11 +7162,11 @@
                     </o>
                     <o>
                       <v n="Id">550940142L</v>
-                      <v n="Value">620</v>
+                      <v n="Value">630</v>
                     </o>
                     <o>
                       <v n="Id">1473355128L</v>
-                      <v n="Value">820</v>
+                      <v n="Value">830</v>
                     </o>
                     <o>
                       <v n="Id">2678395525L</v>
@@ -7186,7 +7186,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTestSetup.m_armDHJntPos[1][4]"</v>
+                      <v n="Value">"g_frictionTestSetup.m_armDHJntPos[2][4]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -7201,8 +7201,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{c05ef578-1bfe-48ff-9d12-db7145b4dd2d}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{e48c61cc-9fde-41dd-9cb1-78a2195b3103}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">145</v>
@@ -7296,11 +7296,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">547</v>
+                      <v n="Value">557</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">863</v>
+                      <v n="Value">873</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -7331,11 +7331,11 @@
                     </o>
                     <o>
                       <v n="Id">550940142L</v>
-                      <v n="Value">620</v>
+                      <v n="Value">630</v>
                     </o>
                     <o>
                       <v n="Id">1473355128L</v>
-                      <v n="Value">884</v>
+                      <v n="Value">894</v>
                     </o>
                     <o>
                       <v n="Id">2678395525L</v>
@@ -7355,7 +7355,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTestSetup.m_armDHJntPos[1][5]"</v>
+                      <v n="Value">"g_frictionTestSetup.m_armDHJntPos[2][5]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -7370,8 +7370,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{1c674bef-219a-4b8b-98b8-f7d546a29a40}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{a1b644ef-cb2b-470f-b537-f1a4f24c686f}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">147</v>
@@ -7429,11 +7429,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">540</v>
+                      <v n="Value">550</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">670</v>
+                      <v n="Value">680</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -7499,8 +7499,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{d874feb5-34cd-483d-8672-b783858c2644}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{c9c3f5cc-fda8-49b7-8ab4-445319932fda}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">149</v>
@@ -7558,11 +7558,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">399</v>
+                      <v n="Value">409</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">979</v>
+                      <v n="Value">989</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -7628,8 +7628,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{a39b0bdb-1143-4d96-913c-aaaac6364793}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{6b555a19-fde3-49f0-99b4-759570f3eb0e}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">151</v>
@@ -7723,11 +7723,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">549</v>
+                      <v n="Value">559</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">973</v>
+                      <v n="Value">983</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -7758,11 +7758,11 @@
                     </o>
                     <o>
                       <v n="Id">550940142L</v>
-                      <v n="Value">622</v>
+                      <v n="Value">632</v>
                     </o>
                     <o>
                       <v n="Id">1473355128L</v>
-                      <v n="Value">994</v>
+                      <v n="Value">1004</v>
                     </o>
                     <o>
                       <v n="Id">2678395525L</v>
@@ -7782,7 +7782,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTestSetup.m_jntIdStart[1]"</v>
+                      <v n="Value">"g_frictionTestSetup.m_jntIdStart[2]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -7816,8 +7816,8 @@
                     </o>
                   </a>
                 </d>
-                <v n="VisualElementIdentification">{53c9116e-94d6-47e1-ac05-125826132139}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{ea336e4a-8ba2-4130-9aee-c632582a3134}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">153</v>
@@ -7875,11 +7875,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">720</v>
+                      <v n="Value">730</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">981</v>
+                      <v n="Value">991</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -7945,8 +7945,8 @@
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
                 <d n="VisualElementInputActions" t="Hashtable" />
-                <v n="VisualElementIdentification">{5f890f31-3919-48fa-904b-9fdca0bc0a37}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{e444d7fe-bbfc-4e9b-9e1f-ef7052ac3754}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">155</v>
@@ -8040,11 +8040,11 @@
                     </o>
                     <o>
                       <v n="Id">1649127785L</v>
-                      <v n="Value">865</v>
+                      <v n="Value">875</v>
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">971</v>
+                      <v n="Value">981</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -8075,11 +8075,11 @@
                     </o>
                     <o>
                       <v n="Id">550940142L</v>
-                      <v n="Value">938</v>
+                      <v n="Value">948</v>
                     </o>
                     <o>
                       <v n="Id">1473355128L</v>
-                      <v n="Value">992</v>
+                      <v n="Value">1002</v>
                     </o>
                     <o>
                       <v n="Id">2678395525L</v>
@@ -8099,7 +8099,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_frictionTestSetup.m_jntIdEnd[1]"</v>
+                      <v n="Value">"g_frictionTestSetup.m_jntIdEnd[2]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -8133,8 +8133,8 @@
                     </o>
                   </a>
                 </d>
-                <v n="VisualElementIdentification">{68f1f251-36dc-4f43-948f-633b79ba12b6}</v>
-                <v n="VisualElementOwningObjectGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+                <v n="VisualElementIdentification">{eb0d8097-08a1-4fff-9dbb-ebca358951a9}</v>
+                <v n="VisualElementOwningObjectGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
                 <a n="LMGuids" et="Guid" />
                 <d n="SubElements" t="Hashtable" />
                 <v n="VisualElementId">157</v>
@@ -8157,148 +8157,148 @@
             <o n="GeneratedVisuFbDescription" t="GenericFbDescription">
               <d n="FbMethods" t="CaseInsensitiveHashtable" ckt="String" cvt="Guid">
                 <v>HasVisibilityAccess</v>
-                <v>ef1e5c08-e48c-429d-87fe-b0ae5a47dd16</v>
+                <v>cfbd9cbd-54ba-4ad5-bbee-88e27690be16</v>
                 <v>ContainsPoint</v>
-                <v>19e725d8-c7c6-4aed-9091-2c34324bf372</v>
+                <v>fc6a8ff0-84a8-4780-989d-c3585732477b</v>
                 <v>HasInputAccess</v>
-                <v>9bc54c9b-f51e-4cff-ad4e-f9ed3331130f</v>
+                <v>bc636f76-b587-4672-a4e6-ee61170d35c0</v>
                 <v>HasInputAccessIntern</v>
-                <v>a67b1529-cef3-40f9-84ca-bb50632226cd</v>
+                <v>a102bffb-66a9-4bdb-8035-735e7695b3c7</v>
                 <v>GetTooltip</v>
-                <v>98abc913-20a4-456d-ace9-bceef50cff72</v>
+                <v>0eb2c698-c5c5-4511-86b8-a311bf34c6b8</v>
                 <v>GetDialogInterfaceSize</v>
-                <v>c675e1fb-14ff-4763-a3f6-c5cb4f63af55</v>
+                <v>243455cd-136a-4a90-9c7c-90cb7bd73963</v>
                 <v>GetUpdateRects</v>
-                <v>93de5c12-89dd-4b6c-b8b2-04c88e815623</v>
+                <v>0aa1a94d-3695-4404-8ef9-fe70a97d2d4c</v>
                 <v>GetNamespace</v>
-                <v>da31b83f-e45c-4771-b93f-b88dbb963250</v>
+                <v>0ae63673-4405-4626-9eb3-4d4dfa131a68</v>
                 <v>SetResult</v>
-                <v>098ceb7f-283f-46fd-a465-13a8f0880595</v>
+                <v>78bcfed9-9d57-4b5f-b469-ca3d580188b5</v>
                 <v>GetTranslator</v>
-                <v>5f69e2f8-a653-4567-8297-7e78378b7c85</v>
+                <v>dd8a3565-3899-4449-be0a-7b9c4415d923</v>
                 <v>Update</v>
-                <v>e1ef15af-f61c-4b1b-a132-7ce0fc981d45</v>
+                <v>af9ea450-4b23-459a-a7d6-2070d64b798b</v>
                 <v>SetClientData</v>
-                <v>8d91635a-64e1-4f17-aba7-d9e4ce5565a6</v>
+                <v>d2399c58-b2f1-4939-96ae-6139a65997b9</v>
                 <v>HasVisibilityAccessIntern</v>
-                <v>7d36aaa0-bff3-4efa-822c-4578609b7d57</v>
+                <v>f709d4f3-d443-4296-86e8-04900c9a7288</v>
                 <v>GetInstance</v>
-                <v>acd64df0-37d4-46b7-bf22-ed39c1d42cdf</v>
+                <v>32456045-99c2-485f-879d-9e331e70790f</v>
                 <v>GetClientData</v>
-                <v>909ae89c-9637-488f-9c5e-6e4fbe7a5a60</v>
+                <v>4dbf61cd-3b20-4cfe-8acd-e293154f7ef0</v>
                 <v>Paint</v>
-                <v>ef5146d1-a7c3-4895-95be-fcf953bf964d</v>
+                <v>ed2ce274-9725-4d0b-9637-05c0b89c2b49</v>
                 <v>GetElementArray</v>
-                <v>d0e222f8-ef1e-4327-ba27-32122f09dfd2</v>
+                <v>fc9a0c2d-01a8-4a21-9008-38ccdeb907ae</v>
                 <v>SetVisuFlagsInternal</v>
-                <v>df429ce8-36a6-44e9-a6e9-a2d7d6315e65</v>
+                <v>c88eb1c5-d01a-430d-8c98-577912fac36c</v>
                 <v>GetText</v>
-                <v>bbaf886c-2ef0-49f9-a469-f62b060a3de7</v>
+                <v>fd2dad82-0eeb-4211-bb57-183f2ea703a8</v>
                 <v>GetTextProperties</v>
-                <v>6e080e76-36ec-446c-9e7b-8e1916094648</v>
+                <v>82ff24f5-3d64-4cfb-8bc5-cf73bdc5298e</v>
                 <v>IsAntialiasingInactive</v>
-                <v>562a6dff-7c24-4f06-bdb0-d94d923ea600</v>
+                <v>5c0f7b8b-d662-418a-84f8-35a5d1bde6ab</v>
                 <v>Initialize</v>
-                <v>3d772551-bde0-4b37-b633-a63f87a01e61</v>
+                <v>2db52db9-2306-41ae-8e8b-aa88b4ea481f</v>
                 <v>Destruct</v>
-                <v>042d4773-72e1-4ee3-92c1-229cd412e66d</v>
+                <v>4f077a5d-3fca-4395-bc29-b89b8439b89c</v>
                 <v>SetStaticState</v>
-                <v>0bcbd482-a1d5-402d-b89e-590dbd0917e1</v>
+                <v>9f53b11f-9c5d-496e-ac45-21a6e9d44431</v>
                 <v>GetSurroundingRect</v>
-                <v>84c6b1dc-864c-417b-a1e7-889718bd32b7</v>
+                <v>f27fcb6d-59e1-45a8-adf1-a547ca79aec4</v>
                 <v>GetResult</v>
-                <v>2005dd85-70d1-415d-8e35-4a79b1d7cee2</v>
+                <v>e07c3322-960d-4cb7-8b37-d37e71d310f8</v>
                 <v>GetLocalUsergroup</v>
-                <v>7e532ab0-bc0b-45b1-ad5f-901c5f67748a</v>
+                <v>edb1a0b6-10d0-4832-bd4e-eec8c3b007bb</v>
                 <v>GetName</v>
-                <v>3c929378-4b08-4623-ae4d-42f486327df2</v>
+                <v>f1a597b2-b361-4e62-af06-bc5bdab512b2</v>
                 <v>GetSize</v>
-                <v>0996fdd6-a416-44e8-8767-ffa41a722c0c</v>
+                <v>75181cc2-beec-4ff3-98de-da26cf62e3cb</v>
                 <v>SetDialogInterface</v>
-                <v>bed18b08-87bb-4cdd-8397-f6b517fb1451</v>
+                <v>7b81474d-f4d1-4a24-a52b-4b59bab91ebc</v>
                 <v>FB_Reinit</v>
-                <v>2eaed67e-7e09-4c7b-baec-a3f7532dc348</v>
+                <v>be306ea0-557f-4266-bcb9-08d80488d57b</v>
                 <v>FB_Exit</v>
-                <v>254a5233-4386-45f2-b57e-ecb7047e1752</v>
+                <v>d6b24fe1-cdda-47a0-980d-527c776ebe4e</v>
                 <v>GetInitializeVersion</v>
-                <v>4e9fffc3-eaeb-478e-8af4-728d91eca74e</v>
+                <v>ba794e32-1f17-459b-bcb5-796b8099fe2f</v>
                 <v>GetDialogInterface</v>
-                <v>9c68709d-33f2-4fbf-b0f9-7961cd5ba984</v>
+                <v>2bc36e33-48e5-4f73-9625-9c7b25926cf4</v>
                 <v>GetElementIdArray</v>
-                <v>b9c8c83f-3b53-4c11-ba78-6efb57b65330</v>
+                <v>c7130fdd-1f06-40c0-8025-e544734d4ed3</v>
                 <v>HandleInput</v>
-                <v>10c85d0c-6590-48af-8f47-aabb1a8c261e</v>
+                <v>b95fdf14-cad8-4478-8ba4-4c4593e637c5</v>
                 <v>ElementInfo</v>
-                <v>35dbad99-47b5-4787-a8e5-714905935aee</v>
+                <v>f51bbffa-313f-4321-bd5e-5f5657969f77</v>
               </d>
               <v n="FbName">"NotImportant"</v>
-              <v n="FbGuid">{5a775795-2dfc-41c7-a1ee-72e1b8a53633}</v>
+              <v n="FbGuid">{c5da6a10-b4de-4783-9cb5-6c5f69b125f7}</v>
             </o>
-            <v n="GeneratedGlobalVisuVarsGuid">{46dd4fd9-a6c3-4332-abfb-4baabb34e2d1}</v>
-            <v n="GeneratedGlobalTheVisuVarlistGuid">{8623d48f-643e-49b5-a988-1c7caee465a7}</v>
-            <v n="GeneratedGlobalVisuConstants">{fd984e55-c300-47fb-a617-f69615dd237b}</v>
+            <v n="GeneratedGlobalVisuVarsGuid">{5dc1bff4-c62a-4fde-9de6-52975f5cd590}</v>
+            <v n="GeneratedGlobalTheVisuVarlistGuid">{ebd1a6f0-e4fd-47fb-8e7b-65e5b0b53b5d}</v>
+            <v n="GeneratedGlobalVisuConstants">{4330459c-d747-44d3-9ee6-93e5cfd19688}</v>
             <d n="GeneratedAllElementsEntries" t="Hashtable" />
             <o n="VisuRegDesc" t="GenericFbDescription">
               <d n="FbMethods" t="CaseInsensitiveHashtable" ckt="String" cvt="Guid">
                 <v>FB_Init</v>
-                <v>a985b17c-48a1-47d9-aedc-db0cc3ee427f</v>
+                <v>c94f43f3-a8bf-4eb3-98ac-fe504e700321</v>
                 <v>FB_Reinit</v>
-                <v>2065ba39-27f7-4dcd-9586-1111102437c7</v>
+                <v>6829a5cc-ac3b-4f5c-acfe-dcc0a54cab71</v>
                 <v>FB_Exit</v>
-                <v>6bf27771-24ca-4d17-af51-61904ff92483</v>
+                <v>777396fd-4d1d-4b6e-81bc-51f855242162</v>
               </d>
               <v n="FbName">"NotImportant"</v>
-              <v n="FbGuid">{81eadee8-ee5c-4268-9224-5960dbe4a9b7}</v>
+              <v n="FbGuid">{772d4665-54f4-4fe1-94cd-ac5715d10cfa}</v>
             </o>
-            <v n="VisuRegisterGvl">{98bc7249-f79d-4817-8e23-918d1937b0fc}</v>
+            <v n="VisuRegisterGvl">{c9149bb0-7c81-46d8-8ea9-025f7c896cd7}</v>
             <n n="SettingsPou" />
             <n n="MemManPou" />
             <o n="InputsPou" t="GenericFbDescription">
               <d n="FbMethods" t="CaseInsensitiveHashtable" ckt="String" cvt="Guid">
                 <v>ExecuteLooseCapture</v>
-                <v>e69a2c38-f937-48b9-bbdd-6a27cdc58b95</v>
+                <v>d628f17a-437f-47ed-bec8-9ff63771e533</v>
                 <v>ExecuteMouseDblClick</v>
-                <v>b70684c4-b109-458b-8eaf-c4255b8dea7a</v>
+                <v>f51bad32-34e1-4977-a043-1febbc15093a</v>
                 <v>ExecuteMouseDown</v>
-                <v>976aadd5-8649-4339-be6f-6ee6cb9afbf0</v>
+                <v>7fcf20f1-f4c3-40dc-9506-51bd93d8ff6c</v>
                 <v>ExecuteMouseUp</v>
-                <v>d1c2bf00-2312-471f-aa97-7a0d1e690dcc</v>
+                <v>db07963b-0ee1-4619-9a1c-deb99fbaf1f8</v>
                 <v>GetElementInfo</v>
-                <v>056eaa0e-9c76-4bdd-b2e4-88b7cd6f49ef</v>
+                <v>e8ee3fda-91cc-43e2-b3da-cc69df608b43</v>
                 <v>abstrGetDefaultCursor</v>
-                <v>8e4075cd-bb9c-4690-b611-271d2e7a8400</v>
+                <v>988e3503-b9b1-4085-bb2b-8a436e02cc5e</v>
                 <v>ExecuteDialogClosed</v>
-                <v>517a0d8c-4471-4fcb-8075-274324014f0d</v>
+                <v>e85ce22f-ac5e-4221-81b6-5c9f3afc9c52</v>
                 <v>ExecuteKeyUp</v>
-                <v>dcd0dfec-f11b-446f-a47e-c86ba3d88990</v>
+                <v>13b44026-9f45-4741-b65d-cc2007453a76</v>
                 <v>ExecuteKeyDown</v>
-                <v>2dddfb73-c799-4562-b1fd-89892fc1f990</v>
+                <v>a2fef96a-99a2-4ae9-9905-b342909b095a</v>
                 <v>ExecuteMouseMove</v>
-                <v>65beef39-1271-4afb-9a9a-2cac6ab3903d</v>
+                <v>903b53e2-653f-4e69-ac1b-98e64ad7c971</v>
                 <v>Initialize</v>
-                <v>ed50b3eb-31ff-41da-bf34-7f72972c929a</v>
+                <v>922fb54b-2de7-4b81-ac2e-7605c8cee296</v>
                 <v>ExecuteMouseEnter</v>
-                <v>a69965dc-7223-4bd4-9268-134eca43e688</v>
+                <v>8c3e8624-abc4-42e4-9a71-2d52967b1d40</v>
                 <v>ExecuteMouseLeave</v>
-                <v>3c63457d-790d-46f1-bba3-dac6f391a714</v>
+                <v>d6aae77a-1096-4907-9dde-c9d095fd7c65</v>
                 <v>ExecuteMouseClick</v>
-                <v>ae20c07a-e657-4075-91f2-31b75828c029</v>
+                <v>f39e08d0-ca79-4f19-bba1-997c041b22bb</v>
               </d>
               <v n="FbName">"NotImportant"</v>
-              <v n="FbGuid">{3955fb85-d96a-41e2-aa2e-9f179e1ccd33}</v>
+              <v n="FbGuid">{c1dc25c1-7197-4b1c-b411-e2b27472a565}</v>
             </o>
-            <v n="DialogDut">{06effea2-1cb1-470f-b21e-275d7ce13c24}</v>
+            <v n="DialogDut">{5bb1c3f0-8311-46d2-9325-a19aa6c06182}</v>
           </o>
           <v n="LastUsedIdForIdentifier">175</v>
           <o n="TextDocument" t="TextDocument">
             <a n="TextLines" cet="TextLine">
               <o>
-                <v n="Id">2L</v>
+                <v n="Id">4L</v>
                 <n n="Tag" />
                 <v n="Text">"VAR_IN_OUT"</v>
               </o>
               <o>
-                <v n="Id">3L</v>
+                <v n="Id">5L</v>
                 <n n="Tag" />
                 <v n="Text">"	"</v>
               </o>
@@ -8327,12 +8327,12 @@
               <v>0</v>
               <o>
                 <v n="Width">1353</v>
-                <v n="Height">1016</v>
+                <v n="Height">1026</v>
               </o>
               <v>1</v>
               <o>
                 <v n="Width">1352</v>
-                <v n="Height">1017</v>
+                <v n="Height">1027</v>
               </o>
             </d2>
             <v n="Version">1</v>

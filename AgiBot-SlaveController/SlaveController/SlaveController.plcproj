@@ -800,6 +800,18 @@
       <SubType>Code</SubType>
       <DependentUpon>视图管理器.TcVMO</DependentUpon>
     </Compile>
+    <Compile Include="FBs_Test\UI\frictionTest\friction_a2.TcVIS">
+      <SubType>Code</SubType>
+      <DependentUpon>视图管理器.TcVMO</DependentUpon>
+    </Compile>
+    <Compile Include="FBs_Test\UI\frictionTest\friction_a3.TcVIS">
+      <SubType>Code</SubType>
+      <DependentUpon>视图管理器.TcVMO</DependentUpon>
+    </Compile>
+    <Compile Include="FBs_Test\UI\frictionTest\friction_a4.TcVIS">
+      <SubType>Code</SubType>
+      <DependentUpon>视图管理器.TcVMO</DependentUpon>
+    </Compile>
     <Compile Include="FBs_Test\UI\motionTest\motion_a1.TcVIS">
       <SubType>Code</SubType>
       <DependentUpon>视图管理器.TcVMO</DependentUpon>
