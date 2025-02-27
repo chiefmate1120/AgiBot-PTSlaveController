@@ -75,6 +75,9 @@ VAR
 	// slave command grip angle and grip force level
 	m_slaveCmdGripAngle :LREAL;
 	m_slaveCmdGripForceLevel:LREAL;
+	
+	//arm id
+	m_armId:INT;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -91,6 +94,14 @@ END_VAR
 
 CASE m_testStep OF 
 	0://init the parameters
+		m_freqTestFlag:=g_responseTest.m_freqTestFlag;
+		m_stepTestFlag:=g_responseTest.m_stepTestFlag;		
+		m_jntMotionFreq:=g_responseTest.m_jntMotionFreq;
+		m_jntMotionRange:=g_responseTest.m_jntMotionRange;		
+		m_jntStep:=g_responseTest.m_jntStep;		
+		m_testJntIdx:=g_responseTest.m_testJntIdx;
+		m_stepCycle:=g_responseTest.m_stepCycle;
+		
 		m_initDHJntPos:=i_slaveArm.curDHJntPos;
 		m_cmdJntPos:=i_slaveArm.curJntPos;		
 		m_lastCmdJntPos:=m_cmdJntPos;
@@ -167,8 +178,9 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-
 //init parameters flag
+m_startMotion:=g_responseTest.m_startMotion[m_armId];
+
 IF (m_startMotionLast=FALSE) AND (m_startMotion=TRUE)THEN
 	m_testStep:=0;
 END_IF
@@ -245,6 +257,11 @@ copyCmds(r_slaveArmCtrlCmd);
 
 // init controller
 m_basicInstruController.init(i_slaveArm);
+
+//init
+m_startMotionLast:=FALSE;
+m_armId:=i_slaveArm.armIdx;
+
 ]]></ST>
       </Implementation>
     </Method>
@@ -255,6 +272,8 @@ m_basicInstruController.init(i_slaveArm);
       <LineId Id="112" Count="0" />
       <LineId Id="7" Count="1" />
       <LineId Id="12" Count="0" />
+      <LineId Id="126" Count="5" />
+      <LineId Id="123" Count="1" />
       <LineId Id="24" Count="0" />
       <LineId Id="95" Count="0" />
       <LineId Id="105" Count="1" />
@@ -296,9 +315,11 @@ m_basicInstruController.init(i_slaveArm);
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlResponseTest.calcCmdJntPos">
-      <LineId Id="332" Count="0" />
-      <LineId Id="343" Count="0" />
-      <LineId Id="333" Count="1" />
+      <LineId Id="333" Count="0" />
+      <LineId Id="362" Count="0" />
+      <LineId Id="361" Count="0" />
+      <LineId Id="360" Count="0" />
+      <LineId Id="334" Count="0" />
       <LineId Id="340" Count="0" />
       <LineId Id="338" Count="0" />
       <LineId Id="335" Count="0" />
@@ -327,6 +348,11 @@ m_basicInstruController.init(i_slaveArm);
       <LineId Id="80" Count="0" />
       <LineId Id="146" Count="0" />
       <LineId Id="59" Count="0" />
+      <LineId Id="154" Count="0" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="155" Count="0" />
+      <LineId Id="165" Count="0" />
+      <LineId Id="164" Count="0" />
       <LineId Id="12" Count="0" />
     </LineIds>
   </POU>

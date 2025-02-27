@@ -41,6 +41,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"585"</v>
+              <v n="TextDefault">"1号臂进入响应测试模式"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"858"</v>
               <v n="TextDefault">"1号臂进入测试"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -48,6 +53,11 @@
             <o>
               <v n="TextID">"415"</v>
               <v n="TextDefault">"2号臂"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"756"</v>
+              <v n="TextDefault">"2号臂进入响应测试模式"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -66,6 +76,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"1406"</v>
+              <v n="TextDefault">"3号臂进入响应测试模式"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"1712"</v>
               <v n="TextDefault">"3号臂进入测试"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -73,6 +88,11 @@
             <o>
               <v n="TextID">"513"</v>
               <v n="TextDefault">"4号臂"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"25"</v>
+              <v n="TextDefault">"4号臂进入响应测试模式"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -276,8 +296,18 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"699"</v>
+              <v n="TextDefault">"关节1"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"102"</v>
               <v n="TextDefault">"关节1-左支撑"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"285"</v>
+              <v n="TextDefault">"关节2"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -561,6 +591,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"474"</v>
+              <v n="TextDefault">"开启/关闭"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"128"</v>
               <v n="TextDefault">"开启循环运动"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -736,6 +771,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"379"</v>
+              <v n="TextDefault">"测试关节序号"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"563"</v>
               <v n="TextDefault">"灯光测试"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -876,6 +916,21 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"1069"</v>
+              <v n="TextDefault">"运动范围-弧度"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"722"</v>
+              <v n="TextDefault">"运动范围-弧度/m"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"962"</v>
+              <v n="TextDefault">"运动频率-HZ"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"298"</v>
               <v n="TextDefault">"进入关节活动范围测试模式"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -911,6 +966,26 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"122"</v>
+              <v n="TextDefault">"阶跃测试"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"88"</v>
+              <v n="TextDefault">"阶跃测试周期"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"1221"</v>
+              <v n="TextDefault">"阶跃测试距离-弧度"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"772"</v>
+              <v n="TextDefault">"阶跃测试距离-弧度/m"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"445"</v>
               <v n="TextDefault">"需要拖动填1，反之填0"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -918,6 +993,11 @@
             <o>
               <v n="TextID">"1642"</v>
               <v n="TextDefault">"霍尔信号"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"40"</v>
+              <v n="TextDefault">"频率测试"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
           </l>

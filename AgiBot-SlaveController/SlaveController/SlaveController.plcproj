@@ -844,6 +844,10 @@
       <SubType>Code</SubType>
       <DependentUpon>视图管理器.TcVMO</DependentUpon>
     </Compile>
+    <Compile Include="FBs_Test\UI\responseTest\responseTest.TcVIS">
+      <SubType>Code</SubType>
+      <DependentUpon>视图管理器.TcVMO</DependentUpon>
+    </Compile>
     <Compile Include="FBs_TrajectoryPlanning\FB_BasicDoubleS.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -1156,6 +1160,7 @@
     <Folder Include="FBs_Test\UI\motionTest" />
     <Folder Include="FBs_Test\UI\motRangeTest" />
     <Folder Include="FBs_Test\UI\precision" />
+    <Folder Include="FBs_Test\UI\responseTest" />
     <Folder Include="FBs_TrajectoryPlanning" />
     <Folder Include="FBs_TrajectoryPlanning\OTG" />
     <Folder Include="GVLs" />

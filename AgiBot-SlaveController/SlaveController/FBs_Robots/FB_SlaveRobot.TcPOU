@@ -725,6 +725,16 @@ FOR i:=1 TO g_sArmNum DO
 		m_nextSlaveArmState[i] := SlaveArmState_Standby;
 	END_IF
 	
+	// to SlaveArmState_TestFriction
+	IF (g_responseTest.m_testMode[i]=TRUE) AND NOT(m_slaveArmState[i]=SlaveArmState_TestResponse) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_TestResponse;
+	END_IF
+	
+	// SlaveArmState_TestFriction exit
+	IF (g_responseTest.m_testMode[i]=FALSE) AND (m_slaveArmState[i]=SlaveArmState_TestResponse) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_Standby;
+	END_IF	
+	
 	//fault mask
 	IF (g_specialSignal.m_faultMask) THEN
 		CONTINUE;
@@ -848,6 +858,9 @@ m_lastEndoScopePostureUI := GVL_interactUI.g_scopeUpDown;
       <LineId Id="4585" Count="0" />
       <LineId Id="4608" Count="7" />
       <LineId Id="4606" Count="1" />
+      <LineId Id="4627" Count="7" />
+      <LineId Id="4623" Count="0" />
+      <LineId Id="4626" Count="0" />
       <LineId Id="4577" Count="0" />
       <LineId Id="4506" Count="0" />
       <LineId Id="4575" Count="1" />
