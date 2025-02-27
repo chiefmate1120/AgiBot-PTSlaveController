@@ -57,6 +57,15 @@ END_FOR
 m_cmdCartPose:=i_slaveArm.curCartPose;
 *)
 
+//add code for test
+FOR i:=1 TO 8 BY 1 DO
+	IF (g_motionRangeTest.m_slaveJntEnable[i]=TRUE) THEN
+		m_jntEnableFlag[i]:=1;
+	ELSE
+		m_jntEnableFlag[i]:=0;
+	END_IF
+END_FOR
+
 //copy the current joint position to command joint position
 m_cmdJntPos:=i_slaveArm.curJntPos;
 m_cmdCartPose:=i_slaveArm.curCartPose;
@@ -185,7 +194,14 @@ copyCmds(r_slaveArmCtrlCmd);
 
 
 //add code for test
-m_jntEnableFlag:=g_onesVec8i;
+FOR i:=1 TO 8 BY 1 DO
+	IF (g_motionRangeTest.m_slaveJntEnable[i]=TRUE) THEN
+		m_jntEnableFlag[i]:=1;
+	ELSE
+		m_jntEnableFlag[i]:=0;
+	END_IF
+END_FOR
+
 m_jntOPMode:=g_slaveAllTrqMode;
 m_DHjntPos:=i_slaveArm.curJntPos;
 m_jntPosMin:=m_DHjntPos;
@@ -205,6 +221,9 @@ vecSub(m_jntPosMax,m_jntPosMin,m_jntMotRange);]]></ST>
       <LineId Id="101" Count="0" />
       <LineId Id="39" Count="0" />
       <LineId Id="132" Count="0" />
+      <LineId Id="167" Count="0" />
+      <LineId Id="170" Count="6" />
+      <LineId Id="168" Count="0" />
       <LineId Id="155" Count="0" />
       <LineId Id="133" Count="2" />
       <LineId Id="148" Count="0" />
@@ -231,7 +250,12 @@ vecSub(m_jntPosMax,m_jntPosMin,m_jntMotRange);]]></ST>
     <LineIds Name="FB_SlaveCtrlDargFreeTest.init">
       <LineId Id="157" Count="32" />
       <LineId Id="201" Count="2" />
-      <LineId Id="221" Count="0" />
+      <LineId Id="233" Count="1" />
+      <LineId Id="236" Count="0" />
+      <LineId Id="238" Count="1" />
+      <LineId Id="237" Count="0" />
+      <LineId Id="235" Count="0" />
+      <LineId Id="232" Count="0" />
       <LineId Id="206" Count="0" />
       <LineId Id="208" Count="2" />
       <LineId Id="207" Count="0" />

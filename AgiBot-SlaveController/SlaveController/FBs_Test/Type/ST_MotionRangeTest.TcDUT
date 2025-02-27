@@ -17,6 +17,12 @@ STRUCT
 	m_setupJntPosMin:ARRAY[1..g_sArmNum] OF Vec5d;
 	m_setupJntPosMax:ARRAY[1..g_sArmNum] OF Vec5d;
 	m_setupJntPosRange:ARRAY[1..g_sArmNum] OF Vec5d;
+	
+	//slave arm enable flag
+	m_slaveJntEnable:ARRAY[1..g_sJntNum] OF BOOL;
+	
+	//setup arm enable flag
+	m_setupJntEnable:ARRAY[1..g_setupJntNum] OF BOOL;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

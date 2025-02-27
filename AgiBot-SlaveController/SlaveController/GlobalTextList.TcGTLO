@@ -296,6 +296,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"263"</v>
+              <v n="TextDefault">"关节3使能"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"851"</v>
               <v n="TextDefault">"关节4"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -303,6 +308,11 @@
             <o>
               <v n="TextID">"24"</v>
               <v n="TextDefault">"关节4-右轮"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"1260"</v>
+              <v n="TextDefault">"关节4使能"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -316,6 +326,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"832"</v>
+              <v n="TextDefault">"关节5使能"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"631"</v>
               <v n="TextDefault">"关节6"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -323,6 +338,11 @@
             <o>
               <v n="TextID">"383"</v>
               <v n="TextDefault">"关节6-横梁旋转"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"179"</v>
+              <v n="TextDefault">"关节6使能"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -336,6 +356,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"329"</v>
+              <v n="TextDefault">"关节7使能"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"509"</v>
               <v n="TextDefault">"关节8"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -346,8 +371,18 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"142"</v>
+              <v n="TextDefault">"关节8使能"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"43"</v>
               <v n="TextDefault">"关节位置增量"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"178"</v>
+              <v n="TextDefault">"关节使能"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -663,6 +698,11 @@
             <o>
               <v n="TextID">"1263"</v>
               <v n="TextDefault">"无颜色"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"1329"</v>
+              <v n="TextDefault">"是否使能"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
