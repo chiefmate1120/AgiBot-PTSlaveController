@@ -334,7 +334,7 @@
                           <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                             <o>
                               <v n="Id">1186196937L</v>
-                              <v n="Value">"A1_Arm1Mode[4,1]"</v>
+                              <v n="Value">"g_motionTest.m_uiArmMode[4,1]"</v>
                             </o>
                           </l>
                         </o>
@@ -490,7 +490,7 @@
                         </o>
                         <o>
                           <v n="Id">1999528970L</v>
-                          <v n="Value">"A1_Arm1ModeL[4,1]"</v>
+                          <v n="Value">"g_motionTest.m_uiArmModeL[4,1]"</v>
                         </o>
                         <o>
                           <v n="Id">823443203L</v>
@@ -520,7 +520,7 @@
                           <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                             <o>
                               <v n="Id">1186196937L</v>
-                              <v n="Value">"A1_Arm1Mode[4,3]"</v>
+                              <v n="Value">"g_motionTest.m_uiArmMode[4,3]"</v>
                             </o>
                           </l>
                         </o>
@@ -676,7 +676,7 @@
                         </o>
                         <o>
                           <v n="Id">1999528970L</v>
-                          <v n="Value">"A1_Arm1ModeL[4,3]"</v>
+                          <v n="Value">"g_motionTest.m_uiArmModeL[4,3]"</v>
                         </o>
                         <o>
                           <v n="Id">823443203L</v>
@@ -871,7 +871,7 @@
                       <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                         <o>
                           <v n="Id">1186196937L</v>
-                          <v n="Value">"A1_Arm1Mode[4,2]"</v>
+                          <v n="Value">"g_motionTest.m_uiArmMode[4,2]"</v>
                         </o>
                         <o>
                           <v n="Id">1329445385L</v>
@@ -1031,7 +1031,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"A1_Arm1ModeL[4,2]"</v>
+                      <v n="Value">"g_motionTest.m_uiArmModeL[4,2]"</v>
                     </o>
                     <o>
                       <v n="Id">2880254039L</v>
@@ -1065,7 +1065,7 @@
                       <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                         <o>
                           <v n="Id">1186196937L</v>
-                          <v n="Value">"A1_Arm1Mode[4,4]"</v>
+                          <v n="Value">"g_motionTest.m_uiArmMode[4,4]"</v>
                         </o>
                       </l>
                     </o>
@@ -1221,7 +1221,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"A1_Arm1ModeL[4,4]"</v>
+                      <v n="Value">"g_motionTest.m_uiArmModeL[4,4]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -1251,7 +1251,7 @@
                       <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                         <o>
                           <v n="Id">1186196937L</v>
-                          <v n="Value">"A1_Arm1Mode[4,6]"</v>
+                          <v n="Value">"g_motionTest.m_uiArmMode[4,6]"</v>
                         </o>
                       </l>
                     </o>
@@ -1407,7 +1407,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"A1_Arm1ModeL[4,6]"</v>
+                      <v n="Value">"g_motionTest.m_uiArmModeL[4,6]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -9459,7 +9459,7 @@
                       <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                         <o>
                           <v n="Id">1186196937L</v>
-                          <v n="Value">"A1_Arm1Mode[4,5]"</v>
+                          <v n="Value">"g_motionTest.m_uiArmMode[4,5]"</v>
                         </o>
                       </l>
                     </o>
@@ -9615,7 +9615,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"A1_Arm1Mode[4,5]"</v>
+                      <v n="Value">"g_motionTest.m_uiArmMode[4,5]"</v>
                     </o>
                     <o>
                       <v n="Id">2880254039L</v>
@@ -12027,7 +12027,7 @@
                       <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                         <o>
                           <v n="Id">1186196937L</v>
-                          <v n="Value">"A1_Arm1Mode[4,7]"</v>
+                          <v n="Value">"g_motionTest.m_uiArmMode[4,7]"</v>
                         </o>
                       </l>
                     </o>
@@ -12183,7 +12183,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"A1_Arm1Mode[4,7]"</v>
+                      <v n="Value">"g_motionTest.m_uiArmMode[4,7]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -12718,7 +12718,7 @@
                       <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                         <o>
                           <v n="Id">1186196937L</v>
-                          <v n="Value">"A1_Arm1Mode[4,8]"</v>
+                          <v n="Value">"g_motionTest.m_uiArmMode[4,8]"</v>
                         </o>
                       </l>
                     </o>
@@ -12874,7 +12874,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"A1_Arm1Mode[4,8]"</v>
+                      <v n="Value">"g_motionTest.m_uiArmMode[4,8]"</v>
                     </o>
                     <o>
                       <v n="Id">2880254039L</v>
@@ -13962,10 +13962,10 @@
               <d n="FbMethods" t="CaseInsensitiveHashtable" ckt="String" cvt="Guid">
                 <v>FB_Init</v>
                 <v>44b7dc2f-7f88-4206-a3b9-ef81b6c4b2b2</v>
-                <v>FB_Reinit</v>
-                <v>41133846-38f3-435d-9e21-fbc00e3f6b55</v>
                 <v>FB_Exit</v>
                 <v>f1048783-2f85-4d32-8e41-3d8373726484</v>
+                <v>FB_Reinit</v>
+                <v>41133846-38f3-435d-9e21-fbc00e3f6b55</v>
               </d>
               <v n="FbName">"NotImportant"</v>
               <v n="FbGuid">{9353c63b-4661-4ca9-a6d0-b4d0fa7b318b}</v>

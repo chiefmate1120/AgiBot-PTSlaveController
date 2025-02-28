@@ -16,7 +16,7 @@
                       <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                         <o>
                           <v n="Id">1186196937L</v>
-                          <v n="Value">"A1_Arm1Mode[1,1]"</v>
+                          <v n="Value">"g_motionTest.m_uiArmMode[1,1]"</v>
                         </o>
                       </l>
                     </o>
@@ -172,7 +172,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"A1_Arm1Mode[3,1]"</v>
+                      <v n="Value">"g_motionTest.m_uiArmMode[3,1]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -14571,7 +14571,7 @@
                       <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                         <o>
                           <v n="Id">1186196937L</v>
-                          <v n="Value">"A1_Arm1Mode[3,9]"</v>
+                          <v n="Value">"g_motionTest.m_uiArmMode[3,9]"</v>
                         </o>
                       </l>
                     </o>
@@ -14727,7 +14727,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"A1_Arm1Mode[3,9]"</v>
+                      <v n="Value">"g_motionTest.m_uiArmMode[3,9]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -23517,10 +23517,10 @@
               <d n="FbMethods" t="CaseInsensitiveHashtable" ckt="String" cvt="Guid">
                 <v>FB_Init</v>
                 <v>cdbaee41-5faf-4abc-88bd-cc6f791ca3de</v>
-                <v>FB_Reinit</v>
-                <v>d8278a58-9c06-4c27-b4b3-0c8a57f9621c</v>
                 <v>FB_Exit</v>
                 <v>3fce2fb8-6ba1-42ea-b2be-d9b100591bd6</v>
+                <v>FB_Reinit</v>
+                <v>d8278a58-9c06-4c27-b4b3-0c8a57f9621c</v>
               </d>
               <v n="FbName">"NotImportant"</v>
               <v n="FbGuid">{6d75f641-625f-4206-9eda-04c765290749}</v>

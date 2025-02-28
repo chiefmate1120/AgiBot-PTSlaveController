@@ -107,10 +107,10 @@ END_VAR
       <Implementation>
         <ST><![CDATA[
 //data from ui
-m_uiControlMode:=A1_Arm1Mode;
+m_uiControlMode:=g_motionTest.m_uiArmMode;
 
 
-//the interface relate to variable A1_Arm1Mode
+//the interface relate to variable g_motionTest.m_uiArmMode
 FOR i:=1 TO 4  DO
 	FOR j:=1 TO GVL_Const.g_controlModeNum DO 
 		//Monitoring button signal rising edge
@@ -126,9 +126,9 @@ END_FOR
 
 
 //Upload variables for displaying button colors
-A1_Arm1ModeL:=m_controlModeInit;
+g_motionTest.m_uiArmModeL:=m_controlModeInit;
 FOR i:=1 TO 4  DO
-	A1_Arm1ModeL[i,g_motionTest.m_controlMode[i]]:=TRUE;
+	g_motionTest.m_uiArmModeL[i,g_motionTest.m_controlMode[i]]:=TRUE;
 END_FOR
 
 
@@ -140,10 +140,6 @@ FOR i:=1 TO 4  DO
 		g_motionTest.m_startMotion[i]:=FALSE;
 	END_IF
 END_FOR
-
-
-//ui signal copy
-g_motionTest.m_uiArmMode:=m_uiControlMode;
 ]]></ST>
       </Implementation>
     </Method>
@@ -264,9 +260,6 @@ END_CASE
       <LineId Id="196" Count="0" />
       <LineId Id="165" Count="6" />
       <LineId Id="97" Count="0" />
-      <LineId Id="198" Count="0" />
-      <LineId Id="239" Count="0" />
-      <LineId Id="251" Count="1" />
       <LineId Id="240" Count="0" />
     </LineIds>
     <LineIds Name="MainTestPart.writePrecisionData">
