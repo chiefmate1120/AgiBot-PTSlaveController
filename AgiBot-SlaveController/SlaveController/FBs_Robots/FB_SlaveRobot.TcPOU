@@ -83,17 +83,16 @@ VAR
 	
 	//add code for test
 	//m_Performance :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlPerformance;
-	m_PrecisionTest :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlMotionTest;
-	m_PrecisionTestCycle :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlCycleTest;
-	m_PrecisionTestFriction :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlFrictionTest;
-	m_PrecisionTestResponse :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlResponseTest;
+	m_motionTest :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlMotionTest;
+	m_cycleTest :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlCycleTest;
+	m_frictionTest :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlFrictionTest;
+	m_responseTest :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlResponseTest;
 	m_armCali :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlArmCali;
 	m_dragFreeTest :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlDargFreeTest;
 	
 	// arm controller interface
 	m_armCtrl :ARRAY[1..g_sArmNum] OF I_SlaveArmCtrl;
 	m_armCtrlCmds :ARRAY[1..g_sArmNum] OF ST_SlaveArmCtrlCmds;
-
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -247,10 +246,10 @@ END_VAR
 	m_armCtrlFactory[i,SlaveArmState_SelfCheckTransport] := m_selfCheckTransport[i];
 	
 	//add code for test
-	m_armCtrlFactory[i,SlaveArmState_PrecisionTest] := m_PrecisionTest[i];
-	m_armCtrlFactory[i,SlaveArmState_TestCycle] := m_PrecisionTestCycle[i];
-	m_armCtrlFactory[i,SlaveArmState_TestFriction] := m_PrecisionTestFriction[i];
-	m_armCtrlFactory[i,SlaveArmState_TestResponse] := m_PrecisionTestResponse[i];
+	m_armCtrlFactory[i,SlaveArmState_MotionTest] := m_motionTest[i];
+	m_armCtrlFactory[i,SlaveArmState_CycleTest] := m_cycleTest[i];
+	m_armCtrlFactory[i,SlaveArmState_FrictionTest] := m_frictionTest[i];
+	m_armCtrlFactory[i,SlaveArmState_ResponseTest] := m_responseTest[i];
 	m_armCtrlFactory[i,SlaveArmState_armCali] := m_armCali[i];
 	m_armCtrlFactory[i,SlaveArmState_DargFreeTest] := m_dragFreeTest[i];
 	
@@ -679,32 +678,32 @@ FOR i:=1 TO g_sArmNum DO
 	
 	//**************************************add for test***************************************//
 	// to precision test
-	IF (g_motionTest.m_enterPrecisionTestMode[i]=TRUE) OR (g_motionTest.m_singleMotorControl[i]=TRUE) AND NOT(m_slaveArmState[i]=SlaveArmState_PrecisionTest) THEN
-		m_nextSlaveArmState[i] := SlaveArmState_PrecisionTest;
+	IF (g_motionTest.m_enterPrecisionTestMode[i]=TRUE) OR (g_motionTest.m_singleMotorControl[i]=TRUE) AND NOT(m_slaveArmState[i]=SlaveArmState_MotionTest) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_MotionTest;
 	END_IF
 	
 	// precision test exit
-	IF (g_motionTest.m_enterPrecisionTestMode[i]=FALSE) AND (g_motionTest.m_singleMotorControl[i]=FALSE) AND (m_slaveArmState[i]=SlaveArmState_PrecisionTest) THEN
+	IF (g_motionTest.m_enterPrecisionTestMode[i]=FALSE) AND (g_motionTest.m_singleMotorControl[i]=FALSE) AND (m_slaveArmState[i]=SlaveArmState_MotionTest) THEN
 		m_nextSlaveArmState[i] := SlaveArmState_Standby;
 	END_IF
 	
 	// to SlaveArmState_TestCycle
-	IF (g_cycleTest.m_enterCycleTestMode[i] OR g_cycleTest.m_enterESDTest[i]) AND NOT(m_slaveArmState[i]=SlaveArmState_TestCycle) THEN
-		m_nextSlaveArmState[i] := SlaveArmState_TestCycle;
+	IF (g_cycleTest.m_enterCycleTestMode[i] OR g_cycleTest.m_enterESDTest[i]) AND NOT(m_slaveArmState[i]=SlaveArmState_CycleTest) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_CycleTest;
 	END_IF
 	
 	// SlaveArmState_TestCycle exit
-	IF (g_cycleTest.m_enterCycleTestMode[i]=FALSE) AND (g_cycleTest.m_enterESDTest[i]=FALSE) AND (m_slaveArmState[i]=SlaveArmState_TestCycle) THEN
+	IF (g_cycleTest.m_enterCycleTestMode[i]=FALSE) AND (g_cycleTest.m_enterESDTest[i]=FALSE) AND (m_slaveArmState[i]=SlaveArmState_CycleTest) THEN
 		m_nextSlaveArmState[i] := SlaveArmState_Standby;
 	END_IF
 		
 	// to SlaveArmState_TestFriction
-	IF (g_frictionTest.m_testMode[i]=TRUE) AND NOT(m_slaveArmState[i]=SlaveArmState_TestFriction) THEN
-		m_nextSlaveArmState[i] := SlaveArmState_TestFriction;
+	IF (g_frictionTest.m_testMode[i]=TRUE) AND NOT(m_slaveArmState[i]=SlaveArmState_FrictionTest) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_FrictionTest;
 	END_IF
 	
 	// SlaveArmState_TestFriction exit
-	IF (g_frictionTest.m_testMode[i]=FALSE) AND (m_slaveArmState[i]=SlaveArmState_TestFriction) THEN
+	IF (g_frictionTest.m_testMode[i]=FALSE) AND (m_slaveArmState[i]=SlaveArmState_FrictionTest) THEN
 		m_nextSlaveArmState[i] := SlaveArmState_Standby;
 	END_IF
 
@@ -725,13 +724,13 @@ FOR i:=1 TO g_sArmNum DO
 		m_nextSlaveArmState[i] := SlaveArmState_Standby;
 	END_IF
 	
-	// to SlaveArmState_TestFriction
-	IF (g_responseTest.m_testMode[i]=TRUE) AND NOT(m_slaveArmState[i]=SlaveArmState_TestResponse) THEN
-		m_nextSlaveArmState[i] := SlaveArmState_TestResponse;
+	// to SlaveArmState_ResponseTest
+	IF (g_responseTest.m_testMode[i]=TRUE) AND NOT(m_slaveArmState[i]=SlaveArmState_ResponseTest) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_ResponseTest;
 	END_IF
 	
-	// SlaveArmState_TestFriction exit
-	IF (g_responseTest.m_testMode[i]=FALSE) AND (m_slaveArmState[i]=SlaveArmState_TestResponse) THEN
+	// SlaveArmState_ResponseTest exit
+	IF (g_responseTest.m_testMode[i]=FALSE) AND (m_slaveArmState[i]=SlaveArmState_ResponseTest) THEN
 		m_nextSlaveArmState[i] := SlaveArmState_Standby;
 	END_IF	
 	

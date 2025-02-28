@@ -179,6 +179,10 @@ VAR
 	//mode1 and mode2
 	m_slaveMode1:Vec8i:=[3(DriverOPMode_PosTrq),5(DriverOPMode_Trq)];
 	m_slaveMode2:Vec8i:=g_slaveAllPosMode;
+	
+	//error record
+	m_slavePosErrRec :Vec3d;
+	m_errAngleRec : LREAL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -195,6 +199,7 @@ VAR
 	poseVec:Vec6d;
 	originPose:ST_Frame;
 	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;	
+	tmpMat3d:Mat3d;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -213,8 +218,45 @@ END_VAR
 		//init operation mode
 		m_lastCmdJntPos :=m_cmdJntPos;
 		SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+		m_testStep:=1;
+		m_time:=0;
+		
+		
+	1: //time delay
+		vecSub(i_slaveArm.curCartPose.m_pos, i_slaveArm.simCartPose.m_pos, m_slavePosErr);		
+		matTranspose(i_slaveArm.simCartPose.m_rot, tmpMat3d);
+		matMultiply(tmpMat3d, i_slaveArm.curCartPose.m_rot, m_slaveRotErr);
+		rot2AngAxis(m_slaveRotErr, angle=>m_errAngle, axis=>m_errAxisLocal);
+		matMultiVec(i_slaveArm.simCartPose.m_rot, m_errAxisLocal, m_errAxis);	
+		
+		//data record
+		m_slavePosErrRec:=m_slavePosErr;
+		m_errAngleRec:=m_errAngle;
+		
+		m_time:=m_time+g_slaveArmCtrlCycleTime;
+		IF (m_time>0.5) THEN
+			m_time:=0;
+			m_testStep:=5;
+		END_IF		
+		
+		
+	5: //time delay
 		m_jntOPMode:=m_slaveMode1;		
-		m_testStep:=10;
+		vecSub(i_slaveArm.curCartPose.m_pos, i_slaveArm.simCartPose.m_pos, m_slavePosErr);		
+		matTranspose(i_slaveArm.simCartPose.m_rot, tmpMat3d);
+		matMultiply(tmpMat3d, i_slaveArm.curCartPose.m_rot, m_slaveRotErr);
+		rot2AngAxis(m_slaveRotErr, angle=>m_errAngle, axis=>m_errAxisLocal);
+		matMultiVec(i_slaveArm.simCartPose.m_rot, m_errAxisLocal, m_errAxis);	
+		
+		//data record
+		m_slavePosErrRec:=m_slavePosErr;
+		m_errAngleRec:=m_errAngle;
+		
+		m_time:=m_time+g_slaveArmCtrlCycleTime;
+		IF (m_time>0.5) THEN
+			m_time:=0;
+			m_testStep:=10;
+		END_IF	
 		
 		
 	10: //motion
@@ -233,7 +275,11 @@ END_VAR
 		ELSE
 			m_errTime:=0;
 		END_IF
-	
+		
+		//data record
+		m_slavePosErrRec:=m_slavePosErr;
+		m_errAngleRec:=m_errAngle;
+		
 		
 	15: //Waiting for confirmation and measurement
 		numericalIK(i_slaveArm);
@@ -1184,10 +1230,24 @@ END_CASE
       <LineId Id="388" Count="1" />
       <LineId Id="355" Count="0" />
       <LineId Id="352" Count="0" />
-      <LineId Id="356" Count="1" />
-      <LineId Id="291" Count="7" />
+      <LineId Id="356" Count="0" />
+      <LineId Id="403" Count="0" />
+      <LineId Id="409" Count="0" />
+      <LineId Id="404" Count="1" />
+      <LineId Id="410" Count="14" />
+      <LineId Id="406" Count="2" />
+      <LineId Id="426" Count="1" />
+      <LineId Id="429" Count="5" />
+      <LineId Id="444" Count="1" />
+      <LineId Id="442" Count="1" />
+      <LineId Id="438" Count="3" />
+      <LineId Id="357" Count="0" />
+      <LineId Id="292" Count="6" />
       <LineId Id="353" Count="0" />
-      <LineId Id="299" Count="12" />
+      <LineId Id="299" Count="10" />
+      <LineId Id="448" Count="1" />
+      <LineId Id="446" Count="1" />
+      <LineId Id="310" Count="1" />
       <LineId Id="374" Count="0" />
       <LineId Id="376" Count="0" />
       <LineId Id="375" Count="0" />

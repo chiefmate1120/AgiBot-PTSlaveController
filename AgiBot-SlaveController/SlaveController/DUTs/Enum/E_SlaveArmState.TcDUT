@@ -29,10 +29,10 @@
 	SlaveArmState_PowerOff := 24,
 	SlaveArmState_SelfCheckTransport := 25,
 		
-	SlaveArmState_PrecisionTest:=50,
-	SlaveArmState_TestCycle:=51,
-	SlaveArmState_TestFriction:=52,
-	SlaveArmState_TestResponse:=53,
+	SlaveArmState_MotionTest:=50,
+	SlaveArmState_CycleTest:=51,
+	SlaveArmState_FrictionTest:=52,
+	SlaveArmState_ResponseTest:=53,
 	SlaveArmState_armCali:=54,
 	SlaveArmState_DargFreeTest:=55,
 	SlaveArmState_totalNum :=SlaveArmState_DargFreeTest
