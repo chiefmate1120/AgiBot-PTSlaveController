@@ -566,6 +566,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"1070"</v>
+              <v n="TextDefault">"台车角度显示"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"485"</v>
               <v n="TextDefault">"后置矩阵"</v>
               <l n="LanguageTexts" t="ArrayList" />

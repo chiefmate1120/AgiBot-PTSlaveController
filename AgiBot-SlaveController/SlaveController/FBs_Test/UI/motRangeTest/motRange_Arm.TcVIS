@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
-  <Visu Name="motRange_A1" Id="{efca283f-21ae-4fe3-b194-d75e7dfc5bb7}">
+  <Visu Name="motRange_Arm" Id="{efca283f-21ae-4fe3-b194-d75e7dfc5bb7}">
     <XmlArchive>
       <Data>
         <o xml:space="preserve" t="VisualObject">
           <n n="LastVisuLanguageModelEntry" />
-          <v n="UniqueIdGenerator">"5"</v>
+          <v n="UniqueIdGenerator">"7"</v>
           <o n="VisualElemList" t="VisualElemList">
             <l n="VisualElementList" t="VisualElemCollection" cet="GenericVisualElem">
               <o>
@@ -9767,10 +9767,10 @@
               <d n="FbMethods" t="CaseInsensitiveHashtable" ckt="String" cvt="Guid">
                 <v>FB_Init</v>
                 <v>2167f5c6-0339-4cff-9ea0-b8c27e9824d6</v>
-                <v>FB_Exit</v>
-                <v>39dd61a2-3ddc-4577-9d54-f14baa97c1a9</v>
                 <v>FB_Reinit</v>
                 <v>24ab163d-2710-4bf2-afab-a601ac2142b1</v>
+                <v>FB_Exit</v>
+                <v>39dd61a2-3ddc-4577-9d54-f14baa97c1a9</v>
               </d>
               <v n="FbName">"NotImportant"</v>
               <v n="FbGuid">{679b8a9e-46ec-4f00-b77f-f624e7e0a1f7}</v>
@@ -9814,16 +9814,16 @@
             </o>
             <v n="DialogDut">{07d7034e-49e2-437e-9887-b6afc48a4523}</v>
           </o>
-          <v n="LastUsedIdForIdentifier">127</v>
+          <v n="LastUsedIdForIdentifier">159</v>
           <o n="TextDocument" t="TextDocument">
             <a n="TextLines" cet="TextLine">
               <o>
-                <v n="Id">4L</v>
+                <v n="Id">6L</v>
                 <n n="Tag" />
                 <v n="Text">"VAR_IN_OUT"</v>
               </o>
               <o>
-                <v n="Id">5L</v>
+                <v n="Id">7L</v>
                 <n n="Tag" />
                 <v n="Text">"	"</v>
               </o>

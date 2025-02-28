@@ -710,6 +710,10 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
+    <Compile Include="FBs_Test\Gvl\GVL_Define.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
     <Compile Include="FBs_Test\Gvl\GVL_Monitor.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
@@ -719,6 +723,9 @@
       <LinkAlways>true</LinkAlways>
     </Compile>
     <Compile Include="FBs_Test\MainTestPart.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Test\Type\ST_CartInfo.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Test\Type\ST_CycleTest.TcDUT">
@@ -746,6 +753,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Test\Type\ST_ResponseTest.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Test\Type\ST_SetupInfo.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Test\Type\ST_SlaveInfo.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Test\UI\armCail\arm1Cail.TcVIS">
@@ -836,7 +849,11 @@
       <SubType>Code</SubType>
       <DependentUpon>视图管理器.TcVMO</DependentUpon>
     </Compile>
-    <Compile Include="FBs_Test\UI\motRangeTest\motRange_A1.TcVIS">
+    <Compile Include="FBs_Test\UI\motRangeTest\motRangeCar.TcVIS">
+      <SubType>Code</SubType>
+      <DependentUpon>视图管理器.TcVMO</DependentUpon>
+    </Compile>
+    <Compile Include="FBs_Test\UI\motRangeTest\motRange_Arm.TcVIS">
       <SubType>Code</SubType>
       <DependentUpon>视图管理器.TcVMO</DependentUpon>
     </Compile>
