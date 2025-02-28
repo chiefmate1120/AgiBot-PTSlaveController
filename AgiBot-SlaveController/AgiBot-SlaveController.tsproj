@@ -320,7 +320,7 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{7B576253-93AB-AE0B-982D-6D48AB59A185}" AutoDeleteType="true">E_SetupArmState</Name>
+			<Name GUID="{075D7E11-7C27-7C4A-8FD8-EE8898484FFB}" AutoDeleteType="true">E_SetupArmState</Name>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
 			<EnumInfo>
@@ -380,15 +380,15 @@
 				<Enum>14</Enum>
 			</EnumInfo>
 			<EnumInfo>
-				<Text><![CDATA[SetupArmState_TestCycle]]></Text>
+				<Text><![CDATA[SetupArmState_CycleTest]]></Text>
 				<Enum>50</Enum>
 			</EnumInfo>
 			<EnumInfo>
-				<Text><![CDATA[SetupArmState_TestFriction]]></Text>
+				<Text><![CDATA[SetupArmState_FrictionTest]]></Text>
 				<Enum>51</Enum>
 			</EnumInfo>
 			<EnumInfo>
-				<Text><![CDATA[SetupArmState_TestJnt]]></Text>
+				<Text><![CDATA[SetupArmState_MotionTest]]></Text>
 				<Enum>52</Enum>
 			</EnumInfo>
 			<EnumInfo>
@@ -500,11 +500,11 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{0DC3892A-6CC9-B0E8-9FD4-7E60CCBB3100}" AutoDeleteType="true">ST_SetupStatus</Name>
+			<Name GUID="{844ED072-49F6-2C99-6E5D-693EEAA06DFF}" AutoDeleteType="true">ST_SetupStatus</Name>
 			<BitSize>3904</BitSize>
 			<SubItem>
 				<Name>m_armState</Name>
-				<Type GUID="{7B576253-93AB-AE0B-982D-6D48AB59A185}">E_SetupArmState</Type>
+				<Type GUID="{075D7E11-7C27-7C4A-8FD8-EE8898484FFB}">E_SetupArmState</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
 					<Elements>4</Elements>
@@ -1705,6 +1705,66 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
+			<Name GUID="{F079E416-EB88-2AD4-306B-2196CCAAFF93}" AutoDeleteType="true">ST_CartJointData</Name>
+			<BitSize>4096</BitSize>
+			<SubItem>
+				<Name>m_curMotorPos</Name>
+				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
+				<Comment><![CDATA[ joint position compute with motor encoder]]></Comment>
+				<BitSize>512</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_curLinkPos</Name>
+				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
+				<Comment><![CDATA[ joint position compute with link/abs encoder]]></Comment>
+				<BitSize>512</BitSize>
+				<BitOffs>512</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_cmdJntPos</Name>
+				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
+				<Comment><![CDATA[ target joint position ]]></Comment>
+				<BitSize>512</BitSize>
+				<BitOffs>1024</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_curJntPos</Name>
+				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
+				<Comment><![CDATA[ current joint position ]]></Comment>
+				<BitSize>512</BitSize>
+				<BitOffs>1536</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_cmdJntVel</Name>
+				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
+				<Comment><![CDATA[ target joint velocity ]]></Comment>
+				<BitSize>512</BitSize>
+				<BitOffs>2048</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_curJntVel</Name>
+				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
+				<Comment><![CDATA[ current joint position ]]></Comment>
+				<BitSize>512</BitSize>
+				<BitOffs>2560</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_cmdJntTrq</Name>
+				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
+				<Comment><![CDATA[ command joint torque ]]></Comment>
+				<BitSize>512</BitSize>
+				<BitOffs>3072</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_curJntTrq</Name>
+				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
+				<Comment><![CDATA[ current joint torque ]]></Comment>
+				<BitSize>512</BitSize>
+				<BitOffs>3584</BitOffs>
+			</SubItem>
+		</DataType>
+		<DataType>
 			<Name GUID="{37055E04-EA8D-06CF-E50F-4E7AA9281154}" AutoDeleteType="true">ST_CartMotorOutput</Name>
 			<BitSize>96</BitSize>
 			<SubItem>
@@ -1746,7 +1806,7 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{FACB7575-7DD0-7EE6-8F6D-F374BA3BEA46}" AutoDeleteType="true">E_CartJointState</Name>
+			<Name GUID="{97AF747C-3A2A-0BE1-3A38-6BFFC9EFACAE}" AutoDeleteType="true">E_CartJointState</Name>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
 			<EnumInfo>
@@ -1806,11 +1866,11 @@
 				<Enum>14</Enum>
 			</EnumInfo>
 			<EnumInfo>
-				<Text><![CDATA[CartJointState_TestCycle]]></Text>
+				<Text><![CDATA[CartJointState_CycleTest]]></Text>
 				<Enum>50</Enum>
 			</EnumInfo>
 			<EnumInfo>
-				<Text><![CDATA[CartJointState_TestJnt]]></Text>
+				<Text><![CDATA[CartJointState_MotionTest]]></Text>
 				<Enum>51</Enum>
 			</EnumInfo>
 			<EnumInfo>
@@ -1879,13 +1939,13 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{8CDB7A6C-5B33-166C-3BAF-C534E72F022F}" AutoDeleteType="true">ST_CartStatus</Name>
+			<Name GUID="{3CE52B31-E444-8BF5-F2EF-C2AB2C90D8DA}" AutoDeleteType="true">ST_CartStatus</Name>
 			<Comment><![CDATA[ Output from cart control task
  Input to slave arm control task  ]]></Comment>
 			<BitSize>768</BitSize>
 			<SubItem>
 				<Name>m_CartState</Name>
-				<Type GUID="{FACB7575-7DD0-7EE6-8F6D-F374BA3BEA46}">E_CartJointState</Type>
+				<Type GUID="{97AF747C-3A2A-0BE1-3A38-6BFFC9EFACAE}">E_CartJointState</Type>
 				<BitSize>16</BitSize>
 				<BitOffs>0</BitOffs>
 				<Default>
@@ -1942,66 +2002,6 @@
 				<Default>
 					<Bool>false</Bool>
 				</Default>
-			</SubItem>
-		</DataType>
-		<DataType>
-			<Name GUID="{F079E416-EB88-2AD4-306B-2196CCAAFF93}" AutoDeleteType="true">ST_CartJointData</Name>
-			<BitSize>4096</BitSize>
-			<SubItem>
-				<Name>m_curMotorPos</Name>
-				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
-				<Comment><![CDATA[ joint position compute with motor encoder]]></Comment>
-				<BitSize>512</BitSize>
-				<BitOffs>0</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_curLinkPos</Name>
-				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
-				<Comment><![CDATA[ joint position compute with link/abs encoder]]></Comment>
-				<BitSize>512</BitSize>
-				<BitOffs>512</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_cmdJntPos</Name>
-				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
-				<Comment><![CDATA[ target joint position ]]></Comment>
-				<BitSize>512</BitSize>
-				<BitOffs>1024</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_curJntPos</Name>
-				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
-				<Comment><![CDATA[ current joint position ]]></Comment>
-				<BitSize>512</BitSize>
-				<BitOffs>1536</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_cmdJntVel</Name>
-				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
-				<Comment><![CDATA[ target joint velocity ]]></Comment>
-				<BitSize>512</BitSize>
-				<BitOffs>2048</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_curJntVel</Name>
-				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
-				<Comment><![CDATA[ current joint position ]]></Comment>
-				<BitSize>512</BitSize>
-				<BitOffs>2560</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_cmdJntTrq</Name>
-				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
-				<Comment><![CDATA[ command joint torque ]]></Comment>
-				<BitSize>512</BitSize>
-				<BitOffs>3072</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_curJntTrq</Name>
-				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
-				<Comment><![CDATA[ current joint torque ]]></Comment>
-				<BitSize>512</BitSize>
-				<BitOffs>3584</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -2179,7 +2179,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveInputDataPool.m_setupStatus</Name>
 							<Comment><![CDATA[ setup arms infromation;]]></Comment>
-							<Type GUID="{0DC3892A-6CC9-B0E8-9FD4-7E60CCBB3100}">ST_SetupStatus</Type>
+							<Type GUID="{844ED072-49F6-2C99-6E5D-693EEAA06DFF}">ST_SetupStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveInputDataPool.m_slaveDynaData</Name>
@@ -2552,7 +2552,7 @@
 						<Var>
 							<Name>SetupArmControl.m_setupStatus</Name>
 							<Comment><![CDATA[ setup robot information]]></Comment>
-							<Type GUID="{0DC3892A-6CC9-B0E8-9FD4-7E60CCBB3100}">ST_SetupStatus</Type>
+							<Type GUID="{844ED072-49F6-2C99-6E5D-693EEAA06DFF}">ST_SetupStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobotData</Name>
@@ -2995,6 +2995,21 @@
 					<Vars VarGrpType="1" ContextId="3" AreaNo="48">
 						<Name>TaskCartControl Inputs</Name>
 						<Var>
+							<Name>CartControl.m_cartDataPool.m_safetyData</Name>
+							<Comment><![CDATA[ safety information, import from safety check task]]></Comment>
+							<Type GUID="{DECD9F57-69F5-04DF-DC39-F93FDC472347}">ST_SafetyData</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartDataPool.m_slaveStatus</Name>
+							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
+							<Type GUID="{1E32A147-5AEC-BF95-6AB2-CB78D2C5076A}">ST_SlaveStatus</Type>
+						</Var>
+						<Var>
+							<Name>SafetyCheck.m_masterRobotData</Name>
+							<Comment><![CDATA[ master robot data, input from master controller box]]></Comment>
+							<Type GUID="{57D525B4-259A-4BD2-9CB2-0E73F7DE8881}">MSCommu_MasterStatus</Type>
+						</Var>
+						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_driveForce</Name>
 							<Comment><![CDATA[Driving force of the car io]]></Comment>
 							<Type GUID="{C1A22AD7-5967-B6D1-57F3-FD353FF09F13}">ARRAY [1..6] OF DINT</Type>
@@ -3136,24 +3151,19 @@
 							<Comment><![CDATA[ input arm button ]]></Comment>
 							<Type GUID="{3D778266-9CB6-A2BC-B908-FC747FC8D738}">ARRAY [1..2] OF BOOL</Type>
 						</Var>
-						<Var>
-							<Name>CartControl.m_cartDataPool.m_safetyData</Name>
-							<Comment><![CDATA[ safety information, import from safety check task]]></Comment>
-							<Type GUID="{DECD9F57-69F5-04DF-DC39-F93FDC472347}">ST_SafetyData</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartDataPool.m_slaveStatus</Name>
-							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{1E32A147-5AEC-BF95-6AB2-CB78D2C5076A}">ST_SlaveStatus</Type>
-						</Var>
-						<Var>
-							<Name>SafetyCheck.m_masterRobotData</Name>
-							<Comment><![CDATA[ master robot data, input from master controller box]]></Comment>
-							<Type GUID="{57D525B4-259A-4BD2-9CB2-0E73F7DE8881}">MSCommu_MasterStatus</Type>
-						</Var>
 					</Vars>
 					<Vars VarGrpType="2" ContextId="3" AreaNo="49">
 						<Name>TaskCartControl Outputs</Name>
+						<Var>
+							<Name>CartControl.m_cartJointsData</Name>
+							<Comment><![CDATA[ cart joint data]]></Comment>
+							<Type GUID="{F079E416-EB88-2AD4-306B-2196CCAAFF93}">ST_CartJointData</Type>
+						</Var>
+						<Var>
+							<Name>SafetyCheck.m_safetyCheckData</Name>
+							<Comment><![CDATA[ error check result]]></Comment>
+							<Type GUID="{DECD9F57-69F5-04DF-DC39-F93FDC472347}">ST_SafetyData</Type>
+						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_screwBreak</Name>
 							<Comment><![CDATA[output screw break IO ]]></Comment>
@@ -3248,17 +3258,7 @@
 						<Var>
 							<Name>CartControl.m_cartStatus</Name>
 							<Comment><![CDATA[ Output cart status]]></Comment>
-							<Type GUID="{8CDB7A6C-5B33-166C-3BAF-C534E72F022F}">ST_CartStatus</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartJointsData</Name>
-							<Comment><![CDATA[ cart joint data]]></Comment>
-							<Type GUID="{F079E416-EB88-2AD4-306B-2196CCAAFF93}">ST_CartJointData</Type>
-						</Var>
-						<Var>
-							<Name>SafetyCheck.m_safetyCheckData</Name>
-							<Comment><![CDATA[ error check result]]></Comment>
-							<Type GUID="{DECD9F57-69F5-04DF-DC39-F93FDC472347}">ST_SafetyData</Type>
+							<Type GUID="{3CE52B31-E444-8BF5-F2EF-C2AB2C90D8DA}">ST_CartStatus</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="1" ContextId="4" AreaNo="64">
@@ -3280,7 +3280,7 @@
 						<Var>
 							<Name>SafetyCheck.m_setupStatus</Name>
 							<Comment><![CDATA[ setup robot information]]></Comment>
-							<Type GUID="{0DC3892A-6CC9-B0E8-9FD4-7E60CCBB3100}">ST_SetupStatus</Type>
+							<Type GUID="{844ED072-49F6-2C99-6E5D-693EEAA06DFF}">ST_SetupStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_setupJointsData</Name>
@@ -3291,11 +3291,6 @@
 							<Name>SafetyCheck.m_asepticMegnetCheck</Name>
 							<Comment><![CDATA[arm aseptic cover megnet check]]></Comment>
 							<Type GUID="{049494CC-9811-D1DC-EA6D-36CFA6178CEC}">ARRAY [1..4] OF DINT</Type>
-						</Var>
-						<Var>
-							<Name>SafetyCheck.m_cartStatus</Name>
-							<Comment><![CDATA[ Output cart status]]></Comment>
-							<Type GUID="{8CDB7A6C-5B33-166C-3BAF-C534E72F022F}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_cartJointsData</Name>
@@ -3331,6 +3326,11 @@
 							<Name>GVL_interactUI.g_upsComStatus</Name>
 							<Comment><![CDATA[communation check for UPS]]></Comment>
 							<Type>UDINT</Type>
+						</Var>
+						<Var>
+							<Name>SafetyCheck.m_cartStatus</Name>
+							<Comment><![CDATA[ Output cart status]]></Comment>
+							<Type GUID="{3CE52B31-E444-8BF5-F2EF-C2AB2C90D8DA}">ST_CartStatus</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2" ContextId="4" AreaNo="65">
@@ -3471,12 +3471,10 @@
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
-					<UnrestoredVarLinks ImportTime="2025-02-28T14:45:02">
+					<UnrestoredVarLinks ImportTime="2025-02-28T15:07:47">
 						<OwnerA Name="OutputSrc" Prefix="TIPC^SlaveController^SlaveController Instance" Type="2">
 							<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
-								<Link VarA="SlaveArmControl.m_slaveStatus" TypeA="ST_SlaveStatus" InOutA="1" GuidA="{4D155D3D-6C27-C9E1-07EF-1E9B366EB25B}" VarB="TaskCartControl Inputs^CartControl.m_cartDataPool.m_slaveStatus" RestoreInfo="TypeChanged" IdA="720"/>
-								<Link VarA="SlaveArmControl.m_slaveStatus" TypeA="ST_SlaveStatus" InOutA="1" GuidA="{4D155D3D-6C27-C9E1-07EF-1E9B366EB25B}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_slaveStatus" RestoreInfo="TypeChanged" IdA="720"/>
-								<Link VarA="SlaveArmControl.m_slaveStatus" TypeA="ST_SlaveStatus" InOutA="1" GuidA="{4D155D3D-6C27-C9E1-07EF-1E9B366EB25B}" VarB="TaskSetupArmControl Inputs^SetupArmControl.m_setupInputDataPool.m_slaveStatus" RestoreInfo="TypeChanged" IdA="720"/>
+								<Link VarA="CartControl.m_cartStatus" TypeA="ST_CartStatus" InOutA="1" GuidA="{8CDB7A6C-5B33-166C-3BAF-C534E72F022F}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_cartStatus" RestoreInfo="TypeChanged" IdA="4174"/>
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
@@ -9482,6 +9480,7 @@
 		<MappingInfo Identifier="{00000000-2005-0850-0320-500860000403}" Id="#x020300a0"/>
 		<MappingInfo Identifier="{00000000-2005-0850-0320-5008C1000403}" Id="#x02030120"/>
 		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030020" Watchdog="10000000040000000400000004000000"/>
+		<MappingInfo Identifier="{08502001-2003-0850-0020-500802205008}" Id="#x02030180" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2004-0850-0020-500804205008}" Id="#x02030190" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2005-0850-0020-500803205008}" Id="#x020301c0" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502002-2003-0850-0120-500802205008}" Id="#x02030030" Watchdog="04000000040000000400000004000000"/>
@@ -10073,17 +10072,19 @@
 			</OwnerB>
 			<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartDataPool.m_safetyData" VarB="TaskCartControl Outputs^SafetyCheck.m_safetyCheckData"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartDataPool.m_slaveStatus" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_instruInfo" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus^m_instruStauts"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_setupJointData" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupJointsData"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_slaveJointsData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_cartJointsData" VarB="TaskCartControl Outputs^CartControl.m_cartJointsData"/>
-				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_cartStatus" VarB="TaskCartControl Outputs^CartControl.m_cartStatus"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupJointsData" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupStatus" VarB="TaskSlaveArmControl Outputs^SetupArmControl.m_setupStatus"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_slaveJointData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveJointsData"/>
+				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_slaveStatus" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus"/>
 				<Link VarA="TaskSetupArmControl Inputs^SetupArmControl.m_setupInputDataPool.m_safetyData" VarB="TaskCartControl Outputs^SafetyCheck.m_safetyCheckData"/>
 				<Link VarA="TaskSetupArmControl Inputs^SetupArmControl.m_setupInputDataPool.m_setupJnt3Gravity" VarB="TaskDynamic Outputs^RobotDynamics.m_setupJnt3Gravity"/>
 				<Link VarA="TaskSetupArmControl Inputs^SetupArmControl.m_setupInputDataPool.m_setupJnt5Gravity" VarB="TaskDynamic Outputs^RobotDynamics.m_setupJnt5Gravity"/>
+				<Link VarA="TaskSetupArmControl Inputs^SetupArmControl.m_setupInputDataPool.m_slaveStatus" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveInputDataPool.m_safetyData" VarB="TaskCartControl Outputs^SafetyCheck.m_safetyCheckData"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveInputDataPool.m_setupStatus" VarB="TaskSlaveArmControl Outputs^SetupArmControl.m_setupStatus"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveInputDataPool.m_slaveDynaData" VarB="TaskDynamic Outputs^RobotDynamics.m_slaveDynaData"/>

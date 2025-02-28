@@ -18,9 +18,9 @@
 	CartJointState_StandColuAdjust := 13,
 	CartJointState_SupportLeg := 14,
 	
-	CartJointState_TestCycle := 50,
-	CartJointState_TestJnt := 51,
-	CartJointState_totalNum := CartJointState_TestJnt
+	CartJointState_CycleTest:= 50,
+	CartJointState_MotionTest := 51,
+	CartJointState_totalNum := CartJointState_MotionTest
 );
 END_TYPE]]></Declaration>
   </DUT>

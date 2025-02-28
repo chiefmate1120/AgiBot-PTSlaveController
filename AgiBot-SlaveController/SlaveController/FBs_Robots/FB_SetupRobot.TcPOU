@@ -45,7 +45,7 @@ VAR
 	//m_Performance :ARRAY[1..g_sArmNum] OF FB_SetupCtrlPerformance;
 	m_setupStateCycleTest :ARRAY[1..g_sArmNum] OF FB_SetupCtrlCycleTest;
 	m_setupStateFrictionTest :ARRAY[1..g_sArmNum] OF FB_SetupCtrlFrictionTest;
-	m_setupStateJntTest :ARRAY[1..g_sArmNum] OF FB_SetupCtrlMotionTest;
+	m_setupStateMotionTest :ARRAY[1..g_sArmNum] OF FB_SetupCtrlMotionTest;
 	m_armCali :ARRAY[1..g_sArmNum] OF FB_SetupCtrlArmCali;
 	m_dragFreeTest :ARRAY[1..g_sArmNum] OF FB_SetupCtrlDragFreeTest;
 	
@@ -177,9 +177,9 @@ END_VAR
 	
 	//add code for test
 	m_armCtrlFactory[i,SetupArmState_Performance] := m_Performance[i];
-	m_armCtrlFactory[i,SetupArmState_TestCycle] := m_setupStateCycleTest[i];
-	m_armCtrlFactory[i,SetupArmState_TestFriction] := m_setupStateFrictionTest[i];
-	m_armCtrlFactory[i,SetupArmState_TestJnt] :=m_setupStateJntTest[i];
+	m_armCtrlFactory[i,SetupArmState_CycleTest] := m_setupStateCycleTest[i];
+	m_armCtrlFactory[i,SetupArmState_FrictionTest] := m_setupStateFrictionTest[i];
+	m_armCtrlFactory[i,SetupArmState_MotionTest] :=m_setupStateMotionTest[i];
 	m_armCtrlFactory[i,SetupArmState_armCali] :=m_armCali[i];
 	m_armCtrlFactory[i,SetupArmState_DargFreeTest] :=m_dragFreeTest[i];
 	
@@ -356,32 +356,32 @@ FOR i:=1 TO g_sArmNum DO
 	
 	//*****************add code for test************************//
 	// to SetupArmState_TestCycle
-	IF (g_cycleTest.m_enterCycleTestModeSetup[i] OR g_cycleTest.m_enterESDTestSetup[i]) AND NOT(m_setupArmState[i]=SetupArmState_TestCycle) THEN
-		m_nextSetupArmState[i] := SetupArmState_TestCycle;
+	IF (g_cycleTest.m_enterCycleTestModeSetup[i] OR g_cycleTest.m_enterESDTestSetup[i]) AND NOT(m_setupArmState[i]=SetupArmState_CycleTest) THEN
+		m_nextSetupArmState[i] := SetupArmState_CycleTest;
 	END_IF
 	
 	//SetupArmState_TestCycle exit
-	IF (g_cycleTest.m_enterCycleTestModeSetup[i]=FALSE) AND (g_cycleTest.m_enterESDTestSetup[i]=FALSE) AND (m_setupArmState[i]=SetupArmState_TestCycle) THEN
+	IF (g_cycleTest.m_enterCycleTestModeSetup[i]=FALSE) AND (g_cycleTest.m_enterESDTestSetup[i]=FALSE) AND (m_setupArmState[i]=SetupArmState_CycleTest) THEN
 		m_nextSetupArmState[i] := SetupArmState_Hold;
 	END_IF
 	
 	// to SetupArmState_TestFriction
-	IF (g_frictionTestSetup.m_testMode[i]=TRUE) AND NOT(m_setupArmState[i]=SetupArmState_TestFriction) THEN
-		m_nextSetupArmState[i] := SetupArmState_TestFriction;
+	IF (g_frictionTestSetup.m_testMode[i]=TRUE) AND NOT(m_setupArmState[i]=SetupArmState_FrictionTest) THEN
+		m_nextSetupArmState[i] := SetupArmState_FrictionTest;
 	END_IF
 
 	//SetupArmState_TestFriction exit
-	IF (g_frictionTestSetup.m_testMode[i]=FALSE) AND (m_setupArmState[i]=SetupArmState_TestFriction) THEN
+	IF (g_frictionTestSetup.m_testMode[i]=FALSE) AND (m_setupArmState[i]=SetupArmState_FrictionTest) THEN
 		m_nextSetupArmState[i] := SetupArmState_Hold;
 	END_IF
 			
 	// to SetupArmState_TestJnt
-	IF (g_motionTest.m_singleMotorControl[i]=TRUE) AND NOT(m_setupArmState[i]=SetupArmState_TestJnt) THEN
-		m_nextSetupArmState[i] := SetupArmState_TestJnt;
+	IF (g_motionTest.m_singleMotorControl[i]=TRUE) AND NOT(m_setupArmState[i]=SetupArmState_MotionTest) THEN
+		m_nextSetupArmState[i] := SetupArmState_MotionTest;
 	END_IF
 	
 	//SetupArmState_TestJnt exit
-	IF (g_motionTest.m_singleMotorControl[i]=FALSE) AND (m_setupArmState[i]=SetupArmState_TestJnt) THEN
+	IF (g_motionTest.m_singleMotorControl[i]=FALSE) AND (m_setupArmState[i]=SetupArmState_MotionTest) THEN
 		m_nextSetupArmState[i] := SetupArmState_Hold;
 	END_IF
 

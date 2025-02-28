@@ -18,9 +18,9 @@
 	SetupArmState_Sotp:=13,
 	SetupArmState_SelfCheckTransport :=14,
 	
-	SetupArmState_TestCycle:=50,
-	SetupArmState_TestFriction:=51,
-	SetupArmState_TestJnt:=52,
+	SetupArmState_CycleTest:=50,
+	SetupArmState_FrictionTest:=51,
+	SetupArmState_MotionTest:=52,
 	SetupArmState_armCali:=53,
 	SetupArmState_DargFreeTest:=54,
 	SetupArmState_totalNum :=SetupArmState_DargFreeTest
