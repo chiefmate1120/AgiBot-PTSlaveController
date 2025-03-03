@@ -353,7 +353,6 @@ FOR i:=1 TO g_sArmNum DO
 	
 	
 	
-	
 	//*****************add code for test************************//
 	// to SetupArmState_TestCycle
 	IF (g_cycleTest.m_enterCycleTestModeSetup[i] OR g_cycleTest.m_enterESDTestSetup[i]) AND NOT(m_setupArmState[i]=SetupArmState_CycleTest) THEN
@@ -403,9 +402,11 @@ FOR i:=1 TO g_sArmNum DO
 	END_IF
 	
 	//fault mask
-	IF (g_specialSignal.m_faultMask) THEN
-		CONTINUE;
-	END_IF
+	//IF (g_specialSignal.m_faultMask[i]) THEN
+		//CONTINUE;
+	//END_IF
+	
+
 	
 	
 	
@@ -487,7 +488,7 @@ FOR i := 1 TO g_sArmNum BY 1 DO
 		END_IF
 	END_IF
 
-	m_setupArms[i].checkLight(m_lightCrlWord[i]);
+	//m_setupArms[i].checkLight(m_lightCrlWord[i]);
 	
 	IF GVL_IO.g_LEDValueDisplay[i] THEN
 		m_LEDTestTime[i] := m_LEDTestTime[i] + GVL_SystemParameters.g_setupArmCtrlCycleTime;
@@ -503,7 +504,7 @@ FOR i := 1 TO g_sArmNum BY 1 DO
 	IF m_LEDTestCount[i] >= 99 THEN
 		GVL_IO.g_LEDValueDisplay[i] := FALSE;
 	END_IF
-	m_setupArms[i].checkDisplayLED(m_LEDTestCount[i]);
+	//m_setupArms[i].checkDisplayLED(m_LEDTestCount[i]);
 END_FOR
 ]]></ST>
       </Implementation>
@@ -530,9 +531,9 @@ END_FOR
       <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.Init">
-      <LineId Id="294" Count="37" />
-      <LineId Id="342" Count="0" />
-      <LineId Id="332" Count="3" />
+      <LineId Id="294" Count="30" />
+      <LineId Id="342" Count="5" />
+      <LineId Id="330" Count="5" />
       <LineId Id="61" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.run">
@@ -540,11 +541,10 @@ END_FOR
       <LineId Id="22" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.stateMachine">
-      <LineId Id="1059" Count="150" />
-      <LineId Id="1235" Count="7" />
-      <LineId Id="1234" Count="0" />
-      <LineId Id="1233" Count="0" />
-      <LineId Id="1210" Count="14" />
+      <LineId Id="1059" Count="111" />
+      <LineId Id="1232" Count="51" />
+      <LineId Id="1171" Count="0" />
+      <LineId Id="1213" Count="11" />
       <LineId Id="16" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.updateArmLight">

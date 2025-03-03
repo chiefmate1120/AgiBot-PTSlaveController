@@ -20,7 +20,7 @@ VAR
 	m_panelMountAcc :LREAL := 4*pi;
 	
 	// joint current threshold which indicate motor is buckled with panel
-	m_maxJntCurrent :INT := 80;
+	m_maxJntCurrent :INT := 200;
 	
 	// command mount motion
 	m_mountStepPos :LREAL := 45.0 * g_deg2Rad;

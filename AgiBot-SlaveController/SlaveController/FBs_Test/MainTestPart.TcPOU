@@ -62,6 +62,9 @@ VAR
 
 	//unit function
 	m_unitFun:FB_UnitTransform;	
+	m_k:INT;
+	m_i:INT;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -75,7 +78,7 @@ uiDataForPrecision();
 writePrecisionData();
 
 //information update
-infoUpdate();
+//infoUpdate();
 ]]></ST>
     </Implementation>
     <Method Name="cartInfoUpdate" Id="{e2abd282-3224-4ce8-9e7b-736da8384d14}">
@@ -250,7 +253,9 @@ END_VAR
 //update system information
 FOR i:=1 TO g_sJntNum BY 1 DO
 	k:=i_slaveArm.armIdx;
-	
+	m_k:=k;
+	m_i:=i;
+		
 	//motor input and output information
 	g_systemInfo.m_slaveJntInfo[k,i].m_motorInput:=i_slaveArm.m_joints[i].m_motorInputs;
 	g_systemInfo.m_slaveJntInfo[k,i].m_motorOutput:=i_slaveArm.m_joints[i].m_motorOutputs;
@@ -262,7 +267,7 @@ FOR i:=1 TO g_sJntNum BY 1 DO
 	
 	//joint max and min
 	g_systemInfo.m_slaveJntInfo[k,i].m_jntMax:=GVL_SlaveMotorParameters.g_maxJntPos[i];
-	g_systemInfo.m_slaveJntInfo[k,i].m_jntMin:=GVL_SlaveMotorParameters.g_minJntPos[i];
+	g_systemInfo.m_slaveJntInfo[k,i].m_jntMin:=GVL_SlaveMotorParameters.g_minJntPos[i];		
 END_FOR
 
 
@@ -284,6 +289,9 @@ g_systemInfo.m_slaveInfo[k].m_curJntPosDegMM:=m_unitFun.slaveArmUnit2UserN8(i_da
 //joint max and min
 g_systemInfo.m_slaveInfo[k].m_jntMax:=GVL_SlaveMotorParameters.g_maxJntPos;
 g_systemInfo.m_slaveInfo[k].m_jntMin:=GVL_SlaveMotorParameters.g_minJntPos;
+
+
+
 ]]></ST>
       </Implementation>
     </Method>
@@ -506,6 +514,8 @@ END_CASE
       <LineId Id="33" Count="0" />
       <LineId Id="18" Count="1" />
       <LineId Id="43" Count="1" />
+      <LineId Id="188" Count="0" />
+      <LineId Id="186" Count="0" />
       <LineId Id="35" Count="0" />
       <LineId Id="31" Count="0" />
       <LineId Id="88" Count="0" />
@@ -530,6 +540,8 @@ END_CASE
       <LineId Id="152" Count="2" />
       <LineId Id="129" Count="0" />
       <LineId Id="41" Count="0" />
+      <LineId Id="182" Count="1" />
+      <LineId Id="181" Count="0" />
     </LineIds>
     <LineIds Name="MainTestPart.uiDataForPrecision">
       <LineId Id="190" Count="0" />

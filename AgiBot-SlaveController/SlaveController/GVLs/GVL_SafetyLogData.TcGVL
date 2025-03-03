@@ -12,13 +12,15 @@ VAR_GLOBAL CONSTANT
 	MAX_CSV_FIELD_LENGTH	: UDINT := 35;(*每个字段的字符长度*)
 	MAX_CSV_RING_BUFFER		: UDINT := 5;
 	g_JointNetPort:ARRAY[1..g_maxArmJoint] OF UINT :=[
-		1002,    1002,	1003,	1004,	1004,	1005,	1006,	1007,	2(1008),	3(1009)];
+		1001,    1001,	1001,	1002,	1002,	1001,	1002,	1003,	2(1004),	3(1005)];
 END_VAR
 
 VAR_GLOBAL
 	g_arrayErrCodeArm:ARRAY [1..g_maxNum] OF ARRAY [0..100] OF UDINT;	
 	g_zeroVec100i : ARRAY [1..100] OF ULINT;	
 	g_zeroErrCodeArray : ARRAY [0..30] OF UDINT;
+	g_ArrayErrCodeTypeTest:ARRAY [1..g_maxNum] OF ARRAY [1..2]OF ARRAY [0..100] OF UDINT;
+	g_clearFault : BOOL;
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

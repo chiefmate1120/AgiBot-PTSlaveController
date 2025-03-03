@@ -16,12 +16,30 @@ VAR
 	
 	m_EtherCATVerify : ST_EtherCATState;
 
+	m_clearCRCError : FB_EcMasterFrameStatisticClearCRC;
 	m_setSlaveState : FB_EcSetSlaveState;
+	
+	m_stateStorage : ARRAY [1..10000] OF BYTE;
+	index:  INT;
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
+    <Method Name="clearCRCError" Id="{4f0edc7d-de27-450a-ae29-6fd12dd64097}">
+      <Declaration><![CDATA[METHOD clearCRCError : BOOL
+VAR_INPUT
+	armsNetID:T_AmsNetID;
+	bEnable:BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_clearCRCError(sNetId:= armsNetID, bExecute:= bEnable, tTimeout:= T#5S, bBusy=> , bError=> , nErrId=> );
+IF NOT m_clearCRCError.bBusy THEN
+	m_clearCRCError.bExecute:=FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="EtherCATVerify" Id="{700221e4-3451-4ebe-a364-9420b7ed5cfc}">
       <Declaration><![CDATA[METHOD EtherCATVerify : ST_EtherCATState
 VAR_INPUT
@@ -35,6 +53,8 @@ m_commuEtherCATState(sNetId:= armsNetID, nSlaveAddr:= jntAddr, bExecute:= TRUE, 
 
 IF NOT m_commuEtherCATState.bBusy THEN
 	m_commuEtherCATState(bExecute:=FALSE);
+	index :=LIMIT(1, index + 1,10000);
+	m_stateStorage[index] := m_EcSlaveState.deviceState;
 	IF m_EcSlaveState.deviceState = EC_DEVICE_STATE_OP THEN
 		m_EtherCATVerify.EtherCATState := TRUE;
 	ELSE
@@ -68,11 +88,16 @@ END_VAR
     <LineIds Name="FB_EtherCATCheck">
       <LineId Id="9" Count="0" />
     </LineIds>
+    <LineIds Name="FB_EtherCATCheck.clearCRCError">
+      <LineId Id="9" Count="0" />
+      <LineId Id="12" Count="2" />
+    </LineIds>
     <LineIds Name="FB_EtherCATCheck.EtherCATVerify">
       <LineId Id="7" Count="1" />
       <LineId Id="11" Count="0" />
       <LineId Id="10" Count="0" />
       <LineId Id="12" Count="0" />
+      <LineId Id="57" Count="1" />
       <LineId Id="48" Count="3" />
       <LineId Id="47" Count="0" />
       <LineId Id="13" Count="0" />

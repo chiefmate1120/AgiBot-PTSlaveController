@@ -84,6 +84,7 @@ g_motionTest.m_actJntCurrentSetup[m_armId]:=i_setupArm.filtJntCurrent;
 m_jntEnableFlag:=g_motionTest.m_jntEnableSetup[m_armId];
 m_jntEnableFlag[3]:=0;
 
+
 IF (m_startMotionLast=FALSE) AND (m_startMotion=TRUE) THEN
 	m_testStep:=0;	
 	m_motionFinished:=FALSE;
@@ -326,6 +327,7 @@ END_CASE
       <LineId Id="226" Count="0" />
       <LineId Id="233" Count="1" />
       <LineId Id="200" Count="0" />
+      <LineId Id="251" Count="0" />
       <LineId Id="185" Count="3" />
       <LineId Id="190" Count="0" />
       <LineId Id="159" Count="2" />

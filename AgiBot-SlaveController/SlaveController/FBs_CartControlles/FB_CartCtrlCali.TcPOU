@@ -1,0 +1,304 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_CartCtrlCali" Id="{2c15e4ab-7fff-4d2b-9c16-c11a99f483ab}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Slave Arm Adjust
+FUNCTION_BLOCK PUBLIC FB_CartCtrlCali EXTENDS FB_CartCtrlBase
+VAR
+
+	m_joystickSignal: Vec8d;		
+	m_fiducialValue:INT:= 512;
+	m_joystickRange:INT:=430;
+	m_joystickDir: Vec8i:=[1,1,1,1,-1,-1,1,1];
+	m_joystickVelInc: Vec8d;
+	m_tarPosInc: Vec8d;
+	m_initActJntPos: Vec8d;
+	m_tarJntPos : Vec8d;
+	m_initActCartPos: Vec8d;
+	
+	m_jntOTG :ARRAY[1..8] OF FB_secOrdTrajFilter;
+	// time threshold to 5-8joint after it's enabled
+	m_cartAdjustStartWaitTime :LREAL := 0.3;
+	
+	//adjust start  time 
+	m_adjustStartTime :Vec8d;
+	
+	//link encoder calibration timer
+	m_linkEncPosFristCaliTon :ARRAY [1..8] OF TON;
+	m_linkEncPosSecondCaliTon :ARRAY [1..8] OF TON;
+	m_linkEncPosHomeCaliTon :ARRAY [1..8] OF TON;
+	
+	//link encoder calibration tigger time
+	m_caliTime : TIME:= T#3S;
+	
+	//joint link zero crossing or not
+	m_linkZeroCrossOrNot : Vec8i;
+	
+	linkLimitFristPos : Vec8di;
+	linkLimitSecondPos : Vec8di;
+	
+	m_maxJntCurrent :Vec5d := [120, 120, 120, 120, 120];
+	
+	m_powerBoxCaliTime : LREAL;
+	
+	m_jointMounted :ARRAY[1..5] OF BOOL := [5(FALSE)];
+	
+	m_lastLinkEncoder :ARRAY [1..8] OF DINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{8dcdd953-3b15-4601-9730-3b2dd2be27dc}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+		// slave cart joint data
+	i_slaveCart :FB_SlaveCart;
+END_VAR
+VAR
+	i:INT;
+	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_jntEnableFlag[5] := BOOL_TO_INT((NOT SafetyCheck.m_safetyCheckData.m_cartStandColumnErr) AND GVL_armCali.g_jointIntoCaliStateOfCart[5]);
+m_jntEnableFlag[6] := BOOL_TO_INT((NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr) AND GVL_armCali.g_jointIntoCaliStateOfCart[6]);
+m_jntEnableFlag[7] := BOOL_TO_INT((NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr) AND GVL_armCali.g_jointIntoCaliStateOfCart[7]);
+m_jntEnableFlag[8] := BOOL_TO_INT((NOT SafetyCheck.m_safetyCheckData.m_cartOverhangErr) AND GVL_armCali.g_jointIntoCaliStateOfCart[8]);
+FOR i:= 5 TO 8 DO
+	IF m_jntEnableFlag[i] = 1 THEN
+		m_adjustStartTime[i] := LIMIT(0, m_adjustStartTime[i] + g_cartCtrlCycleTime, 1);
+		IF m_adjustStartTime[i] > m_cartAdjustStartWaitTime THEN
+			m_joystickSignal[i] := i_slaveCart.m_joystickSignal[i-4] - m_fiducialValue;
+			m_joystickVelInc[i] := m_joystickSignal[i]/m_joystickRange*m_joystickDir[i]*GVL_CartControlParameters.g_maxJntVel[i];
+			m_tarPosInc[i] := m_tarPosInc[i] + m_joystickVelInc[i] * g_cartCtrlCycleTime;
+			m_tarJntPos[i] := m_initActCartPos[i] + m_tarPosInc[i];
+			m_jntOTG[i].run(i_targetPos:= m_tarJntPos[i], i_targetVel:= 0.0, o_cmdAcc=> , o_cmdVel=> , o_cmdPos=>m_cmdJntPos[i] );
+		END_IF
+	ELSE
+		m_initActCartPos[i] := i_slaveCart.m_curJntPos[i];
+		m_tarPosInc[i] := 0;
+		m_tarJntPos[i] := 0;
+		
+	END_IF
+	//link encoder detection calibration
+	linkEncDetecCali(i,i_slaveCart);
+END_FOR
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdJntTrq" Id="{c288d401-3861-4163-ad0b-5800898b7c0a}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntTrq : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	i :INT;
+	armIdx : INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[armIdx := i_slaveArm.armIdx;
+// set joint torque to zero in default
+m_cmdJntTrq := g_zeroVec8d;
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="faultDetect" Id="{eee1ff5e-faae-416e-8895-07c506c9210b}">
+      <Declaration><![CDATA[METHOD faultDetect : vec8i
+VAR_INPUT
+	curJntPos : vec8d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[faultDetect[5] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartStandColumnErr);
+faultDetect[6] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr);
+faultDetect[7] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr);
+faultDetect[8] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr);
+
+IF SafetyCheck.m_safetyCheckData.m_cartStandColumnErr THEN
+	m_tarPosInc[5] := 0;
+	m_initActJntPos[5]:=curJntPos[5];
+	
+END_IF
+IF SafetyCheck.m_safetyCheckData.m_cartAdjustErr THEN
+	m_initActJntPos[6] :=curJntPos[6];
+	m_initActJntPos[7] :=curJntPos[7];
+	m_initActJntPos[8] :=curJntPos[8];
+	m_tarPosInc[6] := 0;
+	m_tarPosInc[7] := 0;
+	m_tarPosInc[8] := 0;
+	m_initActCartPos[6] := (m_initActJntPos[7] + GVL_CartControlParameters.g_curBeamStretchJntInitPos) * SIN(m_initActJntPos[6]);
+	m_initActCartPos[7] := (m_initActJntPos[7] + GVL_CartControlParameters.g_curBeamStretchJntInitPos) * COS(m_initActJntPos[6]);
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{2f22635c-92c1-46d7-82ba-23b9b5b2200c}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveCart	:FB_SlaveCart;
+END_VAR
+VAR_IN_OUT 
+	r_cartCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+VAR
+	i :INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check if to hold the command joint position unchanged
+m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
+
+//init
+SUPER^.Init(i_slaveCart,r_cartCtrlCmd);
+m_jntEnableFlag :=g_zeroVec8i;
+FOR i := 5 TO 8 DO
+	GVL_armCali.g_linkZeroCrossOrNotOfCart[i] :=0;
+	m_lastLinkEncoder[i] := i_slaveCart.m_cartJoints[i].m_motorInputs.m_linkEncoder;
+END_FOR
+
+m_jntOPMode[5]:= DriverOPMode_cspMZ;
+m_jntOPMode[6]:= DriverOPMode_Pos;
+m_jntOPMode[7]:= DriverOPMode_Pos;
+m_jntOPMode[8]:= DriverOPMode_Pos;
+
+linkLimitFristPos := g_zeroVec8di;
+linkLimitSecondPos := g_zeroVec8di;
+
+FOR i := 1 TO 4 BY 1 DO
+	m_jntOTG[i+4].init(i_curCmdPos:= m_cmdJntPos[i+4], i_curCmdVel:= 0, i_maxV:=GVL_CartControlParameters.g_maxJntVel[i+4] , i_maxA:=GVL_CartControlParameters.g_maxJntAcc[i+4] , i_Ts:=g_cartCtrlCycleTime );
+END_FOR
+// update commands to arm
+copyCmds(r_cartCtrlCmd);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="linkEncDetecCali" Id="{27eee869-f49f-46ff-807a-9ffa85a5049f}">
+      <Declaration><![CDATA[METHOD linkEncDetecCali : BOOL
+VAR_IN_OUT CONSTANT
+	// slave cart joint data
+	i_jnt : INT;
+	i_slaveCart :FB_SlaveCart;
+END_VAR
+VAR
+	i : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[i := i_jnt;
+//determine link encoder cross zero
+IF ABS(i_slaveCart.m_cartjoints[i].m_motorInputs.m_linkEncoder - m_lastLinkEncoder[i]) > GVL_SlaveMotorParameters.g_absEncoderRes[i] /2 THEN
+	 GVL_armCali.g_linkZeroCrossOrNotOfCart[i] :=1;
+END_IF
+m_lastLinkEncoder[i] := i_slaveCart.m_cartjoints[i].m_motorInputs.m_linkEncoder;
+
+//link encoder calibration 
+m_linkEncPosFristCaliTon[i](IN:= GVL_armCali.g_linkEncFristPosCaliOfCart[i], PT:= m_caliTime, Q=>  GVL_armCali.g_linkEncFristCaliTriggerOfCart[i], ET=> );
+m_linkEncPosSecondCaliTon[i](IN:=  GVL_armCali.g_linkEncSecondPosCaliOfCart[i], PT:= m_caliTime, Q=>  GVL_armCali.g_linkEncSecondCaliTriggerOfCart[i], ET=> );
+m_linkEncPosHomeCaliTon[i](IN:=  GVL_armCali.g_linkEncHomePosCaliOfCart[i], PT:= m_caliTime, Q=>  GVL_armCali.g_linkEncHomePosCaliTriggerOfCart[i], ET=> );
+IF  GVL_armCali.g_linkEncFristCaliTriggerOfCart[i] THEN
+	linkLimitFristPos[i] := i_slaveCart.m_cartJoints[i].m_motorInputs.m_linkEncoder;
+	IF linkLimitFristPos[i] < linkLimitSecondPos[i] THEN
+		GVL_armCali.g_linkLimitFristPosOfCart[i] := linkLimitFristPos[i];
+		GVL_armCali.g_linkLimitSecondPosOfCart[i] := linkLimitSecondPos[i];
+	ELSE
+		GVL_armCali.g_linkLimitFristPosOfCart[i] := linkLimitSecondPos[i];
+		GVL_armCali.g_linkLimitSecondPosOfCart[i] := linkLimitFristPos[i];
+	END_IF
+ELSIF  GVL_armCali.g_linkEncSecondCaliTriggerOfCart[i] THEN
+	linkLimitSecondPos[i] := i_slaveCart.m_cartJoints[i].m_motorInputs.m_linkEncoder;
+	IF linkLimitFristPos[i] < linkLimitSecondPos[i] THEN
+		GVL_armCali.g_linkLimitFristPosOfCart[i] := linkLimitFristPos[i];
+		GVL_armCali.g_linkLimitSecondPosOfCart[i] := linkLimitSecondPos[i];
+	ELSE
+		GVL_armCali.g_linkLimitFristPosOfCart[i] := linkLimitSecondPos[i];
+		GVL_armCali.g_linkLimitSecondPosOfCart[i] := linkLimitFristPos[i];
+	END_IF
+	 
+ELSIF  GVL_armCali.g_linkEncHomePosCaliTriggerOfCart[i] THEN
+	 GVL_armCali.g_linkHomePosOfCart[i] := i_slaveCart.m_cartJoints[i].m_motorInputs.m_linkEncoder;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_CartCtrlCali">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlCali.calcCmdJntPos">
+      <LineId Id="238" Count="0" />
+      <LineId Id="240" Count="2" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="237" Count="0" />
+      <LineId Id="243" Count="0" />
+      <LineId Id="245" Count="1" />
+      <LineId Id="248" Count="1" />
+      <LineId Id="247" Count="0" />
+      <LineId Id="251" Count="0" />
+      <LineId Id="250" Count="0" />
+      <LineId Id="252" Count="2" />
+      <LineId Id="256" Count="0" />
+      <LineId Id="255" Count="0" />
+      <LineId Id="244" Count="0" />
+      <LineId Id="226" Count="0" />
+      <LineId Id="141" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="136" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlCali.calcCmdJntTrq">
+      <LineId Id="290" Count="0" />
+      <LineId Id="217" Count="0" />
+      <LineId Id="175" Count="0" />
+      <LineId Id="238" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="282" Count="0" />
+      <LineId Id="279" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlCali.faultDetect">
+      <LineId Id="3" Count="2" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="12" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="16" Count="1" />
+      <LineId Id="23" Count="2" />
+      <LineId Id="31" Count="1" />
+      <LineId Id="15" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlCali.init">
+      <LineId Id="157" Count="4" />
+      <LineId Id="204" Count="0" />
+      <LineId Id="201" Count="0" />
+      <LineId Id="208" Count="0" />
+      <LineId Id="205" Count="1" />
+      <LineId Id="239" Count="3" />
+      <LineId Id="238" Count="0" />
+      <LineId Id="219" Count="0" />
+      <LineId Id="203" Count="0" />
+      <LineId Id="187" Count="0" />
+      <LineId Id="244" Count="2" />
+      <LineId Id="243" Count="0" />
+      <LineId Id="188" Count="1" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlCali.linkEncDetecCali">
+      <LineId Id="43" Count="0" />
+      <LineId Id="6" Count="30" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

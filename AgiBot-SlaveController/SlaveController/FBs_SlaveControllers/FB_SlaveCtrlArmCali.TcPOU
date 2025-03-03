@@ -25,6 +25,7 @@ VAR
 	m_powerBoxCaliTime : LREAL;
 	
 	m_jointMounted :ARRAY[1..5] OF BOOL := [5(FALSE)];
+	m_current : Vec5d;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -123,18 +124,17 @@ FOR i := 1 TO 3 DO
 END_FOR
 
 FOR i := 1 TO 5 DO
+	m_current[i] :=ABS(i_slaveArm.filtJntCurrent[i+3]);
 	IF GVL_armCali.g_powerBoxCali[armIdx] THEN
 		m_jntEnableFlag[i+3] := 1;
 		m_jntOPMode[i+3]:=DriverOPMode_Trq;
 		m_cmdJntTrq[i+3] := 150.0/ i_slaveArm.m_joints[i+3].m_trq2CurrentRatio;
-		m_powerBoxCaliTime := m_powerBoxCaliTime + GVL_SystemParameters.g_slaveArmCtrlCycleTime;
-		IF m_powerBoxCaliTime > 5.0 THEN
-			GVL_armCali.g_powerBoxCali[armIdx]:= FALSE;
-		END_IF
-		IF ABS(i_slaveArm.filtJntCurrent[i+3])> m_maxJntCurrent[i] THEN
+		IF m_current[i]> m_maxJntCurrent[i] THEN
 			m_jointMounted[i] := TRUE;
 			GVL_armCali.g_powerBoxLinkHomePos[armIdx][i] := i_slaveArm.m_joints[i+3].m_motorInputs.m_linkEncoder;
+			
 		END_IF
+		
 	ELSE
 		m_jointMounted[i] := FALSE;
 		m_powerBoxCaliTime := 0;
@@ -143,6 +143,10 @@ END_FOR
 
 IF (m_jointMounted[1] AND m_jointMounted[2] AND m_jointMounted[3] AND m_jointMounted[4] AND m_jointMounted[5]) THEN
 	GVL_armCali.g_powerBoxCalicomplete[armIdx] := TRUE;
+	m_powerBoxCaliTime := m_powerBoxCaliTime + GVL_SystemParameters.g_slaveArmCtrlCycleTime;
+	IF m_powerBoxCaliTime > 3.0 THEN
+		GVL_armCali.g_powerBoxCali[armIdx]:= FALSE;
+	END_IF
 ELSE
 	GVL_armCali.g_powerBoxCalicomplete[armIdx] := FALSE;
 END_IF
@@ -231,16 +235,14 @@ copyCmds(r_slaveArmCtrlCmd);
       <LineId Id="236" Count="1" />
       <LineId Id="53" Count="0" />
       <LineId Id="264" Count="0" />
-      <LineId Id="263" Count="0" />
+      <LineId Id="312" Count="1" />
       <LineId Id="265" Count="0" />
       <LineId Id="267" Count="0" />
-      <LineId Id="269" Count="1" />
-      <LineId Id="274" Count="0" />
-      <LineId Id="277" Count="0" />
-      <LineId Id="284" Count="1" />
-      <LineId Id="271" Count="1" />
+      <LineId Id="269" Count="3" />
       <LineId Id="288" Count="0" />
+      <LineId Id="307" Count="0" />
       <LineId Id="273" Count="0" />
+      <LineId Id="303" Count="0" />
       <LineId Id="275" Count="0" />
       <LineId Id="278" Count="0" />
       <LineId Id="276" Count="0" />
@@ -248,6 +250,9 @@ copyCmds(r_slaveArmCtrlCmd);
       <LineId Id="266" Count="0" />
       <LineId Id="283" Count="0" />
       <LineId Id="280" Count="1" />
+      <LineId Id="308" Count="0" />
+      <LineId Id="310" Count="1" />
+      <LineId Id="309" Count="0" />
       <LineId Id="286" Count="1" />
       <LineId Id="282" Count="0" />
       <LineId Id="279" Count="0" />

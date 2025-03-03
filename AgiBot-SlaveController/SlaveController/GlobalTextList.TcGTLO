@@ -81,6 +81,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"1167"</v>
+              <v n="TextDefault">"3关节侧边按钮"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"838"</v>
               <v n="TextDefault">"3号臂"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -133,6 +138,26 @@
             <o>
               <v n="TextID">"541"</v>
               <v n="TextDefault">"Arm1"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"1588"</v>
+              <v n="TextDefault">"Arm2"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"202"</v>
+              <v n="TextDefault">"Arm3"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"1168"</v>
+              <v n="TextDefault">"Arm4"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"569"</v>
+              <v n="TextDefault">"Cart"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -201,8 +226,18 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"1187"</v>
+              <v n="TextDefault">"Joint 1 测试启动"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"304"</v>
               <v n="TextDefault">"Joint 2 标定启动"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"1548"</v>
+              <v n="TextDefault">"Joint 2 测试启动"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -211,8 +246,18 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"1120"</v>
+              <v n="TextDefault">"Joint 3 测试启动"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"1170"</v>
               <v n="TextDefault">"Joint 4 标定启动"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"1162"</v>
+              <v n="TextDefault">"Joint 4 测试启动"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -221,8 +266,18 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"1922"</v>
+              <v n="TextDefault">"Joint 5 测试启动"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"606"</v>
               <v n="TextDefault">"Joint 6 标定启动"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"519"</v>
+              <v n="TextDefault">"Joint 6 测试启动"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -231,8 +286,18 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"1255"</v>
+              <v n="TextDefault">"Joint 7 测试启动"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"37"</v>
               <v n="TextDefault">"Joint 8 标定启动"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"1500"</v>
+              <v n="TextDefault">"Joint 8 测试启动"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -621,6 +686,16 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"1904"</v>
+              <v n="TextDefault">"实际电机编码器值"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"918"</v>
+              <v n="TextDefault">"实际绝对值编码器"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"989"</v>
               <v n="TextDefault">"导出前置矩阵"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -648,6 +723,11 @@
             <o>
               <v n="TextID">"798"</v>
               <v n="TextDefault">"开始运动"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"13"</v>
+              <v n="TextDefault">"弹簧检测"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -836,6 +916,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"162"</v>
+              <v n="TextDefault">"清除故障"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"563"</v>
               <v n="TextDefault">"灯光测试"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -858,6 +943,11 @@
             <o>
               <v n="TextID">"739"</v>
               <v n="TextDefault">"电机编码器"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"286"</v>
+              <v n="TextDefault">"电机编码器方向"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -898,6 +988,11 @@
             <o>
               <v n="TextID">"258"</v>
               <v n="TextDefault">"结束关节ID"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"564"</v>
+              <v n="TextDefault">"绝对值编码器方向"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>

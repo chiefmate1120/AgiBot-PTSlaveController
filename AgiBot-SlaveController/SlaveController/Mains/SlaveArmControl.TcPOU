@@ -316,6 +316,8 @@ FOR i := 1 TO g_sArmNum DO
 	GVL_IO.g_jointPowerBoxIO[i][3] := (m_slaveRobot.m_slaveArms[i].m_panelInstrumentOnIO AND 10#1) = 1;
 	GVL_IO.g_jointPowerBoxIO[i][4] := (m_slaveRobot.m_slaveArms[i].m_panelInstrumentOnIO AND 10#2) = 2;
 	GVL_IO.g_jointPowerBoxIO[i][5] := (m_slaveRobot.m_slaveArms[i].m_panelInstrumentOnIO AND 10#64) = 64;
+	GVL_IO.g_endoscopeSingle[i][1] := (m_slaveRobot.m_slaveArms[i].m_panelInstrumentOnIO AND 10#16) = 16;
+	GVL_IO.g_endoscopeSingle[i][2] := (m_slaveRobot.m_slaveArms[i].m_panelInstrumentOnIO AND 10#32) = 32;
 END_FOR
 
 
@@ -341,6 +343,7 @@ END_FOR
     <LineIds Name="SlaveArmControl.UIOutputProcess">
       <LineId Id="419" Count="93" />
       <LineId Id="527" Count="11" />
+      <LineId Id="550" Count="1" />
       <LineId Id="513" Count="2" />
       <LineId Id="34" Count="0" />
     </LineIds>

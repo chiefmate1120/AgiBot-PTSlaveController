@@ -44,9 +44,9 @@ VAR
 	m_cartSupportLeg : FB_CartSupportLeg;
 	
 	//add for test
-	m_cartCycleTest : FB_CartCtrlCycleTest;
-	m_cartMotionTest : FB_CartCtrlMotionTest;
-	
+	m_cartTestCycle : FB_CartCtrlCycleTest;
+	m_cartTestJnt : FB_CartCtrlMotionTest;
+	m_cartCali : FB_CartCtrlCali;
 	
 	
 	// cart controller interface
@@ -138,9 +138,9 @@ m_cartCtrlFactory[CartJointState_StandColuAdjust] := m_cartStandColuAdjust;
 m_cartCtrlFactory[CartJointState_SupportLeg] := m_cartSupportLeg;
 
 //add for test
-m_cartCtrlFactory[CartJointState_CycleTest] := m_cartCycleTest;
-m_cartCtrlFactory[CartJointState_MotionTest] := m_cartMotionTest;
-
+m_cartCtrlFactory[CartJointState_TestCycle] := m_cartTestCycle;
+m_cartCtrlFactory[CartJointState_TestJnt] := m_cartTestJnt;
+m_cartCtrlFactory[CartJointState_cartCali] := m_cartCali;
 
 // assign controller
 m_cartCtrl:=m_cartCtrlFactory[m_cartState];
@@ -352,25 +352,31 @@ END_CASE
 
 //****************************add for test******************************//
 // to CartJointState_TestCycle
-IF (g_cycleTest.m_carEnterCycleTest OR g_cycleTest.m_carEnterESDTest) AND NOT(m_cartState=CartJointState_CycleTest) THEN
-	m_nextCartState := CartJointState_CycleTest;
+IF (g_cycleTest.m_carEnterCycleTest OR g_cycleTest.m_carEnterESDTest) AND NOT(m_cartState=CartJointState_TestCycle) THEN
+	m_nextCartState := CartJointState_TestCycle;
 END_IF
 
 //CartJointState_TestCycle exit
-IF (m_cartState=CartJointState_CycleTest) AND (g_cycleTest.m_carEnterCycleTest=FALSE) AND (g_cycleTest.m_carEnterESDTest=FALSE) THEN
+IF (m_cartState=CartJointState_TestCycle) AND (g_cycleTest.m_carEnterCycleTest=FALSE) AND (g_cycleTest.m_carEnterESDTest=FALSE) THEN
 	m_nextCartState :=CartJointState_Ready;
 END_IF
 
 // to CartJointState_TestJnt
-IF (g_motionTest.m_enterJntTestModeCar=TRUE) AND NOT(m_cartState=CartJointState_MotionTest) THEN
-	m_nextCartState := CartJointState_MotionTest;
+IF (g_motionTest.m_enterJntTestModeCar=TRUE) AND NOT(m_cartState=CartJointState_TestJnt) THEN
+	m_nextCartState := CartJointState_TestJnt;
 END_IF
 
 // CartJointState_TestJnt exit
-IF (g_motionTest.m_enterJntTestModeCar=FALSE) AND (m_cartState=CartJointState_MotionTest) THEN
+IF (g_motionTest.m_enterJntTestModeCar=FALSE) AND (m_cartState=CartJointState_TestJnt) THEN
 	m_nextCartState := CartJointState_Ready;
 END_IF
 
+//robot calibration 
+IF GVL_armCali.g_CartEnterCaliMode AND (m_cartState<=CartJointState_Ready) THEN
+	m_nextCartState := CartJointState_cartCali;
+ELSIF NOT GVL_armCali.g_CartEnterCaliMode AND (m_cartState=CartJointState_cartCali) THEN
+	m_nextCartState := CartJointState_Ready;
+END_IF	
 
 // Controller transit
 IF m_nextCartState<> m_cartState THEN
@@ -431,7 +437,10 @@ END_IF
       <LineId Id="51" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.stateMachine">
-      <LineId Id="792" Count="151" />
+      <LineId Id="792" Count="135" />
+      <LineId Id="952" Count="4" />
+      <LineId Id="951" Count="0" />
+      <LineId Id="928" Count="15" />
       <LineId Id="22" Count="0" />
     </LineIds>
   </POU>

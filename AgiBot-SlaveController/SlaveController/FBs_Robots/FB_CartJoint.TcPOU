@@ -108,9 +108,9 @@ m_multiCycles :=GVL_CartJointEncoderCaliData.g_multipleCyclesJoint[i_jntIdx];
 
 // convert cali link encoder if joint cross zero
 IF 1=m_linkEncZeroCross THEN
-	IF 1=m_linkEncoderDir AND m_caliLinkEncoder < m_minLinkEncoder THEN
-		m_caliLinkEncoder := GVL_CartJointEncoderCaliData.g_caliLinkEncoder[ i_jntIdx] + m_linkEncoderRes;
-	ELSIF -1=m_linkEncoderDir AND m_caliLinkEncoder < m_maxLinkEncoder THEN
+	m_minLinkEncoder :=GVL_CartJointEncoderCaliData.g_minLinkEncoder[ i_jntIdx] + m_linkEncoderDir*GVL_CartJointEncoderCaliData.g_linkEncLimitBuffer; // expand limit
+	m_maxLinkEncoder :=GVL_CartJointEncoderCaliData.g_maxLinkEncoder[ i_jntIdx] - m_linkEncoderDir*GVL_CartJointEncoderCaliData.g_linkEncLimitBuffer; // expand limit
+	IF m_caliLinkEncoder < m_minLinkEncoder THEN
 		m_caliLinkEncoder := GVL_CartJointEncoderCaliData.g_caliLinkEncoder[ i_jntIdx] + m_linkEncoderRes;
 	END_IF
 END_IF
@@ -247,7 +247,11 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="89" Count="7" />
       <LineId Id="98" Count="3" />
       <LineId Id="163" Count="0" />
-      <LineId Id="102" Count="15" />
+      <LineId Id="102" Count="8" />
+      <LineId Id="191" Count="1" />
+      <LineId Id="111" Count="1" />
+      <LineId Id="190" Count="0" />
+      <LineId Id="116" Count="1" />
       <LineId Id="122" Count="4" />
       <LineId Id="184" Count="0" />
       <LineId Id="127" Count="1" />

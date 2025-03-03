@@ -12600,8 +12600,8 @@
                 <v>800a2e77-4ea5-476a-88df-14d9538fbc04</v>
                 <v>ContainsPoint</v>
                 <v>e43c69fe-4c65-4dd1-8ffb-d6850bf49903</v>
-                <v>SetStaticState</v>
-                <v>98f820d3-1f0f-47d8-a241-f3fcedd79134</v>
+                <v>HasInputAccess</v>
+                <v>f59d2e4f-d67d-4105-9bda-23fd2cdcdc1f</v>
                 <v>HasInputAccessIntern</v>
                 <v>c5f3bcb5-154e-451e-8cfb-4c197b2d4444</v>
                 <v>GetTooltip</v>
@@ -12620,6 +12620,8 @@
                 <v>4b08ba8a-a3d9-44f8-8473-0e13be25995c</v>
                 <v>SetClientData</v>
                 <v>e933f41d-64ae-4564-b477-07bfcfaa99e8</v>
+                <v>HasVisibilityAccessIntern</v>
+                <v>c8c73575-eed3-435b-8ca1-262415bb3678</v>
                 <v>GetInstance</v>
                 <v>e1bcd675-5eaf-4bd3-a23c-1286c258eebd</v>
                 <v>GetClientData</v>
@@ -12638,14 +12640,12 @@
                 <v>1ce0d918-42ba-4f32-98f5-98ef977acc3a</v>
                 <v>Initialize</v>
                 <v>caf25a98-12d8-4073-842c-da471580edac</v>
-                <v>HasInputAccess</v>
-                <v>f59d2e4f-d67d-4105-9bda-23fd2cdcdc1f</v>
-                <v>HasVisibilityAccessIntern</v>
-                <v>c8c73575-eed3-435b-8ca1-262415bb3678</v>
+                <v>Destruct</v>
+                <v>71cb0587-8c1b-4af2-a4ba-48412c4705ef</v>
+                <v>SetStaticState</v>
+                <v>98f820d3-1f0f-47d8-a241-f3fcedd79134</v>
                 <v>GetSurroundingRect</v>
                 <v>3351cfca-a5f3-4a1a-8f2d-5f9a594ddcc3</v>
-                <v>ElementInfo</v>
-                <v>3b069ea5-ef2d-4864-9685-5d1d4aa96e27</v>
                 <v>GetResult</v>
                 <v>f8cb82e6-9db3-404d-a544-7c78f1dbf03c</v>
                 <v>GetLocalUsergroup</v>
@@ -12668,8 +12668,8 @@
                 <v>cecd096b-a82e-4b7d-a8db-087402a365a5</v>
                 <v>HandleInput</v>
                 <v>a5624b9d-bb42-4d46-a1cf-3397d87441aa</v>
-                <v>Destruct</v>
-                <v>71cb0587-8c1b-4af2-a4ba-48412c4705ef</v>
+                <v>ElementInfo</v>
+                <v>3b069ea5-ef2d-4864-9685-5d1d4aa96e27</v>
               </d>
               <v n="FbName">"NotImportant"</v>
               <v n="FbGuid">{bd855177-9b02-4a98-9d42-e0c6f6c07909}</v>

@@ -6,7 +6,7 @@ STRUCT
 	m_armJntEncErr :ARRAY [1..13] OF BOOL;
 	m_driveErr :ARRAY [1..13] OF BOOL;
 	m_jntStatusErr :ARRAY [1..13] OF BOOL;
-	m_currentIsNotUpdate :ARRAY [1..13] OF BOOL;
+	m_springBreakageCheck : BOOL;
 	m_linkEncErr :ARRAY [1..13] OF BOOL;
 	m_motPhieErr:ARRAY [1..13] OF BOOL;
 	m_outOfLimit :ARRAY [1..13] OF BOOL;

@@ -5,25 +5,13 @@
 // Robot8 --joints parameters of slave arms
 VAR_GLOBAL	
 	// absolute encoder value at minimal joint positon
-	g_minLinkEncoder :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF DINT :=
-		[14471, 21847, 28333, 0, 0, 0, 0, 0,
-		 131048, 64913, 59382, 0, 0, 0, 0, 0,
-		35  , 85624, 950, 0, 0, 0, 0, 0,
-		 2514,  5293,25850 , 0, 0, 0, 0, 0];
+	g_minLinkEncoder :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF DINT ;
 		 
 	// absolute encoder value at maximum joint positon
-	g_maxLinkEncoder :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF DINT :=
-		[23229 , 79626, 1234, 0, 0, 0, 0, 0,
-		 8756, 123134, 32388 , 0, 0, 0, 0, 0,
-		  8803  , 14040, 39535, 0, 0, 0, 0, 0,
-		 11255,  63641,64475, 0, 0, 0, 0, 0];
+	g_maxLinkEncoder :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF DINT ;
 	
 	// absolute encoder value at calibrated positon
-	g_caliLinkEncoder :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF DINT :=
-		[84530, 43966, 1234,  29666, 22972, 575, 7559, 18337,
-		 69942, 85902, 32388, 33511, 54993, 57990, 51203,  22607,
-		  69906, 107792, 39535, 28870, 3252, 36994, 15587, 22004,
-		 72568,  26674, 64475 , 7835, 57358, 33216,  26388,  62420];
+	g_caliLinkEncoder :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF DINT ;
 	
 	 // if absolute encoder value cross zeros within joint motion range
 	 // NOTICE: joint 7 is always 0.
@@ -34,14 +22,13 @@ VAR_GLOBAL
 		 1, 1, 0, 1, 1, 1, 1, 1];
 		 
 	 // joint SDO address
-	g_slaveArmNetID: ARRAY[1..4] OF T_AmsNetId:=['169.254.0.16.8.1','192.168.2.91.4.1','192.168.2.91.6.1','192.168.2.91.5.1'];
+	g_slaveArmNetID: ARRAY[1..4] OF T_AmsNetId:=['169.254.223.120.10.1','192.168.2.91.4.1','192.168.2.91.6.1','192.168.2.91.5.1'];
 	g_slaveJointNetPort:ARRAY[1..g_sArmNum,1..g_sJntNum] OF UINT :=[
 		1001,	1002,	1003,	2(1004),	3(1005),
 		1001,	1002,	1003,	2(1004),	3(1005),
 		1001,	1002,	1003,	2(1004),	3(1005),
 		1001,	1002,	1003,	2(1004),	3(1005)];
 	
-
 END_VAR
 
 VAR_GLOBAL CONSTANT	

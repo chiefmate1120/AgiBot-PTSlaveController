@@ -78,8 +78,6 @@ VAR_GLOBAL CONSTANT
 	g_cartMaxJntPos :Vec8d:=[0.053,0.053,1, 1,  0.69+0.01, 35*g_deg2Rad,	0.5+0.02,	165*g_deg2Rad];
 END_VAR
 
-
- 
 ]]></Declaration>
   </GVL>
 </TcPlcObject>

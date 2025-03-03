@@ -11,8 +11,8 @@ STRUCT
 	Ti_linkEncErr:TIME:=T#5S;
 	//joint status error delay time 
 	Ti_jntStatusErr:TIME:=T#1S;
-	//motor current is not update delay time
-	Ti_currentIsNotUpdate:TIME:=T#20S;
+	//spring breakage check time
+	Ti_springBreakCheck:TIME:=T#0.3S;
 	//joint postion out of limit
 	Ti_outOfLimit:TIME:=T#0.25S;
 	//joint follow error delay time

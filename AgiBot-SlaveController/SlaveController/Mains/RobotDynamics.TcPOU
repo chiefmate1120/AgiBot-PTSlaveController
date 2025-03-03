@@ -54,12 +54,21 @@ END_IF
 
 FOR i:=1 TO g_sArmNum DO
 	// run gravity model
-	m_slaveDynaData.m_gravity[i]:=m_slaveGravityModel[i].run(m_setupJointData.m_curJntPos[i][5], m_slaveJointsData.m_curJntPos[i],m_instruInfo[i]);
-	m_setupGravityModel[i].run(m_setupJointData.m_curJntPos[i], m_slaveJointsData.m_curJntPos[i],m_instruInfo[i], o_jnt3Gravity=> m_setupJnt3Gravity[i], o_jnt5Gravity=> m_setupJnt5Gravity[i]);
+	IF NOT GVL_armCali.g_armEnterCaliMode[i] THEN
+		m_slaveDynaData.m_gravity[i]:=m_slaveGravityModel[i].run(m_setupJointData.m_curJntPos[i][5], m_slaveJointsData.m_curJntPos[i],m_instruInfo[i]);
+		m_setupGravityModel[i].run(m_setupJointData.m_curJntPos[i], m_slaveJointsData.m_curJntPos[i],m_instruInfo[i], o_jnt3Gravity=> m_setupJnt3Gravity[i], o_jnt5Gravity=> m_setupJnt5Gravity[i]);
+		
+		// run dynamic model
+		m_slaveDynamicModel[i].updateDynamic(m_slaveJointsData.m_curJntPos[i]);
+		m_slaveDynaData.m_massMat[i]:= m_slaveDynamicModel[i].jntMassMat;
+	ELSE
+		m_slaveDynaData.m_gravity[i]:=g_zeroVec3d;
+		m_setupJnt3Gravity[i] :=0;
+		m_setupJnt5Gravity[i] :=0;
+	END_IF
 	
-	// run dynamic model
-	m_slaveDynamicModel[i].updateDynamic(m_slaveJointsData.m_curJntPos[i]);
-	m_slaveDynaData.m_massMat[i]:= m_slaveDynamicModel[i].jntMassMat;
+	
+	
 END_FOR
 
 
@@ -79,9 +88,17 @@ m_codeTime(START:=FALSE);
       <LineId Id="31" Count="0" />
       <LineId Id="28" Count="1" />
       <LineId Id="332" Count="0" />
+      <LineId Id="372" Count="1" />
+      <LineId Id="375" Count="0" />
+      <LineId Id="413" Count="0" />
+      <LineId Id="415" Count="1" />
+      <LineId Id="414" Count="0" />
+      <LineId Id="376" Count="1" />
+      <LineId Id="417" Count="1" />
+      <LineId Id="374" Count="0" />
       <LineId Id="30" Count="0" />
-      <LineId Id="295" Count="0" />
-      <LineId Id="333" Count="3" />
+      <LineId Id="333" Count="0" />
+      <LineId Id="336" Count="0" />
       <LineId Id="27" Count="0" />
       <LineId Id="260" Count="1" />
       <LineId Id="83" Count="0" />

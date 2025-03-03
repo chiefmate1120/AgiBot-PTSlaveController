@@ -93,6 +93,7 @@ VAR
 	// arm controller interface
 	m_armCtrl :ARRAY[1..g_sArmNum] OF I_SlaveArmCtrl;
 	m_armCtrlCmds :ARRAY[1..g_sArmNum] OF ST_SlaveArmCtrlCmds;
+
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -674,8 +675,6 @@ FOR i:=1 TO g_sArmNum DO
 	
 	
 	
-	
-	
 	//**************************************add for test***************************************//
 	// to precision test
 	IF (g_motionTest.m_enterPrecisionTestMode[i]=TRUE) OR (g_motionTest.m_singleMotorControl[i]=TRUE) AND NOT(m_slaveArmState[i]=SlaveArmState_MotionTest) THEN
@@ -735,9 +734,11 @@ FOR i:=1 TO g_sArmNum DO
 	END_IF	
 	
 	//fault mask
-	IF (g_specialSignal.m_faultMask) THEN
-		CONTINUE;
-	END_IF
+	//IF (g_specialSignal.m_faultMask[i]) THEN
+		//CONTINUE;
+	//END_IF
+	
+	
 	
 	
 	
@@ -831,13 +832,9 @@ m_lastEndoScopePostureUI := GVL_interactUI.g_scopeUpDown;
     </LineIds>
     <LineIds Name="FB_SlaveRobot.Init">
       <LineId Id="189" Count="44" />
-      <LineId Id="246" Count="1" />
-      <LineId Id="245" Count="0" />
-      <LineId Id="234" Count="0" />
-      <LineId Id="254" Count="0" />
+      <LineId Id="270" Count="5" />
       <LineId Id="263" Count="0" />
       <LineId Id="256" Count="0" />
-      <LineId Id="270" Count="0" />
       <LineId Id="255" Count="0" />
       <LineId Id="235" Count="3" />
       <LineId Id="61" Count="0" />
@@ -848,21 +845,11 @@ m_lastEndoScopePostureUI := GVL_interactUI.g_scopeUpDown;
     </LineIds>
     <LineIds Name="FB_SlaveRobot.stateMachine">
       <LineId Id="4131" Count="342" />
-      <LineId Id="4566" Count="1" />
+      <LineId Id="4566" Count="0" />
+      <LineId Id="4606" Count="60" />
+      <LineId Id="4567" Count="0" />
       <LineId Id="4474" Count="0" />
-      <LineId Id="4536" Count="29" />
-      <LineId Id="4586" Count="3" />
-      <LineId Id="4597" Count="1" />
-      <LineId Id="4505" Count="0" />
-      <LineId Id="4585" Count="0" />
-      <LineId Id="4608" Count="7" />
-      <LineId Id="4606" Count="1" />
-      <LineId Id="4627" Count="7" />
-      <LineId Id="4623" Count="0" />
-      <LineId Id="4626" Count="0" />
-      <LineId Id="4577" Count="0" />
-      <LineId Id="4506" Count="0" />
-      <LineId Id="4575" Count="1" />
+      <LineId Id="4576" Count="0" />
       <LineId Id="4507" Count="21" />
       <LineId Id="2" Count="0" />
     </LineIds>

@@ -7,7 +7,7 @@ STRUCT
 	T_driveErr:ARRAY [1..13] OF FB_TON;
 	T_linkEncErr:ARRAY [1..13] OF FB_TON;
 	T_jntStatusErr:ARRAY [1..13] OF FB_TON;
-	T_currentIsNotUpdate:ARRAY [1..13] OF FB_TON;
+	T_springBreakageCheck: FB_TON;
 	T_outOfLimit:ARRAY [1..13] OF FB_TON;
 	T_armJntFollowErr:ARRAY [1..13] OF FB_TON;
 	T_jntVelErr:ARRAY [1..13] OF FB_TON;

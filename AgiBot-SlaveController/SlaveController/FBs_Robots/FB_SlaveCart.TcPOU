@@ -7,7 +7,7 @@ VAR
 	//Driving force of the car io
 	m_driveForce AT %I* :ARRAY [1..6] OF DINT;
 	m_cartDriveForce :Vec6d;
-	m_cartDriveForceOffset:Vec6d;
+	m_cartDriveForceOffset:Vec6d:= [-0.5,2.0,4(0.0)];
 	m_cartDriveForceLpf :ARRAY[1..6] OF FB_LowPassFilter;
 	
 	//stabilizing foot sensor  (normally-closed contact)

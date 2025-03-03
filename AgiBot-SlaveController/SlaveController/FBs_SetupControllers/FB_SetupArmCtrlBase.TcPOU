@@ -196,7 +196,7 @@ r_setupArmCtrlCmd.m_jntOPMode:=m_jntOPMode;
 m_timePeriod := m_timePeriod+g_setupArmCtrlCycleTime;
 
 // information update
-//infoUpdate(i_setupArm);
+infoUpdate(i_setupArm);
 
 ]]></ST>
       </Implementation>

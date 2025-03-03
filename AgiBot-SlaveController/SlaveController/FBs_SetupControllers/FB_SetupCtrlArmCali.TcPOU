@@ -38,9 +38,9 @@ END_VAR
       <Implementation>
         <ST><![CDATA[armIdx := i_setupArm.armIdx;
 FOR i:= 1 TO g_setupJntNum DO
-	IF m_jntOPMode[i] = DriverOPMode_Trq THEN
+	//IF m_jntOPMode[i] = DriverOPMode_Trq THEN
 		m_cmdJntPos[i]:=i_setupArm.curJntPos[i];
-	END_IF
+	//END_IF
 	
 	//determine link encoder cross zero
 	IF ABS(i_setupArm.m_joints[i].m_motorInputs.m_linkEncoder - m_lastLinkEncoder[i]) > GVL_SetupMotorParameters.g_absEncoderRes[i] /2 THEN
@@ -130,8 +130,8 @@ m_holdLastCmds := checkToHoldLastCmds(i_setupArm);
 //init
 SUPER^.Init(i_setupArm,r_setupArmCtrlCmd);
 
-FOR i := 1 TO 3 DO
-	GVL_armCali.g_linkZeroCrossOrNot[i_setupArm.armIdx][i+5] :=0;
+FOR i := 1 TO 5 DO
+	GVL_armCali.g_linkZeroCrossOrNot[i_setupArm.armIdx][i] :=0;
 	m_lastLinkEncoder[i] := i_setupArm.m_joints[i].m_motorInputs.m_linkEncoder;
 END_FOR
 

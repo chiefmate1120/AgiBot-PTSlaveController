@@ -356,10 +356,12 @@ IF i_opMode = DriverOPMode_Pos THEN
 //	i_cmdPos:=LIMIT(m_minJntPos, i_cmdPos, m_maxJntPos); // May cause position jump, Do this in safety check. 
 	m_cmdJntPos :=i_cmdPos;
 	m_motorOutputs.m_cmdMotorEncoder :=motorPos2Enc(m_cmdJntPos);
+	
 ELSIF i_opMode = DriverOPMode_Trq THEN
 	filtCmdTrq:=m_cmdTrqLpf.run(i_cmdTrq);
 	m_motorOutputs.m_cmdCurrent:=LREAL_TO_DINT(LIMIT(-m_maxCurrent, filtCmdTrq*m_trq2CurrentRatio,m_maxCurrent));
-	m_motorOutputs.m_cmdMotorEncoder :=m_motorInputs.m_motorEncoder; 
+	//m_motorOutputs.m_cmdMotorEncoder :=m_motorInputs.m_motorEncoder; 
+	m_motorOutputs.m_cmdMotorEncoder :=motorPos2Enc(m_curJntPos);
 END_IF
 m_cmdCurrent:=m_motorOutputs.m_cmdCurrent;]]></ST>
       </Implementation>
@@ -491,9 +493,12 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="49" Count="0" />
       <LineId Id="42" Count="0" />
       <LineId Id="71" Count="0" />
-      <LineId Id="32" Count="1" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="33" Count="0" />
       <LineId Id="50" Count="0" />
       <LineId Id="34" Count="1" />
+      <LineId Id="80" Count="0" />
       <LineId Id="30" Count="0" />
       <LineId Id="53" Count="0" />
     </LineIds>
