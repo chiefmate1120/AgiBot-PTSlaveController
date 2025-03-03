@@ -61,10 +61,7 @@ VAR
 	m_controlMode_FTRIG:ARRAY[1..4,0..GVL_Const.g_controlModeNum] OF  F_TRIG;
 
 	//unit function
-	m_unitFun:FB_UnitTransform;	
-	m_k:INT;
-	m_i:INT;
-	
+	m_unitFun:FB_UnitTransform;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -78,7 +75,7 @@ uiDataForPrecision();
 writePrecisionData();
 
 //information update
-//infoUpdate();
+infoUpdate();
 ]]></ST>
     </Implementation>
     <Method Name="cartInfoUpdate" Id="{e2abd282-3224-4ce8-9e7b-736da8384d14}">
@@ -92,9 +89,7 @@ VAR
 	i: INT;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-
-//update system information
+        <ST><![CDATA[//update system information
 FOR i:=1 TO g_cartJntNum BY 1 DO
 	//motor input and output information
 	g_systemInfo.m_cartJntInfo[i].m_motorInput:=i_slaveCart.m_cartJoints[i].m_motorInputs;
@@ -109,7 +104,6 @@ FOR i:=1 TO g_cartJntNum BY 1 DO
 	g_systemInfo.m_cartJntInfo[i].m_jntMax:=GVL_CartMotorParameters.g_maxJntPos[i];
 	g_systemInfo.m_cartJntInfo[i].m_jntMin:=GVL_CartMotorParameters.g_minJntPos[i];
 END_FOR
-
 
 
 //update system information
@@ -127,8 +121,7 @@ g_systemInfo.m_cartInfo.m_curJntPosDegMM:=m_unitFun.carArmUnit2User(i_dataSystem
 
 //joint min and max
 g_systemInfo.m_cartInfo.m_jntMax:=GVL_CartMotorParameters.g_maxJntPos;
-g_systemInfo.m_cartInfo.m_jntMin:=GVL_CartMotorParameters.g_minJntPos;
-]]></ST>
+g_systemInfo.m_cartInfo.m_jntMin:=GVL_CartMotorParameters.g_minJntPos;]]></ST>
       </Implementation>
     </Method>
     <Method Name="dataWriteExp" Id="{83e2b061-240b-48f5-a37e-40e2d8eb7275}">
@@ -165,12 +158,19 @@ END_VAR]]></Declaration>
         <ST><![CDATA[
 //update the system information
 FOR i:= 1 TO 4 BY 1 DO
-	slaveInfoUpdate(i_slaveArm:= SlaveArmControl.m_slaveRobot.m_slaveArms[i]);
-	setupInfoUpdate(i_setupArm:= SetupArmControl.m_setupRobot.m_setupArms[i]);	
+	IF (SlaveArmControl.m_robotInit=TRUE) THEN
+		slaveInfoUpdate(i_slaveArm:= SlaveArmControl.m_slaveRobot.m_slaveArms[i]);
+	END_IF
+	
+	IF (SetupArmControl.m_robotInit=TRUE) THEN
+		setupInfoUpdate(i_setupArm:= SetupArmControl.m_setupRobot.m_setupArms[i]);	
+	END_IF	
 END_FOR
 
 //cart information
-cartInfoUpdate(i_slaveCart:= CartControl.m_cartRobot.m_slaveCart);
+IF (CartControl.m_cartInit=TRUE) THEN
+	cartInfoUpdate(i_slaveCart:= CartControl.m_cartRobot.m_slaveCart);
+END_IF
 ]]></ST>
       </Implementation>
     </Method>
@@ -185,9 +185,7 @@ VAR
 	k:INT;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-
-//update system information
+        <ST><![CDATA[//update system information
 FOR i:=1 TO g_setupJntNum BY 1 DO
 	k:=i_setupArm.armIdx;
 	
@@ -249,13 +247,10 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-//update system information
+        <ST><![CDATA[//update system information
 FOR i:=1 TO g_sJntNum BY 1 DO
 	k:=i_slaveArm.armIdx;
-	m_k:=k;
-	m_i:=i;
-		
+	
 	//motor input and output information
 	g_systemInfo.m_slaveJntInfo[k,i].m_motorInput:=i_slaveArm.m_joints[i].m_motorInputs;
 	g_systemInfo.m_slaveJntInfo[k,i].m_motorOutput:=i_slaveArm.m_joints[i].m_motorOutputs;
@@ -289,9 +284,6 @@ g_systemInfo.m_slaveInfo[k].m_curJntPosDegMM:=m_unitFun.slaveArmUnit2UserN8(i_da
 //joint max and min
 g_systemInfo.m_slaveInfo[k].m_jntMax:=GVL_SlaveMotorParameters.g_maxJntPos;
 g_systemInfo.m_slaveInfo[k].m_jntMin:=GVL_SlaveMotorParameters.g_minJntPos;
-
-
-
 ]]></ST>
       </Implementation>
     </Method>
@@ -434,8 +426,6 @@ END_CASE
       <LineId Id="283" Count="0" />
     </LineIds>
     <LineIds Name="MainTestPart.cartInfoUpdate">
-      <LineId Id="84" Count="0" />
-      <LineId Id="29" Count="0" />
       <LineId Id="32" Count="0" />
       <LineId Id="30" Count="0" />
       <LineId Id="40" Count="0" />
@@ -449,7 +439,6 @@ END_CASE
       <LineId Id="44" Count="0" />
       <LineId Id="38" Count="0" />
       <LineId Id="34" Count="0" />
-      <LineId Id="102" Count="0" />
       <LineId Id="111" Count="0" />
       <LineId Id="85" Count="0" />
       <LineId Id="88" Count="4" />
@@ -460,7 +449,6 @@ END_CASE
       <LineId Id="114" Count="0" />
       <LineId Id="107" Count="2" />
       <LineId Id="87" Count="0" />
-      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="MainTestPart.dataWriteExp">
       <LineId Id="39" Count="1" />
@@ -475,17 +463,17 @@ END_CASE
     <LineIds Name="MainTestPart.infoUpdate">
       <LineId Id="18" Count="0" />
       <LineId Id="7" Count="1" />
+      <LineId Id="30" Count="2" />
       <LineId Id="13" Count="0" />
-      <LineId Id="16" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="33" Count="1" />
       <LineId Id="14" Count="0" />
       <LineId Id="20" Count="0" />
       <LineId Id="9" Count="0" />
-      <LineId Id="5" Count="0" />
+      <LineId Id="35" Count="2" />
       <LineId Id="19" Count="0" />
     </LineIds>
     <LineIds Name="MainTestPart.setupInfoUpdate">
-      <LineId Id="8" Count="0" />
-      <LineId Id="28" Count="0" />
       <LineId Id="31" Count="0" />
       <LineId Id="29" Count="0" />
       <LineId Id="45" Count="1" />
@@ -511,10 +499,8 @@ END_CASE
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="MainTestPart.slaveInfoUpdate">
-      <LineId Id="33" Count="0" />
       <LineId Id="18" Count="1" />
-      <LineId Id="43" Count="1" />
-      <LineId Id="188" Count="0" />
+      <LineId Id="43" Count="0" />
       <LineId Id="186" Count="0" />
       <LineId Id="35" Count="0" />
       <LineId Id="31" Count="0" />
@@ -539,8 +525,6 @@ END_CASE
       <LineId Id="161" Count="0" />
       <LineId Id="152" Count="2" />
       <LineId Id="129" Count="0" />
-      <LineId Id="41" Count="0" />
-      <LineId Id="182" Count="1" />
       <LineId Id="181" Count="0" />
     </LineIds>
     <LineIds Name="MainTestPart.uiDataForPrecision">

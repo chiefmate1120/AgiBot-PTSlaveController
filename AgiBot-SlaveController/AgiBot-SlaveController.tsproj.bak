@@ -1746,7 +1746,7 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{97AF747C-3A2A-0BE1-3A38-6BFFC9EFACAE}" AutoDeleteType="true">E_CartJointState</Name>
+			<Name GUID="{6BD3F20D-F153-EBC7-C876-8F276EA43171}" AutoDeleteType="true">E_CartJointState</Name>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
 			<EnumInfo>
@@ -1814,8 +1814,12 @@
 				<Enum>51</Enum>
 			</EnumInfo>
 			<EnumInfo>
+				<Text><![CDATA[CartJointState_cartCali]]></Text>
+				<Enum>52</Enum>
+			</EnumInfo>
+			<EnumInfo>
 				<Text><![CDATA[CartJointState_totalNum]]></Text>
-				<Enum>51</Enum>
+				<Enum>52</Enum>
 			</EnumInfo>
 			<Properties>
 				<Property>
@@ -1879,13 +1883,13 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{3CE52B31-E444-8BF5-F2EF-C2AB2C90D8DA}" AutoDeleteType="true">ST_CartStatus</Name>
+			<Name GUID="{9EBEFE51-DFD2-1B9B-9250-221526416584}" AutoDeleteType="true">ST_CartStatus</Name>
 			<Comment><![CDATA[ Output from cart control task
  Input to slave arm control task  ]]></Comment>
 			<BitSize>768</BitSize>
 			<SubItem>
 				<Name>m_CartState</Name>
-				<Type GUID="{97AF747C-3A2A-0BE1-3A38-6BFFC9EFACAE}">E_CartJointState</Type>
+				<Type GUID="{6BD3F20D-F153-EBC7-C876-8F276EA43171}">E_CartJointState</Type>
 				<BitSize>16</BitSize>
 				<BitOffs>0</BitOffs>
 				<Default>
@@ -2011,6 +2015,15 @@
 			<ArrayInfo>
 				<LBound>1</LBound>
 				<Elements>4</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{FCC357D1-7124-E2AD-B3F6-8EAA3F7F80C9}" IecBaseType="true" AutoDeleteType="true">ARRAY [1..3] OF BOOL</Name>
+			<BitSize>24</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000030}">BOOL</BaseType>
+			<ArrayInfo>
+				<LBound>1</LBound>
+				<Elements>3</Elements>
 			</ArrayInfo>
 		</DataType>
 		<DataType>
@@ -3248,7 +3261,7 @@
 						<Var>
 							<Name>CartControl.m_cartStatus</Name>
 							<Comment><![CDATA[ Output cart status]]></Comment>
-							<Type GUID="{3CE52B31-E444-8BF5-F2EF-C2AB2C90D8DA}">ST_CartStatus</Type>
+							<Type GUID="{9EBEFE51-DFD2-1B9B-9250-221526416584}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartJointsData</Name>
@@ -3295,7 +3308,7 @@
 						<Var>
 							<Name>SafetyCheck.m_cartStatus</Name>
 							<Comment><![CDATA[ Output cart status]]></Comment>
-							<Type GUID="{3CE52B31-E444-8BF5-F2EF-C2AB2C90D8DA}">ST_CartStatus</Type>
+							<Type GUID="{9EBEFE51-DFD2-1B9B-9250-221526416584}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_cartJointsData</Name>
@@ -3335,6 +3348,16 @@
 					</Vars>
 					<Vars VarGrpType="2" ContextId="4" AreaNo="65">
 						<Name>TaskSafetyCheck Outputs</Name>
+						<Var>
+							<Name>SafetyCheck.m_brakeDistanceCheck</Name>
+							<Comment><![CDATA[brake distance check outpurt]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>SafetyCheck.m_tricolourLight</Name>
+							<Comment><![CDATA[tricolour light]]></Comment>
+							<Type GUID="{FCC357D1-7124-E2AD-B3F6-8EAA3F7F80C9}">ARRAY [1..3] OF BOOL</Type>
+						</Var>
 						<Var>
 							<Name>SafetyCheck.m_warningTone</Name>
 							<Comment><![CDATA[warning tone]]></Comment>
@@ -3468,6 +3491,13 @@
 							<OwnerB Name="TIID^MSCommunication^Term 22 (EK1100)^Term 24 (EL1008)">
 								<Link VarA="CartControl.m_cartRobot.m_slaveCart.m_stabilizFootSensorLeft" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 3^Input" Size="1" RestoreInfo="ANotFound"/>
 								<Link VarA="CartControl.m_cartRobot.m_slaveCart.m_stabilizFootSensorRight" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 4^Input" Size="1" RestoreInfo="ANotFound"/>
+							</OwnerB>
+						</OwnerA>
+					</UnrestoredVarLinks>
+					<UnrestoredVarLinks ImportTime="2025-03-03T10:09:45">
+						<OwnerA Name="OutputSrc" Prefix="TIPC^SlaveController^SlaveController Instance" Type="2">
+							<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
+								<Link VarA="CartControl.m_cartStatus" TypeA="ST_CartStatus" InOutA="1" GuidA="{A9F15D16-27E8-6DD8-7775-C3875815D261}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_cartStatus" RestoreInfo="TypeChanged" IdA="4082"/>
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
@@ -10059,7 +10089,6 @@
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_setupJointData" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupJointsData"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_slaveJointsData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_cartJointsData" VarB="TaskCartControl Outputs^CartControl.m_cartJointsData"/>
-				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_cartStatus" VarB="TaskCartControl Outputs^CartControl.m_cartStatus"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupJointsData" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupStatus" VarB="TaskSlaveArmControl Outputs^SetupArmControl.m_setupStatus"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_slaveJointData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveJointsData"/>

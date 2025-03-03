@@ -734,9 +734,9 @@ FOR i:=1 TO g_sArmNum DO
 	END_IF	
 	
 	//fault mask
-	//IF (g_specialSignal.m_faultMask[i]) THEN
-		//CONTINUE;
-	//END_IF
+	IF (g_specialSignal.m_faultMask[i]) THEN
+		CONTINUE;
+	END_IF
 	
 	
 	

@@ -147,49 +147,6 @@ END_FOR
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="infoUpdate" Id="{5a7dc976-8607-4bd8-b1dd-4ab477672eff}">
-      <Declaration><![CDATA[METHOD infoUpdate : BOOL
-VAR_INPUT
-	// endoscope pose in cart coordinate
-	i_endoscopePose : ST_Frame;
-	
-	// master arm data
-	i_masterStatus :ST_MasterStatus;
-	
-	// setup arm data
-	i_setupStatus: ST_SetupStatus;
-	
-	// slave arm data
-	i_slaveArm :FB_SlaveArm;
-END_VAR
-
-VAR
-	i:INT;
-	k:INT;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[
-//update system information
-FOR i:=1 TO g_sJntNum BY 1 DO
-	k:=i_slaveArm.armIdx;
-	
-	//motor input and output information
-	g_systemInfo.m_slaveJntInfo[k,i].m_motorInput:=i_slaveArm.m_joints[i].m_motorInputs;
-	g_systemInfo.m_slaveJntInfo[k,i].m_motorOutput:=i_slaveArm.m_joints[i].m_motorOutputs;
-	
-	//joint position
-	g_systemInfo.m_slaveJntInfo[k,i].m_curJntPos:=i_slaveArm.curJntPos[i];
-	g_systemInfo.m_slaveJntInfo[k,i].m_curLinkPos:=i_slaveArm.curLinkPos[i];
-	g_systemInfo.m_slaveJntInfo[k,i].m_encErr:=i_slaveArm.curJntPos[i]-i_slaveArm.curLinkPos[i];
-	
-	//joint max and min
-	g_systemInfo.m_slaveJntInfo[k,i].m_jntMax:=GVL_SlaveMotorParameters.g_maxJntPos[i];
-	g_systemInfo.m_slaveJntInfo[k,i].m_jntMin:=GVL_SlaveMotorParameters.g_minJntPos[i];
-END_FOR
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="init" Id="{63e02c69-11c3-4e06-9c58-dcaf1b3a881b}">
       <Declaration><![CDATA[// override this function in each exact controller
 // NOTICE: set joint control mode here, and do some initialization if needed
@@ -282,10 +239,6 @@ copyCmds(r_slaveArmCtrlCmd);
 
 // update time period
 m_timePeriod := m_timePeriod+g_slaveArmCtrlCycleTime;
-
-//system information update
-infoUpdate(i_endoscopePose, i_masterStatus, i_setupStatus, i_slaveArm);
-
 ]]></ST>
       </Implementation>
     </Method>
@@ -326,23 +279,6 @@ END_VAR
     <LineIds Name="FB_SlaveArmCtrlBase.enableFrictionCompensation">
       <LineId Id="7" Count="4" />
       <LineId Id="5" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlaveArmCtrlBase.infoUpdate">
-      <LineId Id="33" Count="0" />
-      <LineId Id="18" Count="1" />
-      <LineId Id="43" Count="1" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="31" Count="0" />
-      <LineId Id="88" Count="0" />
-      <LineId Id="87" Count="0" />
-      <LineId Id="34" Count="0" />
-      <LineId Id="36" Count="0" />
-      <LineId Id="64" Count="0" />
-      <LineId Id="66" Count="1" />
-      <LineId Id="65" Count="0" />
-      <LineId Id="39" Count="1" />
-      <LineId Id="30" Count="0" />
-      <LineId Id="41" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArmCtrlBase.init">
       <LineId Id="49" Count="0" />
@@ -388,9 +324,6 @@ END_VAR
       <LineId Id="27" Count="0" />
       <LineId Id="61" Count="0" />
       <LineId Id="84" Count="1" />
-      <LineId Id="155" Count="1" />
-      <LineId Id="158" Count="0" />
-      <LineId Id="157" Count="0" />
       <LineId Id="10" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArmCtrlBase.timePeriod.Get">

@@ -73,40 +73,6 @@ checkToHoldLastCmds := (maxJntErr<GVL_SlaveControlParameters.g_jntCtrlErrForCmdH
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="infoUpdate" Id="{ff27b4f3-7623-4814-a2c8-aa6b9f5ee30c}">
-      <Declaration><![CDATA[METHOD infoUpdate : BOOL
-VAR_IN_OUT CONSTANT
-	i_setupArm	:FB_SetupArm;
-END_VAR
-
-VAR
-	i: INT;
-	k:INT;
-END_VAR]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[
-
-//update system information
-FOR i:=1 TO g_setupJntNum BY 1 DO
-	k:=i_setupArm.armIdx;
-	
-	//motor input and output information
-	g_systemInfo.m_setupJntInfo[k,i].m_motorInput:=i_setupArm.m_joints[i].m_motorInputs;
-	g_systemInfo.m_setupJntInfo[k,i].m_motorOutput:=i_setupArm.m_joints[i].m_motorOutputs;
-	
-	//joint position and max/min
-	g_systemInfo.m_setupJntInfo[k,i].m_curJntPos:=i_setupArm.curJntPos[i];
-	g_systemInfo.m_setupJntInfo[k,i].m_curLinkPos:=i_setupArm.curLinkPos[i];
-	g_systemInfo.m_setupJntInfo[k,i].m_encErr:=i_setupArm.curJntPos[i]-i_setupArm.curJntPos[i];
-	
-	//joint min and max
-	g_systemInfo.m_setupJntInfo[k,i].m_jntMax:=GVL_SetupMotorParameters.g_maxJntPos[k,i];
-	g_systemInfo.m_setupJntInfo[k,i].m_jntMin:=GVL_SetupMotorParameters.g_minJntPos[k,i];
-END_FOR
-
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="init" Id="{39abdba7-12c4-423b-9680-dbfc1169a913}">
       <Declaration><![CDATA[// override this function in each exact controller
 // NOTICE: set joint control mode here, and do some initialization if needed
@@ -194,10 +160,6 @@ r_setupArmCtrlCmd.m_jntOPMode:=m_jntOPMode;
 
 // update time period
 m_timePeriod := m_timePeriod+g_setupArmCtrlCycleTime;
-
-// information update
-infoUpdate(i_setupArm);
-
 ]]></ST>
       </Implementation>
     </Method>
@@ -214,25 +176,6 @@ infoUpdate(i_setupArm);
     <LineIds Name="FB_SetupArmCtrlBase.checkToHoldLastCmds">
       <LineId Id="3" Count="7" />
       <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SetupArmCtrlBase.infoUpdate">
-      <LineId Id="8" Count="0" />
-      <LineId Id="28" Count="0" />
-      <LineId Id="31" Count="0" />
-      <LineId Id="29" Count="0" />
-      <LineId Id="45" Count="1" />
-      <LineId Id="38" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="67" Count="1" />
-      <LineId Id="41" Count="1" />
-      <LineId Id="55" Count="0" />
-      <LineId Id="57" Count="1" />
-      <LineId Id="56" Count="0" />
-      <LineId Id="43" Count="0" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="33" Count="0" />
-      <LineId Id="30" Count="0" />
-      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArmCtrlBase.init">
       <LineId Id="104" Count="11" />
@@ -264,10 +207,6 @@ infoUpdate(i_setupArm);
       <LineId Id="26" Count="1" />
       <LineId Id="61" Count="0" />
       <LineId Id="84" Count="1" />
-      <LineId Id="153" Count="0" />
-      <LineId Id="155" Count="0" />
-      <LineId Id="154" Count="0" />
-      <LineId Id="156" Count="0" />
       <LineId Id="10" Count="0" />
     </LineIds>
   </POU>
