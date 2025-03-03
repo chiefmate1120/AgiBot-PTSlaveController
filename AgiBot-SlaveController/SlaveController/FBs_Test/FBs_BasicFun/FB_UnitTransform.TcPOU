@@ -26,9 +26,8 @@ END_VAR]]></Declaration>
         <ST><![CDATA[FOR i:=1 TO 8 BY 1 DO
 	unit_Transform[i]:=g_rad2Deg;
 END_FOR
-unit_Transform[1]:=1000; //m to mm
-unit_Transform[2]:=1000; //m to mm
 unit_Transform[5]:=1000; //m to mm
+unit_Transform[7]:=1000; //m to mm
 
 FOR i:=1 TO 8 BY 1 DO
 	carArmUnit2User[i]:=i_dataSystem[i]*unit_Transform[i];
@@ -50,9 +49,8 @@ END_VAR]]></Declaration>
         <ST><![CDATA[FOR i:=1 TO 8 BY 1 DO
 	unit_Transform[i]:=g_deg2Rad;
 END_FOR
-unit_Transform[1]:=0.001; //mm to m
-unit_Transform[2]:=0.001; //mm to m
 unit_Transform[5]:=0.001; //mm to m
+unit_Transform[7]:=0.001; //mm to m
 
 FOR i:=1 TO 8 BY 1 DO
 	carUnit2System[i]:=i_dataTest[i]*unit_Transform[i];
@@ -251,13 +249,13 @@ END_FOR
       <LineId Id="46" Count="2" />
       <LineId Id="64" Count="0" />
       <LineId Id="63" Count="0" />
-      <LineId Id="49" Count="5" />
+      <LineId Id="50" Count="4" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_UnitTransform.carUnit2System">
       <LineId Id="49" Count="2" />
       <LineId Id="64" Count="1" />
-      <LineId Id="52" Count="4" />
+      <LineId Id="53" Count="3" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_UnitTransform.setupArmUnit2System">

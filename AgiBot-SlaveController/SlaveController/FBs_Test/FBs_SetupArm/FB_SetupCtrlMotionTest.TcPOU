@@ -82,7 +82,7 @@ g_motionTest.m_actJntCurrentSetup[m_armId]:=i_setupArm.filtJntCurrent;
 
 //joint enable
 m_jntEnableFlag:=g_motionTest.m_jntEnableSetup[m_armId];
-
+m_jntEnableFlag[3]:=0;
 
 IF (m_startMotionLast=FALSE) AND (m_startMotion=TRUE) THEN
 	m_testStep:=0;	
@@ -222,6 +222,7 @@ CASE m_testStep OF
 	20: //Switch to normal state
 		SUPER^.Init(i_setupArm,r_setupArmCtrlCmd);		
 		m_jntEnableFlag:=g_motionTest.m_jntEnableSetup[m_armId];
+		m_jntEnableFlag[3]:=0;
 		m_cmdJntPos:=i_setupArm.curJntPos;
 		
 		m_motionFinished:=TRUE;
@@ -386,7 +387,9 @@ END_CASE
       <LineId Id="103" Count="1" />
       <LineId Id="86" Count="0" />
       <LineId Id="117" Count="1" />
-      <LineId Id="157" Count="2" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="158" Count="1" />
       <LineId Id="120" Count="0" />
       <LineId Id="160" Count="0" />
       <LineId Id="115" Count="0" />
