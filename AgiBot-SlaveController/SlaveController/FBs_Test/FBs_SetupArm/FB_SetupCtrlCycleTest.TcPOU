@@ -71,6 +71,7 @@ END_VAR
       <Implementation>
         <ST><![CDATA[
 //joint enable
+g_cycleTest.m_jntEnableSetup[m_armId][1]:=0;  g_cycleTest.m_jntEnableSetup[m_armId][2]:=0;  g_cycleTest.m_jntEnableSetup[m_armId][3]:=0;
 m_jntEnableFlag:=g_cycleTest.m_jntEnableSetup[m_armId];
 
 //init parameters flag
@@ -349,7 +350,9 @@ END_IF
     </LineIds>
     <LineIds Name="FB_SetupCtrlCycleTest.calcCmdJntPos">
       <LineId Id="168" Count="0" />
-      <LineId Id="170" Count="1" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="179" Count="0" />
+      <LineId Id="171" Count="0" />
       <LineId Id="126" Count="0" />
       <LineId Id="156" Count="6" />
       <LineId Id="127" Count="9" />

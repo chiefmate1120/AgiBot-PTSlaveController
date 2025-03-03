@@ -381,7 +381,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[SUPER^.Init(i_setupArm,r_setupArmCtrlCmd);
-m_jntEnableFlag:=g_onesVec5i; m_jntEnableFlag[1]:=0; m_jntEnableFlag[2]:=0;
+m_jntEnableFlag:=g_onesVec5i; m_jntEnableFlag[1]:=0; m_jntEnableFlag[2]:=0; m_jntEnableFlag[3]:=0;
 m_jntOPMode:= g_setupAllPosMode;
 
 

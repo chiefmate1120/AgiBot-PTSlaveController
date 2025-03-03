@@ -3494,13 +3494,6 @@
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
-					<UnrestoredVarLinks ImportTime="2025-03-03T10:09:45">
-						<OwnerA Name="OutputSrc" Prefix="TIPC^SlaveController^SlaveController Instance" Type="2">
-							<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
-								<Link VarA="CartControl.m_cartStatus" TypeA="ST_CartStatus" InOutA="1" GuidA="{A9F15D16-27E8-6DD8-7775-C3875815D261}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_cartStatus" RestoreInfo="TypeChanged" IdA="4082"/>
-							</OwnerB>
-						</OwnerA>
-					</UnrestoredVarLinks>
 					<Contexts>
 						<Context>
 							<Id NeedCalleeCall="true">0</Id>
@@ -10089,6 +10082,7 @@
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_setupJointData" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupJointsData"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_slaveJointsData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_cartJointsData" VarB="TaskCartControl Outputs^CartControl.m_cartJointsData"/>
+				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_cartStatus" VarB="TaskCartControl Outputs^CartControl.m_cartStatus"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupJointsData" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupStatus" VarB="TaskSlaveArmControl Outputs^SetupArmControl.m_setupStatus"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_slaveJointData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveJointsData"/>
