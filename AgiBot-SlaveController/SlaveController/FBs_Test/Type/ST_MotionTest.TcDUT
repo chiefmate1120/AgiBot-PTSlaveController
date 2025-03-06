@@ -26,6 +26,9 @@ STRUCT
 	//current cycle id
 	m_testCycleId:ARRAY[1..g_sArmNum] OF INT;
 	
+	//go home flag
+	m_goHome:ARRAY[1..g_sArmNum] OF Vec6b;
+	
 	//origin joint position
 	m_originJntPos:ARRAY[1..g_sArmNum] OF Vec6d;
 	
@@ -101,6 +104,8 @@ STRUCT
 	
 	
 	
+	
+	
 	//**********************variables related to setup arm*******************//
 	//setuparm target joint position
 	m_targetJntPosSetup:ARRAY[1..g_sArmNum] OF Vec5d;
@@ -122,6 +127,9 @@ STRUCT
 	
 	//actual joint current
 	m_actJntCurrentSetup:ARRAY[1..g_sArmNum] OF Vec5d;
+	
+	//go home flag setup
+	m_goHomeSetup:ARRAY[1..g_sArmNum] OF Vec5b;
 	
 	
 	
@@ -181,6 +189,9 @@ STRUCT
 	
 	//cover command position
 	m_coverCmdPosCar:BOOL;
+	
+	//go home flag car
+	m_goHomeCar:Vec8b;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

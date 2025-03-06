@@ -124,6 +124,89 @@ g_systemInfo.m_cartInfo.m_jntMax:=GVL_CartMotorParameters.g_maxJntPos;
 g_systemInfo.m_cartInfo.m_jntMin:=GVL_CartMotorParameters.g_minJntPos;]]></ST>
       </Implementation>
     </Method>
+    <Method Name="controlSignalAnalysis" Id="{600771a8-3e3f-46e2-8822-6a6fc4cde8bd}">
+      <Declaration><![CDATA[//*********Analyze the signals of the interactive interface*********//
+METHOD controlSignalAnalysis : BOOL
+VAR_INPUT
+END_VAR
+
+VAR
+	i,k:INT;
+	m_armId:INT;
+	originJntPosUser:Vec6d;
+	
+	originJntPos_Setup:Vec5d;
+	originJntPosUser_Setup:Vec5d;
+	
+	originJntPos_car:Vec8d;
+	originJntPosUser_car:Vec8d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//go home signal
+FOR m_armId:=1 TO 4 BY 1 DO	
+	//slave arm joint
+	FOR i:=1 TO 3 BY 1 DO
+		IF (g_motionTest.m_goHome[m_armId][i]=TRUE) AND (SlaveArmControl.m_slaveRobot.m_slaveArmState[m_armId]=SlaveArmState_MotionTest) THEN
+			g_motionTest.m_controlMode[m_armId]:=1;
+			
+			//slave arm target joint position
+			originJntPosUser:=m_unitFun.slaveArmUnit2User(gvl_const.g_originJntPos);
+			g_motionTest.m_targetJntPosN8[m_armId]:=g_motionTest.m_actJntPos[m_armId];			
+			g_motionTest.m_targetJntPosN8[m_armId][i]:=originJntPosUser[i];
+			
+			//setup arm target joint position
+			g_motionTest.m_targetJntPosSetup[m_armId]:=g_motionTest.m_actJntPosSetup[m_armId];
+			
+			//exit for cycle
+			EXIT;
+		END_IF
+	END_FOR
+	
+	//setup arm joint
+	FOR i:=4 TO 5 BY 1 DO
+		IF (g_motionTest.m_goHomeSetup[m_armId][i]=TRUE) AND (SetupArmControl.m_setupRobot.m_setupArmState[m_armId]=SetupArmState_MotionTest) THEN
+			g_motionTest.m_controlMode[m_armId]:=1;
+			
+			//slave arm target joint position
+			g_motionTest.m_targetJntPosN8[m_armId]:=g_motionTest.m_actJntPos[m_armId];
+			
+			//setup arm target joint position
+			FOR k:=1 TO 5 BY 1 DO
+				originJntPos_Setup[k]:=GVL_SetupJointEncoderCaliData.g_linkEncCaliJntPos[m_armId,k];
+			END_FOR
+			originJntPosUser_Setup:=m_unitFun.setupArmUnit2User(originJntPos_Setup);			
+			g_motionTest.m_targetJntPosSetup[m_armId]:=g_motionTest.m_actJntPosSetup[m_armId];
+			g_motionTest.m_targetJntPosSetup[m_armId][i]:=originJntPosUser_Setup[i];
+			
+			//exit for cycle
+			EXIT;
+		END_IF
+	END_FOR
+END_FOR
+
+
+
+//cart joint go home---//左支撑-右支撑-左轮-右轮-立柱升降-横梁旋转-横梁伸缩-悬吊旋转
+FOR i:=6 TO 8 BY 1 DO
+	IF (g_motionTest.m_goHomeCar[i]=TRUE) AND (CartControl.m_cartRobot.m_cartState=CartJointState_MotionTest) THEN
+			g_motionTest.m_controlModeCar:=1;
+			
+			//cart target joint position
+			originJntPos_car:=GVL_CartJointEncoderCaliData.g_linkEncCaliJntPos;
+			originJntPosUser_car:=m_unitFun.carArmUnit2User(originJntPos_car);			
+			g_motionTest.m_targetJntPosCar:=g_motionTest.m_curJntPosCar;
+			g_motionTest.m_targetJntPosCar[i]:=originJntPosUser_car[i];
+			
+			//exit for cycle
+			EXIT;
+	END_IF
+END_FOR
+
+
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="dataWriteExp" Id="{83e2b061-240b-48f5-a37e-40e2d8eb7275}">
       <Declaration><![CDATA[METHOD dataWriteExp : BOOL
 VAR_INPUT
@@ -449,6 +532,49 @@ END_CASE
       <LineId Id="114" Count="0" />
       <LineId Id="107" Count="2" />
       <LineId Id="87" Count="0" />
+    </LineIds>
+    <LineIds Name="MainTestPart.controlSignalAnalysis">
+      <LineId Id="15" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="36" Count="4" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="43" Count="1" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="45" Count="2" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="50" Count="2" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="61" Count="2" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="76" Count="1" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="67" Count="1" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="82" Count="1" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="101" Count="1" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="109" Count="5" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="92" Count="1" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="80" Count="0" />
     </LineIds>
     <LineIds Name="MainTestPart.dataWriteExp">
       <LineId Id="39" Count="1" />
