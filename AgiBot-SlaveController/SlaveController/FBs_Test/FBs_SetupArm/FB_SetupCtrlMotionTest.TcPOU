@@ -254,13 +254,13 @@ CASE m_testStep OF
 	0: //init
 		IF (g_motionTest.m_singleMotorControl[m_armId]=TRUE) THEN
 			m_maxjntVel:=m_unitFun.setupArmUnit2System(i_dataTest:= g_motionTest.m_targetJntVelSetup[m_armId]);
-						
-			FOR i:=1 TO 5 BY 1 DO
+			
+			FOR i:=1 TO 5 BY 1 DO				
 				IF ABS(m_maxjntVel[i])<g_smallNum THEN
 					m_maxjntVel[i]:=g_motionTest.m_defultTargetJntVelSetup[i];
 				END_IF
+				m_maxjntVel[i]:=LIMIT(-GVL_SetupMotorParameters.g_maxJntVel[i],m_maxjntVel[i],GVL_SetupMotorParameters.g_maxJntVel[i]);
 			END_FOR			
-			
 			vecMultiNum(m_maxjntVel,3,m_maxjntAcc);
 			vecMultiNum(m_maxjntAcc,3,m_maxjntJerk);
 		END_IF		
@@ -412,8 +412,8 @@ END_CASE
       <LineId Id="112" Count="0" />
       <LineId Id="115" Count="0" />
       <LineId Id="117" Count="1" />
+      <LineId Id="137" Count="0" />
       <LineId Id="116" Count="0" />
-      <LineId Id="114" Count="0" />
       <LineId Id="81" Count="0" />
       <LineId Id="78" Count="1" />
       <LineId Id="49" Count="0" />
