@@ -149,6 +149,8 @@ FOR m_armId:=1 TO 4 BY 1 DO
 	FOR i:=1 TO 3 BY 1 DO
 		IF (g_motionTest.m_goHome[m_armId][i]=TRUE) AND (SlaveArmControl.m_slaveRobot.m_slaveArmState[m_armId]=SlaveArmState_MotionTest) THEN
 			g_motionTest.m_controlMode[m_armId]:=1;
+			g_motionTest.m_startMotion[m_armId]:=TRUE;
+			g_motionTest.m_singleMotorIncControl[m_armId]:=FALSE;
 			
 			//slave arm target joint position
 			originJntPosUser:=m_unitFun.slaveArmUnit2User(gvl_const.g_originJntPos);
@@ -167,6 +169,8 @@ FOR m_armId:=1 TO 4 BY 1 DO
 	FOR i:=4 TO 5 BY 1 DO
 		IF (g_motionTest.m_goHomeSetup[m_armId][i]=TRUE) AND (SetupArmControl.m_setupRobot.m_setupArmState[m_armId]=SetupArmState_MotionTest) THEN
 			g_motionTest.m_controlMode[m_armId]:=1;
+			g_motionTest.m_startMotion[m_armId]:=TRUE;
+			g_motionTest.m_singleMotorIncControl[m_armId]:=FALSE;
 			
 			//slave arm target joint position
 			g_motionTest.m_targetJntPosN8[m_armId]:=g_motionTest.m_actJntPos[m_armId];
@@ -190,7 +194,8 @@ END_FOR
 //cart joint go home---//左支撑-右支撑-左轮-右轮-立柱升降-横梁旋转-横梁伸缩-悬吊旋转
 FOR i:=6 TO 8 BY 1 DO
 	IF (g_motionTest.m_goHomeCar[i]=TRUE) AND (CartControl.m_cartRobot.m_cartState=CartJointState_MotionTest) THEN
-			g_motionTest.m_controlModeCar:=1;
+			g_motionTest.m_controlModeCar:=1;			
+			g_motionTest.m_jntTestModeIncCar:=FALSE;
 			
 			//cart target joint position
 			originJntPos_car:=GVL_CartJointEncoderCaliData.g_linkEncCaliJntPos;
@@ -537,7 +542,10 @@ END_CASE
       <LineId Id="15" Count="0" />
       <LineId Id="33" Count="0" />
       <LineId Id="49" Count="0" />
-      <LineId Id="36" Count="4" />
+      <LineId Id="36" Count="3" />
+      <LineId Id="132" Count="0" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="40" Count="0" />
       <LineId Id="53" Count="0" />
       <LineId Id="41" Count="0" />
       <LineId Id="43" Count="1" />
@@ -549,7 +557,10 @@ END_CASE
       <LineId Id="50" Count="2" />
       <LineId Id="57" Count="0" />
       <LineId Id="59" Count="0" />
-      <LineId Id="61" Count="2" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="62" Count="1" />
       <LineId Id="66" Count="0" />
       <LineId Id="64" Count="0" />
       <LineId Id="73" Count="0" />
@@ -567,7 +578,9 @@ END_CASE
       <LineId Id="98" Count="0" />
       <LineId Id="82" Count="1" />
       <LineId Id="96" Count="0" />
-      <LineId Id="101" Count="1" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="135" Count="0" />
       <LineId Id="106" Count="0" />
       <LineId Id="109" Count="5" />
       <LineId Id="100" Count="0" />

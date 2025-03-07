@@ -3052,17 +3052,7 @@
 							<Type>DINT</Type>
 						</Var>
 						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_lightIO</Name>
-							<Comment><![CDATA[arm light out to drive]]></Comment>
-							<Type>DINT</Type>
-						</Var>
-						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_lightIO</Name>
-							<Comment><![CDATA[arm light out to drive]]></Comment>
-							<Type>DINT</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_lightIO</Name>
 							<Comment><![CDATA[arm light out to drive]]></Comment>
 							<Type>DINT</Type>
 						</Var>
@@ -3075,6 +3065,16 @@
 							<Name>SetupArmControl.m_setupMotorData</Name>
 							<Comment><![CDATA[setup motor in_output to safety check]]></Comment>
 							<Type GUID="{0A9186FE-C455-143B-D6DA-F780ACCB07DC}">ST_SetupMotorData</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_lightIO</Name>
+							<Comment><![CDATA[arm light out to drive]]></Comment>
+							<Type>DINT</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_lightIO</Name>
+							<Comment><![CDATA[arm light out to drive]]></Comment>
+							<Type>DINT</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="1" ContextId="3" AreaNo="48">
