@@ -76,6 +76,9 @@ writePrecisionData();
 
 //information update
 infoUpdate();
+
+//joint get home
+controlSignalAnalysis();
 ]]></ST>
     </Implementation>
     <Method Name="cartInfoUpdate" Id="{e2abd282-3224-4ce8-9e7b-736da8384d14}">
@@ -511,6 +514,7 @@ END_CASE
       <LineId Id="284" Count="0" />
       <LineId Id="223" Count="0" />
       <LineId Id="154" Count="0" />
+      <LineId Id="347" Count="2" />
       <LineId Id="283" Count="0" />
     </LineIds>
     <LineIds Name="MainTestPart.cartInfoUpdate">

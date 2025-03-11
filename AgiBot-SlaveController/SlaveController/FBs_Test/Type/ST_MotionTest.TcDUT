@@ -101,6 +101,8 @@ STRUCT
 	//cover command position
 	m_coverCmdPos:ARRAY[1..g_sArmNum] OF BOOL;
 	
+	//cover command current
+	m_coverCmdCurrent:ARRAY[1..g_sArmNum] OF BOOL;
 	
 	
 	
@@ -192,6 +194,9 @@ STRUCT
 	
 	//go home flag car
 	m_goHomeCar:Vec8b;
+	
+	//cover command current-car
+	m_coverCmdCurrentCar:BOOL;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

@@ -106,6 +106,10 @@ IF (g_motionTest.m_coverCmdPos[m_armId]=TRUE) THEN
 	g_motionTest.m_targetJntPosSetup[m_armId]:=m_unitFun.setupArmUnit2User(i_dataSystem:= i_setupArm.curJntPos);
 END_IF
 
+//cover the command joint current
+IF (g_motionTest.m_coverCmdCurrent[m_armId]=TRUE) THEN
+	g_motionTest.m_targetJntCurrentSetup[m_armId]:=g_motionTest.m_actJntCurrentSetup[m_armId];
+END_IF
 ]]></ST>
       </Implementation>
     </Method>
@@ -280,6 +284,12 @@ CASE m_testStep OF
 			vecAdd(m_startJntPos,m_targetJntPosInc,m_endJntPos);
 		END_IF
 		
+		//limit the joint position
+		FOR i:=1 TO 5 BY 1 DO
+			m_startJntPos[i]:=LIMIT(GVL_SetupMotorParameters.g_minJntPos[m_armId,i],m_startJntPos[i],GVL_SetupMotorParameters.g_maxJntPos[m_armId,i]);
+			m_endJntPos[i]:=LIMIT(GVL_SetupMotorParameters.g_minJntPos[m_armId,i],m_endJntPos[i],GVL_SetupMotorParameters.g_maxJntPos[m_armId,i]);		
+		END_FOR
+		
 		//motion distance judgement
 		vecSub(m_endJntPos,m_startJntPos,m_motDist);
 		IF (norm(m_motDist)<g_smallNum) THEN
@@ -342,7 +352,9 @@ END_CASE
       <LineId Id="240" Count="0" />
       <LineId Id="242" Count="3" />
       <LineId Id="241" Count="0" />
+      <LineId Id="264" Count="2" />
       <LineId Id="198" Count="0" />
+      <LineId Id="267" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupCtrlMotionTest.calcCmdJntTrq">
       <LineId Id="7" Count="3" />
@@ -427,7 +439,10 @@ END_CASE
       <LineId Id="66" Count="1" />
       <LineId Id="93" Count="0" />
       <LineId Id="69" Count="1" />
-      <LineId Id="127" Count="1" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="148" Count="3" />
+      <LineId Id="146" Count="1" />
+      <LineId Id="128" Count="0" />
       <LineId Id="120" Count="0" />
       <LineId Id="123" Count="1" />
       <LineId Id="126" Count="0" />

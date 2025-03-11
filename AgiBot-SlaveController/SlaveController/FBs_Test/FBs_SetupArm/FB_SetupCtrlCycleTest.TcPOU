@@ -221,6 +221,12 @@ CASE m_testStep OF
 		m_startJntPos:=startDHPos;
 		m_endJntPos:=endDHPos;
 		
+		//limit the joint position
+		FOR i:=1 TO 5 BY 1 DO
+			m_startJntPos[i]:=LIMIT(GVL_SetupMotorParameters.g_minJntPos[m_armId,i],m_startJntPos[i],GVL_SetupMotorParameters.g_maxJntPos[m_armId,i]);
+			m_endJntPos[i]:=LIMIT(GVL_SetupMotorParameters.g_minJntPos[m_armId,i],m_endJntPos[i],GVL_SetupMotorParameters.g_maxJntPos[m_armId,i]);		
+		END_FOR
+		
 		//motion distance judgement
 		vecSub(m_endJntPos,m_startJntPos,m_motDist);
 		IF (norm(m_motDist)<g_smallNum) THEN
@@ -431,6 +437,8 @@ END_IF
       <LineId Id="25" Count="0" />
       <LineId Id="53" Count="1" />
       <LineId Id="132" Count="0" />
+      <LineId Id="237" Count="3" />
+      <LineId Id="235" Count="1" />
       <LineId Id="137" Count="4" />
       <LineId Id="133" Count="0" />
       <LineId Id="136" Count="0" />

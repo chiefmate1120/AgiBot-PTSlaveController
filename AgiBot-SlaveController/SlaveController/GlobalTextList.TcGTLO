@@ -1031,6 +1031,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"465"</v>
+              <v n="TextDefault">"覆盖指令电流"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"1165"</v>
               <v n="TextDefault">"覆盖第几个指令位置"</v>
               <l n="LanguageTexts" t="ArrayList" />

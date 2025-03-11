@@ -487,6 +487,12 @@ IF (g_motionTest.m_coverCmdPos[m_armId]=TRUE) THEN
 	g_motionTest.m_targetJntPosN8[m_armId]:=m_unitFun.slaveArmUnit2UserN8(i_dataSystem:= i_slaveArm.curJntPos);
 END_IF
 
+//cover the command joint current
+IF (g_motionTest.m_coverCmdCurrent[m_armId]=TRUE) THEN
+	g_motionTest.m_targetJntCurrentN8[m_armId]:=g_motionTest.m_actJntCurrent[m_armId];
+END_IF
+
+
 
 
 //*******************monitor part which can be delete*********************//
@@ -876,7 +882,10 @@ VAR_INPUT
 	// slave arm data
 	i_slaveArm :FB_SlaveArm;
 END_VAR
-]]></Declaration>
+
+VAR
+	i:INT;
+END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[
 
@@ -893,6 +902,12 @@ CASE m_testStep OF
 		m_endDHPos:=m_MutiDHJntPosArr[m_pointNum];
 		
 		i_slaveArm.instrument.instruIK(m_endDHPos,0, o_jntPos=>m_endJntPos);
+		//limit the joint position
+		FOR i:=1 TO 3 BY 1 DO
+			m_startJntPos[i]:=LIMIT(GVL_SlaveMotorParameters.g_minDHJntPos[i],m_startJntPos[i],GVL_SlaveMotorParameters.g_maxDHJntPos[i]);
+			m_endJntPos[i]:=LIMIT(GVL_SlaveMotorParameters.g_minDHJntPos[i],m_endJntPos[i],GVL_SlaveMotorParameters.g_maxDHJntPos[i]);			
+		END_FOR
+		
 		m_Planner.init(i_startJntPos:= m_startJntPos, 	i_targetJntPos:= m_endJntPos, 	i_maxJntVel:= m_maxjntVel, 	i_maxJntAcc:= m_maxjntAcc, 	i_maxJntJerk:= m_maxjntJerk);
 		IF (m_Planner.isGene=FALSE) THEN
 			m_testStep:=100;
@@ -985,6 +1000,12 @@ CASE m_testStep OF
 			m_targetJntPosIncN8:=m_unitFun.slaveArmUnit2SystemN8(i_dataTest:=g_motionTest.m_targetJntPosIncN8[m_armId]);
 			vecAdd(m_startJntPos,m_targetJntPosIncN8,m_endJntPos);
 		END_IF
+		
+		//limit the joint position
+		FOR i:=1 TO 3 BY 1 DO
+			m_startJntPos[i]:=LIMIT(GVL_SlaveMotorParameters.g_minDHJntPos[i],m_startJntPos[i],GVL_SlaveMotorParameters.g_maxDHJntPos[i]);
+			m_endJntPos[i]:=LIMIT(GVL_SlaveMotorParameters.g_minDHJntPos[i],m_endJntPos[i],GVL_SlaveMotorParameters.g_maxDHJntPos[i]);			
+		END_FOR
 		
 		//motion distance judgement
 		vecSub(m_endJntPos,m_startJntPos,m_motDist);
@@ -1302,7 +1323,10 @@ END_CASE
       <LineId Id="605" Count="0" />
       <LineId Id="628" Count="0" />
       <LineId Id="845" Count="2" />
-      <LineId Id="843" Count="1" />
+      <LineId Id="843" Count="0" />
+      <LineId Id="873" Count="2" />
+      <LineId Id="870" Count="2" />
+      <LineId Id="844" Count="0" />
       <LineId Id="606" Count="2" />
       <LineId Id="610" Count="3" />
       <LineId Id="617" Count="6" />
@@ -1489,7 +1513,10 @@ END_CASE
       <LineId Id="30" Count="1" />
       <LineId Id="33" Count="0" />
       <LineId Id="87" Count="0" />
-      <LineId Id="34" Count="14" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="124" Count="3" />
+      <LineId Id="122" Count="1" />
+      <LineId Id="35" Count="13" />
       <LineId Id="22" Count="0" />
       <LineId Id="114" Count="0" />
       <LineId Id="111" Count="2" />
@@ -1542,6 +1569,9 @@ END_CASE
       <LineId Id="100" Count="0" />
       <LineId Id="97" Count="0" />
       <LineId Id="95" Count="0" />
+      <LineId Id="174" Count="2" />
+      <LineId Id="178" Count="0" />
+      <LineId Id="171" Count="1" />
       <LineId Id="147" Count="4" />
       <LineId Id="144" Count="0" />
       <LineId Id="146" Count="0" />

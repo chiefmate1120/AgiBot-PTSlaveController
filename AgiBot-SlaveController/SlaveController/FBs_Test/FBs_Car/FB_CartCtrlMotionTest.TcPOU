@@ -402,6 +402,12 @@ CASE m_testStep OF
 			vecAdd(m_startJntPos,m_targetJntPosIncCar,m_endJntPos);
 		END_IF
 		
+		//limit the joint position
+		FOR i:=1 TO 8 BY 1 DO
+			m_startJntPos[i]:=LIMIT(GVL_CartMotorParameters.g_minJntPos[i],m_startJntPos[i],GVL_CartMotorParameters.g_maxJntPos[i]);
+			m_endJntPos[i]:=LIMIT(GVL_CartMotorParameters.g_minJntPos[i],m_endJntPos[i],GVL_CartMotorParameters.g_maxJntPos[i]);		
+		END_FOR
+		
 		//motion distance judgement
 		vecSub(m_endJntPos,m_startJntPos,m_motDist);
 		IF (norm(m_motDist)<g_smallNum) THEN
@@ -586,6 +592,8 @@ END_CASE
       <LineId Id="71" Count="0" />
       <LineId Id="56" Count="0" />
       <LineId Id="53" Count="1" />
+      <LineId Id="173" Count="3" />
+      <LineId Id="171" Count="1" />
       <LineId Id="84" Count="4" />
       <LineId Id="81" Count="0" />
       <LineId Id="83" Count="0" />

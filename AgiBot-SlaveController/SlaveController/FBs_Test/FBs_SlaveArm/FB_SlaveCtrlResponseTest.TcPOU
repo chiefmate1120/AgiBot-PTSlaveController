@@ -103,7 +103,10 @@ CASE m_testStep OF
 		m_stepCycle:=g_responseTest.m_stepCycle;
 		
 		m_initDHJntPos:=i_slaveArm.curDHJntPos;
-		m_cmdJntPos:=i_slaveArm.curJntPos;		
+		m_targetDHJntPos:=m_initDHJntPos;
+		m_targetDHJntVel:=g_zeroVec6d;
+		
+		m_cmdJntPos:=i_slaveArm.curJntPos;
 		m_lastCmdJntPos:=m_cmdJntPos;
 		m_cmdJntVel:=g_zeroVec8d;
 		m_time:=0;
@@ -116,14 +119,14 @@ CASE m_testStep OF
 		m_time:=m_time+g_slaveArmCtrlCycleTime;
 		
 		//frequency test
-		IF (m_freqTestFlag[m_testJntIdx]=TRUE) THEN 
+		IF (m_freqTestFlag[m_testJntIdx]=TRUE) AND (m_stepTestFlag[m_testJntIdx]=FALSE) THEN 
 			m_targetDHJntPos[m_testJntIdx]:=m_initDHJntPos[m_testJntIdx]+m_jntMotionRange[m_testJntIdx]/2
 												+0.5*m_jntMotionRange[m_testJntIdx]*SIN(2*pi*m_jntMotionFreq[m_testJntIdx]*m_time-pi/2);
 			m_targetDHJntVel[m_testJntIdx]:=0.5*m_jntMotionRange[m_testJntIdx]*2*pi*m_jntMotionFreq[m_testJntIdx]*COS(2*pi*m_jntMotionFreq[m_testJntIdx]*m_time-pi/2);
 		END_IF
 		
 		//step test
-		IF (m_stepTestFlag[m_testJntIdx]=TRUE) THEN
+		IF (m_stepTestFlag[m_testJntIdx]=TRUE) AND (m_freqTestFlag[m_testJntIdx]=FALSE) THEN
 			IF (m_time>m_cycleTime) THEN	
 				m_time:=0;			
 				IF (m_stepTestDir[m_testJntIdx]=1) THEN
@@ -275,6 +278,7 @@ m_armId:=i_slaveArm.armIdx;
       <LineId Id="126" Count="5" />
       <LineId Id="123" Count="1" />
       <LineId Id="24" Count="0" />
+      <LineId Id="136" Count="2" />
       <LineId Id="95" Count="0" />
       <LineId Id="105" Count="1" />
       <LineId Id="58" Count="3" />
