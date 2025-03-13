@@ -516,6 +516,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"273"</v>
+              <v n="TextDefault">"关节接近极限"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"10"</v>
               <v n="TextDefault">"关节活动范围"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -961,6 +966,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"150"</v>
+              <v n="TextDefault">"短超声刀单臂精度"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"1317"</v>
               <v n="TextDefault">"第一极限"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -1008,6 +1018,11 @@
             <o>
               <v n="TextID">"205"</v>
               <v n="TextDefault">"绿灯闪烁"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"466"</v>
+              <v n="TextDefault">"若测试超声刀，请点击右侧，然后点击不动点精度测试"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -1133,6 +1148,11 @@
             <o>
               <v n="TextID">"96"</v>
               <v n="TextDefault">"进入精度测试模式"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"672"</v>
+              <v n="TextDefault">"长超声刀单臂精度"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>

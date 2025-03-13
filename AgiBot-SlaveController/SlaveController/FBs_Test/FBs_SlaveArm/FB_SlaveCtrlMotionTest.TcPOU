@@ -446,7 +446,8 @@ ELSIF (m_controlMode=7) THEN
 	drag(i_slaveArm);
 	
 ELSIF (m_controlMode=8) THEN
-	jntMutiPoint(i_slaveArm);
+	//jntMutiPoint(i_slaveArm);
+	jntMutiPoint_1(i_slaveArm);
 	
 ELSIF (m_controlMode=9) THEN
 	jntCurrentMode(i_slaveArm);
@@ -961,6 +962,111 @@ END_CASE
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="jntMutiPoint_1" Id="{9704d934-7b37-4e9e-a2e9-e92c2d0bbc83}">
+      <Declaration><![CDATA[METHOD jntMutiPoint_1 : BOOL
+VAR_INPUT
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+CASE m_testStep OF
+	0: //init
+		m_pointNum:=2;
+		m_motionCycleNum:=1;
+		m_pointSum:=m_MutiDHJntPosNum;
+		m_testStep:=10;
+		
+		//single arm precision test point for InstruType_UltrasoundKnife
+		IF (g_motionTest.m_UltrasoundKnife_Long[m_armId]=TRUE) OR (g_motionTest.m_UltrasoundKnife_Short[m_armId]=TRUE) THEN
+			m_pointSum:=5;
+			m_pointNum:=1;
+		END_IF
+		
+		
+	10: //Trajectory parameter initialization
+		m_startJntPos:=i_slaveArm.curJntPos;
+		m_endDHPos:=m_MutiDHJntPosArr[m_pointNum];
+		
+		IF (g_motionTest.m_UltrasoundKnife_Long[m_armId]=TRUE) THEN
+			FOR i:=1 TO 6 BY 1 DO
+				m_endDHPos[i]:=gvl_Const.g_testJntPoint_UltrasoundKnife_Long[m_pointNum,i];
+			END_FOR
+		END_IF
+		
+		IF (g_motionTest.m_UltrasoundKnife_Short[m_armId]=TRUE) THEN
+			FOR i:=1 TO 6 BY 1 DO
+				m_endDHPos[i]:=gvl_Const.g_testJntPoint_UltrasoundKnife_Short[m_pointNum,i];
+			END_FOR
+		END_IF
+		
+		i_slaveArm.instrument.instruIK(m_endDHPos,0, o_jntPos=>m_endJntPos);
+		m_Planner.init(i_startJntPos:= m_startJntPos, 	i_targetJntPos:= m_endJntPos, 	i_maxJntVel:= m_maxjntVel, 	i_maxJntAcc:= m_maxjntAcc, 	i_maxJntJerk:= m_maxjntJerk);
+		IF (m_Planner.isGene=FALSE) THEN
+			m_testStep:=100;
+		ELSE
+			m_time:=0; m_testStep:=20;
+		END_IF		
+		
+		
+	20: //start motion
+		m_time:=m_time+g_slaveArmCtrlCycleTime;
+		m_Planner.evaluate(t:= m_time, jntPos=> m_cmdJntPos, jntVel=> m_cmdJntVel, jntAcc=> m_cmdJntAcc);
+		m_simJntPos:=m_cmdJntPos; //copy value to sim jntpos
+		IF (m_time>m_Planner.duration) THEN
+			m_testStep:=15;
+		END_IF	
+		
+		//exit
+		IF (g_motionTest.m_uiArmMode[m_armId,8]=FALSE) THEN
+			m_testStep:=-1;
+		END_IF
+		
+		
+	15: //Waiting for confirmation and measurement
+		IF (g_motionTest.m_nextStep[m_armId]=TRUE) THEN
+			g_motionTest.m_nextStep[m_armId]:=FALSE;
+			m_testStep:=30;
+		END_IF		
+		
+		//exit
+		IF (g_motionTest.m_uiArmMode[m_armId,8]=FALSE) THEN
+			m_testStep:=-1;
+		END_IF
+				
+		
+	30: //confirm
+		m_pointNum:=m_pointNum+1;		
+		m_testStep:=10;
+		
+		IF (g_motionTest.m_UltrasoundKnife_Long[m_armId]=TRUE) OR (g_motionTest.m_UltrasoundKnife_Short[m_armId]=TRUE) THEN
+			IF (m_pointNum>m_pointSum) THEN
+				m_motionCycleNum:=m_motionCycleNum+1;
+				m_pointNum:=1;
+			END_IF
+		ELSE
+			IF (m_pointNum>(m_pointSum-1)) THEN
+				m_motionCycleNum:=m_motionCycleNum+1;
+				m_pointNum:=2;
+			END_IF
+		END_IF
+		
+		
+	100: //end the motion
+		m_testStep:=-1;
+		
+		
+	-1: //
+END_CASE
+
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="jntSinglePoint" Id="{0dd167e7-64df-41a9-986a-68e28cb0e649}">
       <Declaration><![CDATA[METHOD jntSinglePoint : BOOL
 VAR_INPUT
@@ -1308,6 +1414,7 @@ END_CASE
       <LineId Id="651" Count="0" />
       <LineId Id="653" Count="0" />
       <LineId Id="652" Count="0" />
+      <LineId Id="897" Count="0" />
       <LineId Id="723" Count="0" />
       <LineId Id="725" Count="0" />
       <LineId Id="724" Count="0" />
@@ -1534,6 +1641,60 @@ END_CASE
       <LineId Id="86" Count="0" />
       <LineId Id="101" Count="2" />
       <LineId Id="80" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMotionTest.jntMutiPoint_1">
+      <LineId Id="6" Count="2" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="19" Count="1" />
+      <LineId Id="122" Count="1" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="30" Count="1" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="137" Count="2" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="142" Count="3" />
+      <LineId Id="140" Count="0" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="34" Count="14" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="111" Count="2" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="168" Count="0" />
+      <LineId Id="173" Count="8" />
+      <LineId Id="169" Count="1" />
+      <LineId Id="53" Count="1" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="157" Count="2" />
+      <LineId Id="149" Count="0" />
+      <LineId Id="151" Count="0" />
+      <LineId Id="154" Count="2" />
+      <LineId Id="153" Count="0" />
+      <LineId Id="150" Count="0" />
       <LineId Id="77" Count="0" />
       <LineId Id="49" Count="0" />
       <LineId Id="17" Count="0" />
