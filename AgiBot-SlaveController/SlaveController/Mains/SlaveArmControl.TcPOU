@@ -34,6 +34,8 @@ VAR
 	// code execute time measure
 	m_codeTime : Profiler;
 	
+	m_armIsDisable : ARRAY [1..4] OF BOOL;
+	m_slaveCheckDetect : FB_MasterSlaveCheckDetect;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -41,11 +43,11 @@ END_VAR
 //check arms EtherCAT state is OP
 IF NOT m_slaveInputDataPool.m_safetyData.m_armEtherCATAllOP AND NOT m_robotInit THEN
 	m_armEtherCATOPTime := m_armEtherCATOPTime + g_slaveArmCtrlCycleTime;
-	//RETURN;
+	RETURN;
 END_IF
 
 // wait communication to be stable
-IF(m_robotInitWaitTime<g_robotInitWaitTime) THEN
+IF(m_robotInitWaitTime<g_robotInitWaitTime) OR NOT(SafetyCheck.m_loadConfigFileOK) THEN
 	m_robotInitWaitTime := m_robotInitWaitTime+g_slaveArmCtrlCycleTime;
 	RETURN;
 END_IF
@@ -325,7 +327,7 @@ END_FOR
       </Implementation>
     </Method>
     <LineIds Name="SlaveArmControl">
-      <LineId Id="488" Count="36" />
+      <LineId Id="595" Count="36" />
       <LineId Id="87" Count="0" />
     </LineIds>
     <LineIds Name="SlaveArmControl.masterInputDataCast">

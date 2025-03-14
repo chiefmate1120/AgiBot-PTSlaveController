@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="E_SystemVoice" Id="{572b4a8d-6839-42f9-9603-7fa13d21556e}">
+    <Declaration><![CDATA[TYPE E_SystemVoice :
+(
+	systemVoice_du := 1,
+	systemVoice_triger3 := 2,
+	systemVoice_triger5 := 3,
+	systemVoice_end4 := 4,
+	systemVoice_end7 := 5,
+	systemVoice_cut := 6,
+	systemVoice_coag := 7,
+	systemVoice_UltraKnifeMin := 8,
+	systemVoice_UltraKnifeMax := 9
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

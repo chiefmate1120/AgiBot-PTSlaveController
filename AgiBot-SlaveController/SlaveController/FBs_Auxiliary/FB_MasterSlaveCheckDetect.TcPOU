@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_MasterSlaveCheckDetect" Id="{2fc52dc6-aea9-4f7f-9696-53f309e4debb}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterSlaveCheckDetect
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	m_salveCheckCounts :INT :=0;
+	m_salveCheckThres :INT :=10;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="run" Id="{c4c42e8a-47e4-4b2e-af21-67d5fd4387a7}">
+      <Declaration><![CDATA[// check if instrument is on
+METHOD run : BOOL
+VAR_INPUT
+	IOValue :BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+IF IOValue = TRUE  THEN
+	m_salveCheckCounts := MIN( m_salveCheckCounts +1,m_salveCheckThres);
+ELSIF IOValue = FALSE  THEN
+	m_salveCheckCounts :=0;
+END_IF
+run := m_salveCheckCounts >= m_salveCheckThres;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_MasterSlaveCheckDetect">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterSlaveCheckDetect.run">
+      <LineId Id="81" Count="5" />
+      <LineId Id="66" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

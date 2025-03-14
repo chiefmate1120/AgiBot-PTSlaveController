@@ -67,6 +67,9 @@ VAR
 	m_motorEncSalta : vec8di;
 	m_lastMotorEnc:Vec8di;
 	
+	// intrument joint backlash
+	m_instruJntBacklash :Vec5d:=g_zeroVec5d;
+	
 	// arm dynamic data
 	m_jntGravity : Vec8d:=g_zeroVec8d;
 	m_jntMassMat : Mat3d;
@@ -583,13 +586,14 @@ END_VAR]]></Declaration>
 m_armIdx:=i_armIdx;
 m_curGripAngle:=0;
 m_simGripAngle:=0;
+m_instruJntBacklash := g_zeroVec5d;
 
 // joint init
 FOR i:=1 TO g_sJntNum DO
 	IF i<4 THEN
 		m_joints[i].init(m_armIdx, i,g_slaveArmCtrlCycleTime, 1);
 	ELSE
-		m_joints[i].init(m_armIdx, i,g_slaveArmCtrlCycleTime, 4);
+		m_joints[i].init(m_armIdx, i,g_slaveArmCtrlCycleTime, 2);
 	END_IF
 END_FOR
 
@@ -598,17 +602,10 @@ initJntPos();
 
 // joint controller init
 FOR i:=1 TO g_sJntNum DO 
-	currentRatioMotor2Jnt:=GVL_SlaveMotorParameters.g_motorTrqConst[i]*GVL_SlaveMotorParameters.g_motorReduction[i]/1000;
-	m_jntPIDCtrl[i].init(g_slaveArmCtrlCycleTime,GVL_slaveControlParameters.g_posKp[i],GVL_slaveControlParameters.g_posKd[i],
-		GVL_slaveControlParameters.g_posKi[i], GVL_slaveControlParameters.g_posKiLimit[i]* currentRatioMotor2Jnt,
-		GVL_slaveControlParameters.g_posCtrlLimit[i]*currentRatioMotor2Jnt);
-		
-	// TODO: remove code below
-	IF m_armIdx=2 AND i=1 THEN
-		m_jntPIDCtrl[i].init(g_slaveArmCtrlCycleTime,GVL_slaveControlParameters.g_posKp[i]/2,GVL_slaveControlParameters.g_posKd[i]/2,
-		GVL_slaveControlParameters.g_posKi[i]/2, GVL_slaveControlParameters.g_posKiLimit[i]* currentRatioMotor2Jnt,
-		GVL_slaveControlParameters.g_posCtrlLimit[i]*currentRatioMotor2Jnt);
-	END_IF
+	currentRatioMotor2Jnt:=GVL_SlaveMotorParameters.g_motorTrqConst[m_armIdx,i]*GVL_SlaveMotorParameters.g_motorReduction[m_armIdx,i]/1000;
+	m_jntPIDCtrl[i].init(g_slaveArmCtrlCycleTime,GVL_slaveControlParameters.g_posKp[m_armIdx,i],GVL_slaveControlParameters.g_posKd[m_armIdx,i],
+		GVL_slaveControlParameters.g_posKi[m_armIdx,i], GVL_slaveControlParameters.g_posKiLimit[m_armIdx,i]* currentRatioMotor2Jnt,
+		GVL_slaveControlParameters.g_posCtrlLimit[m_armIdx,i]*currentRatioMotor2Jnt);
 END_FOR
 
 // instrument init
@@ -638,6 +635,26 @@ END_FOR
 updateStatus();]]></ST>
       </Implementation>
     </Method>
+    <Property Name="instruJntBacklash" Id="{88009436-63a3-453e-90cc-655a8a6c10d7}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY instruJntBacklash :REFERENCE TO Vec5d]]></Declaration>
+      <Get Name="Get" Id="{042c0ee1-c963-40d8-8b91-055199bc99cd}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[instruJntBacklash ref=m_instruJntBacklash;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{f4769db0-ca40-4b10-b4c1-f1e63de83403}">
+        <Declaration><![CDATA[
+VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_instruJntBacklash := instruJntBacklash;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
     <Property Name="instrument" Id="{ef5d0758-d499-4e04-a177-87950f9a716b}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY instrument : REFERENCE TO FB_Instrument]]></Declaration>
       <Get Name="Get" Id="{3a5249de-ec45-4e88-a302-3df6650a3ff5}">
@@ -1046,7 +1063,12 @@ FOR i:=1 TO g_sJntNum DO
 	ELSE
 		m_jntPIDCtrl[i].reset();
 		m_cmdJntTrq[i]:=0;
-		m_joints[i].updateCmds(DriverOPMode_Pos,m_cmdJntPos[i],m_cmdJntTrq[i]);
+		IF i>3 THEN
+			// add instrument joint backlash
+			m_joints[i].updateCmds(DriverOPMode_Pos,m_cmdJntPos[i]+m_instruJntBacklash[i-3],m_cmdJntTrq[i]);
+		ELSE
+			m_joints[i].updateCmds(DriverOPMode_Pos,m_cmdJntPos[i],m_cmdJntTrq[i]);
+		END_IF
 	END_IF
 	
 END_FOR
@@ -1144,10 +1166,18 @@ checkIO();
 
 // get joint data
 FOR i:=1 TO g_sJntNum DO
-	m_curMotorPos[i]:=m_joints[i].motorPos;
-	m_curLinkPos[i]:=m_joints[i].linkPos;
-	m_curLinkSingle[i]:=m_joints[i].linkSingle;
-	m_curJntPos[i]:=m_joints[i].jntPos;
+	// remove instrument joint backlash
+	IF i>3 THEN
+		m_curMotorPos[i]:=m_joints[i].motorPos - m_instruJntBacklash[i-3];
+		m_curLinkPos[i]:=m_joints[i].linkPos - m_instruJntBacklash[i-3];
+		m_curLinkSingle[i]:=m_joints[i].linkSingle - m_instruJntBacklash[i-3];
+		m_curJntPos[i]:=m_joints[i].jntPos - m_instruJntBacklash[i-3];
+	ELSE
+		m_curMotorPos[i]:=m_joints[i].motorPos;
+		m_curLinkPos[i]:=m_joints[i].linkPos;
+		m_curLinkSingle[i]:=m_joints[i].linkSingle;
+		m_curJntPos[i]:=m_joints[i].jntPos;
+	END_IF
 	m_curJntVel[i]:=m_joints[i].jntVel;
 	m_curJntTrq[i]:=m_joints[i].jntTrq;
 	m_rawJntCurrent[i]:=m_joints[i].rawCurrent;
@@ -1268,14 +1298,19 @@ matMultiVec(m_jaco, m_curDHJntVel, m_curCartTwist);
       <LineId Id="29" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.init">
-      <LineId Id="310" Count="3" />
-      <LineId Id="322" Count="34" />
+      <LineId Id="364" Count="32" />
       <LineId Id="80" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.initJntPos">
       <LineId Id="7" Count="3" />
       <LineId Id="32" Count="1" />
       <LineId Id="25" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.instruJntBacklash.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.instruJntBacklash.Set">
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.instrument.Get">
       <LineId Id="6" Count="0" />
@@ -1354,34 +1389,7 @@ matMultiVec(m_jaco, m_curDHJntVel, m_curCartTwist);
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.updateCmds">
-      <LineId Id="40" Count="0" />
-      <LineId Id="105" Count="3" />
-      <LineId Id="73" Count="0" />
-      <LineId Id="75" Count="1" />
-      <LineId Id="74" Count="0" />
-      <LineId Id="52" Count="0" />
-      <LineId Id="43" Count="0" />
-      <LineId Id="42" Count="0" />
-      <LineId Id="85" Count="0" />
-      <LineId Id="53" Count="0" />
-      <LineId Id="36" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="19" Count="0" />
-      <LineId Id="13" Count="0" />
-      <LineId Id="18" Count="0" />
-      <LineId Id="95" Count="0" />
-      <LineId Id="16" Count="0" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="117" Count="0" />
-      <LineId Id="22" Count="0" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="21" Count="0" />
-      <LineId Id="20" Count="0" />
-      <LineId Id="96" Count="0" />
-      <LineId Id="64" Count="0" />
-      <LineId Id="14" Count="0" />
-      <LineId Id="9" Count="1" />
+      <LineId Id="126" Count="37" />
       <LineId Id="86" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.updateDyna">
@@ -1411,9 +1419,7 @@ matMultiVec(m_jaco, m_curDHJntVel, m_curCartTwist);
       <LineId Id="24" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.updateStatus">
-      <LineId Id="255" Count="18" />
-      <LineId Id="297" Count="1" />
-      <LineId Id="274" Count="16" />
+      <LineId Id="305" Count="45" />
       <LineId Id="47" Count="0" />
     </LineIds>
   </POU>

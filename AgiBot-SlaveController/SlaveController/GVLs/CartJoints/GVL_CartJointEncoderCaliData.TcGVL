@@ -30,7 +30,7 @@ VAR_GLOBAL
 	g_linkEncCaliJntPos :ARRAY[1..g_cartJntNum] OF LREAL :=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0.0];
 	
 	 // joint SDO address
-	g_slaveCartNetID: T_AmsNetId:='169.254.45.61.8.1';
+	g_slaveCartNetID: T_AmsNetId:='169.254.45.61.7.1';
 	g_slaveCartJointNetPort:ARRAY[1..g_cartJntNum] OF UINT :=[1001,    1002,	1003,	1004,	1005,	1007,	1008,	1009];
 
 END_VAR]]></Declaration>

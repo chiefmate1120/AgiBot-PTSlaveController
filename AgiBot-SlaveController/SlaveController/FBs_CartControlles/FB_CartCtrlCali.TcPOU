@@ -196,7 +196,7 @@ END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[i := i_jnt;
 //determine link encoder cross zero
-IF ABS(i_slaveCart.m_cartjoints[i].m_motorInputs.m_linkEncoder - m_lastLinkEncoder[i]) > GVL_SlaveMotorParameters.g_absEncoderRes[i] /2 THEN
+IF ABS(i_slaveCart.m_cartjoints[i].m_motorInputs.m_linkEncoder - m_lastLinkEncoder[i]) > GVL_CartMotorParameters.g_absEncoderRes[i] /2 THEN
 	 GVL_armCali.g_linkZeroCrossOrNotOfCart[i] :=1;
 END_IF
 m_lastLinkEncoder[i] := i_slaveCart.m_cartjoints[i].m_motorInputs.m_linkEncoder;

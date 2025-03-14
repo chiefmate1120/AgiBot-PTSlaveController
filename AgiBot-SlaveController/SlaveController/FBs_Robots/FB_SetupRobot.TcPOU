@@ -488,7 +488,7 @@ FOR i := 1 TO g_sArmNum BY 1 DO
 		END_IF
 	END_IF
 
-	//m_setupArms[i].checkLight(m_lightCrlWord[i]);
+	m_setupArms[i].checkLight(m_lightCrlWord[i]);
 	
 	IF GVL_IO.g_LEDValueDisplay[i] THEN
 		m_LEDTestTime[i] := m_LEDTestTime[i] + GVL_SystemParameters.g_setupArmCtrlCycleTime;

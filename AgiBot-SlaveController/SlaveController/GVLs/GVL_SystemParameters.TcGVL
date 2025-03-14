@@ -5,9 +5,9 @@
 		
 	g_SWVersion : STRING := '1(1.2.0.1)';
 	
-	g_mArmNum :INT := 2;
+	g_mArmNum :INT := 2;	
 	g_mJntNum :INT := 7;	
-	g_sArmNum :INT := 4;
+	g_sArmNum :INT := 4;	
 	g_sJntNum :INT := 8;
 	g_setupJntNum :INT :=5;
 	g_cartDofs :INT :=6;
@@ -26,14 +26,14 @@
 	g_cartCtrlFreq :LREAL := 1.0/g_cartCtrlCycleTime;
 	
 	// wait time before robot init  for ethercat to stablize 
-	g_robotInitWaitTime : LREAL := 1.0;
+	g_robotInitWaitTime : LREAL := 2.0;
 
 	g_robotSafetyCheckWaitTime : LREAL :=3.0;
 	//recipe
-	RecipeDefinitionName :ARRAY [1..8] OF STRING := ['arm1LinkEncValue', 'arm2LinkEncValue', 'arm3LinkEncValue', 'arm4LinkEncValue','Arm1Dynamics','Arm2Dynamics','Arm3Dynamics','Arm4Dynamics'];
+	RecipeDefinitionName :ARRAY [1..8] OF STRING := ['arm1LinkEncValue', 'arm2LinkEncValue', 'arm3LinkEncValue', 'arm4LinkEncValue',
+																								'Arm1Dynamics','Arm2Dynamics','Arm3Dynamics','Arm4Dynamics'];
 	RecipeDefinitionNameCart : STRING := 'SlaveCartEncValue';
-	
-	
+
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

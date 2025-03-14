@@ -154,7 +154,7 @@ FOR i:=1 TO 5 DO
 END_FOR
 
 // init PID controller
-currentRatioMotor2Jnt:=GVL_SlaveMotorParameters.g_motorTrqConst[3]*GVL_SlaveMotorParameters.g_motorReduction[3]/1000;
+currentRatioMotor2Jnt:=GVL_SlaveMotorParameters.g_motorTrqConst[m_armIdx,3]*GVL_SlaveMotorParameters.g_motorReduction[m_armIdx,3]/1000;
 m_retractCtrl.init(g_slaveArmCtrlCycleTime,m_retractKp,m_retractKd,m_retractKi,m_retractKiLimit*currentRatioMotor2Jnt, m_retractCtrlLimit*currentRatioMotor2Jnt);
 
 // update commands to arm

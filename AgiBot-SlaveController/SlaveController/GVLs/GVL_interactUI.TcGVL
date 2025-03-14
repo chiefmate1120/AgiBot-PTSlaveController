@@ -126,6 +126,9 @@ VAR_GLOBAL
 	
 	//endoscope turn over enable
 	g_scopeTurnOverEnable : BOOL:=TRUE;
+	
+	//robot system operates sound 
+	g_systemVoice : INT;
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

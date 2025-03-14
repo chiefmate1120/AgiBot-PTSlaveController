@@ -84,7 +84,9 @@ VAR
 	// instrument controller
 	m_basicInstruController : FB_BasicInstruControl;
 	m_usKnifeController : FB_UltrosonicKnifeControl;
-	
+	m_basicInstruControllerDC : FB_BasicInstruControl_DC;
+	m_usKnifeControllerDC : FB_UltrosonicKnifeControl_DC;
+
 	// slave command grip angle and grip force level
 	m_slaveCmdGripAngle :LREAL;
 	m_slaveCmdGripForceLevel:LREAL;
@@ -126,12 +128,13 @@ VAR
 	//init salve instrument angle
 	m_initInstruAngle : LREAL;
 	m_gripperMatchAngMin : LREAL:=g_largeNum;
-	matchedSlaveGripAngle:LREAL;
+
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
+    <Folder Name="property" Id="{10e99898-12da-415d-81d6-00b44b8263ca}" />
     <Method Name="calcCmdJntPos" Id="{b549ed00-ec1a-412a-94d0-63a741bf9608}">
       <Declaration><![CDATA[METHOD PROTECTED calcCmdJntPos : BOOL
 VAR_IN_OUT CONSTANT
@@ -296,7 +299,12 @@ FOR i:=1 TO 3 DO
 END_FOR
 cmdVelScale := 1;
 FOR i:=1 TO g_cartDofs DO 
-	cmdVelScale:=MAX(cmdVelScale, ABS(m_simDHJointVel[i]/GVL_SlaveMotorParameters.g_maxJntVel[i]));
+	//TODO
+	IF i_slaveArm.armIdx = 1 THEN
+		cmdVelScale:=MAX(cmdVelScale, ABS(m_simDHJointVel[i]/GVL_SlaveMotorParameters.g_maxJntVelArm1[i]));
+	ELSE
+		cmdVelScale:=MAX(cmdVelScale, ABS(m_simDHJointVel[i]/GVL_SlaveMotorParameters.g_maxJntVel[i]));
+	END_IF
 END_FOR
 vecSelfMultiNum(m_simDHJointVel, 1.0/cmdVelScale);
 
@@ -367,10 +375,23 @@ END_FOR
 m_cmdYawAngle := m_cmdYawAngLpf.run(m_simDHJntPos[6]);
 m_cmdYawVel := m_cmdYawVelLpf.run(m_simDHJointVel[6]);
 
+// check if to exert larger grip force
+setMaxGripTrq(i_masterStatus, i_slaveArm);
+
 IF i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeS OR i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeU THEN
-	m_usKnifeController.run(instruCmdJntPos,instruCmdJntVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
+		IF m_armIdx = 1 OR m_armIdx = 3 THEN
+			//TODO
+			m_usKnifeControllerDC.run(instruCmdJntPos,instruCmdJntVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
+		ELSE
+			m_usKnifeController.run(instruCmdJntPos,instruCmdJntVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
+		END_IF
 ELSE
-	m_basicInstruController.run(instruCmdJntPos,instruCmdJntVel, m_cmdYawAngle, m_cmdYawVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
+		IF m_armIdx = 1 OR m_armIdx = 3 THEN
+			//TODO
+			m_basicInstruControllerDC.run(instruCmdJntPos,instruCmdJntVel, m_cmdYawAngle, m_cmdYawVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
+		ELSE
+			m_basicInstruController.run(instruCmdJntPos,instruCmdJntVel, m_cmdYawAngle, m_cmdYawVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
+		END_IF
 END_IF
 
 FOR i:=1 TO 5 DO
@@ -419,6 +440,16 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="clearBacklash" Id="{974369ce-a041-475c-b112-317ab8d645f8}">
+      <Declaration><![CDATA[METHOD PUBLIC clearBacklash : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_basicInstruController.clearBacklash();
+m_usKnifeController.clearBacklash();]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="gripperControl" Id="{19c9d86a-3bea-4759-9ef1-8287a84124de}">
       <Declaration><![CDATA[METHOD gripperControl : BOOL
 VAR_IN_OUT CONSTANT
@@ -428,6 +459,7 @@ END_VAR
 VAR
 	//matchedSlaveGripAngle:LREAL;
 	matchedSlaveGripForce:LREAL;
+	matchedSlaveGripAngle:LREAL;
 	masterGripVelThres :LREAL := 5.0 *g_deg2Rad;
 END_VAR
 ]]></Declaration>
@@ -476,6 +508,7 @@ m_jntOPMode[8] := DriverOPMode_Trq;
 m_firstIn :=TRUE;
 m_gripperCtrlFlag :=FALSE;
 
+
 // init gripper angle
 m_slaveCmdGripAngle := i_slaveArm.curGripAngle;
 m_slaveCmdGripForceLevel:=0;
@@ -493,6 +526,8 @@ m_cmdYawVelLpf.init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
 // init controller
 m_basicInstruController.init(i_slaveArm);
 m_usKnifeController.init(i_slaveArm);
+m_basicInstruControllerDC.init(i_slaveArm);
+m_usKnifeControllerDC.init(i_slaveArm);
 m_instruType := i_slaveArm.instrument.instruType;
 
 // init interpolation data
@@ -508,7 +543,7 @@ copyCmds(r_slaveArmCtrlCmd);
 ]]></ST>
       </Implementation>
     </Method>
-    <Property Name="InstruBacklash" Id="{36c2eae9-d34a-4d78-a1ca-ae4b84eb11b6}">
+    <Property Name="InstruBacklash" Id="{36c2eae9-d34a-4d78-a1ca-ae4b84eb11b6}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY InstruBacklash : Vec5d]]></Declaration>
       <Get Name="Get" Id="{a50be6d4-ea37-4d42-9226-d0fdbcd75516}">
         <Declaration><![CDATA[VAR
@@ -516,9 +551,9 @@ END_VAR
 ]]></Declaration>
         <Implementation>
           <ST><![CDATA[IF m_instruType = InstruType_UltrasoundKnifeS OR m_instruType = InstruType_UltrasoundKnifeU THEN
-	instruBacklash := g_zeroVec5d;
+	instruBacklash := m_usKnifeController.jntBacklash;
 ELSE
-	instruBacklash := m_basicInstruController.m_jntBacklash;
+	instruBacklash := m_basicInstruController.jntBacklash;
 END_IF]]></ST>
         </Implementation>
       </Get>
@@ -603,7 +638,7 @@ m_curInterpolateCylce:= m_curInterpolateCylce+1;
 ]]></ST>
       </Implementation>
     </Method>
-    <Property Name="masterSlavePoseErr" Id="{87b704e0-4215-4360-b95f-fd5590f5f115}">
+    <Property Name="masterSlavePoseErr" Id="{87b704e0-4215-4360-b95f-fd5590f5f115}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY masterSlavePoseErr : REFERENCE to Vec6d]]></Declaration>
       <Get Name="Get" Id="{1ddbef06-84f8-4aa0-a258-43dd88acef2a}">
         <Declaration><![CDATA[VAR
@@ -614,7 +649,40 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Property Name="simDHJntPos" Id="{5527a713-292b-49c0-a5f8-7003007877ae}">
+    <Method Name="setMaxGripTrq" Id="{087dc9a4-dc23-4f2d-af36-96ccef498f41}">
+      <Declaration><![CDATA[METHOD setMaxGripTrq : BOOL
+VAR_IN_OUT CONSTANT
+	i_masterStatus :ST_MasterStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	i:INT;
+	 peakGripTrqScale :LREAL := 2;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// only valid for ForceBipolar
+IF i_slaveArm.instrument.instruType <> InstruType_ForceBipolar THEN
+	RETURN;
+END_IF
+
+// only trigger grip force switch when no grip force exerted currently
+IF m_slaveCmdGripForceLevel > g_smallNum  THEN
+	RETURN;
+END_IF; 
+
+// decide matched master arm index
+FOR i:=1 TO g_mArmNum DO 
+	IF i_masterStatus.m_teleSlaveArmIdx[i] = i_slaveArm.armIdx THEN
+		IF i_masterStatus.m_pedalHover[i] AND i_masterStatus.m_electricKnifePedalTrigger[i] =1 THEN
+		   m_basicInstruController.setMaxGripTrq(i_slaveArm.instrument.instruTypeInfo.m_normGripTrq * peakGripTrqScale);
+		ELSE
+		   m_basicInstruController.setMaxGripTrq(i_slaveArm.instrument.instruTypeInfo.m_normGripTrq);
+		END_IF
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="simDHJntPos" Id="{5527a713-292b-49c0-a5f8-7003007877ae}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY simDHJntPos : Vec6d]]></Declaration>
       <Get Name="Get" Id="{bbf81dda-000a-4108-91e1-460142ac49a0}">
         <Declaration><![CDATA[VAR
@@ -866,21 +934,21 @@ END_FOR
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.calcCmdJntPos">
-      <LineId Id="1977" Count="160" />
-      <LineId Id="206" Count="0" />
-      <LineId Id="2164" Count="2" />
-      <LineId Id="2170" Count="1" />
-      <LineId Id="2167" Count="1" />
-      <LineId Id="2197" Count="3" />
+      <LineId Id="2197" Count="173" />
+      <LineId Id="2396" Count="3" />
       <LineId Id="2163" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.calcCmdJntTrq">
-      <LineId Id="173" Count="22" />
+      <LineId Id="209" Count="35" />
       <LineId Id="55" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.calcMSErrInScope">
       <LineId Id="158" Count="23" />
       <LineId Id="28" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave.clearBacklash">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.gripperControl">
       <LineId Id="64" Count="8" />
@@ -890,13 +958,7 @@ END_FOR
       <LineId Id="7" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.init">
-      <LineId Id="331" Count="35" />
-      <LineId Id="381" Count="0" />
-      <LineId Id="380" Count="0" />
-      <LineId Id="382" Count="0" />
-      <LineId Id="367" Count="0" />
-      <LineId Id="393" Count="0" />
-      <LineId Id="368" Count="1" />
+      <LineId Id="404" Count="45" />
       <LineId Id="12" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.InstruBacklash.Get">
@@ -940,7 +1002,11 @@ END_FOR
       <LineId Id="49" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.masterSlavePoseErr.Get">
-      <LineId Id="7" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave.setMaxGripTrq">
+      <LineId Id="3" Count="18" />
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.simDHJntPos.Get">
       <LineId Id="2" Count="0" />

@@ -24,8 +24,8 @@ VAR_GLOBAL CONSTANT
 	g_motorDir :ARRAY[1..g_cartJntNum] OF INT :=[1, 1, 1, -1, 1, 1, -1, -1];
 																												 
 	// joint position limit
-	g_minJntPos: vec8d:=[0, 0, 1, 1, 0, -30*g_deg2Rad, 0.002, -160*g_deg2Rad];	
-	g_maxJntPos: vec8d:=[0.053, 0.053, 1, 1,  0.69, 30*g_deg2Rad, 0.498, 160*g_deg2Rad];	
+	g_minJntPos: vec8d:=[0, 0, 1, 1, 0, -30*g_deg2Rad, 0.002, -170*g_deg2Rad];	
+	g_maxJntPos: vec8d:=[0.053, 0.053, 1, 1,  0.69, 30*g_deg2Rad, 0.498, 170*g_deg2Rad];	
 	
 END_VAR
 ]]></Declaration>

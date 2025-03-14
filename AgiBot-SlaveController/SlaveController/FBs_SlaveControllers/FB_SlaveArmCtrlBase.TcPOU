@@ -31,6 +31,7 @@ VAR
 	m_cmdCartPose : ST_Frame;
 	m_cmdCartTwist : Vec6d;
 	m_FFJntTrq :Vec8d;
+	m_armIdx: int;
 	
 END_VAR
 ]]></Declaration>
@@ -175,6 +176,8 @@ m_cmdJntAcc:=g_zeroVec8d;
 m_cmdJntTrq:=g_zeroVec8d;
 m_FFJntTrq :=g_zeroVec8d;
 
+m_armIdx:= i_slaveArm.armIdx;
+
 // update commands to arm
 copyCmds(r_slaveArmCtrlCmd);
 ]]></ST>
@@ -294,6 +297,8 @@ END_VAR
       <LineId Id="50" Count="0" />
       <LineId Id="38" Count="0" />
       <LineId Id="146" Count="0" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="156" Count="0" />
       <LineId Id="84" Count="0" />
       <LineId Id="86" Count="0" />
       <LineId Id="94" Count="0" />

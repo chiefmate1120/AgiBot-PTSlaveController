@@ -52,8 +52,8 @@
 	g_zeroVec8d: Vec8d:=[8(0)];
 	g_onesVec8d: Vec8d:=[8(1.0)];
 	g_zeroVec8i: Vec8i:=[8(0)];
-	g_onesVec8i: Vec8i:=[8(1)];
 	g_zeroVec8di: Vec8di:=[8(0)];
+	g_onesVec8i: Vec8i:=[8(1)];
 	g_initCurVec8d :Vec8d:=[8(250)];
 	
 	g_setupAllPosMode:Vec5i:=[5(DriverOPMode_Pos)];

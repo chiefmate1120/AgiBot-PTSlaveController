@@ -53,7 +53,7 @@ FOR i:= 1 TO 3 DO
 	END_IF
 	
 	//determine link encoder cross zero
-	IF ABS(i_slaveArm.m_joints[i].m_motorInputs.m_linkEncoder - m_lastLinkEncoder[i]) > GVL_SlaveMotorParameters.g_absEncoderRes[i] /2 THEN
+	IF ABS(i_slaveArm.m_joints[i].m_motorInputs.m_linkEncoder - m_lastLinkEncoder[i]) > GVL_SlaveMotorParameters.g_absEncoderRes[m_armIdx, i] /2 THEN
 		 GVL_armCali.g_linkZeroCrossOrNot[armIdx][i+5] :=1;
 	END_IF
 	m_lastLinkEncoder[i] := i_slaveArm.m_joints[i].m_motorInputs.m_linkEncoder;

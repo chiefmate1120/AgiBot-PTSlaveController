@@ -21,6 +21,8 @@ STRUCT
 	//motor electrical angle deviation
 	m_electriAngleDev : DINT;
 	
+	//drive heart beat
+	m_heartBeat : UDINT;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

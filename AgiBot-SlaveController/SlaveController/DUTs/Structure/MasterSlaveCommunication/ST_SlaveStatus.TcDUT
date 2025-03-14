@@ -58,7 +58,7 @@ STRUCT
 	m_slaveStopButton : BOOL;
 	
 	// simulated DH joint position from master-slave
-	m_simDHJntPos : vec6d;
+	m_simDHJntPos : ARRAY[1..g_sArmNum] OF  vec6d;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

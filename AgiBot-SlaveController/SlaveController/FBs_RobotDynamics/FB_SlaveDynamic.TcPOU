@@ -95,7 +95,7 @@ FOR i:=1 TO 5 DO
 END_FOR
 
 FOR i:=1 TO 3 DO
-	m_motorInertia[i]:=GVL_SlaveArmDynamics.g_motorInertia[i]*GVL_SlaveMotorParameters.g_motorReduction[i]*GVL_SlaveMotorParameters.g_motorReduction[i];
+	m_motorInertia[i]:=GVL_SlaveArmDynamics.g_motorInertia[i]*GVL_SlaveMotorParameters.g_motorReduction[m_armIdx,i]*GVL_SlaveMotorParameters.g_motorReduction[m_armIdx,i];
 END_FOR
 
 FOR i:=1 TO 5 DO

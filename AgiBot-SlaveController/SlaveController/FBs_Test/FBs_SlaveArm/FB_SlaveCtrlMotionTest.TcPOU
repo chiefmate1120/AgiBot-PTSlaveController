@@ -176,6 +176,10 @@ VAR
 	m_usKnifeController : FB_UltrosonicKnifeControl;
 	m_slaveCmdGripForceLevel:LREAL;
 	
+	//DC motor controller
+	m_basicInstruControllerDC : FB_BasicInstruControl_DC;
+	m_usKnifeControllerDC : FB_UltrosonicKnifeControl_DC;
+	
 	//mode1 and mode2
 	m_slaveMode1:Vec8i:=[3(DriverOPMode_PosTrq),5(DriverOPMode_Trq)];
 	m_slaveMode2:Vec8i:=g_slaveAllPosMode;
@@ -335,6 +339,15 @@ CASE m_testStep OF
 	0: //Trajectory parameter initialization
 		m_startJntPos:=i_slaveArm.curJntPos;
 		m_endDHPos:=m_originJntPos;		
+		
+		//add code for UltrasoundKnife
+		IF (g_motionTest.m_UltrasoundKnife_Short[m_armId]=TRUE) THEN
+			m_endDHPos[3]:=0.3167;
+		END_IF
+		IF (g_motionTest.m_UltrasoundKnife_Long[m_armId]=TRUE) THEN
+			m_endDHPos[3]:=0.3807;
+		END_IF
+		
 		i_slaveArm.instrument.instruIK(m_endDHPos,0, o_jntPos=>m_endJntPos);
 		m_Planner.init(i_startJntPos:= m_startJntPos, 	i_targetJntPos:= m_endJntPos, 	i_maxJntVel:= m_maxjntVel, 	i_maxJntAcc:= m_maxjntAcc, 	i_maxJntJerk:= m_maxjntJerk);
 		IF (m_Planner.isGene=FALSE) THEN
@@ -565,9 +578,17 @@ m_cmdYawAngle := m_cmdYawAngLpf.run(m_simDHJntPos[6]);
 m_cmdYawVel := m_cmdYawVelLpf.run(m_simDHJointVel[6]);
 
 IF i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeS OR i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeU THEN
-	m_usKnifeController.run(instruCmdJntPos,instruCmdJntVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
+	IF m_armIdx = 1 OR m_armIdx = 3 THEN
+		m_usKnifeControllerDC.run(instruCmdJntPos,instruCmdJntVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
+	ELSE
+		m_usKnifeController.run(instruCmdJntPos,instruCmdJntVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);	
+	END_IF
 ELSE
-	m_basicInstruController.run(instruCmdJntPos,instruCmdJntVel, m_cmdYawAngle, m_cmdYawVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
+	IF m_armIdx = 1 OR m_armIdx = 3 THEN
+		m_basicInstruControllerDC.run(instruCmdJntPos,instruCmdJntVel, m_cmdYawAngle, m_cmdYawVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
+	ELSE
+		m_basicInstruController.run(instruCmdJntPos,instruCmdJntVel, m_cmdYawAngle, m_cmdYawVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
+	END_IF	
 END_IF
 
 FOR i:=1 TO 5 DO
@@ -746,6 +767,8 @@ m_cmdYawVelLpf.init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
 m_basicInstruController.init(i_slaveArm);
 m_usKnifeController.init(i_slaveArm);
 //m_instruType := i_slaveArm.instrument.instruType;
+m_basicInstruControllerDC.init(i_slaveArm);
+m_usKnifeControllerDC.init(i_slaveArm);
 ]]></ST>
       </Implementation>
     </Method>
@@ -826,8 +849,8 @@ END_VAR]]></Declaration>
 CASE m_testStep OF
 	0: //init
 		FOR i_jntIdx:=1 TO 8 BY 1 DO
-			m_motorReduction :=GVL_SlaveMotorParameters.g_motorReduction[i_jntIdx];
-			m_trqConst :=GVL_SlaveMotorParameters.g_motorTrqConst[i_jntIdx];
+			m_motorReduction :=GVL_SlaveMotorParameters.g_motorReduction[m_armIdx, i_jntIdx];
+			m_trqConst :=GVL_SlaveMotorParameters.g_motorTrqConst[m_armIdx,i_jntIdx];
 			m_motorDir :=GVL_SlaveMotorParameters.g_motorDir[i_jntIdx];
 			m_trq2CurrentRatio:=m_motorDir * 1000.0/(m_trqConst*m_motorReduction);
 			m_current2TrqRatio:=m_motorDir * (m_trqConst*m_motorReduction)/1000.0;
@@ -1385,7 +1408,11 @@ END_CASE
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMotionTest.back2origin">
       <LineId Id="6" Count="0" />
-      <LineId Id="9" Count="15" />
+      <LineId Id="9" Count="3" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="53" Count="5" />
+      <LineId Id="51" Count="1" />
+      <LineId Id="13" Count="11" />
       <LineId Id="44" Count="0" />
       <LineId Id="25" Count="6" />
       <LineId Id="38" Count="0" />
@@ -1447,7 +1474,16 @@ END_CASE
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMotionTest.calJntTrq">
       <LineId Id="18" Count="0" />
-      <LineId Id="22" Count="14" />
+      <LineId Id="22" Count="11" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="75" Count="1" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="81" Count="1" />
+      <LineId Id="80" Count="0" />
       <LineId Id="19" Count="1" />
       <LineId Id="37" Count="1" />
       <LineId Id="21" Count="0" />
@@ -1546,6 +1582,8 @@ END_CASE
       <LineId Id="233" Count="1" />
       <LineId Id="260" Count="2" />
       <LineId Id="235" Count="0" />
+      <LineId Id="297" Count="0" />
+      <LineId Id="296" Count="0" />
       <LineId Id="157" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMotionTest.jntContinuousPoint">
@@ -1573,7 +1611,9 @@ END_CASE
       <LineId Id="7" Count="2" />
       <LineId Id="11" Count="0" />
       <LineId Id="51" Count="0" />
-      <LineId Id="54" Count="4" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="56" Count="2" />
       <LineId Id="52" Count="1" />
       <LineId Id="59" Count="0" />
       <LineId Id="61" Count="0" />

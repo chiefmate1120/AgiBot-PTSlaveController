@@ -118,7 +118,7 @@ END_FOR
 IF NOT(checkInstruType) THEN
 	RETURN;
 END_IF
-IF m_onChipData.m_InstruID = 31 THEN
+IF m_onChipData.m_InstruID = InstruType_NewEndoscope THEN
 	m_instruType := InstruType_Endoscope;
 	m_endoscopeRotateReduction := 1.0;
 	m_endoscopeRotJntIdx := 7;
@@ -127,7 +127,6 @@ ELSE
 	m_endoscopeRotateReduction := 2.0/3.0;
 	m_endoscopeRotJntIdx := 8;
 END_IF
-
 
 // update DH joint limit
 m_instruTypeInfo.m_rodLength := m_instruTypeInfo.m_rodLength - GVL_SlaveArmKinematic.g_panelHeight;
@@ -207,7 +206,7 @@ END_IF
 IF i_masterGripAng < g_masterGripForceStartAng THEN
 	o_instruGripAngle := g_minSlaveGripAngle;
 	// NOTE: force is applied from 50%，as minimum gripper angle already apply some sort of force
-	o_instruGripForceLevel := 30+70*(g_masterGripForceStartAng - i_masterGripAng)/(g_masterGripForceStartAng - g_minMasterGripAngle);
+	o_instruGripForceLevel := 10+90*(g_masterGripForceStartAng - i_masterGripAng)/(g_masterGripForceStartAng - g_minMasterGripAngle);
 // finger open
 ELSE
 	o_instruGripAngle := (g_maxMasterGripAngle - i_masterGripAng)/(g_maxMasterGripAngle - g_masterGripForceStartAng);
@@ -1054,38 +1053,45 @@ VAR_OUTPUT
 END_VAR
 VAR
 	posCode:UDINT;
+	ultraKnifePos : UDINT;
+	posDir : UDINT;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// joint3
-posCode := i_posCode AND 16#3FF;
-o_q3 := g_2pi *  posCode/16#3FF;
-
-// joint2
-i_posCode := SHR(i_posCode, 10);
-posCode := i_posCode AND 16#3FF;
-o_q2 := g_2pi *  posCode/16#3FF;
-
-// joint1
-i_posCode := SHR(i_posCode, 10);
-posCode := i_posCode AND 16#3FF;
-o_q1 := g_2pi *  posCode/16#3FF;
-]]></ST>
+        <ST><![CDATA[// ultrasound knife 
+IF (m_onChipData.m_InstruID = InstruType_UltrasoundKnifeS OR m_onChipData.m_InstruID = InstruType_UltrasoundKnifeU) THEN
+	ultraKnifePos := i_posCode;
+	posCode := i_posCode AND 16#FFFFF;
+	posDir := SHR(ultraKnifePos,20);
+	IF posDir = 0 THEN
+		o_q3 := (UDINT_TO_LREAL(posCode)/1000);
+	ELSIF posDir = 1 THEN
+		o_q3 := g_2pi - (UDINT_TO_LREAL(posCode)/1000);
+	END_IF
+	
+ELSE
+	// joint3
+	posCode := i_posCode AND 16#3FF;
+	o_q3 := g_2pi *  posCode/16#3FF;
+	
+	// joint2
+	i_posCode := SHR(i_posCode, 10);
+	posCode := i_posCode AND 16#3FF;
+	o_q2 := g_2pi *  posCode/16#3FF;
+	
+	// joint1
+	i_posCode := SHR(i_posCode, 10);
+	posCode := i_posCode AND 16#3FF;
+	o_q1 := g_2pi *  posCode/16#3FF;
+END_IF]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_Instrument">
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.checkInstruType">
-      <LineId Id="439" Count="15" />
-      <LineId Id="475" Count="0" />
-      <LineId Id="493" Count="0" />
-      <LineId Id="455" Count="1" />
-      <LineId Id="479" Count="0" />
-      <LineId Id="494" Count="0" />
-      <LineId Id="457" Count="3" />
-      <LineId Id="486" Count="0" />
-      <LineId Id="461" Count="5" />
+      <LineId Id="501" Count="30" />
+      <LineId Id="466" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.curScopePosture.Get">
       <LineId Id="2" Count="0" />
@@ -1100,7 +1106,7 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.gripAngleMap">
-      <LineId Id="137" Count="17" />
+      <LineId Id="171" Count="17" />
       <LineId Id="24" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.init">
@@ -1207,16 +1213,7 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.zeroPosDecode">
-      <LineId Id="40" Count="0" />
-      <LineId Id="45" Count="0" />
-      <LineId Id="63" Count="0" />
-      <LineId Id="58" Count="0" />
-      <LineId Id="51" Count="0" />
-      <LineId Id="64" Count="0" />
-      <LineId Id="66" Count="0" />
-      <LineId Id="65" Count="0" />
-      <LineId Id="68" Count="3" />
-      <LineId Id="67" Count="0" />
+      <LineId Id="104" Count="24" />
       <LineId Id="5" Count="0" />
     </LineIds>
   </POU>

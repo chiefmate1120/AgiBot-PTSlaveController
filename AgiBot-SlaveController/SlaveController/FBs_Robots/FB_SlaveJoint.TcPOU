@@ -36,12 +36,12 @@ m_cycleTime := i_controlCycleTime;
 m_velCalcCycles :=MAX(i_velCalcCycles,1);
 
 // hardware parameters
-m_motorEncoderRes :=GVL_SlaveMotorParameters.g_incEncoderRes[i_jntIdx];
-m_linkEncoderRes :=GVL_SlaveMotorParameters.g_absEncoderRes[i_jntIdx];
-m_motorReduction :=GVL_SlaveMotorParameters.g_motorReduction[i_jntIdx];
-m_linkEncoderReduction :=GVL_SlaveMotorParameters.g_absEncoderReduction[i_jntIdx];
-m_trqConst :=GVL_SlaveMotorParameters.g_motorTrqConst[i_jntIdx];
-m_maxCurrent :=GVL_SlaveMotorParameters.g_motorMaxCurrent[i_jntIdx];
+m_motorEncoderRes :=GVL_SlaveMotorParameters.g_incEncoderRes[m_armIdx,i_jntIdx];
+m_linkEncoderRes :=GVL_SlaveMotorParameters.g_absEncoderRes[m_armIdx,i_jntIdx];
+m_motorReduction :=GVL_SlaveMotorParameters.g_motorReduction[m_armIdx,i_jntIdx];
+m_linkEncoderReduction :=GVL_SlaveMotorParameters.g_absEncoderReduction[m_armIdx,i_jntIdx];
+m_trqConst :=GVL_SlaveMotorParameters.g_motorTrqConst[m_armIdx,i_jntIdx];
+m_maxCurrent :=GVL_SlaveMotorParameters.g_motorMaxCurrent[m_armIdx,i_jntIdx];
 m_motorDir :=GVL_SlaveMotorParameters.g_motorDir[i_jntIdx];								
 m_minJntPos	:=GVL_SlaveMotorParameters.g_minJntPos[i_jntIdx];
 m_maxJntPos	:=GVL_SlaveMotorParameters.g_maxJntPos[i_jntIdx];
@@ -49,17 +49,18 @@ m_maxJntPos	:=GVL_SlaveMotorParameters.g_maxJntPos[i_jntIdx];
 //link encoder calibartion data
 m_linkEncoderDir :=GVL_SlaveJointEncoderCaliData.g_asbEncoderDir[i_jntIdx];
 m_linkEncLimitBuffer := GVL_SlaveJointEncoderCaliData.g_linkEncLimitBuffer[i_jntIdx];
-m_minLinkEncoder :=GVL_SlaveJointEncoderCaliData.g_minLinkEncoder[i_armIdx, i_jntIdx] - m_linkEncoderDir*m_linkEncLimitBuffer; // expand limit
-m_maxLinkEncoder :=GVL_SlaveJointEncoderCaliData.g_maxLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncoderDir*m_linkEncLimitBuffer; // expand limit
+m_minLinkEncoder :=GVL_SlaveJointEncoderCaliData.g_minLinkEncoder[i_armIdx, i_jntIdx] - m_linkEncLimitBuffer; // expand limit
+m_maxLinkEncoder :=GVL_SlaveJointEncoderCaliData.g_maxLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncLimitBuffer; // expand limit
 m_caliLinkEncoder :=GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[i_armIdx, i_jntIdx];
 m_linkEncCaliJntPos :=GVL_SlaveJointEncoderCaliData.g_linkEncCaliJntPos[i_jntIdx];
+m_linkJntPosOffset := GVL_SlaveJointEncoderCaliData.g_linkJntPosOffset[i_armIdx, i_jntIdx];
 m_linkEncZeroCross :=GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[i_armIdx, i_jntIdx];
 m_multiCycles :=GVL_SlaveJointEncoderCaliData.g_multipleCyclesJoint[i_armIdx,i_jntIdx];
 
 // convert cali link encoder if joint cross zero
 IF 1=m_linkEncZeroCross THEN
-	m_minLinkEncoder :=GVL_SlaveJointEncoderCaliData.g_minLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncoderDir*m_linkEncLimitBuffer; // expand limit
-	m_maxLinkEncoder :=GVL_SlaveJointEncoderCaliData.g_maxLinkEncoder[i_armIdx, i_jntIdx] - m_linkEncoderDir*m_linkEncLimitBuffer; // expand limit
+	m_minLinkEncoder :=GVL_SlaveJointEncoderCaliData.g_minLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncLimitBuffer; // expand limit
+	m_maxLinkEncoder :=GVL_SlaveJointEncoderCaliData.g_maxLinkEncoder[i_armIdx, i_jntIdx] - m_linkEncLimitBuffer; // expand limit
 	IF m_caliLinkEncoder < m_minLinkEncoder THEN
 		m_caliLinkEncoder := GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncoderRes;
 	END_IF
@@ -167,26 +168,7 @@ END_IF
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveJoint.init">
-      <LineId Id="187" Count="0" />
-      <LineId Id="186" Count="0" />
-      <LineId Id="155" Count="0" />
-      <LineId Id="166" Count="0" />
-      <LineId Id="156" Count="0" />
-      <LineId Id="89" Count="7" />
-      <LineId Id="98" Count="3" />
-      <LineId Id="176" Count="0" />
-      <LineId Id="270" Count="0" />
-      <LineId Id="102" Count="7" />
-      <LineId Id="280" Count="5" />
-      <LineId Id="116" Count="1" />
-      <LineId Id="122" Count="6" />
-      <LineId Id="197" Count="0" />
-      <LineId Id="130" Count="1" />
-      <LineId Id="152" Count="1" />
-      <LineId Id="133" Count="1" />
-      <LineId Id="154" Count="0" />
-      <LineId Id="148" Count="3" />
-      <LineId Id="137" Count="5" />
+      <LineId Id="295" Count="60" />
       <LineId Id="39" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveJoint.updateCmds">

@@ -28,6 +28,7 @@ VAR
 	
 	// joint current threshold which indicate panel is buckled with instrument
 	m_maxJntCurrent :Vec5d := [200, 200, 200, 220, 220];
+	m_maxJntCurrentOldEndoScope :Vec5d := [200, 200, 200, 350, 350];
 	
 	// command mount motion
 	m_targetMountPos :Vec8d;
@@ -53,7 +54,7 @@ VAR
 	m_instruClampErrId : UINT;
 	m_instruClampTime : LREAL;
 	m_noCurrentTime : LREAL :=3;
-	m_notReturnToZero : LREAL :=4;
+	m_notReturnToZero : LREAL :=5;
 	m_maxClampTime :LREAL :=0.5;
 END_VAR
 ]]></Declaration>
@@ -73,7 +74,8 @@ END_VAR
 VAR 
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// return directly if instrument/endoscope is not readed
+        <ST><![CDATA[
+// return directly if instrument/endoscope is not readed
 IF NOT(i_slaveArm.instrument.onChipData.m_InstruReadSucceed) THEN
 	return;
 END_IF
@@ -88,8 +90,8 @@ ELSE
 	mountInstrument(i_slaveArm);
 END_IF
 
-m_instruClampErrId := instruClampStatus(i_slaveArm);
-]]></ST>
+// mount error detect;
+m_instruClampErrId := instruClampStatus(i_slaveArm);]]></ST>
       </Implementation>
     </Method>
     <Method Name="calcCmdJntTrq" Id="{3dcdda2f-e476-49ce-befa-85e7b34cb17e}">
@@ -113,7 +115,8 @@ m_cmdJntTrq := g_zeroVec8d;
 IF m_instruClampErrId >0 THEN 
 	FOR i:=4 TO 8 DO 
 		m_jntOPMode[i] := DriverOPMode_Trq;
-		m_cmdJntTrq[i]:= i_slaveArm.curJntTrq[I]*0.8;
+		m_cmdJntPos[i] := i_slaveArm.curJntPos[i];
+		m_cmdJntTrq[i]:= i_slaveArm.curJntTrq[i]*0.8;
 	END_FOR
 	m_instruClampTime := m_instruClampTime + g_slaveArmCtrlCycleTime;
 	m_isFinished := m_instruClampTime > m_maxClampTime;
@@ -149,6 +152,12 @@ FOR i:=1 TO 5 DO
 	m_jntOTG[i].init(m_targetMountPos[i+3], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
 	m_jointMounted[i]:=FALSE;
 END_FOR
+
+// TODO
+IF i_slaveArm.armIdx = 1 OR i_slaveArm.armIdx =3 THEN
+	m_maxJntCurrentOldEndoScope[4] := 220.0;
+	m_maxJntCurrentOldEndoScope[5] := 220.0;
+END_IF
 
 m_instruMountStatus:=0;
 m_scopeMountStatus:=0;
@@ -191,6 +200,8 @@ END_VAR
       <Implementation>
         <ST><![CDATA[//m_instruClampErrId=1 instrumen clamp the current does not reach the set value
 //m_instruClampErrId=2 instrumen clamp position does not return to zero
+//m_instruClampErrId=3 instrumen can not be recongnized
+
 IF i_slaveArm.instrument.onChipData.m_InstruReadSucceed THEN
 	IF InstruType_endoscope = i_slaveArm.instrument.m_instruType THEN
 		IF (m_scopeMountStatus=0 OR m_scopeMountStatus=1) AND m_timePeriod>=m_noCurrentTime  THEN
@@ -202,7 +213,7 @@ IF i_slaveArm.instrument.onChipData.m_InstruReadSucceed THEN
 	ELSIF (InstruType_UltrasoundKnifeS = i_slaveArm.instrument.m_instruType OR InstruType_UltrasoundKnifeU = i_slaveArm.instrument.m_instruType) THEN
 		IF (m_ultrasoundMountStatus=0) AND m_timePeriod>=m_noCurrentTime  THEN
 			instruClampStatus := 1;
-		ELSIF (m_scopeMountStatus=3) AND m_timePeriod>=m_notReturnToZero  THEN
+		ELSIF (m_ultrasoundMountStatus=3) AND m_timePeriod>=m_notReturnToZero  THEN
 			instruClampStatus := 2;
 		END_IF
 			
@@ -213,6 +224,9 @@ IF i_slaveArm.instrument.onChipData.m_InstruReadSucceed THEN
 			instruClampStatus := 2;
 		END_IF
 	END_IF
+
+//ELSIF i_slaveArm.instrument.onChipData.m_Error = TRUE THEN
+//	instruClampStatus:=3;
 END_IF]]></ST>
       </Implementation>
     </Method>
@@ -242,7 +256,7 @@ CASE m_scopeMountStatus OF
 		// check if buckled
 		m_jointMounted[4]:=FALSE; 
 		m_jointMounted[5]:=FALSE; 
-		IF ABS(i_slaveArm.filtJntCurrent[7])> m_maxJntCurrent[4] THEN 
+		IF ABS(i_slaveArm.filtJntCurrent[7])> m_maxJntCurrentOldEndoScope[4] THEN 
 			m_jointMounted[4]:=TRUE;
 			m_targetMountPos[7]:=curJntPos[7];
 			m_jntOTG[4].init(m_targetMountPos[7], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
@@ -253,7 +267,7 @@ CASE m_scopeMountStatus OF
 
 	1: // buckle scope rotate joint (joint 8)
 		m_jointMounted[5]:=FALSE; 
-		IF ABS(i_slaveArm.filtJntCurrent[8])> m_maxJntCurrent[5] THEN 
+		IF ABS(i_slaveArm.filtJntCurrent[8])> m_maxJntCurrentOldEndoScope[5] THEN 
 			m_jointMounted[5]:=TRUE;
 			m_targetMountPos[8]:=curJntPos[8];
 			m_jntOTG[5].init(m_targetMountPos[8], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
@@ -369,7 +383,7 @@ CASE m_instruMountStatus OF
 			m_jntPosErr[i]:=m_targetMountPos[i+3]-curJntPos[i+3];
 			m_linkSingleErr[i] := ABS( i_slaveArm.linkSingle[i+3] - i_slaveArm.instrument.onChipData.m_InstruPos[i]);
 			m_linkSingleErr[i]:= MIN(m_linkSingleErr[i], g_2pi-m_linkSingleErr[i]);
-			IF ABS(m_jntPosErr[i]) >GVL_SlaveControlParameters.g_jntCtrlAngTolLow OR 	ABS( m_linkSingleErr[i]) >5*g_deg2rad THEN
+			IF ABS(m_jntPosErr[i]) >5*GVL_SlaveControlParameters.g_jntCtrlAngTolLow OR 	ABS( m_linkSingleErr[i]) >5*g_deg2rad THEN
 				m_instruMountStatus :=3;
 				EXIT;
 			END_IF
@@ -437,8 +451,8 @@ CASE m_scopeMountStatus OF
 		
 
 	1: // buckle scope rotate joint (joint 8)
-		m_jntOPMode[6] := DriverOPMode_Trq;
-		m_instruZeroDeviation[4] :=  i_slaveArm.linkSingle[7] - i_slaveArm.instrument.onChipData.m_InstruPos[4];
+		//m_jntOPMode[6] := DriverOPMode_Trq;
+		m_instruZeroDeviation[4] :=  i_slaveArm.linkSingle[7] - i_slaveArm.instrument.onChipData.m_InstruPos[1];
 		m_scopeMountStatus :=2;
 
 	2:// move back to zero position
@@ -450,13 +464,14 @@ CASE m_scopeMountStatus OF
 			m_instruZeroDeviation[4] := m_instruZeroDeviation[4] + 2*pi;
 		END_IF
 		
+		m_targetMountPos[6]:=curJntPos[6] + m_instruZeroDeviation[4];
 		m_targetMountPos[7]:=curJntPos[7] - m_instruZeroDeviation[4];
 		m_scopeMountStatus :=3;
 		
 		
 	3:
 		m_isFinished := FALSE;
-		IF ABS(m_targetMountPos[7]-curJntPos[7]) <GVL_SlaveControlParameters.g_jntCtrlAngTolHigh THEN
+		IF ABS(m_targetMountPos[7]-curJntPos[7]) <GVL_SlaveControlParameters.g_jntCtrlAngTolHigh/2 THEN
 			// record current joint position as offset for instrument
 			i_slaveArm.instrument.initInstruJntPos(i_slaveArm.curJntPos);
 			m_isFinished := TRUE;
@@ -468,6 +483,12 @@ END_CASE
 FOR i:=1 TO 5 DO
 	m_jntOTG[i].run(m_targetMountPos[i+3],0.0, o_cmdAcc=>m_cmdJntAcc[3+i],o_cmdVel=>m_cmdJntVel[3+i],o_cmdPos=>m_cmdJntPos[i+3]);
 END_FOR
+
+// joint6 output torque to help rotation motion
+IF m_jntOPMode[6] = DriverOPMode_Trq THEN
+	m_cmdJntTrq[6] := -0.5*i_slaveArm.cmdJntTrq[7];
+END_IF
+
 
 
 ]]></ST>
@@ -524,11 +545,17 @@ CASE m_ultrasoundMountStatus OF
 	1:
 		//m_jntOPMode[8] := DriverOPMode_Trq;
 		// calculation deviates from the instrument zero position
-		m_instruZeroDeviation[3] :=  m_ultraKnifeRotaAngleJ3;
+		m_instruZeroDeviation[3] :=  i_slaveArm.linkSingle[6] - i_slaveArm.instrument.onChipData.m_InstruPos[3]; //m_ultraKnifeRotaAngleJ3;
 		m_instruZeroDeviation[4] :=  i_slaveArm.linkSingle[7] - m_ultraKnifeRotAngZeroPos;
 		m_ultrasoundMountStatus :=2;
 		
 	2:// move back to zero position
+		//joint3
+		IF m_instruZeroDeviation[3] > 2*pi THEN
+			m_instruZeroDeviation[3] := m_instruZeroDeviation[3] - 2*pi  ;
+		ELSIF  m_instruZeroDeviation[3] < -pi THEN
+			m_instruZeroDeviation[3] := 2*pi + m_instruZeroDeviation[3] ;
+		END_IF
 		//joint4
 		IF m_instruZeroDeviation[4]>0 AND m_instruZeroDeviation[4] < pi THEN
 			m_instruZeroDeviation[4] := m_instruZeroDeviation[4] - 2*pi;
@@ -537,7 +564,8 @@ CASE m_ultrasoundMountStatus OF
 		END_IF
 	
 		// set target joint position
-		m_targetMountPos[6]:=curJntPos[6] + m_instruZeroDeviation[3];
+		m_targetMountPos[6]:=curJntPos[6] - m_instruZeroDeviation[3];
+		//m_targetMountPos[6]:=curJntPos[6] + m_ultraKnifeRotaAngleJ3;
 		m_targetMountPos[7]:=curJntPos[7] - m_instruZeroDeviation[4];
 		m_targetMountPos[8]:=curJntPos[8] - m_instruZeroDeviation[4];
 
@@ -572,11 +600,11 @@ END_FOR]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.calcCmdJntPos">
+      <LineId Id="614" Count="0" />
       <LineId Id="549" Count="4" />
       <LineId Id="575" Count="7" />
       <LineId Id="573" Count="0" />
-      <LineId Id="562" Count="0" />
-      <LineId Id="478" Count="0" />
+      <LineId Id="627" Count="1" />
       <LineId Id="603" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.calcCmdJntTrq">
@@ -584,13 +612,17 @@ END_FOR]]></ST>
       <LineId Id="228" Count="0" />
       <LineId Id="218" Count="1" />
       <LineId Id="231" Count="1" />
+      <LineId Id="246" Count="0" />
       <LineId Id="234" Count="0" />
       <LineId Id="233" Count="0" />
       <LineId Id="225" Count="2" />
       <LineId Id="53" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.init">
-      <LineId Id="239" Count="23" />
+      <LineId Id="239" Count="14" />
+      <LineId Id="274" Count="4" />
+      <LineId Id="273" Count="0" />
+      <LineId Id="254" Count="8" />
       <LineId Id="92" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.instruClampErrId.Get">
@@ -601,17 +633,15 @@ END_FOR]]></ST>
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.instruClampStatus">
       <LineId Id="3" Count="1" />
+      <LineId Id="32" Count="1" />
       <LineId Id="6" Count="21" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="36" Count="0" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.mountEndoscope">
-      <LineId Id="14" Count="36" />
-      <LineId Id="62" Count="5" />
-      <LineId Id="71" Count="1" />
-      <LineId Id="94" Count="1" />
-      <LineId Id="73" Count="0" />
-      <LineId Id="75" Count="0" />
-      <LineId Id="77" Count="8" />
+      <LineId Id="104" Count="57" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.mountInstrument">
@@ -630,12 +660,13 @@ END_FOR]]></ST>
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.mountNewEndoscope">
-      <LineId Id="3" Count="55" />
-      <LineId Id="60" Count="10" />
+      <LineId Id="93" Count="47" />
+      <LineId Id="175" Count="0" />
+      <LineId Id="141" Count="24" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.mountUltraKnife">
-      <LineId Id="184" Count="79" />
+      <LineId Id="296" Count="86" />
       <LineId Id="2" Count="0" />
     </LineIds>
   </POU>

@@ -20,7 +20,7 @@ VAR
 	m_panelMountAcc :LREAL := 4*pi;
 	
 	// joint current threshold which indicate motor is buckled with panel
-	m_maxJntCurrent :INT := 200;
+	m_maxJntCurrent :LREAL := 180.0;
 	
 	// command mount motion
 	m_mountStepPos :LREAL := 45.0 * g_deg2Rad;
@@ -92,7 +92,7 @@ CASE m_mountStatus OF
 	2:
 		m_isFinished:=TRUE;
 		FOR i:=1 TO 5 DO
-			IF ABS(m_targetMountPos[i]-curJntPos[i+3])>GVL_SlaveControlParameters.g_jntCtrlAngTolHigh THEN
+			IF ABS(m_targetMountPos[i]-m_cmdJntPos[i+3])>GVL_SlaveControlParameters.g_jntCtrlAngTolLow THEN
 				m_isFinished:=FALSE;
 				EXIT;
 			END_IF
@@ -136,6 +136,13 @@ FOR i:=1 TO 5 DO
 	m_jntOTG[i].init(m_targetMountPos[i], 0,m_panelMountVel, m_panelMountAcc, g_slaveArmCtrlCycleTime);
 	m_jointMounted[i]:=FALSE;
 END_FOR
+
+	
+// TODO
+IF i_slaveArm.armIdx = 1 OR i_slaveArm.armIdx =3 THEN
+	m_maxJntCurrent := 90.0;
+END_IF
+	
 m_panelClampTime :=0;
 m_panelClampErrId := 0;
 // update commands to arm
@@ -181,7 +188,7 @@ END_IF
       <LineId Id="150" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountPanel.init">
-      <LineId Id="140" Count="16" />
+      <LineId Id="168" Count="23" />
       <LineId Id="12" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountPanel.panelClampErrId.Get">
