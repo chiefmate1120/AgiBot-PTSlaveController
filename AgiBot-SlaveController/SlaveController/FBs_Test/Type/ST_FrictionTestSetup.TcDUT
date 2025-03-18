@@ -32,8 +32,8 @@ STRUCT
 	
 	//date wait to write to file
 	m_dataSum:INT:=13000;
-	m_cmdDHJntPosD2,m_jntPosD2,m_jntTrqD2:ARRAY[1..g_sArmNum,1..5,1..13000] OF LREAL;
-	m_cmdDHJntPosD3,m_jntPosD3,m_jntTrqD3:ARRAY[1..g_sArmNum,1..5,1..13000] OF LREAL;
+	m_cmdDHJntPosD2,m_jntPosD2,m_jntTrqD2:ARRAY[1..g_sArmNum,1..6,1..13000] OF LREAL;
+	m_cmdDHJntPosD3,m_jntPosD3,m_jntTrqD3:ARRAY[1..g_sArmNum,1..6,1..13000] OF LREAL;
 	
 	//write data
 	m_writeData:ARRAY[1..g_sArmNum] OF BOOL;
