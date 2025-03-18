@@ -170,7 +170,7 @@ CASE m_testStep OF
 		
 		
 	20: //start the motion
-		m_time:=m_time+g_slaveArmCtrlCycleTime;
+		m_time:=m_time+g_setupArmCtrlCycleTime;
 		m_Planner.evaluate(t:= m_time, jntPos=> m_cmdJntPos, jntVel=> m_cmdJntVel, jntAcc=> m_cmdJntAcc);
 		IF (m_time>m_Planner.duration) THEN
 			m_testStep:=30;
