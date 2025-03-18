@@ -176,6 +176,15 @@ CASE m_testStep OF
 			m_testStep:=30;
 		END_IF		
 		
+		//keep the other joint position
+		FOR i:=1 TO 5 BY 1 DO
+			IF (i=5) OR (i=4) THEN
+				//
+			ELSE
+				m_cmdJntPos[i]:=i_setupArm.curJntPos[i];
+			END_IF
+		END_FOR
+		
 		//updata the value of counter
 		m_counter:=m_counter+1;
 		IF (m_counter>=4*20) THEN
@@ -306,14 +315,14 @@ CASE m_testStep OF
 		IF (m_jntId<=g_frictionTestSetup.m_jntIdEnd[m_armId]) THEN
 			m_testStep:=10;
 		ELSE
-			m_testStep:=40;
+			m_testStep:=60;
 		END_IF
 		
 		
 	60:
 		m_testStep:=-1;
 		m_motionFinished:=TRUE;
-		g_frictionTestSetup.m_writeData[m_armId]:=TRUE; //output the data to txt file
+		//g_frictionTestSetup.m_writeData[m_armId]:=TRUE; //output the data to txt file
 		
 		
 	-1: //	
@@ -339,8 +348,8 @@ END_VAR
       <Implementation>
         <ST><![CDATA[
 //show the joint angle
-g_frictionTestSetup.m_armActJntPos[m_armId]:=i_setupArm.curJntPos;
-g_frictionTestSetup.m_armDHJntPos[m_armId]:=i_setupArm.curJntPos;
+g_frictionTestSetup.m_armActJntPos[m_armId]:=m_unitTransform.setupArmUnit2User(i_dataSystem:= i_setupArm.curJntPos);
+g_frictionTestSetup.m_armDHJntPos[m_armId]:=m_unitTransform.setupArmUnit2User(i_dataSystem:= i_setupArm.curJntPos);
 
 
 //start motion flag
@@ -399,7 +408,10 @@ END_FOR
 
 
 //velocity and acceleration
-vecMultiNum(GVL_SetupMotorParameters.g_maxJntVel,0.1,m_maxjntVel);
+//vecMultiNum(GVL_SetupMotorParameters.g_maxJntVel,1,m_maxjntVel);
+FOR i:=1 TO 5 BY 1 DO
+	m_maxjntVel[i]:=3*g_deg2Rad;
+END_FOR
 vecMultiNum(m_maxjntVel,3,m_maxjntAcc);
 vecMultiNum(m_maxjntAcc,3,m_maxjntJerk);
 
@@ -415,7 +427,16 @@ vecMultiNum(m_maxjntAcc,3,m_maxjntJerk);
       <LineId Id="12" Count="19" />
       <LineId Id="231" Count="0" />
       <LineId Id="32" Count="11" />
-      <LineId Id="48" Count="36" />
+      <LineId Id="48" Count="18" />
+      <LineId Id="283" Count="0" />
+      <LineId Id="275" Count="0" />
+      <LineId Id="277" Count="0" />
+      <LineId Id="279" Count="0" />
+      <LineId Id="281" Count="1" />
+      <LineId Id="280" Count="0" />
+      <LineId Id="278" Count="0" />
+      <LineId Id="276" Count="0" />
+      <LineId Id="67" Count="17" />
       <LineId Id="213" Count="0" />
       <LineId Id="86" Count="37" />
       <LineId Id="232" Count="0" />
@@ -441,7 +462,7 @@ vecMultiNum(m_maxjntAcc,3,m_maxjntJerk);
       <LineId Id="172" Count="0" />
       <LineId Id="175" Count="0" />
       <LineId Id="173" Count="1" />
-      <LineId Id="176" Count="0" />
+      <LineId Id="182" Count="0" />
       <LineId Id="14" Count="0" />
       <LineId Id="153" Count="18" />
       <LineId Id="7" Count="0" />
@@ -463,7 +484,9 @@ vecMultiNum(m_maxjntAcc,3,m_maxjntJerk);
       <LineId Id="175" Count="0" />
       <LineId Id="94" Count="0" />
       <LineId Id="93" Count="0" />
-      <LineId Id="129" Count="1" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="191" Count="2" />
+      <LineId Id="130" Count="0" />
       <LineId Id="127" Count="0" />
       <LineId Id="113" Count="0" />
       <LineId Id="98" Count="0" />

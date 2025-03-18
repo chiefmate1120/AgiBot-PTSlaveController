@@ -1114,7 +1114,7 @@ CASE m_testStep OF
 			m_endJntPos:=m_unitFun.slaveArmUnit2SystemN8(i_dataTest:= g_motionTest.m_targetJntPosN8[m_armId]);
 			m_maxjntVel:=m_unitFun.slaveArmUnit2SystemN8(i_dataTest:=g_motionTest.m_targetJntVel[m_armId]);
 			
-			FOR i:=1 TO 8 BY 1 DO				
+			FOR i:=1 TO 8 BY 1 DO
 				IF ABS(m_maxjntVel[i])<g_smallNum THEN
 					m_maxjntVel[i]:=g_motionTest.m_defultTargetJntVel[i];
 				END_IF

@@ -183,7 +183,12 @@ CASE m_testStep OF
 		m_Planner.evaluate(t:= m_time, jntPos=> m_cmdJntPos, jntVel=> m_cmdJntVel, jntAcc=> m_cmdJntAcc);
 		IF (m_time>m_Planner.duration) THEN
 			m_testStep:=30;
-		END_IF		
+		END_IF
+		
+		//add code for instrument joint
+		FOR i:=4 TO 8 BY 1 DO
+			m_cmdJntPos[i]:=i_slaveArm.curJntPos[i];
+		END_FOR						
 		
 		//updata the value of counter
 		m_counter:=m_counter+1;
@@ -322,7 +327,7 @@ CASE m_testStep OF
 	60:
 		m_testStep:=-1;
 		m_motionFinished:=TRUE;
-		g_frictionTest.m_writeData[m_armId]:=TRUE; //output the data to txt file
+		//g_frictionTest.m_writeData[m_armId]:=TRUE; //output the data to txt file
 		
 		
 	-1: //	
@@ -352,9 +357,8 @@ END_VAR
       <Implementation>
         <ST><![CDATA[
 //show the joint angle
-g_frictionTest.m_armActJntPos[m_armId]:=i_slaveArm.curJntPos;
-g_frictionTest.m_armDHJntPos[m_armId]:=i_slaveArm.curDHJntPos;
-
+g_frictionTest.m_armActJntPos[m_armId]:=m_unitTransform.slaveArmUnit2UserN8(i_dataSystem:= i_slaveArm.curJntPos);
+g_frictionTest.m_armDHJntPos[m_armId]:=m_unitTransform.slaveArmUnit2User(i_dataSystem:= i_slaveArm.curDHJntPos);
 
 //start motion flag
 m_startMotion:=g_frictionTest.m_startMotion[m_armId];
@@ -441,12 +445,14 @@ FOR i:=1 TO 6 BY 1 DO
 	m_startDHJntPos[i]:=GVL_SlaveMotorParameters.g_minDHJntPos[i]+m_limitBuffer;
 	m_endDHJntPos[i]:=GVL_SlaveMotorParameters.g_maxDHJntPos[i]-m_limitBuffer;	
 END_FOR
+m_homeDHPos[2]:=-pi/2;
 
 
 //joint velocity and acceleration
 FOR i:=1 TO 8 BY 1 DO
 	m_maxjntVel[i]:=3.0*g_deg2rad;
 END_FOR
+m_maxjntVel[3]:=0.005;
 vecMultiNum(m_maxjntVel,3,m_maxjntAcc);
 vecMultiNum(m_maxjntAcc,3,m_maxjntJerk);
 
@@ -473,7 +479,13 @@ vecMultiNum(m_maxjntAcc,3,m_maxjntJerk);
       <LineId Id="255" Count="0" />
       <LineId Id="254" Count="0" />
       <LineId Id="59" Count="14" />
-      <LineId Id="76" Count="18" />
+      <LineId Id="335" Count="1" />
+      <LineId Id="333" Count="0" />
+      <LineId Id="337" Count="0" />
+      <LineId Id="334" Count="0" />
+      <LineId Id="329" Count="0" />
+      <LineId Id="331" Count="1" />
+      <LineId Id="79" Count="15" />
       <LineId Id="96" Count="0" />
       <LineId Id="261" Count="1" />
       <LineId Id="259" Count="0" />
@@ -506,7 +518,6 @@ vecMultiNum(m_maxjntAcc,3,m_maxjntJerk);
       <LineId Id="379" Count="0" />
       <LineId Id="381" Count="1" />
       <LineId Id="332" Count="0" />
-      <LineId Id="383" Count="0" />
       <LineId Id="343" Count="0" />
       <LineId Id="360" Count="5" />
       <LineId Id="113" Count="0" />
@@ -541,9 +552,13 @@ vecMultiNum(m_maxjntAcc,3,m_maxjntJerk);
       <LineId Id="163" Count="0" />
       <LineId Id="162" Count="0" />
       <LineId Id="160" Count="0" />
-      <LineId Id="149" Count="1" />
+      <LineId Id="149" Count="0" />
+      <LineId Id="184" Count="0" />
+      <LineId Id="150" Count="0" />
       <LineId Id="59" Count="0" />
-      <LineId Id="166" Count="4" />
+      <LineId Id="166" Count="3" />
+      <LineId Id="185" Count="0" />
+      <LineId Id="170" Count="0" />
       <LineId Id="164" Count="1" />
       <LineId Id="12" Count="0" />
     </LineIds>
