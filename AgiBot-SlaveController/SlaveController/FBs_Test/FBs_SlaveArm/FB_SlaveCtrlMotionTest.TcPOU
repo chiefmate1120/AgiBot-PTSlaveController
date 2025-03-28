@@ -222,8 +222,11 @@ END_VAR
 		//init operation mode
 		m_lastCmdJntPos :=m_cmdJntPos;
 		SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
-		m_testStep:=1;
+		
+		// init filter
+		initFilter();
 		m_time:=0;
+		m_testStep:=1;		
 		
 		
 	1: //time delay
@@ -708,15 +711,6 @@ g_motionTest.m_jntEnable[m_armId]:=g_onesVec8i;
 m_originJntPos:=GVL_Const.g_originJntPos;
 
 
-// init filter
-FOR i:=1 TO 3 DO
-	m_cmdJntPosLpf[i].init(1, m_macroCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
-END_FOR
-FOR i:=4 TO g_sJntNum DO
-	m_cmdJntPosLpf[i].init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
-END_FOR
-
-
 //velocity---acceleration---jerk
 vecMultiNum(GVL_SlaveMotorParameters.g_maxJntVel,0.2,m_maxjntVel);
 vecMultiNum(m_maxjntVel,3,m_maxjntAcc);
@@ -752,7 +746,28 @@ END_FOR
 
 //init grip force
 m_slaveCmdGripForceLevel:=0;
+initFilter();
 
+
+// init controller
+m_basicInstruController.init(i_slaveArm);
+m_usKnifeController.init(i_slaveArm);
+//m_instruType := i_slaveArm.instrument.instruType;
+m_basicInstruControllerDC.init(i_slaveArm);
+m_usKnifeControllerDC.init(i_slaveArm);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="initFilter" Id="{03773f47-d367-4c1c-97ac-0684f8a93851}">
+      <Declaration><![CDATA[METHOD initFilter : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
 // init filter
 FOR i:=1 TO 3 DO
 	m_cmdJntPosLpf[i].init(1, m_macroCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
@@ -762,13 +777,6 @@ FOR i:=4 TO g_sJntNum DO
 END_FOR
 m_cmdYawAngLpf.init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
 m_cmdYawVelLpf.init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
-
-// init controller
-m_basicInstruController.init(i_slaveArm);
-m_usKnifeController.init(i_slaveArm);
-//m_instruType := i_slaveArm.instrument.instruType;
-m_basicInstruControllerDC.init(i_slaveArm);
-m_usKnifeControllerDC.init(i_slaveArm);
 ]]></ST>
       </Implementation>
     </Method>
@@ -1232,7 +1240,7 @@ END_VAR
 		
 		// filt command joint position
 		FOR i:=1 TO g_sJntNum DO 
-			//m_cmdJntPos[i] := m_cmdJntPosLpf[i].run(m_simJntPos[i]);
+			m_cmdJntPos[i] := m_cmdJntPosLpf[i].run(m_simJntPos[i]);
 		END_FOR
 		m_cmdJntPos:=m_simJntPos;
 		
@@ -1292,6 +1300,8 @@ CASE m_testStep OF
 				m_spatialVel[i]:=m_defaultSpatialVel[i];
 			END_IF
 		END_FOR
+		
+		initFilter();
 		m_testStep:=10;
 		
 	
@@ -1342,6 +1352,7 @@ END_VAR
 CASE m_testStep OF
 	0: //init
 		vecMultiNum(m_DHJntVel,m_velFactor[1],m_maxDHJntVel); //low velocity
+		initFilter();
 		m_testStep:=10;
 		
 		
@@ -1381,9 +1392,11 @@ END_CASE
       <LineId Id="355" Count="0" />
       <LineId Id="352" Count="0" />
       <LineId Id="356" Count="0" />
-      <LineId Id="403" Count="0" />
-      <LineId Id="409" Count="0" />
-      <LineId Id="404" Count="1" />
+      <LineId Id="462" Count="0" />
+      <LineId Id="466" Count="0" />
+      <LineId Id="463" Count="0" />
+      <LineId Id="467" Count="0" />
+      <LineId Id="403" Count="2" />
       <LineId Id="410" Count="14" />
       <LineId Id="406" Count="2" />
       <LineId Id="426" Count="1" />
@@ -1554,9 +1567,6 @@ END_CASE
       <LineId Id="280" Count="0" />
       <LineId Id="279" Count="0" />
       <LineId Id="112" Count="2" />
-      <LineId Id="163" Count="0" />
-      <LineId Id="115" Count="6" />
-      <LineId Id="99" Count="0" />
       <LineId Id="162" Count="0" />
       <LineId Id="123" Count="3" />
       <LineId Id="122" Count="0" />
@@ -1578,13 +1588,19 @@ END_CASE
       <LineId Id="166" Count="0" />
       <LineId Id="160" Count="0" />
       <LineId Id="231" Count="1" />
-      <LineId Id="236" Count="9" />
+      <LineId Id="236" Count="1" />
       <LineId Id="233" Count="1" />
       <LineId Id="260" Count="2" />
       <LineId Id="235" Count="0" />
       <LineId Id="297" Count="0" />
       <LineId Id="296" Count="0" />
       <LineId Id="157" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMotionTest.initFilter">
+      <LineId Id="7" Count="0" />
+      <LineId Id="9" Count="7" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMotionTest.jntContinuousPoint">
       <LineId Id="120" Count="0" />
@@ -1828,6 +1844,7 @@ END_CASE
       <LineId Id="187" Count="0" />
       <LineId Id="165" Count="14" />
       <LineId Id="134" Count="0" />
+      <LineId Id="215" Count="1" />
       <LineId Id="158" Count="0" />
       <LineId Id="180" Count="0" />
       <LineId Id="135" Count="1" />
@@ -1845,6 +1862,7 @@ END_CASE
       <LineId Id="9" Count="1" />
       <LineId Id="167" Count="0" />
       <LineId Id="171" Count="0" />
+      <LineId Id="183" Count="0" />
       <LineId Id="170" Count="0" />
       <LineId Id="168" Count="0" />
       <LineId Id="172" Count="0" />
