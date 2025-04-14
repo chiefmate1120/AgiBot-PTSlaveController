@@ -273,10 +273,10 @@ CASE m_testStep OF
 			
 			//Calculate frictional force
 			FOR j:=1 TO validNum BY 1 DO
-				//for positive direciton:T2=G-F-----for nagative direction:T3=G+F,  so F=(T3-T2)/2---G=(T2+T3)/2
-				m_CoulombFriction[i,j]:=(m_jntTrqD3_Reverse[i,j]-m_jntTrqD2[i,j])/2;
-				m_CoulombFrictionSum[i]:=m_CoulombFrictionSum[i]+m_CoulombFriction[i,j];										
-			END_FOR		
+				//for positive direciton:T2=G+F-----for nagative direction:T3=G-F,  so F=(T2-T3)/2---G=(T2+T3)/2
+				m_CoulombFriction[i,j]:=(m_jntTrqD2[i,j]-m_jntTrqD3_Reverse[i,j])/2;
+				m_CoulombFrictionSum[i]:=m_CoulombFrictionSum[i]+m_CoulombFriction[i,j];
+			END_FOR
 			
 			//calculate the max joint friction
 			m_CoulombFrictionMax[i]:=m_CoulombFriction[i,1];
