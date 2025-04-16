@@ -108,6 +108,13 @@ m_uiArmModeCarLast:=g_motionTest.m_uiArmModeCar;
 m_controlMode:=g_motionTest.m_controlModeCar;
 
 
+//joint enable
+m_jntEnableFlag:=g_motionTest.m_jntEnableCar;
+FOR i:=1 TO 4 BY 1 DO
+	m_jntEnableFlag[i] :=0;
+END_FOR
+
+
 //m_startMotion:=g_motionTest.m_startMotionCar;
 IF (m_controlMode=0) THEN
 	m_startMotion:=FALSE;
@@ -252,7 +259,7 @@ VAR_IN_OUT
 	r_cartCtrlCmd :ST_SlaveArmCtrlCmds;
 END_VAR
 VAR
-	i:INT;
+	i:INT;	
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -263,6 +270,9 @@ m_jntEnableFlag :=g_zeroVec8i;
 FOR i:=5 TO 8 BY 1 DO
 	m_jntEnableFlag[i] :=1;
 END_FOR
+
+//joint enable
+g_motionTest.m_jntEnableCar:=m_jntEnableFlag;
 
 //operation mode
 m_jntOPMode:=g_slaveAllPosMode;
@@ -492,6 +502,10 @@ END_CASE
       <LineId Id="299" Count="1" />
       <LineId Id="303" Count="0" />
       <LineId Id="294" Count="0" />
+      <LineId Id="378" Count="1" />
+      <LineId Id="376" Count="1" />
+      <LineId Id="381" Count="1" />
+      <LineId Id="380" Count="0" />
       <LineId Id="304" Count="0" />
       <LineId Id="306" Count="0" />
       <LineId Id="314" Count="0" />
@@ -565,6 +579,8 @@ END_CASE
       <LineId Id="240" Count="0" />
       <LineId Id="253" Count="0" />
       <LineId Id="272" Count="1" />
+      <LineId Id="347" Count="0" />
+      <LineId Id="349" Count="1" />
       <LineId Id="276" Count="0" />
       <LineId Id="271" Count="0" />
       <LineId Id="203" Count="0" />
