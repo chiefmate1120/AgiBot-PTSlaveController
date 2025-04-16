@@ -9,6 +9,9 @@ STRUCT
 	//joint position-unit:deg/mm
 	m_curJntPosDegMM:Vec8d;
 	
+	//current joint velocity
+	m_curJntVelDegMM:Vec8d;
+	
 	//link position
 	m_curLinkPos:Vec8d;
 	

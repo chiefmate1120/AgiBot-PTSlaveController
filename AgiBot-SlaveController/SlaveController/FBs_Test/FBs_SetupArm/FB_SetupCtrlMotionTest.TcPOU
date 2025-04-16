@@ -57,6 +57,9 @@ VAR
 	
 	//unit function
 	m_unitFun:FB_UnitTransform;
+	
+	//original joint position
+	m_originJntPos:Vec5d;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -162,6 +165,12 @@ vecMultiNum(GVL_SetupMotorParameters.g_maxJntVel,0.1,m_maxjntVel);
 vecMultiNum(m_maxjntVel,3,m_maxjntAcc);
 vecMultiNum(m_maxjntAcc,3,m_maxjntJerk);
 
+
+//origin joint position
+FOR i:=1 TO 5 BY 1 DO
+	m_originJntPos[i]:=GVL_SetupJointEncoderCaliData.g_linkEncCaliJntPos[m_armId,i];
+END_FOR
+
 ]]></ST>
       </Implementation>
     </Method>
@@ -249,6 +258,7 @@ END_VAR
 VAR
 	homeDHPos,startDHPos,endDHPos :Vec5d;
 	m_targetJntPosInc:Vec5d;
+	tgtJntPos:Vec5d;
 	i:INT;
 END_VAR]]></Declaration>
       <Implementation>
@@ -278,6 +288,35 @@ CASE m_testStep OF
 		
 		m_startJntPos:=startDHPos;
 		m_endJntPos:=endDHPos;
+		tgtJntPos:=m_endJntPos;
+		
+		//go home
+		FOR i:=4 TO 5 BY 1 DO
+			IF (g_motionTest.m_goHomeSetup[m_armId][i]=TRUE) THEN					
+					m_endJntPos:=m_startJntPos;
+					m_endJntPos[i]:=m_originJntPos[i];
+				EXIT; //exit for cycle
+			END_IF
+		END_FOR
+		
+		//single motor target joint position
+		FOR i:=4 TO 5 BY 1 DO
+			IF (g_motionTest.m_singleMotorStartMotionSetup[m_armId][i]=TRUE) THEN					
+					m_endJntPos:=m_startJntPos;
+					m_endJntPos[i]:=tgtJntPos[i];
+				EXIT; //exit for cycle
+			END_IF
+		END_FOR
+		
+		//single motor incresement control
+		FOR i:=4 TO 5 BY 1 DO
+			IF (g_motionTest.m_singleMotorStartIncMotionSetup[m_armId][i]=TRUE) THEN	
+					m_targetJntPosInc:=m_unitFun.setupArmUnit2System(i_dataTest:= g_motionTest.m_targetJntPosIncSetup[m_armId]);
+					m_endJntPos:=m_startJntPos;
+					m_endJntPos[i]:=m_startJntPos[i]+m_targetJntPosInc[i];
+				EXIT; //exit for cycle
+			END_IF
+		END_FOR	
 		
 		IF (g_motionTest.m_singleMotorIncControl[m_armId]=TRUE) THEN
 			m_targetJntPosInc:=m_unitFun.setupArmUnit2System(i_dataTest:= g_motionTest.m_targetJntPosIncSetup[m_armId]);
@@ -375,8 +414,12 @@ END_CASE
       <LineId Id="93" Count="0" />
       <LineId Id="129" Count="1" />
       <LineId Id="127" Count="0" />
+      <LineId Id="224" Count="0" />
       <LineId Id="113" Count="0" />
       <LineId Id="98" Count="0" />
+      <LineId Id="221" Count="2" />
+      <LineId Id="220" Count="0" />
+      <LineId Id="219" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupCtrlMotionTest.jntCurrentMode">
       <LineId Id="9" Count="2" />
@@ -436,7 +479,16 @@ END_CASE
       <LineId Id="91" Count="0" />
       <LineId Id="90" Count="0" />
       <LineId Id="32" Count="1" />
-      <LineId Id="66" Count="1" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="191" Count="0" />
+      <LineId Id="165" Count="6" />
+      <LineId Id="160" Count="1" />
+      <LineId Id="172" Count="6" />
+      <LineId Id="162" Count="1" />
+      <LineId Id="182" Count="7" />
+      <LineId Id="179" Count="0" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="67" Count="0" />
       <LineId Id="93" Count="0" />
       <LineId Id="69" Count="1" />
       <LineId Id="127" Count="0" />

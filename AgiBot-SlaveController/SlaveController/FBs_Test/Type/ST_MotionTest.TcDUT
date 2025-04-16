@@ -176,7 +176,8 @@ STRUCT
 	//joint enable
 	m_jntEnable:ARRAY[1..g_sArmNum] OF Vec8i;
 	m_jntEnableSetup:ARRAY[1..g_sArmNum] OF Vec5i;
-		
+	m_jntEnableCar:Vec8i;
+	
 	//instrument joint backlash
 	m_jntBacklash :Vec5d;
 	
@@ -204,6 +205,18 @@ STRUCT
 	//start motion flag
 	m_UltrasoundKnife_Long:ARRAY[1..g_sArmNum] OF BOOL;
 	m_UltrasoundKnife_Short:ARRAY[1..g_sArmNum] OF BOOL;
+	
+	//single motor target joint position control interface---car
+	m_singleMotorStartMotion_Car:Vec8b;
+	m_singleMotorStartIncMotion_Car:Vec8b;	
+	
+	//single motor target joint position control interface
+	m_singleMotorStartMotion:ARRAY[1..g_sArmNum] OF Vec8b;
+	m_singleMotorStartIncMotion:ARRAY[1..g_sArmNum] OF Vec8b;
+	
+	//single motor target joint position control interface---setup arm
+	m_singleMotorStartMotionSetup:ARRAY[1..g_sArmNum] OF Vec5b;
+	m_singleMotorStartIncMotionSetup:ARRAY[1..g_sArmNum] OF Vec5b;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

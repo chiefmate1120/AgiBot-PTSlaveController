@@ -1106,6 +1106,7 @@ VAR_INPUT
 END_VAR
 VAR
 	m_targetJntPosIncN8:Vec8d;
+	tgtJntPos:Vec8d;
 	i:INT;
 END_VAR
 ]]></Declaration>
@@ -1120,16 +1121,35 @@ CASE m_testStep OF
 		//joint test mode
 		IF (g_motionTest.m_singleMotorControl[m_armId]=TRUE) THEN
 			m_endJntPos:=m_unitFun.slaveArmUnit2SystemN8(i_dataTest:= g_motionTest.m_targetJntPosN8[m_armId]);
-			m_maxjntVel:=m_unitFun.slaveArmUnit2SystemN8(i_dataTest:=g_motionTest.m_targetJntVel[m_armId]);
+			tgtJntPos:=m_endJntPos;
 			
-			FOR i:=1 TO 8 BY 1 DO
-				IF ABS(m_maxjntVel[i])<g_smallNum THEN
-					m_maxjntVel[i]:=g_motionTest.m_defultTargetJntVel[i];
+			//go home
+			FOR i:=1 TO 3 BY 1 DO
+				IF (g_motionTest.m_goHome[m_armId][i]=TRUE) THEN					
+						m_endJntPos:=m_startJntPos;
+						m_endJntPos[i]:=m_originJntPos[i];
+					EXIT; //exit for cycle
 				END_IF
-				m_maxjntVel[i]:=LIMIT(-GVL_SlaveMotorParameters.g_maxJntVel[i],m_maxjntVel[i],GVL_SlaveMotorParameters.g_maxJntVel[i]);
+			END_FOR
+			
+			//single motor target joint position
+			FOR i:=1 TO 8 BY 1 DO
+				IF (g_motionTest.m_singleMotorStartMotion[m_armId][i]=TRUE) THEN					
+						m_endJntPos:=m_startJntPos;
+						m_endJntPos[i]:=tgtJntPos[i];
+					EXIT; //exit for cycle
+				END_IF
 			END_FOR	
-			vecMultiNum(m_maxjntVel,3,m_maxjntAcc);
-			vecMultiNum(m_maxjntAcc,3,m_maxjntJerk);
+			
+			//single motor incresement control
+			FOR i:=1 TO 8 BY 1 DO
+				IF (g_motionTest.m_singleMotorStartIncMotion[m_armId][i]=TRUE) THEN	
+						m_targetJntPosIncN8:=m_unitFun.slaveArmUnit2SystemN8(i_dataTest:=g_motionTest.m_targetJntPosIncN8[m_armId]);			
+						m_endJntPos:=m_startJntPos;
+						m_endJntPos[i]:=m_startJntPos[i]+m_targetJntPosIncN8[i];
+					EXIT; //exit for cycle
+				END_IF
+			END_FOR			
 		END_IF
 		
 		//incresement position
@@ -1143,6 +1163,19 @@ CASE m_testStep OF
 			m_startJntPos[i]:=LIMIT(GVL_SlaveMotorParameters.g_minDHJntPos[i],m_startJntPos[i],GVL_SlaveMotorParameters.g_maxDHJntPos[i]);
 			m_endJntPos[i]:=LIMIT(GVL_SlaveMotorParameters.g_minDHJntPos[i],m_endJntPos[i],GVL_SlaveMotorParameters.g_maxDHJntPos[i]);			
 		END_FOR
+		
+		//limit the joint velocity
+		IF (g_motionTest.m_singleMotorControl[m_armId]=TRUE) THEN
+			m_maxjntVel:=m_unitFun.slaveArmUnit2SystemN8(i_dataTest:=g_motionTest.m_targetJntVel[m_armId]);			
+			FOR i:=1 TO 8 BY 1 DO
+				IF ABS(m_maxjntVel[i])<g_smallNum THEN
+					m_maxjntVel[i]:=g_motionTest.m_defultTargetJntVel[i];
+				END_IF
+				m_maxjntVel[i]:=LIMIT(-GVL_SlaveMotorParameters.g_maxJntVel[i],m_maxjntVel[i],GVL_SlaveMotorParameters.g_maxJntVel[i]);
+			END_FOR	
+			vecMultiNum(m_maxjntVel,3,m_maxjntAcc);
+			vecMultiNum(m_maxjntAcc,3,m_maxjntJerk);
+		END_IF		
 		
 		//motion distance judgement
 		vecSub(m_endJntPos,m_startJntPos,m_motDist);
@@ -1773,13 +1806,19 @@ END_CASE
       <LineId Id="98" Count="0" />
       <LineId Id="94" Count="0" />
       <LineId Id="96" Count="0" />
-      <LineId Id="101" Count="0" />
-      <LineId Id="136" Count="0" />
-      <LineId Id="138" Count="3" />
-      <LineId Id="161" Count="0" />
-      <LineId Id="137" Count="0" />
-      <LineId Id="102" Count="0" />
-      <LineId Id="104" Count="0" />
+      <LineId Id="204" Count="0" />
+      <LineId Id="226" Count="0" />
+      <LineId Id="207" Count="6" />
+      <LineId Id="205" Count="1" />
+      <LineId Id="214" Count="0" />
+      <LineId Id="218" Count="2" />
+      <LineId Id="224" Count="0" />
+      <LineId Id="222" Count="1" />
+      <LineId Id="217" Count="0" />
+      <LineId Id="215" Count="0" />
+      <LineId Id="227" Count="0" />
+      <LineId Id="229" Count="6" />
+      <LineId Id="228" Count="0" />
       <LineId Id="116" Count="2" />
       <LineId Id="99" Count="0" />
       <LineId Id="127" Count="0" />
@@ -1789,6 +1828,11 @@ END_CASE
       <LineId Id="174" Count="2" />
       <LineId Id="178" Count="0" />
       <LineId Id="171" Count="1" />
+      <LineId Id="191" Count="1" />
+      <LineId Id="194" Count="0" />
+      <LineId Id="196" Count="7" />
+      <LineId Id="188" Count="0" />
+      <LineId Id="190" Count="0" />
       <LineId Id="147" Count="4" />
       <LineId Id="144" Count="0" />
       <LineId Id="146" Count="0" />

@@ -76,6 +76,9 @@ VAR
 	
 	//copy value
 	m_uiArmModeCarLast:ARRAY[0..GVL_Const.g_controlModeNum] OF BOOL;
+	
+	//original joint position
+	m_originJntPos:Vec8d;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -292,7 +295,13 @@ vecMultiNum(m_maxjntVel,5,m_maxjntAcc);
 vecMultiNum(m_maxjntAcc,5,m_maxjntJerk);
 
 //start flag
-m_startMotionLast:=FALSE;]]></ST>
+m_startMotionLast:=FALSE;
+
+//origin joint position
+FOR i:=1 TO 8 BY 1 DO
+	m_originJntPos[i]:=GVL_CartJointEncoderCaliData.g_linkEncCaliJntPos[i];
+END_FOR
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="jntCurrentMode" Id="{1702581d-d7c9-4695-828e-38a367cbd31c}">
@@ -368,6 +377,7 @@ END_VAR
 VAR
 	homeDHPos,startDHPos,endDHPos :Vec8d;
 	m_targetJntPosIncCar:Vec8d;
+	tgtJntPos:Vec8d;
 	i:INT;
 END_VAR
 ]]></Declaration>
@@ -396,7 +406,37 @@ CASE m_testStep OF
 		END_FOR		
 		
 		m_startJntPos:=startDHPos;
-		m_endJntPos:=endDHPos;		
+		m_endJntPos:=endDHPos;	
+		tgtJntPos:=m_endJntPos;
+		
+		//go home
+		FOR i:=5 TO 8 BY 1 DO
+			IF (g_motionTest.m_goHomeCar[i]=TRUE) THEN					
+					m_endJntPos:=m_startJntPos;
+					m_endJntPos[i]:=m_originJntPos[i];
+				EXIT; //exit for cycle
+			END_IF
+		END_FOR
+		
+		//single motor target joint position
+		FOR i:=5 TO 8 BY 1 DO
+			IF (g_motionTest.m_singleMotorStartMotion_Car[i]=TRUE) THEN					
+					m_endJntPos:=m_startJntPos;
+					m_endJntPos[i]:=tgtJntPos[i];
+				EXIT; //exit for cycle
+			END_IF
+		END_FOR
+		
+		//single motor incresement control
+		FOR i:=5 TO 8 BY 1 DO
+			IF (g_motionTest.m_singleMotorStartIncMotion_Car[i]=TRUE) THEN
+					m_targetJntPosIncCar:=m_unitFun.carUnit2System(i_dataTest:= g_motionTest.m_targetJntPosIncCar);					
+					m_endJntPos:=m_startJntPos;
+					m_endJntPos[i]:=m_startJntPos[i]+m_targetJntPosIncCar[i];
+				EXIT; //exit for cycle
+			END_IF
+		END_FOR
+		
 		IF (g_motionTest.m_jntTestModeIncCar=TRUE) THEN
 			m_targetJntPosIncCar:=m_unitFun.carUnit2System(i_dataTest:= g_motionTest.m_targetJntPosIncCar);
 			vecAdd(m_startJntPos,m_targetJntPosIncCar,m_endJntPos);
@@ -545,6 +585,11 @@ END_CASE
       <LineId Id="257" Count="1" />
       <LineId Id="302" Count="0" />
       <LineId Id="254" Count="0" />
+      <LineId Id="329" Count="0" />
+      <LineId Id="328" Count="0" />
+      <LineId Id="332" Count="1" />
+      <LineId Id="331" Count="0" />
+      <LineId Id="330" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlMotionTest.jntCurrentMode">
       <LineId Id="10" Count="2" />
@@ -588,6 +633,16 @@ END_CASE
       <LineId Id="102" Count="1" />
       <LineId Id="101" Count="0" />
       <LineId Id="37" Count="1" />
+      <LineId Id="188" Count="1" />
+      <LineId Id="193" Count="6" />
+      <LineId Id="190" Count="1" />
+      <LineId Id="203" Count="6" />
+      <LineId Id="200" Count="2" />
+      <LineId Id="211" Count="1" />
+      <LineId Id="217" Count="0" />
+      <LineId Id="213" Count="3" />
+      <LineId Id="210" Count="0" />
+      <LineId Id="187" Count="0" />
       <LineId Id="55" Count="0" />
       <LineId Id="71" Count="0" />
       <LineId Id="56" Count="0" />
