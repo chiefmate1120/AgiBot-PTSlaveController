@@ -3,9 +3,6 @@
   <GVL Name="GVL_UIData" Id="{64e88e01-f0c9-4682-9994-b5aa2920e88c}">
     <Declaration><![CDATA[//{attribute 'qualified_only'}
 VAR_GLOBAL
-	//g_motionTest.m_uiArmMode:ARRAY[1..4,0..GVL_Const.g_controlModeNum] OF BOOL;	
-	//g_motionTest.m_uiArmModeL:ARRAY[1..4,0..GVL_Const.g_controlModeNum] OF BOOL;	
-	
 	//basic motion test variables
 	g_motionTest:ST_MotionTest;
 	
@@ -29,6 +26,9 @@ VAR_GLOBAL
 	
 	//response test
 	g_responseTest:ST_ResponseTest;
+	
+	//Device ID number
+	g_deviceID:INT:=2; //1:doctor   2:patient
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

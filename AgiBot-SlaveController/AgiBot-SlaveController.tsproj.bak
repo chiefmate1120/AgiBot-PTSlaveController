@@ -2,6 +2,59 @@
 <TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.29">
 	<DataTypes>
 		<DataType>
+			<Name GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}" AutoDeleteType="true">ST_MotorInputs</Name>
+			<BitSize>224</BitSize>
+			<SubItem>
+				<Name>m_driverError</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<Comment><![CDATA[ driver error info]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_statusWord</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[ driver ethercat status]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>32</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_motorEncoder</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[ motor/relative encoder from IO]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>64</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_linkEncoder</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[ link/absolute encoder form IO]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>96</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_current</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[ motor current from IO]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>128</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_electriAngleDev</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[motor electrical angle deviation]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>160</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_heartBeat</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<Comment><![CDATA[drive heart beat]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>192</BitOffs>
+			</SubItem>
+		</DataType>
+		<DataType>
 			<Name GUID="{3CB7ED90-7127-49D3-B07C-B1898FA8B8B3}" PersistentType="true">MSCommu_Vec3d</Name>
 			<Comment><![CDATA[ data type specialized for master-slave control box communication]]></Comment>
 			<BitSize>192</BitSize>
@@ -581,56 +634,47 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}" AutoDeleteType="true">ST_MotorInputs</Name>
-			<BitSize>224</BitSize>
+			<Name GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}" AutoDeleteType="true">ST_MotorOutputs</Name>
+			<BitSize>96</BitSize>
 			<SubItem>
-				<Name>m_driverError</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
-				<Comment><![CDATA[ driver error info]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>0</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_statusWord</Name>
+				<Name>m_controlWord</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
-				<Comment><![CDATA[ driver ethercat status]]></Comment>
+				<Comment><![CDATA[ driver control word]]></Comment>
 				<BitSize>16</BitSize>
-				<BitOffs>32</BitOffs>
+				<BitOffs>0</BitOffs>
+				<Default>
+					<Value>6</Value>
+				</Default>
 			</SubItem>
 			<SubItem>
-				<Name>m_motorEncoder</Name>
+				<Name>m_opMode</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000003}">SINT</Type>
+				<Comment><![CDATA[ motor control mode, 0 for position mode, 1 for torque mode]]></Comment>
+				<BitSize>8</BitSize>
+				<BitOffs>16</BitOffs>
+				<Default>
+					<Value>0</Value>
+				</Default>
+			</SubItem>
+			<SubItem>
+				<Name>m_cmdMotorEncoder</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[ motor/relative encoder from IO]]></Comment>
+				<Comment><![CDATA[ target motor encoder]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>32</BitOffs>
+				<Default>
+					<Value>0</Value>
+				</Default>
+			</SubItem>
+			<SubItem>
+				<Name>m_cmdCurrent</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[ motor current to IO]]></Comment>
 				<BitSize>32</BitSize>
 				<BitOffs>64</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_linkEncoder</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[ link/absolute encoder form IO]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>96</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_current</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[ motor current from IO]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>128</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_electriAngleDev</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[motor electrical angle deviation]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>160</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_heartBeat</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
-				<Comment><![CDATA[drive heart beat]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>192</BitOffs>
+				<Default>
+					<Value>0</Value>
+				</Default>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -1410,50 +1454,6 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}" AutoDeleteType="true">ST_MotorOutputs</Name>
-			<BitSize>96</BitSize>
-			<SubItem>
-				<Name>m_controlWord</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
-				<Comment><![CDATA[ driver control word]]></Comment>
-				<BitSize>16</BitSize>
-				<BitOffs>0</BitOffs>
-				<Default>
-					<Value>6</Value>
-				</Default>
-			</SubItem>
-			<SubItem>
-				<Name>m_opMode</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000003}">SINT</Type>
-				<Comment><![CDATA[ motor control mode, 0 for position mode, 1 for torque mode]]></Comment>
-				<BitSize>8</BitSize>
-				<BitOffs>16</BitOffs>
-				<Default>
-					<Value>0</Value>
-				</Default>
-			</SubItem>
-			<SubItem>
-				<Name>m_cmdMotorEncoder</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[ target motor encoder]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>32</BitOffs>
-				<Default>
-					<Value>0</Value>
-				</Default>
-			</SubItem>
-			<SubItem>
-				<Name>m_cmdCurrent</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[ motor current to IO]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>64</BitOffs>
-				<Default>
-					<Value>0</Value>
-				</Default>
-			</SubItem>
-		</DataType>
-		<DataType>
 			<Name GUID="{349963B7-3B6A-F4D8-E4BF-0A770B5A9091}" AutoDeleteType="true">Vec8di</Name>
 			<BitSize>256</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000009}">DINT</BaseType>
@@ -1713,6 +1713,47 @@
 			<ArrayInfo>
 				<LBound>1</LBound>
 				<Elements>8</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{37055E04-EA8D-06CF-E50F-4E7AA9281154}" AutoDeleteType="true">ST_CartMotorOutput</Name>
+			<BitSize>96</BitSize>
+			<SubItem>
+				<Name>m_cmdVelMax</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[MingZhi drive ues]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>0</BitOffs>
+				<Default>
+					<Value>0</Value>
+				</Default>
+			</SubItem>
+			<SubItem>
+				<Name>m_cmdAccMz</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>32</BitOffs>
+				<Default>
+					<Value>0</Value>
+				</Default>
+			</SubItem>
+			<SubItem>
+				<Name>m_cmdVelMzVelMode</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>64</BitOffs>
+				<Default>
+					<Value>0</Value>
+				</Default>
+			</SubItem>
+		</DataType>
+		<DataType>
+			<Name GUID="{F585EC68-350F-45ED-8409-4E110429A50F}" IecBaseType="true" AutoDeleteType="true">ARRAY [1..2] OF DINT</Name>
+			<BitSize>64</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000009}">DINT</BaseType>
+			<ArrayInfo>
+				<LBound>1</LBound>
+				<Elements>2</Elements>
 			</ArrayInfo>
 		</DataType>
 		<DataType>
@@ -1979,47 +2020,6 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{37055E04-EA8D-06CF-E50F-4E7AA9281154}" AutoDeleteType="true">ST_CartMotorOutput</Name>
-			<BitSize>96</BitSize>
-			<SubItem>
-				<Name>m_cmdVelMax</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[MingZhi drive ues]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>0</BitOffs>
-				<Default>
-					<Value>0</Value>
-				</Default>
-			</SubItem>
-			<SubItem>
-				<Name>m_cmdAccMz</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<BitSize>32</BitSize>
-				<BitOffs>32</BitOffs>
-				<Default>
-					<Value>0</Value>
-				</Default>
-			</SubItem>
-			<SubItem>
-				<Name>m_cmdVelMzVelMode</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<BitSize>32</BitSize>
-				<BitOffs>64</BitOffs>
-				<Default>
-					<Value>0</Value>
-				</Default>
-			</SubItem>
-		</DataType>
-		<DataType>
-			<Name GUID="{F585EC68-350F-45ED-8409-4E110429A50F}" IecBaseType="true" AutoDeleteType="true">ARRAY [1..2] OF DINT</Name>
-			<BitSize>64</BitSize>
-			<BaseType GUID="{18071995-0000-0000-0000-000000000009}">DINT</BaseType>
-			<ArrayInfo>
-				<LBound>1</LBound>
-				<Elements>2</Elements>
-			</ArrayInfo>
-		</DataType>
-		<DataType>
 			<Name GUID="{064EA673-04B6-D0C1-CD14-82E56022843A}" IecBaseType="true" AutoDeleteType="true">ARRAY [1..4] OF BOOL</Name>
 			<BitSize>32</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000030}">BOOL</BaseType>
@@ -2171,6 +2171,146 @@
 							<Name>SafetyCheck.m_stopButton</Name>
 							<Comment><![CDATA[emergency stop and stop botton]]></Comment>
 							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[1].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[2].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[3].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[4].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[5].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[1].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[2].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[3].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[4].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[5].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[1].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[2].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[3].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[4].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[5].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[1].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[2].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[3].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[4].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[5].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_masterRobotData</Name>
@@ -2552,149 +2692,121 @@
 							<Comment><![CDATA[ trocar and  adjust detect]]></Comment>
 							<Type>UDINT</Type>
 						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[1].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[2].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[3].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[4].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[5].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[1].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[2].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[3].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[4].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[5].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[1].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[2].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[3].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[4].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[5].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[1].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[2].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[3].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[4].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[5].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
-						</Var>
 					</Vars>
 					<Vars VarGrpType="2" AreaNo="1">
 						<Name>TaskSlaveArmControl Outputs</Name>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[1].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[2].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[3].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[4].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[5].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[1].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[2].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[3].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[4].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[5].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[1].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[2].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[3].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[4].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[5].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[1].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[2].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[3].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[4].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[5].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupStatus</Name>
 							<Comment><![CDATA[ setup robot information]]></Comment>
@@ -2848,118 +2960,6 @@
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[8].m_motorOutputs</Name>
 							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
 						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[1].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[2].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[3].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[4].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[5].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[1].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[2].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[3].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[4].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[5].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[1].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[2].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[3].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[4].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[5].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[1].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[2].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[3].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[4].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[5].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
 					</Vars>
 					<Vars VarGrpType="1" ContextId="1" AreaNo="16">
 						<Name>TaskDynamic Inputs</Name>
@@ -2998,25 +2998,6 @@
 					<Vars VarGrpType="1" ContextId="2" AreaNo="32">
 						<Name>TaskSetupArmControl Inputs</Name>
 						<Var>
-							<Name>SetupArmControl.m_setupInputDataPool.m_slaveStatus</Name>
-							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{6144C3B5-3A02-20F0-72B9-019C627E61A3}">ST_SlaveStatus</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupInputDataPool.m_safetyData</Name>
-							<Comment><![CDATA[ safety information, import from safety check task]]></Comment>
-							<Type GUID="{DECD9F57-69F5-04DF-DC39-F93FDC472347}">ST_SafetyData</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupInputDataPool.m_setupJnt3Gravity</Name>
-							<Comment><![CDATA[ slave gravity]]></Comment>
-							<Type GUID="{1731225E-543E-79E3-4A96-A9E6DBEFA803}">ARRAY [1..4] OF LREAL</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupInputDataPool.m_setupJnt5Gravity</Name>
-							<Type GUID="{1731225E-543E-79E3-4A96-A9E6DBEFA803}">ARRAY [1..4] OF LREAL</Type>
-						</Var>
-						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_adjustIO</Name>
 							<Comment><![CDATA[ adjust detect]]></Comment>
 							<Type>UDINT</Type>
@@ -3035,6 +3016,25 @@
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_adjustIO</Name>
 							<Comment><![CDATA[ adjust detect]]></Comment>
 							<Type>UDINT</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupInputDataPool.m_slaveStatus</Name>
+							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
+							<Type GUID="{6144C3B5-3A02-20F0-72B9-019C627E61A3}">ST_SlaveStatus</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupInputDataPool.m_safetyData</Name>
+							<Comment><![CDATA[ safety information, import from safety check task]]></Comment>
+							<Type GUID="{DECD9F57-69F5-04DF-DC39-F93FDC472347}">ST_SafetyData</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupInputDataPool.m_setupJnt3Gravity</Name>
+							<Comment><![CDATA[ slave gravity]]></Comment>
+							<Type GUID="{1731225E-543E-79E3-4A96-A9E6DBEFA803}">ARRAY [1..4] OF LREAL</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupInputDataPool.m_setupJnt5Gravity</Name>
+							<Type GUID="{1731225E-543E-79E3-4A96-A9E6DBEFA803}">ARRAY [1..4] OF LREAL</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2" ContextId="2" AreaNo="33">
@@ -3072,21 +3072,6 @@
 					</Vars>
 					<Vars VarGrpType="1" ContextId="3" AreaNo="48">
 						<Name>TaskCartControl Inputs</Name>
-						<Var>
-							<Name>CartControl.m_cartDataPool.m_safetyData</Name>
-							<Comment><![CDATA[ safety information, import from safety check task]]></Comment>
-							<Type GUID="{DECD9F57-69F5-04DF-DC39-F93FDC472347}">ST_SafetyData</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartDataPool.m_slaveStatus</Name>
-							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{6144C3B5-3A02-20F0-72B9-019C627E61A3}">ST_SlaveStatus</Type>
-						</Var>
-						<Var>
-							<Name>SafetyCheck.m_masterRobotData</Name>
-							<Comment><![CDATA[ master robot data, input from master controller box]]></Comment>
-							<Type GUID="{57D525B4-259A-4BD2-9CB2-0E73F7DE8881}">MSCommu_MasterStatus</Type>
-						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_driveForce</Name>
 							<Comment><![CDATA[Driving force of the car io]]></Comment>
@@ -3189,24 +3174,24 @@
 							<Comment><![CDATA[ input arm button ]]></Comment>
 							<Type GUID="{3D778266-9CB6-A2BC-B908-FC747FC8D738}">ARRAY [1..2] OF BOOL</Type>
 						</Var>
+						<Var>
+							<Name>CartControl.m_cartDataPool.m_safetyData</Name>
+							<Comment><![CDATA[ safety information, import from safety check task]]></Comment>
+							<Type GUID="{DECD9F57-69F5-04DF-DC39-F93FDC472347}">ST_SafetyData</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartDataPool.m_slaveStatus</Name>
+							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
+							<Type GUID="{6144C3B5-3A02-20F0-72B9-019C627E61A3}">ST_SlaveStatus</Type>
+						</Var>
+						<Var>
+							<Name>SafetyCheck.m_masterRobotData</Name>
+							<Comment><![CDATA[ master robot data, input from master controller box]]></Comment>
+							<Type GUID="{57D525B4-259A-4BD2-9CB2-0E73F7DE8881}">MSCommu_MasterStatus</Type>
+						</Var>
 					</Vars>
 					<Vars VarGrpType="2" ContextId="3" AreaNo="49">
 						<Name>TaskCartControl Outputs</Name>
-						<Var>
-							<Name>CartControl.m_cartStatus</Name>
-							<Comment><![CDATA[ Output cart status]]></Comment>
-							<Type GUID="{9EBEFE51-DFD2-1B9B-9250-221526416584}">ST_CartStatus</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartJointsData</Name>
-							<Comment><![CDATA[ cart joint data]]></Comment>
-							<Type GUID="{F079E416-EB88-2AD4-306B-2196CCAAFF93}">ST_CartJointData</Type>
-						</Var>
-						<Var>
-							<Name>SafetyCheck.m_safetyCheckData</Name>
-							<Comment><![CDATA[ error check result]]></Comment>
-							<Type GUID="{DECD9F57-69F5-04DF-DC39-F93FDC472347}">ST_SafetyData</Type>
-						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_screwBreak</Name>
 							<Comment><![CDATA[output screw break IO ]]></Comment>
@@ -3265,6 +3250,21 @@
 							<Name>CartControl.m_cartRobot.m_cartSupportLeg.m_supportLegBreak</Name>
 							<Comment><![CDATA[output support leg break IO]]></Comment>
 							<Type GUID="{F585EC68-350F-45ED-8409-4E110429A50F}">ARRAY [1..2] OF DINT</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartStatus</Name>
+							<Comment><![CDATA[ Output cart status]]></Comment>
+							<Type GUID="{9EBEFE51-DFD2-1B9B-9250-221526416584}">ST_CartStatus</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartJointsData</Name>
+							<Comment><![CDATA[ cart joint data]]></Comment>
+							<Type GUID="{F079E416-EB88-2AD4-306B-2196CCAAFF93}">ST_CartJointData</Type>
+						</Var>
+						<Var>
+							<Name>SafetyCheck.m_safetyCheckData</Name>
+							<Comment><![CDATA[ error check result]]></Comment>
+							<Type GUID="{DECD9F57-69F5-04DF-DC39-F93FDC472347}">ST_SafetyData</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="1" ContextId="4" AreaNo="64">
