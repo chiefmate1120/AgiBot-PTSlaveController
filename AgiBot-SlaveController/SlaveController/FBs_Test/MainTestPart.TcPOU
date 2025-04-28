@@ -300,10 +300,19 @@ FOR i:= 1 TO 4 BY 1 DO
 	END_IF	
 END_FOR
 
+
 //cart information
 IF (CartControl.m_cartInit=TRUE) THEN
 	cartInfoUpdate(i_slaveCart:= CartControl.m_cartRobot.m_slaveCart);
 END_IF
+
+
+//update the instrument information
+FOR i:= 1 TO 4 BY 1 DO
+	IF (SlaveArmControl.m_robotInit=TRUE) THEN
+		updateInstrument(i_slaveArm:= SlaveArmControl.m_slaveRobot.m_slaveArms[i]);
+	END_IF
+END_FOR
 ]]></ST>
       </Implementation>
     </Method>
@@ -472,6 +481,22 @@ FOR i:=1 TO 4  DO
 	END_IF
 END_FOR
 ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="updateInstrument" Id="{80cb968a-3d0b-4b5a-a912-964eb0f206df}">
+      <Declaration><![CDATA[METHOD updateInstrument : BOOL
+
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[GVL_UIData.g_instrument.m_armId := LIMIT(1,GVL_UIData.g_instrument.m_armId, 4);
+IF i_slaveArm.armIdx=GVL_UIData.g_instrument.m_armId THEN
+	GVL_UIData.g_instrument.m_instrumentSN:=i_slaveArm.instrument.onChipData.m_InstruseriesNum;
+	GVL_UIData.g_instrument.m_instruNameCH:=i_slaveArm.instrument.m_instruTypeInfo.m_instruNameCH;
+	GVL_UIData.g_instrument.m_instruUsageCounts:=i_slaveArm.instrument.onChipData.m_InstruUsageCounts;
+	GVL_UIData.g_instrument.m_maxUseNum:=i_slaveArm.instrument.m_instruTypeInfo.m_maxUseNum;
+END_IF]]></ST>
       </Implementation>
     </Method>
     <Method Name="writeArmTestData" Id="{75371ddd-c0a5-4294-8245-87433006a1e9}">
@@ -823,9 +848,13 @@ END_CASE
       <LineId Id="28" Count="0" />
       <LineId Id="33" Count="1" />
       <LineId Id="14" Count="0" />
+      <LineId Id="53" Count="0" />
       <LineId Id="20" Count="0" />
       <LineId Id="9" Count="0" />
       <LineId Id="35" Count="2" />
+      <LineId Id="45" Count="1" />
+      <LineId Id="48" Count="4" />
+      <LineId Id="47" Count="0" />
       <LineId Id="19" Count="0" />
     </LineIds>
     <LineIds Name="MainTestPart.setupInfoUpdate">
@@ -910,6 +939,13 @@ END_CASE
       <LineId Id="165" Count="6" />
       <LineId Id="97" Count="0" />
       <LineId Id="240" Count="0" />
+    </LineIds>
+    <LineIds Name="MainTestPart.updateInstrument">
+      <LineId Id="6" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="7" Count="2" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="MainTestPart.writeArmTestData">
       <LineId Id="19" Count="0" />

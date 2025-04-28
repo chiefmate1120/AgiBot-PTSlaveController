@@ -757,6 +757,9 @@
     <Compile Include="FBs_Test\Type\ST_InfoUpdate.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_Test\Type\ST_Instrument.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_Test\Type\ST_JntInfo.TcDUT">
       <SubType>Code</SubType>
     </Compile>

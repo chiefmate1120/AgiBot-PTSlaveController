@@ -29,6 +29,9 @@ VAR_GLOBAL
 	
 	//Device ID number
 	g_deviceID:INT:=2; //1:doctor   2:patient
+	
+	//instrument information
+	g_instrument:ST_Instrument;
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

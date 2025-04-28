@@ -3040,6 +3040,16 @@
 					<Vars VarGrpType="2" ContextId="2" AreaNo="33">
 						<Name>TaskSetupArmControl Outputs</Name>
 						<Var>
+							<Name>SetupArmControl.m_setupJointsData</Name>
+							<Comment><![CDATA[ setup robot joint data]]></Comment>
+							<Type GUID="{1A915D10-5106-7CE3-481F-ABD7A49B79D6}">ST_SetupJointData</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupMotorData</Name>
+							<Comment><![CDATA[setup motor in_output to safety check]]></Comment>
+							<Type GUID="{AA28900A-D698-7304-4545-D4FF94559FEF}">ST_SetupMotorData</Type>
+						</Var>
+						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_lightIO</Name>
 							<Comment><![CDATA[arm light out to drive]]></Comment>
 							<Type>DINT</Type>
@@ -3058,16 +3068,6 @@
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_lightIO</Name>
 							<Comment><![CDATA[arm light out to drive]]></Comment>
 							<Type>DINT</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupJointsData</Name>
-							<Comment><![CDATA[ setup robot joint data]]></Comment>
-							<Type GUID="{1A915D10-5106-7CE3-481F-ABD7A49B79D6}">ST_SetupJointData</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupMotorData</Name>
-							<Comment><![CDATA[setup motor in_output to safety check]]></Comment>
-							<Type GUID="{AA28900A-D698-7304-4545-D4FF94559FEF}">ST_SetupMotorData</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="1" ContextId="3" AreaNo="48">
