@@ -113,7 +113,7 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-
+(*
 //update system information
 FOR i:=1 TO g_cartJntNum BY 1 DO
 	//motor input and output information
@@ -129,7 +129,7 @@ FOR i:=1 TO g_cartJntNum BY 1 DO
 	g_systemInfo.m_cartJntInfo[i].m_jntMax:=GVL_CartMotorParameters.g_maxJntPos[i];
 	g_systemInfo.m_cartJntInfo[i].m_jntMin:=GVL_CartMotorParameters.g_minJntPos[i];
 END_FOR
-
+*)
 ]]></ST>
       </Implementation>
     </Method>
