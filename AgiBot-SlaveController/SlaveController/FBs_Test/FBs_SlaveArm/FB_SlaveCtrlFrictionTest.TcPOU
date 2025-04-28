@@ -163,8 +163,19 @@ CASE m_testStep OF
 		END_IF
 		
 		//m_startJntPos,m_endJntPos
-		i_slaveArm.instrument.instruIK(m_startDHPos,0, o_jntPos=>m_startJntPos);
-		i_slaveArm.instrument.instruIK(m_endDHPos,0, o_jntPos=>m_endJntPos);
+		IF (i_slaveArm.instrument.m_instruType=InstruType_UNKNOWM) THEN
+			FOR i:=1 TO 3 BY 1 DO
+				m_startJntPos[i]:=m_startDHPos[i];
+				m_endJntPos[i]:=m_endDHPos[i];
+			END_FOR
+			FOR i:=4 TO 8 BY 1 DO
+				m_startJntPos[i]:=i_slaveArm.curJntPos[i];
+				m_endJntPos[i]:=i_slaveArm.curJntPos[i];
+			END_FOR
+		ELSE
+			i_slaveArm.instrument.instruIK(m_startDHPos,0, o_jntPos=>m_startJntPos);
+			i_slaveArm.instrument.instruIK(m_endDHPos,0, o_jntPos=>m_endJntPos);			
+		END_IF		
 		
 		m_Planner.init(i_startJntPos:= m_startJntPos, 	i_targetJntPos:= m_endJntPos, 	i_maxJntVel:= m_maxjntVel, 	i_maxJntAcc:= m_maxjntAcc, 	i_maxJntJerk:= m_maxjntJerk);
 		IF (m_Planner.isGene=FALSE) THEN
@@ -475,8 +486,15 @@ vecMultiNum(m_maxjntAcc,3,m_maxjntJerk);
       <LineId Id="281" Count="0" />
       <LineId Id="47" Count="11" />
       <LineId Id="256" Count="0" />
-      <LineId Id="253" Count="0" />
-      <LineId Id="255" Count="0" />
+      <LineId Id="353" Count="1" />
+      <LineId Id="360" Count="0" />
+      <LineId Id="362" Count="0" />
+      <LineId Id="361" Count="0" />
+      <LineId Id="364" Count="2" />
+      <LineId Id="363" Count="0" />
+      <LineId Id="356" Count="0" />
+      <LineId Id="358" Count="1" />
+      <LineId Id="355" Count="0" />
       <LineId Id="254" Count="0" />
       <LineId Id="59" Count="14" />
       <LineId Id="335" Count="1" />
