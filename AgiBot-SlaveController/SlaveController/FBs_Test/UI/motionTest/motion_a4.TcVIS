@@ -16,7 +16,7 @@
                       <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                         <o>
                           <v n="Id">1186196937L</v>
-                          <v n="Value">"g_motionTest.m_uiArmMode[1,1]"</v>
+                          <v n="Value">"g_motionTest.m_uiArmMode[4,1]"</v>
                         </o>
                       </l>
                     </o>
@@ -24629,10 +24629,10 @@
               <d n="FbMethods" t="CaseInsensitiveHashtable" ckt="String" cvt="Guid">
                 <v>FB_Init</v>
                 <v>eaea15e9-0ec2-4ff7-81f6-0d4c67b769ae</v>
-                <v>FB_Exit</v>
-                <v>4adcfefe-5d85-49dd-8066-4d99fb601a71</v>
                 <v>FB_Reinit</v>
                 <v>a40cdef2-f686-470c-984c-aa7fe9a97e0b</v>
+                <v>FB_Exit</v>
+                <v>4adcfefe-5d85-49dd-8066-4d99fb601a71</v>
               </d>
               <v n="FbName">"NotImportant"</v>
               <v n="FbGuid">{8e652888-09f4-4048-b9c4-ec12b1c56475}</v>
