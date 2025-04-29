@@ -6,7 +6,7 @@
 VAR_GLOBAL CONSTANT	
 	// absolute encoder value at minimal joint positon
 	g_minLinkEncoder :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF DINT;
-		 
+	
 	// absolute encoder value at maximum joint positon
 	g_maxLinkEncoder :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF DINT;
 	
@@ -16,7 +16,7 @@ VAR_GLOBAL CONSTANT
 	 // if absolute encoder value cross zeros within joint motion range
 	 // NOTICE: joint 7 is always 0.
 	g_linkEncZeroCross :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF INT;
-		 
+	
 	 // joint SDO address
 	g_slaveArmNetID: ARRAY[1..4] OF T_AmsNetId:=['169.254.223.120.10.1','192.168.2.91.4.1','192.168.2.91.6.1','192.168.2.91.5.1'];
 	g_slaveJointNetPort:ARRAY[1..g_sArmNum,1..g_sJntNum] OF UINT :=[

@@ -19,7 +19,7 @@ STRUCT
 	m_setupInfo:ARRAY[1..g_sArmNum] OF ST_SetupInfo;
 	
 	//cart information
-	m_cartInfo:ST_CartInfo;	
+	m_cartInfo:ST_CartInfo;
 END_STRUCT
 END_TYPE]]></Declaration>
   </DUT>

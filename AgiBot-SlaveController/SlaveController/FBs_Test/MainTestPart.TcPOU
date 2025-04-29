@@ -129,7 +129,14 @@ g_systemInfo.m_cartInfo.m_curJntVelDegMM:=m_unitFun.carArmUnit2User(i_dataSystem
 
 //joint min and max
 g_systemInfo.m_cartInfo.m_jntMax:=GVL_CartMotorParameters.g_maxJntPos;
-g_systemInfo.m_cartInfo.m_jntMin:=GVL_CartMotorParameters.g_minJntPos;]]></ST>
+g_systemInfo.m_cartInfo.m_jntMin:=GVL_CartMotorParameters.g_minJntPos;
+
+//state machine
+g_systemInfo.m_cartInfo.m_stateMachine:=CartControl.m_cartRobot.m_cartState;
+
+//IP Address
+g_systemInfo.m_cartInfo.m_IPAddress:=GVL_CartJointEncoderCaliData.g_slaveCartNetID;
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="controlSignalAnalysis" Id="{600771a8-3e3f-46e2-8822-6a6fc4cde8bd}">
@@ -366,6 +373,12 @@ g_systemInfo.m_setupInfo[k].m_curLinkPos:=i_setupArm.curLinkPos;
 g_systemInfo.m_setupInfo[k].m_curJntPosDegMM:=m_unitFun.setupArmUnit2User(i_dataSystem:= i_setupArm.curJntPos);
 g_systemInfo.m_setupInfo[k].m_curJntVelDegMM:=m_unitFun.setupArmUnit2User(i_dataSystem:= i_setupArm.curJntVel);
 
+//state machine
+g_systemInfo.m_setupInfo[k].m_stateMachine:=SetupArmControl.m_setupRobot.m_setupArmState[k];
+
+//IP Address
+g_systemInfo.m_setupInfo[k].m_IPAddress:=GVL_SetupJointEncoderCaliData.g_setupArmNetID[k];
+
 ]]></ST>
       </Implementation>
     </Method>
@@ -426,10 +439,15 @@ g_systemInfo.m_slaveInfo[k].m_curLinkPos:=i_slaveArm.curLinkPos;
 g_systemInfo.m_slaveInfo[k].m_curJntPosDegMM:=m_unitFun.slaveArmUnit2UserN8(i_dataSystem:= i_slaveArm.curJntPos);
 g_systemInfo.m_slaveInfo[k].m_curJntVelDegMM:=m_unitFun.slaveArmUnit2UserN8(i_dataSystem:= i_slaveArm.curJntVel);
 
-
 //joint max and min
 g_systemInfo.m_slaveInfo[k].m_jntMax:=GVL_SlaveMotorParameters.g_maxJntPos;
 g_systemInfo.m_slaveInfo[k].m_jntMin:=GVL_SlaveMotorParameters.g_minJntPos;
+
+//state machine
+g_systemInfo.m_slaveInfo[k].m_stateMachine:=SlaveArmControl.m_slaveRobot.m_slaveArmState[k];
+
+//IP Address
+g_systemInfo.m_slaveInfo[k].m_IPAddress:=GVL_SlaveJointEncoderCaliData.g_slaveArmNetID[k];
 ]]></ST>
       </Implementation>
     </Method>
@@ -766,6 +784,9 @@ END_CASE
       <LineId Id="123" Count="0" />
       <LineId Id="107" Count="2" />
       <LineId Id="87" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="137" Count="4" />
+      <LineId Id="133" Count="0" />
     </LineIds>
     <LineIds Name="MainTestPart.controlSignalAnalysis">
       <LineId Id="187" Count="0" />
@@ -881,7 +902,9 @@ END_CASE
       <LineId Id="107" Count="2" />
       <LineId Id="113" Count="0" />
       <LineId Id="124" Count="0" />
-      <LineId Id="122" Count="0" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="135" Count="4" />
+      <LineId Id="134" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="MainTestPart.slaveInfoUpdate">
@@ -910,10 +933,12 @@ END_CASE
       <LineId Id="148" Count="2" />
       <LineId Id="161" Count="0" />
       <LineId Id="207" Count="0" />
-      <LineId Id="206" Count="0" />
       <LineId Id="152" Count="2" />
       <LineId Id="129" Count="0" />
+      <LineId Id="227" Count="3" />
       <LineId Id="181" Count="0" />
+      <LineId Id="235" Count="0" />
+      <LineId Id="231" Count="0" />
     </LineIds>
     <LineIds Name="MainTestPart.uiDataForPrecision">
       <LineId Id="190" Count="0" />

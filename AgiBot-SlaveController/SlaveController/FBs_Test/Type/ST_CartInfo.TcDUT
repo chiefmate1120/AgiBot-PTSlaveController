@@ -29,6 +29,12 @@ STRUCT
 	
 	//motor output signal
 	m_motorOutput:ARRAY[1..8] OF ST_MotorOutputs;
+	
+	//state machine
+	m_stateMachine:INT;
+	
+	//IP Address
+	m_IPAddress:T_AmsNetId;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
