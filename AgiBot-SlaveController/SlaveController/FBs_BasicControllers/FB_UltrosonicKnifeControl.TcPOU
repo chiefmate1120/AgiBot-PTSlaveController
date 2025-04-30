@@ -13,7 +13,7 @@ VAR
 	m_instruKd:ARRAY[1..5] OF LREAL:=[5(0.04)];
 	m_instruKi:ARRAY[1..5] OF LREAL:=[5(10.0)];
 	m_instruKiLimit:ARRAY[1..5] OF LREAL:=[5(250.0)];
-	m_instruCtrlLimit:ARRAY[1..5] OF LREAL:=[5(500.0)];
+	m_instruCtrlLimit:ARRAY[1..5] OF LREAL:=[5(450.0)];
 	
 	// max grip force/current(mA)
 	m_maxGripForce:LREAL;
@@ -192,7 +192,7 @@ FOR i:=1 TO 5 DO
 END_FOR
 m_instruJntCtrlTrq[1]:=0;
 m_instruJntCtrlTrq[2]:=0;
-m_instruJntCtrlTrq[4]:=0.5*m_instruJntCtrlTrq[5];
+m_instruJntCtrlTrq[4]:=m_instruJntCtrlTrq[5];
 
 // exert grip force 
 //IF m_graspForceLevel >0  THEN

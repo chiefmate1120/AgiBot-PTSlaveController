@@ -13,7 +13,7 @@ VAR
 	m_instruKd:ARRAY[1..5] OF LREAL:=[4(0.25), 0];
 	m_instruKi:ARRAY[1..5] OF LREAL:=[4(10.0),0];
 	m_instruKiLimit:ARRAY[1..5] OF LREAL:=[5(100.0)];
-	m_instruCtrlLimit:ARRAY[1..5] OF LREAL:=[2(150.0), 3(350.0)];
+	m_instruCtrlLimit:ARRAY[1..5] OF LREAL:=[5(330.0)];
 	
 	// gripper force level threshold for variable PID parameter
 	m_forceLevelThres : ARRAY[1..3] OF LREAL := [40, 70, 101];
@@ -23,7 +23,7 @@ VAR
 	m_yawKd:ARRAY[1..3] OF LREAL:=[0.25, 0.4, 0.6];
 	m_yawKi:ARRAY[1..3] OF LREAL:=[10.0, 15.0, 20.0];
 	m_yawKiLimit:LREAL:=150.0;
-	m_yawCtrlLimit:LREAL:=350.0;
+	m_yawCtrlLimit:LREAL:=330.0;
 	
 	// max grip force/current(mA)
 	m_maxGripForce:LREAL;
@@ -31,7 +31,7 @@ VAR
 	
 	// max gripper finger control force/current(mA)
 	m_maxGripCtrlForce:LREAL;
-	m_maxGripCtrlCurrent:LREAL:=350.0;
+	m_maxGripCtrlCurrent:LREAL:=330.0;
 	
 	// ratio convert motor current to joint troque
 	m_currentRatioMotor2Jnt:LREAL;
@@ -83,7 +83,6 @@ VAR
 	
 	// filter cut-off frequency for pitch back lash
 	m_cmdJntPosLpfCutoffFreq : LREAL :=3;
-	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -204,13 +203,13 @@ END_VAR]]></Declaration>
         <ST><![CDATA[m_graspForceLevel:=0;
 
 // init controller
+m_maxGripCurrent:= i_slaveArm.instrument.instruTypeInfo.m_normGripTrq; 
 m_currentRatioMotor2Jnt:=GVL_SlaveMotorParameters.g_motorTrqConst[i_slaveArm.armIdx,4]*GVL_SlaveMotorParameters.g_motorReduction[i_slaveArm.armIdx,4]/1000;
 m_maxGripForce := m_maxGripCurrent * m_currentRatioMotor2Jnt;
 m_maxGripCtrlForce := m_maxGripCtrlCurrent * m_currentRatioMotor2Jnt;
 FOR i:=1 TO 4 DO
 	m_jntBacklash[i] := 0;
 	m_instruCmdJntPos[i]:=i_slaveArm.curJntPos[i+3];
-	
 	m_instruCmdJntVel[i]:=0;
 	
 	m_instruJntCtrl[i].init(g_slaveArmCtrlCycleTime,m_instruKp[i],m_instruKd[i],m_instruKi[i],
@@ -314,10 +313,10 @@ o_cmdJntTrq := m_instruJntCtrlTrq;]]></ST>
       <Declaration><![CDATA[METHOD setMaxGripTrq : BOOL
 VAR_INPUT
 	i_maxGripTrq:LREAL;
-END_VAR
-]]></Declaration>
+END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[]]></ST>
+        <ST><![CDATA[m_maxGripCurrent := i_maxGripTrq;
+m_maxGripForce := m_maxGripCurrent * m_currentRatioMotor2Jnt;]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_BasicInstruControl_DC">
@@ -337,9 +336,11 @@ END_VAR
     </LineIds>
     <LineIds Name="FB_BasicInstruControl_DC.init">
       <LineId Id="229" Count="2" />
+      <LineId Id="276" Count="0" />
       <LineId Id="233" Count="3" />
       <LineId Id="267" Count="0" />
-      <LineId Id="238" Count="8" />
+      <LineId Id="238" Count="0" />
+      <LineId Id="240" Count="6" />
       <LineId Id="220" Count="0" />
       <LineId Id="268" Count="0" />
     </LineIds>
@@ -352,6 +353,7 @@ END_VAR
       <LineId Id="70" Count="0" />
     </LineIds>
     <LineIds Name="FB_BasicInstruControl_DC.setMaxGripTrq">
+      <LineId Id="18" Count="0" />
       <LineId Id="7" Count="0" />
     </LineIds>
   </POU>

@@ -19,10 +19,9 @@ VAR
 	m_resetFlagTon : Ton;
 	
 	m_errNumType: ARRAY [1..3] OF INT:= [3(0)];
-	m_ArrayErrCodeType:ARRAY [1..3] OF ARRAY [0..30] OF UDINT;
+	m_ArrayErrCodeType:ARRAY [0..3] OF ARRAY [0..50] OF UDINT;
 	m_ArrayErrCodeTypeTest:ARRAY [1..3] OF ARRAY [0..100] OF UDINT;
 	m_armErrCodePopup : ARRAY [1..4] OF ARRAY [0..2] OF UDINT;
-	m_armErrCodeRefresh : ARRAY [1..4] OF UINT;
 	
 	//The fault is sent to the UI at the frequency of 0.1S
 	m_errCodeUpdateFlag: ARRAY [1..3] OF BOOL;
@@ -32,10 +31,10 @@ VAR
 	m_simCmdLast :ARRAY [1..g_sArmNum] OF  vec6d;
 	m_cartCurJntTorqueIOlast :vec8di;  
 	m_cartCmdJntPosLast : vec8d;  
-	o_ErrCode:ARRAY [1..3] OF UDINT;
+	o_ErrCode:ARRAY [0..3] OF UDINT;
 		
 	m_PromptMassBusy:BOOL;
-	m_PromptFlag:ARRAY[1..g_maxNum,1..30] OF UINT;
+	m_PromptFlag:ARRAY[1..g_maxNum,1..50] OF UINT;
 	m_deleteCode:UDINT;
 	
 	m_simCmdSalta: ARRAY[1..g_sArmNum] OF ARRAY[1..6] OF LREAL;
@@ -43,6 +42,8 @@ VAR
 	//drive  heartbeat single check
 	m_heartbeatCheck :ARRAY [1..g_maxNum] OF ARRAY [1..g_maxArmJoint] OF FB_HeartbeatDetect;
 	m_bHeartbeatCheck : ARRAY [1..g_maxNum] OF ARRAY [1..g_maxArmJoint] OF BOOL;
+	
+	m_test : Vec8d;
 END_VAR
 
 
@@ -61,9 +62,9 @@ END_VAR
     </Implementation>
     <Folder Name="interface" Id="{17cc820b-439e-4bcd-b035-470b65e01b6b}" />
     <Method Name="arrayDeleteFrist" Id="{00e49c9f-cbe8-4b26-b05a-c4b6acb31969}">
-      <Declaration><![CDATA[METHOD arrayDeleteFrist : ARRAY [0..30] OF UDINT;
+      <Declaration><![CDATA[METHOD arrayDeleteFrist : ARRAY [0..50] OF UDINT;
 VAR_INPUT
-	i_array:ARRAY [0..30] OF UDINT;
+	i_array:ARRAY [0..50] OF UDINT;
 END_VAR
 
 VAR
@@ -71,9 +72,9 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-arrayDeleteFrist[30]:=0;
+arrayDeleteFrist[50]:=0;
 
-FOR k:=0 TO 29 BY 1 DO
+FOR k:=0 TO 49 BY 1 DO
 	arrayDeleteFrist[k]:=i_array[k+1];
 END_FOR]]></ST>
       </Implementation>
@@ -118,7 +119,7 @@ END_VAR]]></Declaration>
 FOR i:=1 TO g_maxCartJoint BY 1 DO
 	m_bHeartbeatCheck[i_armId][i] := m_heartbeatCheck[i_armId][i].run(i_safetyCheckVar.m_cartDriverInput[i].m_heartBeat);
 	m_bHeartbeatCheck[i_armId][i] := TRUE;
-	m_checkDelay[i_ArmId].T_cartJntStatusErr[i](IN:= (i_safetyCheckVar.m_cartDriverInput[i].m_statusWord=0 AND m_checkPermit[i_ArmId].m_cartJntStatus[i]), PT:=m_checkDelayTime.Ti_CarJntStatus , Q=> , ET=> );
+	m_checkDelay[i_ArmId].T_cartJntStatusErr[i](IN:= (i_safetyCheckVar.m_cartDriverInput[i].m_statusWord=0 AND i_safetyCheckVar.m_cartEtherCATState[i].EtherCATState AND m_checkPermit[i_ArmId].m_cartJntStatus[i]), PT:=m_checkDelayTime.Ti_CarJntStatus , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_cartJntStatusErr[i].Q OR NOT m_bHeartbeatCheck[i_armId][i] THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i, 16#3002 ,m_unrcvLevel );
 	END_IF
@@ -147,6 +148,7 @@ END_FOR
 
 //台车双编码器偏差过大
 FOR i:=1 TO g_maxCartJoint BY 1 DO
+	m_test[i] := i_cartJointData.m_curLinkPos[i]-i_cartJointData.m_curJntPos[i];
 	m_checkDelay[i_ArmId].T_cartJntEncErr[i](IN:= ABS (i_cartJointData.m_curLinkPos[i]-i_cartJointData.m_curJntPos[i])>g_cartMaxJntEncErr[i] AND m_checkPermit[i_ArmId].m_cartJntEncErr[i], PT:=m_checkDelayTime.Ti_CarDualEncDev , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_cartJntEncErr[i].Q THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i, 16#3005 ,m_unrcvLevel );
@@ -219,20 +221,24 @@ VAR_IN_OUT CONSTANT
 END_VAR
 VAR
 	arm : UDINT;
+	armCheckOPStatus :ARRAY [1..g_sArmNum] OF UDINT ;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[
 FOR arm := 1 TO g_sArmNum DO
 	IF NOT i_armEtherCATOPStatus[arm] THEN
-		checkOPStatus:=SHL(arm+3,24)+SHL(0,16)+16#103B;
-		RETURN;
+		armCheckOPStatus[arm]:=SHL(arm+3,24)+SHL(16#00FF,16)+16#103B;
 	END_IF
 END_FOR
 IF NOT i_cartEtherCATOPStatus THEN
 	arm := g_cartNum + 3;
 	checkOPStatus:=SHL(arm,24)+SHL(0,16)+16#103B;
 END_IF
-]]></ST>
+GVL_interactUI.g_popupErrorArm1[0] := armCheckOPStatus[1];
+GVL_interactUI.g_popupErrorArm2[0] := armCheckOPStatus[2];
+GVL_interactUI.g_popupErrorArm3[0] := armCheckOPStatus[3];
+GVL_interactUI.g_popupErrorArm4[0] := armCheckOPStatus[4];
+GVL_interactUI.g_errIdType0 := checkOPStatus;]]></ST>
       </Implementation>
     </Method>
     <Property Name="checkPermit" Id="{4ac5d9ef-e4e1-4258-a3b3-a263171adb15}" FolderPath="interface\">
@@ -398,11 +404,12 @@ VAR_INPUT
 	i_ErrID:UDINT;
 	i_ErrLocation:UDINT;
 END_VAR
-VAR
+VAR_STAT
 	m_errStatus : UDINT := 0;
 	//error ID , 0-15 bit
 	m_errId : UDINT;
-	m_arrayErrCode : ARRAY [0..30] OF UDINT;
+	m_arrayErrCode : ARRAY [0..50] OF UDINT;
+	m_arrayErrCode0 : ARRAY [0..50] OF UDINT;
 	m_armErrCode : ARRAY [0..2] OF UDINT;
 END_VAR]]></Declaration>
       <Implementation>
@@ -430,7 +437,9 @@ IF m_PromptFlag[i_ArmId,i_ErrID]=1 THEN
 	IF (m_ErrCode AND 16#00FF0000) = 16#00FF0000 THEN
 		vecFIFO(m_armErrCodePopup[i_armId] , m_ErrCode , m_armErrCode );
 		m_armErrCodePopup[i_armId] := m_armErrCode;
-		m_armErrCodeRefresh[i_armId] := 1;
+	ELSE
+		vecFIFO(m_ArrayErrCodeType[0] , m_ErrCode , m_arrayErrCode0 );
+		m_ArrayErrCodeType[0] := m_arrayErrCode0;
 	END_IF
 	m_PromptFlag[i_ArmId,i_ErrID]:=2;
 END_IF
@@ -443,12 +452,14 @@ IF m_PromptFlag[i_ArmId,i_ErrID]=2 AND i_PromptStatus=FALSE THEN
 	IF (m_deleteCode AND 16#00FF0000)  = 16#00FF0000 THEN
 		vecDeleteInput(m_armErrCodePopup[i_armId] , m_deleteCode , m_armErrCode );
 		m_armErrCodePopup[i_armId] := m_armErrCode;
-		m_armErrCodeRefresh[i_armId] := 2;
+	ELSE
+		vecDeleteInput(m_ArrayErrCodeType[0] , m_deleteCode , m_arrayErrCode0 );
+		m_ArrayErrCodeType[0] := m_arrayErrCode0;
 	END_IF
-	//ArrayDeleteInput(i_Array:= m_ArrayErrCodeType[1], i_DeleteCode:=m_deleteCode , o_Array=> m_ArrayErrCodeType[1]);
 	m_PromptFlag[i_ArmId,i_ErrID]:=0;
 END_IF
 o_ErrCode[1]:=m_ArrayErrCodeType[1][0];
+o_ErrCode[0]:=m_ArrayErrCodeType[0][0];
 m_PromptMassBusy:=FALSE;
 
 ]]></ST>
@@ -514,9 +525,9 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[//驱动器状态监测、驱动器未连接
-FOR i:=1 TO g_setupJntNum BY 1 DO
+FOR i:=1 TO g_setupJntNum DO
 	m_bHeartbeatCheck[i_armId][i] := TRUE;// m_heartbeatCheck[i_armId][i].run(i_safetyCheckVar[i_armId].m_setupDriverInput[i].m_heartBeat);
-	m_checkDelay[i_ArmId].T_jntStatusErr[i](IN:= (i_safetyCheckVar[i_ArmId].m_setupDriverInput[i].m_statusWord=0 AND m_checkPermit[i_ArmId].m_jntStatusErr[i]), PT:=m_checkDelayTime.Ti_jntStatusErr , Q=> , ET=> );
+	m_checkDelay[i_ArmId].T_jntStatusErr[i](IN:= (i_safetyCheckVar[i_ArmId].m_setupDriverInput[i].m_statusWord=0 AND i_safetyCheckVar[i_ArmId].m_EtherCATState[i].EtherCATState AND m_checkPermit[i_ArmId].m_jntStatusErr[i]), PT:=m_checkDelayTime.Ti_jntStatusErr , Q=> , ET=> );
 	IF (m_checkDelay[i_ArmId].T_jntStatusErr[i].Q  OR NOT m_bHeartbeatCheck[i_armId][i]) AND i_safetyCheckVar[i_ArmId].m_EtherCATState[i].EtherCATState  THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i, 16#3002 ,m_unrcvLevel );
 	END_IF
@@ -525,7 +536,7 @@ END_FOR
 
 
 //关节编码器监测
-FOR i:=1 TO g_setupJntNum BY 1 DO
+FOR i:=1 TO g_setupJntNum DO
 	m_checkDelay[i_ArmId].T_linkEncErr[i](IN:= (i_safetyCheckVar[i_ArmId].m_setupDriverInput[i].m_linkEncoder=g_maxLinkEnc[i] OR i_safetyCheckVar[i_ArmId].m_setupDriverInput[i].m_linkEncoder=g_minLinkEnc[i]) AND m_checkPermit[i_ArmId].m_linkEncErr[i], PT:=m_checkDelayTime.Ti_linkEncErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_linkEncErr[i].Q THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i,  16#3003 ,m_unrcvLevel );
@@ -534,7 +545,7 @@ END_FOR
 
 
 //驱动器错误检测
-FOR i:=1 TO g_setupJntNum BY 1 DO
+FOR i:=1 TO g_setupJntNum DO
 	m_checkDelay[i_ArmId].T_DriveErr[i](IN:= (i_safetyCheckVar[i_ArmId].m_setupDriverInput[i].m_driverError AND g_driveErrWord)=g_driveErrWord AND m_checkPermit[i_ArmId].m_driveErr[i] , PT:=m_checkDelayTime.Ti_driveErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_DriveErr[i].Q THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i, 16#3004 ,m_unrcvLevel );
@@ -543,7 +554,7 @@ END_FOR
 
 
 //双编码器偏差过大检测
-FOR i:=1 TO g_setupJntNum BY 1 DO
+FOR i:=1 TO g_setupJntNum DO
 	m_checkDelay[i_ArmId].T_armJntEncErr[i](IN:= ABS(i_setupJointData.m_curLinkPos[i_armId][i]-i_setupJointData.m_curJntPos[i_armId][i])>=g_armMaxJntEncErr[i] AND m_checkPermit[i_ArmId].m_armJntEncErr[i], PT:=m_checkDelayTime.Ti_armJntEncErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_armJntEncErr[i].Q THEN
 		errCodeAssign( i_ArmId, i_ArmId+3,  0, i, 16#3005, m_unrcvLevel );
@@ -552,7 +563,7 @@ END_FOR
 
 
 //关节运动超限位
-FOR i:=1 TO g_setupJntNum BY 1 DO
+FOR i:=1 TO g_setupJntNum DO
 	m_checkDelay[i_ArmId].T_outOfLimit[i](IN:= (i_setupJointData.m_curJntPos[i_armId][i]>=(g_maxJntPos[i_armId,i]+g_armJntPosLimitBuffer[i]) OR i_setupJointData.m_curJntPos[i_armId][i]<=(g_minJntPos[i_armId,i]-g_armJntPosLimitBuffer[i])) AND m_checkPermit[i_ArmId].m_outOfLimit[i] , PT:=m_checkDelayTime.Ti_outofLimit , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_outOfLimit[i].Q THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i, 16#3006, m_unrcvLevel );
@@ -561,7 +572,7 @@ END_FOR
 
 
 //电机电角度偏差
-FOR i:=1 TO g_setupJntNum BY 1 DO
+FOR i:=1 TO g_setupJntNum DO
 	IF ABS(electriAngleDev(i_safetyCheckVar[i_armId].m_setupDriverInput[i].m_electriAngleDev))> g_motPhieErrLimit  AND m_checkPermit[i_ArmId].m_motPhieErr[i] THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i, 16#3008, m_unrcvLevel );
 	END_IF
@@ -576,7 +587,7 @@ END_IF
 
 
 //关节跟随误差过大
-FOR i:=1 TO g_setupJntNum BY 1 DO
+FOR i:=1 TO g_setupJntNum DO
 	m_checkDelay[i_ArmId].T_armJntFollowErr[i](IN:= ABS(i_setupJointData.m_cmdJntPos[i_armId][i]- i_setupJointData.m_curJntPos[i_armId][i])>g_armMaxJntFollowErr[i]  AND m_checkPermit[i_ArmId].m_armJntFollowErr[i], PT:=m_checkDelayTime.Ti_armJntFollowErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_armJntFollowErr[i].Q THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i, 16#2002, m_rcvLevel );
@@ -585,7 +596,7 @@ END_FOR
 
 
 //关节速度监控
-FOR i:=1 TO g_setupJntNum BY 1 DO
+FOR i:=1 TO g_setupJntNum DO
 	m_checkDelay[i_ArmId].T_jntVelErr[i](IN:= ABS (i_setupJointData.m_curJntVel[i_armId][i])>g_safetyJntVel[i_armId,i] AND m_checkPermit[i_ArmId].m_jntVelErr[i], PT:=m_checkDelayTime.Ti_jntVelErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_jntVelErr[i].Q THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i, 16#2003, m_rcvLevel );
@@ -595,7 +606,7 @@ END_FOR
 
 
 //电流超限监测
-FOR i:=1 TO g_setupJntNum BY 1 DO
+FOR i:=1 TO g_setupJntNum DO
 	m_checkDelay[i_ArmId].T_jntCurrentErr[i](IN:= ABS(i_setupJointData.m_rawJntCurrent[i_armId][i])>g_maxJntCurrent[i] AND m_checkPermit[i_ArmId].m_jntCurrentErr[i], PT:=m_checkDelayTime.Ti_jntCurrentErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_jntCurrentErr[i].Q THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i, 16#2005, m_rcvLevel );
@@ -604,7 +615,7 @@ END_FOR
 
 
 //Ethercat通讯检测
-FOR i:=1 TO g_setupJntNum BY 1 DO
+FOR i:=1 TO g_setupJntNum DO
 	IF NOT i_safetyCheckVar[i_ArmId].m_EtherCATState[i].EtherCATState THEN
 		errCodeAssign(i_ArmId, i_ArmId+3, 0, i, 16#2006, m_rcvLevel );
 		EXIT;
@@ -620,7 +631,7 @@ END_IF
 
 
 //目标位置指令突变检测
-FOR i:=1 TO g_setupJntNum BY 1 DO
+FOR i:=1 TO g_setupJntNum DO
 	IF (i_setupJointData.m_cmdJntPos[i_armId][i]-m_cmdJntPosLast[i_ArmId][i])>g_maxJntCmdSalta[i] AND m_checkPermit[i_ArmId].m_cmdJntSaltation[i] THEN
 		errCodeAssign(i_armId, i_ArmId+3, 0, i, 16#2008, m_rcvLevel );
 	END_IF
@@ -629,15 +640,16 @@ END_FOR
 
 
 //Deviation between command current and feedback current
-FOR i:=1 TO g_setupJntNum BY 1 DO
-	IF ABS(i_safetyCheckVar[i_armId].m_slaveDriverOutput[i].m_cmdCurrent-i_safetyCheckVar[i_armId].m_slaveDriverInput[i].m_current)> g_jntCurrentCtrlLimit[i]  AND m_checkPermit[i_armId].m_jntCurrentCtrlErr[i] THEN
-		//errCodeAssign(i_armId, i_armId+3, 0, i, 16#200B, m_rcvLevel );
+FOR i:=1 TO g_setupJntNum DO
+	m_checkDelay[i_ArmId].T_jntCmdCurrent[i](IN:= ABS(i_safetyCheckVar[i_armId].m_slaveDriverOutput[i].m_cmdCurrent-i_safetyCheckVar[i_armId].m_slaveDriverInput[i].m_current)> g_jntCurrentCtrlLimit[i]  AND m_checkPermit[i_armId].m_jntCurrentCtrlErr[i], PT:=m_checkDelayTime.Ti_jntCmdCurrentErr , Q=> , ET=> );
+	IF m_checkDelay[i_ArmId].T_jntCmdCurrent[i].Q THEN
+		errCodeAssign(i_armId, i_armId+3, 0, i, 16#200B, m_rcvLevel );
 	END_IF
 END_FOR
 
 
 //motor encoder mutation detection
-FOR i:=1 TO g_setupJntNum BY 1 DO
+FOR i:=1 TO g_setupJntNum DO
 	IF (i_safetyCheckVar[i_armId].m_motorEncoderSaltaValue[i])>g_maxJntCurSalta[i] THEN
 		errCodeAssign(i_armId, i_ArmId+3, 0, i, 16#200C, m_rcvLevel );
 	END_IF
@@ -645,7 +657,7 @@ END_FOR
 
 //drive Ethercat CRC lost
 FOR i:=1 TO g_setupJntNum BY 1 DO
-	IF (i_safetyCheckVar[i_armId].m_EtherCATState[i].CRCPortA)>m_minLossFrame OR  (i_safetyCheckVar[i_armId].m_EtherCATState[i].CRCPortB)>m_minLossFrame OR  (i_safetyCheckVar[i_armId].m_EtherCATState[i].CRCPortC)>m_minLossFrame  THEN
+	IF (i_safetyCheckVar[i_armId].m_EtherCATState[i].CRCPortA)>g_minLossFrame OR  (i_safetyCheckVar[i_armId].m_EtherCATState[i].CRCPortB)>g_minLossFrame OR  (i_safetyCheckVar[i_armId].m_EtherCATState[i].CRCPortC)>g_minLossFrame  THEN
 		errCodeAssign(i_armId, i_ArmId+3, 0, i, 16#200F, m_rcvLevel );
 	END_IF
 END_FOR
@@ -661,9 +673,9 @@ VAR_IN_OUT CONSTANT
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[//驱动器状态监测、驱动器未连接
-FOR i:=1 TO g_sJntNum BY 1 DO
+FOR i:=1 TO g_sJntNum DO
 	m_bHeartbeatCheck[i_armId][i+g_setupJntNum] := TRUE;//m_heartbeatCheck[i_armId][i+g_setupJntNum].run(i_safetyCheckVar[i_armId].m_slaveDriverInput[i].m_heartBeat);
-	m_checkDelay[i_ArmId].T_jntStatusErr[i+g_setupJntNum](IN:= (i_safetyCheckVar[i_ArmId].m_slaveDriverInput[i].m_statusWord=0 AND m_checkPermit[i_ArmId].m_jntStatusErr[i+g_setupJntNum]), PT:=m_checkDelayTime.Ti_jntStatusErr , Q=> , ET=> );
+	m_checkDelay[i_ArmId].T_jntStatusErr[i+g_setupJntNum](IN:= (i_safetyCheckVar[i_ArmId].m_slaveDriverInput[i].m_statusWord=0 AND i_safetyCheckVar[i_ArmId].m_EtherCATState[i+g_setupJntNum].EtherCATState AND m_checkPermit[i_ArmId].m_jntStatusErr[i+g_setupJntNum]), PT:=m_checkDelayTime.Ti_jntStatusErr , Q=> , ET=> );
 	IF (m_checkDelay[i_ArmId].T_jntStatusErr[i+g_setupJntNum].Q OR NOT m_bHeartbeatCheck[i_armId][i+g_setupJntNum]) AND i_safetyCheckVar[i_ArmId].m_EtherCATState[i+g_setupJntNum].EtherCATState  THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i+g_setupJntNum, 16#3002 ,m_unrcvLevel );
 	END_IF
@@ -671,7 +683,7 @@ END_FOR
 
 
 //关节编码器监测
-FOR i:=1 TO g_sJntNum BY 1 DO
+FOR i:=1 TO g_sJntNum DO
 	m_checkDelay[i_ArmId].T_linkEncErr[i+g_setupJntNum](IN:= (i_safetyCheckVar[i_ArmId].m_slaveDriverInput[i].m_linkEncoder=g_maxLinkEnc[i] OR i_safetyCheckVar[i_ArmId].m_slaveDriverInput[i].m_linkEncoder=g_minLinkEnc[i]) AND m_checkPermit[i_ArmId].m_linkEncErr[i], PT:=m_checkDelayTime.Ti_linkEncErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_linkEncErr[i+g_setupJntNum].Q THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i+g_setupJntNum,  16#3003 ,m_unrcvLevel );
@@ -680,7 +692,7 @@ END_FOR
 
 
 //驱动器错误检测
-FOR i:=1 TO g_sJntNum BY 1 DO
+FOR i:=1 TO g_sJntNum DO
 	m_checkDelay[i_ArmId].T_DriveErr[i+g_setupJntNum](IN:= (i_safetyCheckVar[i_ArmId].m_slaveDriverInput[i].m_driverError AND g_driveErrWord)=g_driveErrWord AND m_checkPermit[i_ArmId].m_driveErr[i] , PT:=m_checkDelayTime.Ti_driveErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_DriveErr[i+g_setupJntNum].Q THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i+g_setupJntNum, 16#3004 ,m_unrcvLevel );
@@ -689,7 +701,7 @@ END_FOR
 
 
 //双编码器偏差过大检测
-FOR i:=1 TO g_sJntNum-5 BY 1 DO
+FOR i:=1 TO g_sJntNum-5 DO
 	m_checkDelay[i_ArmId].T_armJntEncErr[i+g_setupJntNum](IN:= ABS(i_slaveJointData.m_curLinkPos[i_armId][i]-i_slaveJointData.m_curJntPos[i_armId][i])>=g_armMaxJntEncErr[i+g_setupJntNum] AND m_checkPermit[i_ArmId].m_armJntEncErr[i+g_setupJntNum], PT:=m_checkDelayTime.Ti_armJntEncErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_armJntEncErr[i+g_setupJntNum].Q THEN
 		errCodeAssign( i_ArmId, i_ArmId+3,  0, i+g_setupJntNum, 16#3005, m_unrcvLevel );
@@ -698,7 +710,7 @@ END_FOR
 
 
 //关节运动超限位
-FOR i:=1 TO g_sJntNum BY 1 DO
+FOR i:=1 TO g_sJntNum DO
 	m_checkDelay[i_ArmId].T_outOfLimit[i+g_setupJntNum](IN:= (i_slaveJointData.m_curJntPos[i_armId][i]>=(g_maxJntPos[i_armId,i+g_setupJntNum]+g_armJntPosLimitBuffer[i+g_setupJntNum]) OR i_slaveJointData.m_curJntPos[i_armId][i]<=(g_minJntPos[i_armId,i+g_setupJntNum]-g_armJntPosLimitBuffer[i+g_setupJntNum])) AND m_checkPermit[i_ArmId].m_outOfLimit[i+g_setupJntNum] , PT:=m_checkDelayTime.Ti_outofLimit , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_outOfLimit[i+g_setupJntNum].Q THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i+g_setupJntNum, 16#3006, m_unrcvLevel );
@@ -707,7 +719,7 @@ END_FOR
 
 
 //电机电角度偏差  
-FOR i:=1 TO 2 BY 1 DO
+FOR i:=1 TO 2 DO
 	IF ABS(electriAngleDev(i_safetyCheckVar[i_armId].m_slaveDriverInput[i].m_electriAngleDev))> g_motPhieErrLimit  AND m_checkPermit[i_ArmId].m_motPhieErr[i+g_setupJntNum] THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i+g_setupJntNum, 16#3008, m_unrcvLevel );
 	END_IF
@@ -715,7 +727,7 @@ END_FOR
 
 
 //关节跟随误差过大
-FOR i:=1 TO g_sJntNum-2 BY 1 DO
+FOR i:=1 TO g_sJntNum DO
 	m_checkDelay[i_ArmId].T_armJntFollowErr[i+g_setupJntNum](IN:= ABS(i_slaveJointData.m_cmdJntPos[i_armId][i]- i_slaveJointData.m_curJntPos[i_armId][i])>g_armMaxJntFollowErr[i+g_setupJntNum]  AND m_checkPermit[i_ArmId].m_armJntFollowErr[i+g_setupJntNum], PT:=m_checkDelayTime.Ti_armJntFollowErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_armJntFollowErr[i+g_setupJntNum].Q THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i+g_setupJntNum, 16#2002, m_rcvLevel );
@@ -724,7 +736,7 @@ END_FOR
 
 
 //关节速度监控
-FOR i:=1 TO g_sJntNum-5 BY 1 DO
+FOR i:=1 TO g_sJntNum-5 DO
 	m_checkDelay[i_ArmId].T_jntVelErr[i+g_setupJntNum](IN:= ABS (i_slaveJointData.m_curJntVel[i_armId][i])>g_safetyJntVel[i_armId,i+g_setupJntNum] AND m_checkPermit[i_ArmId].m_jntVelErr[i+g_setupJntNum], PT:=m_checkDelayTime.Ti_jntVelErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_jntVelErr[i+g_setupJntNum].Q THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i+g_setupJntNum, 16#2003, m_rcvLevel );
@@ -741,7 +753,7 @@ END_IF
 
 
 //电流超限监测
-FOR i:=1 TO g_sJntNum BY 1 DO
+FOR i:=1 TO g_sJntNum DO
 	m_checkDelay[i_ArmId].T_jntCurrentErr[i+g_setupJntNum](IN:= ABS(i_slaveJointData.m_rawJntCurrent[i_armId][i])>g_maxJntCurrent[i+g_setupJntNum] AND m_checkPermit[i_ArmId].m_jntCurrentErr[i+g_setupJntNum], PT:=m_checkDelayTime.Ti_jntCurrentErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_jntCurrentErr[i+g_setupJntNum].Q THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i+g_setupJntNum, 16#2005, m_rcvLevel );
@@ -750,7 +762,7 @@ END_FOR
 
 
 //Ethercat通讯检测
-FOR i:=1 TO g_sJntNum BY 1 DO
+FOR i:=1 TO g_sJntNum DO
 	IF NOT i_safetyCheckVar[i_ArmId].m_EtherCATState[i+g_setupJntNum].EtherCATState THEN
 		errCodeAssign(i_ArmId, i_ArmId+3, 0, i+g_setupJntNum, 16#2006, m_rcvLevel );
 		EXIT;
@@ -759,7 +771,7 @@ END_FOR
 
 
 //目标位置指令突变检测
-FOR i:=1 TO g_sJntNum BY 1 DO
+FOR i:=1 TO g_sJntNum DO
 	m_checkDelay[i_ArmId].T_jntCmdSalta[i+g_setupJntNum](IN:= m_checkPermit[i_ArmId].m_cmdJntSaltation[i+g_setupJntNum], PT:=m_checkDelayTime.Ti_jntCmdSaltationErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_jntCmdSalta[i+g_setupJntNum].Q THEN
 		IF ABS(i_slaveJointData.m_cmdJntPos[i_armId][i]-m_cmdJntPosLast[i_ArmId][i+g_setupJntNum])> g_maxJntCmdSalta[i+g_setupJntNum] THEN
@@ -782,8 +794,8 @@ END_IF
 m_simCmdLast[i_ArmId] := i_safetyCheckVar[i_ArmId].m_cmdArmPos;
 
 //Deviation between command current and feedback current
-FOR i:=1 TO g_sJntNum BY 1 DO
-	IF i =3 THEN
+FOR i:=1 TO g_sJntNum DO
+	IF i <4 THEN
 		m_checkDelay[i_ArmId].T_jntCmdCurrent[i+g_setupJntNum](IN:= ABS(i_safetyCheckVar[i_armId].m_slaveDriverOutput[i].m_cmdCurrent-i_safetyCheckVar[i_armId].m_slaveDriverInput[i].m_current)> g_jntCurrentCtrlLimit[i+g_setupJntNum]  AND m_checkPermit[i_armId].m_jntCurrentCtrlErr[i+g_setupJntNum], PT:=m_checkDelayTime.Ti_jntCmdCurrentErr , Q=> , ET=> );
 		IF m_checkDelay[i_ArmId].T_jntCmdCurrent[i+g_setupJntNum].Q THEN
 			errCodeAssign(i_armId, i_armId+3, 0, i+g_setupJntNum, 16#200B, m_rcvLevel );
@@ -793,9 +805,11 @@ END_FOR
 
 
 //motor encoder mutation detection
-FOR i:=1 TO g_sJntNum BY 1 DO
-	IF (i_safetyCheckVar[i_armId].m_motorEncoderSaltaValue[i+g_setupJntNum])>g_maxJntCurSalta[i+g_setupJntNum] THEN
-		//errCodeAssign(i_armId, i_ArmId+3, 0, i+g_setupJntNum, 16#200C, m_rcvLevel );
+FOR i:=1 TO g_sJntNum DO
+	IF i < 4 THEN
+		IF (i_safetyCheckVar[i_armId].m_motorEncoderSaltaValue[i+g_setupJntNum])>g_maxJntCurSalta[i+g_setupJntNum] THEN
+			errCodeAssign(i_armId, i_ArmId+3, 0, i+g_setupJntNum, 16#200C, m_rcvLevel );
+		END_IF
 	END_IF
 END_FOR
 
@@ -806,8 +820,8 @@ IF (i_safetyCheckVar[i_ArmId].m_instruOpenAngle> g_maxInstruOpen OR i_safetyChec
 END_IF
 
 //drive Ethercat CRC lost
-FOR i:=1 TO g_sJntNum BY 1 DO
-	IF (i_safetyCheckVar[i_armId].m_EtherCATState[i+g_setupJntNum].CRCPortA)>m_minLossFrame OR  (i_safetyCheckVar[i_armId].m_EtherCATState[i+g_setupJntNum].CRCPortB)>m_minLossFrame OR  (i_safetyCheckVar[i_armId].m_EtherCATState[i+g_setupJntNum].CRCPortC)>m_minLossFrame  THEN
+FOR i:=1 TO g_sJntNum DO
+	IF (i_safetyCheckVar[i_armId].m_EtherCATState[i+g_setupJntNum].CRCPortA)>g_minLossFrame OR  (i_safetyCheckVar[i_armId].m_EtherCATState[i+g_setupJntNum].CRCPortB)>g_minLossFrame OR  (i_safetyCheckVar[i_armId].m_EtherCATState[i+g_setupJntNum].CRCPortC)>g_minLossFrame  THEN
 		errCodeAssign(i_armId, i_ArmId+3, 0, i+g_setupJntNum, 16#200F, m_rcvLevel );
 	END_IF
 END_FOR
@@ -861,7 +875,7 @@ IF NOT i_safetyCheckVar[i_ArmId].SlaveStopButton OR i_safetyCheckVar[i_ArmId].PC
 END_IF
 
 //prompt message
-FOR i:=1 TO 30 BY 1 DO
+FOR i:=1 TO 50 DO
 	PromptMassCode( i_safetyCheckVar[i_ArmId].m_promptStatus[i], i_ArmId,  i,  i_safetyCheckVar[i_ArmId].m_promptLocation[i]);
 END_FOR
 
@@ -954,20 +968,21 @@ vecB[0]:=i_newData;]]></ST>
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.cartSafetyCheck">
-      <LineId Id="305" Count="93" />
+      <LineId Id="305" Count="32" />
+      <LineId Id="409" Count="0" />
+      <LineId Id="338" Count="60" />
       <LineId Id="74" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.checkOPStatus">
       <LineId Id="6" Count="0" />
       <LineId Id="9" Count="0" />
-      <LineId Id="15" Count="1" />
-      <LineId Id="18" Count="0" />
-      <LineId Id="17" Count="0" />
+      <LineId Id="15" Count="2" />
       <LineId Id="13" Count="0" />
       <LineId Id="19" Count="0" />
       <LineId Id="22" Count="0" />
       <LineId Id="20" Count="1" />
       <LineId Id="5" Count="0" />
+      <LineId Id="31" Count="3" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.checkPermit.Get">
       <LineId Id="2" Count="0" />
@@ -1040,7 +1055,8 @@ vecB[0]:=i_newData;]]></ST>
       <LineId Id="90" Count="0" />
       <LineId Id="97" Count="0" />
       <LineId Id="91" Count="0" />
-      <LineId Id="106" Count="0" />
+      <LineId Id="122" Count="1" />
+      <LineId Id="141" Count="0" />
       <LineId Id="92" Count="0" />
       <LineId Id="36" Count="0" />
       <LineId Id="28" Count="0" />
@@ -1050,11 +1066,12 @@ vecB[0]:=i_newData;]]></ST>
       <LineId Id="52" Count="0" />
       <LineId Id="100" Count="1" />
       <LineId Id="103" Count="2" />
-      <LineId Id="107" Count="0" />
+      <LineId Id="124" Count="1" />
+      <LineId Id="142" Count="0" />
       <LineId Id="102" Count="0" />
-      <LineId Id="56" Count="0" />
       <LineId Id="49" Count="1" />
       <LineId Id="37" Count="0" />
+      <LineId Id="126" Count="0" />
       <LineId Id="39" Count="0" />
       <LineId Id="38" Count="0" />
       <LineId Id="5" Count="0" />
@@ -1078,14 +1095,22 @@ vecB[0]:=i_newData;]]></ST>
       <LineId Id="14" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.setupSafetyCheck">
-      <LineId Id="751" Count="135" />
+      <LineId Id="751" Count="116" />
+      <LineId Id="910" Count="0" />
+      <LineId Id="899" Count="1" />
+      <LineId Id="897" Count="0" />
+      <LineId Id="871" Count="15" />
       <LineId Id="145" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.slaveSafetyCheck">
       <LineId Id="1429" Count="64" />
       <LineId Id="1595" Count="2" />
       <LineId Id="1594" Count="0" />
-      <LineId Id="1498" Count="83" />
+      <LineId Id="1498" Count="64" />
+      <LineId Id="1603" Count="0" />
+      <LineId Id="1606" Count="1" />
+      <LineId Id="1604" Count="1" />
+      <LineId Id="1566" Count="15" />
       <LineId Id="145" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.systemSafetyCheck">

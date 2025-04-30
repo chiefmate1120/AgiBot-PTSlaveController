@@ -13,7 +13,8 @@ STRUCT
 	m_cmdMotorEncoder :DINT := 0;
 	
 	// motor current to IO
-	m_cmdCurrent :DINT := 0;	
+	m_cmdCurrent :DINT := 0;
+	
 END_STRUCT
 END_TYPE
 ]]></Declaration>

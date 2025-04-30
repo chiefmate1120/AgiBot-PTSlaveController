@@ -18,7 +18,7 @@ VAR
 	m_zeroPosWritten :BOOL;
 	
 	// joint current threshold which indicate panel is buckled with instrument
-	m_maxJntCurrent :LREAL := 160;
+	m_maxJntCurrent :LREAL := 300;
 	
 	// joint current threshold which indicate finger closed
 	m_fingerCloseCurrent :LREAL := 50;

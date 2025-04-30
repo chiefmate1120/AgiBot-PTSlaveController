@@ -101,38 +101,6 @@ r_cartCtrlCmd.m_cmdJntTrq:=m_cmdJntTrq;
 r_cartCtrlCmd.m_jntOPMode:=m_jntOPMode;]]></ST>
       </Implementation>
     </Method>
-    <Method Name="infoUpdate" Id="{8c830d4d-c154-4443-a3a1-f833f12bbda0}">
-      <Declaration><![CDATA[METHOD infoUpdate : BOOL
-VAR_IN_OUT CONSTANT
-	// slave cart joint data
-	i_slaveCart :FB_SlaveCart;
-END_VAR
-
-VAR
-	i: INT;
-END_VAR]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[
-(*
-//update system information
-FOR i:=1 TO g_cartJntNum BY 1 DO
-	//motor input and output information
-	g_systemInfo.m_cartJntInfo[i].m_motorInput:=i_slaveCart.m_cartJoints[i].m_motorInputs;
-	g_systemInfo.m_cartJntInfo[i].m_motorOutput:=i_slaveCart.m_cartJoints[i].m_motorOutputs;
-	
-	//joint position and max/min
-	g_systemInfo.m_cartJntInfo[i].m_curJntPos:=i_slaveCart.curJntPos[i];
-	g_systemInfo.m_cartJntInfo[i].m_curLinkPos:=i_slaveCart.curLinkPos[i];
-	g_systemInfo.m_cartJntInfo[i].m_encErr:=i_slaveCart.curJntPos[i]-i_slaveCart.curLinkPos[i];
-	
-	//joint min and max
-	g_systemInfo.m_cartJntInfo[i].m_jntMax:=GVL_CartMotorParameters.g_maxJntPos[i];
-	g_systemInfo.m_cartJntInfo[i].m_jntMin:=GVL_CartMotorParameters.g_minJntPos[i];
-END_FOR
-*)
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="init" Id="{5034560a-cf20-4cfa-8880-9f10222f85c0}">
       <Declaration><![CDATA[// override this function in each exact controller
 // NOTICE: set joint control mode here, and do some initialization if needed
@@ -232,9 +200,6 @@ copyCmds(r_cartCtrlCmd);
 
 // update time period
 m_timePeriod := m_timePeriod+g_cartCtrlCycleTime;
-
-//information update
-//infoUpdate(i_slaveCart);
 ]]></ST>
       </Implementation>
     </Method>
@@ -259,25 +224,6 @@ m_timePeriod := m_timePeriod+g_cartCtrlCycleTime;
     <LineIds Name="FB_CartCtrlBase.copyCmds">
       <LineId Id="15" Count="0" />
       <LineId Id="19" Count="3" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_CartCtrlBase.infoUpdate">
-      <LineId Id="9" Count="0" />
-      <LineId Id="29" Count="0" />
-      <LineId Id="32" Count="0" />
-      <LineId Id="30" Count="0" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="65" Count="0" />
-      <LineId Id="67" Count="0" />
-      <LineId Id="66" Count="0" />
-      <LineId Id="42" Count="1" />
-      <LineId Id="53" Count="0" />
-      <LineId Id="55" Count="1" />
-      <LineId Id="54" Count="0" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="38" Count="0" />
-      <LineId Id="34" Count="0" />
-      <LineId Id="31" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlBase.init">
@@ -312,9 +258,6 @@ m_timePeriod := m_timePeriod+g_cartCtrlCycleTime;
     </LineIds>
     <LineIds Name="FB_CartCtrlBase.run">
       <LineId Id="202" Count="19" />
-      <LineId Id="233" Count="0" />
-      <LineId Id="235" Count="0" />
-      <LineId Id="234" Count="0" />
       <LineId Id="10" Count="0" />
     </LineIds>
   </POU>

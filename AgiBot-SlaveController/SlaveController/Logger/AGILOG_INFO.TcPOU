@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="AGILOG_INFO" Id="{d769d76e-905c-45d8-8351-63f42bd44cee}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION AGILOG_INFO : BOOL
+VAR_INPUT
+	// could be any data type, for array, only lreal is supported
+	i_logData : ANY;
+	// if to print time
+	i_printTime :BOOL :=TRUE;
+	//add a byte at the line end. 0: nothing, 1: new line, 2: space
+	i_lineBreak :INT :=0;
+
+END_VAR
+VAR
+	tmpData : LogDataType;
+	checkIdx:INT;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF NOT(GVL_RunTimeLogger.g_infoLogReady) THEN
+	RETURN;
+END_IF
+
+// data decode
+tmpData.m_dataType := i_logData.TypeClass;
+tmpData.m_dataSize := MIN(i_logData.diSize,96);
+tmpData.m_lineBreak := i_lineBreak;
+tmpData.m_printTime := i_printTime;
+tmpData.m_timeStamp := GVL_RunTimeLogger.g_localSystemTime.systemTime;
+MEMCPY(ADR(tmpData.m_data), i_logData.pValue, tmpData.m_dataSize);
+
+//add to buffer
+FOR checkIdx :=1 TO 20 DO 
+	IF TestAndSet(GVL_RunTimeLogger.g_infoLogBufferLock) THEN
+		GVL_RunTimeLogger.g_infoLogBuffer[GVL_RunTimeLogger.g_infoLogBufferInPtr] := tmpData;
+		// step pointer
+		IF GVL_RunTimeLogger.g_infoLogBufferInPtr >= GVL_RunTimeLogger.g_infoLogBufferSize THEN
+			GVL_RunTimeLogger.g_infoLogBufferInPtr := 1;
+		ELSE
+			GVL_RunTimeLogger.g_infoLogBufferInPtr:=GVL_RunTimeLogger.g_infoLogBufferInPtr+1;
+		END_IF
+		GVL_RunTimeLogger.g_infoLogBufferLock := false;
+		EXIT;
+	END_IF
+END_FOR
+
+
+
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="AGILOG_INFO">
+      <LineId Id="138" Count="1" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="174" Count="0" />
+      <LineId Id="185" Count="4" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="178" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="107" Count="2" />
+      <LineId Id="111" Count="4" />
+      <LineId Id="117" Count="1" />
+      <LineId Id="105" Count="1" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

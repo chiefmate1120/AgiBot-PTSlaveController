@@ -42,9 +42,14 @@ END_VAR]]></Declaration>
         <ST><![CDATA[// traj plan
 m_jntOTG.run(m_targetRotJntPos, 0.0, o_cmdAcc=>m_cmdJntAcc[m_scopeRotJntIdx],o_cmdVel=>m_cmdJntVel[m_scopeRotJntIdx],o_cmdPos=>m_cmdJntPos[m_scopeRotJntIdx]);
 
+// joint6 output torque to help rotation motion
+IF m_jntOPMode[6] = DriverOPMode_Trq THEN
+	m_cmdJntTrq[6] := -0.5*i_slaveArm.cmdJntTrq[7];
+END_IF
+
 // reach target check
 trackErr := ABS(i_slaveArm.curJntPos[m_scopeRotJntIdx] - m_targetRotJntPos);
-m_isFinished := trackErr <g_jntCtrlAngTolHigh/4 AND i_slaveArm.curJntVel[m_scopeRotJntIdx]<g_jntStaticVelThres;]]></ST>
+m_isFinished := trackErr <g_jntCtrlAngTolHigh/2 AND i_slaveArm.curJntVel[m_scopeRotJntIdx]<g_jntStaticVelThres;]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{d6394fcd-e49b-40e7-837c-8d44a4853971}">
@@ -70,7 +75,7 @@ m_jntOPMode[6] := DriverOPMode_PosTrq;
 m_jntOPMode[7] := DriverOPMode_PosTrq;
 m_jntOPMode[8] := DriverOPMode_PosTrq;
 
-IF i_slaveArm.instrument.onChipData.m_InstruID = 31 THEN
+IF i_slaveArm.instrument.onChipData.m_InstruID = InstruType_NewEndoscope THEN
 	m_scopeRotJntIdx :=7;
 	m_jntOPMode[6] := DriverOPMode_Trq;
 ELSE
@@ -103,11 +108,11 @@ copyCmds(r_slaveArmCtrlCmd);]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlScopeToggle.calcCmdJntPos">
-      <LineId Id="258" Count="4" />
+      <LineId Id="293" Count="9" />
       <LineId Id="211" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlScopeToggle.init">
-      <LineId Id="300" Count="33" />
+      <LineId Id="346" Count="33" />
       <LineId Id="191" Count="0" />
     </LineIds>
   </POU>

@@ -129,6 +129,10 @@ VAR_GLOBAL
 	
 	//robot system operates sound 
 	g_systemVoice : INT;
+	
+	// instrument use duration
+	g_instruUseDuration :ARRAY[1..4] OF Vec4d;
+	g_masterCmdDuration :ARRAY[1..4] OF Vec4d;
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

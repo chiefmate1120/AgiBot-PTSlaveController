@@ -16,7 +16,7 @@ STRUCT
 	//joint postion out of limit
 	Ti_outOfLimit:TIME:=T#0.25S;
 	//joint follow error delay time
-	Ti_armJntFollowErr:TIME:=T#0.1S;
+	Ti_armJntFollowErr:TIME:=T#0.002S;
 	//joint vel error delay time
 	Ti_jntVelErr:TIME:=T#0.05S;
 	//joint current error  delay time
@@ -24,7 +24,7 @@ STRUCT
 	//fixed point postion change of  master-slave state 
 	Ti_fixedPointErr:TIME:=T#0.1S;
 	//space pose error  delay time
-	Ti_spacePoseErr:TIME:=T#0.1S;
+	Ti_spacePoseErr:TIME:=T#0.002S;
 	//commend joint position saltation delay time
 	Ti_jntCmdSaltationErr:TIME:=T#0.002S;
 	Ti_simCmdSaltaErr:TIME:=T#0.002S;

@@ -9,6 +9,9 @@ STRUCT
 	//new instrument  true
 	m_newInstrument : BOOL;
 	
+	//Force Bipolar
+	m_strongStatus :BOOL;
+	
 	//instrument arm in master-slave
 	m_instruInMasterSlave : BOOL;
 	

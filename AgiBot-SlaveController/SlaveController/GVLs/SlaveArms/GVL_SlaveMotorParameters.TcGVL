@@ -5,9 +5,9 @@
 {attribute 'qualified_only'}
 VAR_GLOBAL CONSTANT
 	// encoder resolution
-	g_incEncoderRes :ARRAY[1..g_sArmNum,1..g_sJntNum] OF DINT :=[2(65536),4096,5(65536),
+	g_incEncoderRes :ARRAY[1..g_sArmNum,1..g_sJntNum] OF DINT :=[2(65536),4096,5(2048),
 																2(65536),4096,5(2048),
-																2(65536),4096,5(65536),
+																2(65536),4096,5(2048),
 																2(65536),4096,5(2048)];
 	g_absEncoderRes :ARRAY[1..g_sArmNum,1..g_sJntNum] OF DINT :=[2(131072),6(65536),
 																2(131072),6(65536),
@@ -15,9 +15,9 @@ VAR_GLOBAL CONSTANT
 																2(131072),6(65536)];
 	
 	// reduction ratio
-	g_motorReduction :ARRAY[1..g_sArmNum,1..g_sJntNum] OF LREAL :=[ 81,81,  2*pi/0.006, 5(388125.0/4693),
+	g_motorReduction :ARRAY[1..g_sArmNum,1..g_sJntNum] OF LREAL :=[ 81,81,  2*pi/0.006, 5(221.0/11),
 																	 81,81,  2*pi/0.006, 5(221.0/11),
-																	 81,81,  2*pi/0.006, 5(388125.0/4693),
+																	 81,81,  2*pi/0.006, 5(221.0/11),
 																	 81,81,  2*pi/0.006, 5(221.0/11)];
 	g_absEncoderReduction :ARRAY[1..g_sArmNum,1..g_sJntNum] OF LREAL :=[2(1.0), 2*PI/0.5364, 5(1.0),
 																		2(1.0), 2*PI/0.5364, 5(1.0),
@@ -25,13 +25,13 @@ VAR_GLOBAL CONSTANT
 																		2(1.0), 2*PI/0.5364, 5(1.0)];//8 0.5364
 	
 	// motor parameters
-	g_motorTrqConst :ARRAY[1..g_sArmNum,1..g_sJntNum] OF LREAL :=[ 0.569/9.32,0.569/9.32, 0.032,5(0.0146),
+	g_motorTrqConst :ARRAY[1..g_sArmNum,1..g_sJntNum] OF LREAL :=[ 0.9/5.6,0.9/5.6, 0.032,5(0.0303),
 																	0.9/5.6,0.9/5.6, 0.032,5(0.0303),
-																	0.9/5.6,0.9/5.6, 0.032,5(0.0146),
+																	0.9/5.6,0.9/5.6, 0.032,5(0.0303),
 																	0.9/5.6,0.9/5.6, 0.0303,5(0.0303)];
-	g_motorMaxCurrent :ARRAY[1..g_sArmNum,1..g_sJntNum] OF LREAL :=[ 9000,9000,  1300, 5(490),
+	g_motorMaxCurrent :ARRAY[1..g_sArmNum,1..g_sJntNum] OF LREAL :=[ 5600,5600,  1300, 5(800),
 																	5600,5600,  1300, 5(800),
-																	5600,5600,  1300, 5(490),
+																	5600,5600,  1300, 5(800),
 																	5600,5600,  1300, 5(800)];//mA
 	
 	// motor encoder direction
@@ -48,7 +48,6 @@ VAR_GLOBAL CONSTANT
 	
 	// joint velocity limit
 	g_maxJntVel :ARRAY[1..g_sJntNum] OF LREAL :=[1.25, 1.25, 0.5, 5(11.0)];
-	g_maxJntVelArm1 :ARRAY[1..g_sJntNum] OF LREAL :=[2.0, 2.0, 0.5, 5(11.0)];
 		
 END_VAR
 ]]></Declaration>

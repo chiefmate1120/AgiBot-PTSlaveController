@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="LogDataType" Id="{815cc196-e446-4cc1-88c8-1acb0a868587}">
+    <Declaration><![CDATA[TYPE LogDataType : // total size 128 byte
+STRUCT
+	m_data :LogDataUnion;
+	m_timeStamp : TIMESTRUCT;
+	m_dataType :__SYSTEM.TYPE_CLASS;
+	m_dataSize :DINT;
+	m_printTime :BOOL :=false;
+	m_lineBreak :INT:=0; //add a byte at the line end. 0: nothing, 1: new line, 2: space
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

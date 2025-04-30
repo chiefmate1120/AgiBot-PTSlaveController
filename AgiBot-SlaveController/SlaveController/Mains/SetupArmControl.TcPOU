@@ -50,7 +50,7 @@ m_setupRobot.run(m_setupInputDataPool);
 m_setupRobot.getStatus(m_setupStatus,m_setupMotorData, m_setupJointsData);]]></ST>
     </Implementation>
     <LineIds Name="SetupArmControl">
-      <LineId Id="330" Count="19" />
+      <LineId Id="213" Count="19" />
       <LineId Id="64" Count="0" />
     </LineIds>
   </POU>

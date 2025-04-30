@@ -25,7 +25,10 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//init
-SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);]]></ST>
+SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+
+
+]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_SlaveCtrlStandBy">
@@ -34,6 +37,9 @@ SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);]]></ST>
     <LineIds Name="FB_SlaveCtrlStandBy.init">
       <LineId Id="86" Count="0" />
       <LineId Id="74" Count="0" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="95" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

@@ -10,9 +10,9 @@ VAR_GLOBAL CONSTANT
 	g_curJntTrqLpfCutoffFreq :LREAL := 300;
 	
 	// setup arm joint position controller parameters
-	g_posKp :ARRAY[1..g_setupJntNum] OF LREAL :=[0.0, 0.0, 40000.0, 0.0, 2000];
-	g_posKd :ARRAY[1..g_setupJntNum] OF LREAL :=[0.0, 0.0, 2000.0, 0.0, 200 ];
-	g_posKi :ARRAY[1..g_setupJntNum] OF LREAL :=[0.0, 0.0, 80000.0, 0.0, 5000];
+	g_posKp :ARRAY[1..g_setupJntNum] OF LREAL :=[0.0, 0.0, 30000.0, 0.0, 2000];
+	g_posKd :ARRAY[1..g_setupJntNum] OF LREAL :=[0.0, 0.0, 600.0, 0.0, 200 ];
+	g_posKi :ARRAY[1..g_setupJntNum] OF LREAL :=[0.0, 0.0, 50000.0, 0.0, 5000];
 	g_posKiLimit :ARRAY[1..g_setupJntNum] OF LREAL :=[0.0, 0.0, 4000.0, 0.0, 2000];// define in current
 	g_posCtrlLimit :ARRAY[1..g_setupJntNum] OF LREAL :=[0.0, 0.0, 8000.0, 0.0, 5000];// define in current	
 END_VAR]]></Declaration>

@@ -28,7 +28,7 @@ STRUCT
 	m_cartJntEncErr : vec8b:=[4(FALSE),4(TRUE)];
 	m_cartOutOfLimit : vec8b:=[4(FALSE),4(TRUE)];
 	m_cartFollowErr : vec8b:=[4(FALSE),4(TRUE)];
-	m_cartJntVelErr : vec8b:=[4(FALSE),4(TRUE)];
+	m_cartJntVelErr : vec8b:=[2(FALSE),6(TRUE)];
 	m_cartJntCurrentErr : vec8b:=[8(FALSE)];
 	m_cartMZDriveErr : vec8b:=[FALSE,FALSE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE];
 END_STRUCT

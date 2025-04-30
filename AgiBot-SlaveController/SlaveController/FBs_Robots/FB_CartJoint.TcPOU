@@ -99,17 +99,18 @@ m_maxJntPos	:=GVL_CartMotorParameters.g_maxJntPos[i_jntIdx];
 
 //link encoder calibartion data
 m_linkEncoderDir :=GVL_CartJointEncoderCaliData.g_asbEncoderDir[i_jntIdx];
-m_minLinkEncoder :=GVL_CartJointEncoderCaliData.g_minLinkEncoder[ i_jntIdx] - m_linkEncoderDir*GVL_CartJointEncoderCaliData.g_linkEncLimitBuffer; // expand limit
-m_maxLinkEncoder :=GVL_CartJointEncoderCaliData.g_maxLinkEncoder[ i_jntIdx] + m_linkEncoderDir*GVL_CartJointEncoderCaliData.g_linkEncLimitBuffer; // expand limit
+m_minLinkEncoder :=GVL_CartJointEncoderCaliData.g_minLinkEncoder[ i_jntIdx] - GVL_CartJointEncoderCaliData.g_linkEncLimitBuffer; // expand limit
+m_maxLinkEncoder :=GVL_CartJointEncoderCaliData.g_maxLinkEncoder[ i_jntIdx] + GVL_CartJointEncoderCaliData.g_linkEncLimitBuffer; // expand limit
 m_caliLinkEncoder :=GVL_CartJointEncoderCaliData.g_caliLinkEncoder[ i_jntIdx];
 m_linkEncCaliJntPos :=GVL_CartJointEncoderCaliData.g_linkEncCaliJntPos[i_jntIdx];
+m_linkJntPosOffset := 0;
 m_linkEncZeroCross :=GVL_CartJointEncoderCaliData.g_linkEncZeroCross[ i_jntIdx];
 m_multiCycles :=GVL_CartJointEncoderCaliData.g_multipleCyclesJoint[i_jntIdx];
 
 // convert cali link encoder if joint cross zero
 IF 1=m_linkEncZeroCross THEN
-	m_minLinkEncoder :=GVL_CartJointEncoderCaliData.g_minLinkEncoder[ i_jntIdx] + m_linkEncoderDir*GVL_CartJointEncoderCaliData.g_linkEncLimitBuffer; // expand limit
-	m_maxLinkEncoder :=GVL_CartJointEncoderCaliData.g_maxLinkEncoder[ i_jntIdx] - m_linkEncoderDir*GVL_CartJointEncoderCaliData.g_linkEncLimitBuffer; // expand limit
+	m_minLinkEncoder :=GVL_CartJointEncoderCaliData.g_minLinkEncoder[ i_jntIdx] + GVL_CartJointEncoderCaliData.g_linkEncLimitBuffer; // expand limit
+	m_maxLinkEncoder :=GVL_CartJointEncoderCaliData.g_maxLinkEncoder[ i_jntIdx] - GVL_CartJointEncoderCaliData.g_linkEncLimitBuffer; // expand limit
 	IF m_caliLinkEncoder < m_minLinkEncoder THEN
 		m_caliLinkEncoder := GVL_CartJointEncoderCaliData.g_caliLinkEncoder[ i_jntIdx] + m_linkEncoderRes;
 	END_IF
@@ -242,26 +243,7 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="7" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartJoint.init">
-      <LineId Id="171" Count="0" />
-      <LineId Id="155" Count="1" />
-      <LineId Id="89" Count="7" />
-      <LineId Id="98" Count="3" />
-      <LineId Id="163" Count="0" />
-      <LineId Id="102" Count="8" />
-      <LineId Id="191" Count="1" />
-      <LineId Id="111" Count="1" />
-      <LineId Id="190" Count="0" />
-      <LineId Id="116" Count="1" />
-      <LineId Id="122" Count="4" />
-      <LineId Id="184" Count="0" />
-      <LineId Id="127" Count="1" />
-      <LineId Id="178" Count="0" />
-      <LineId Id="130" Count="1" />
-      <LineId Id="152" Count="1" />
-      <LineId Id="133" Count="1" />
-      <LineId Id="154" Count="0" />
-      <LineId Id="148" Count="3" />
-      <LineId Id="137" Count="5" />
+      <LineId Id="254" Count="58" />
       <LineId Id="39" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartJoint.updateCmd">

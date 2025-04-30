@@ -105,13 +105,13 @@ END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[
 FOR i := 5 TO g_cartJntNum DO
-	IF (GVL_CartMotorParameters.g_minJntPos[i] +  GVL_CartControlParameters.g_carJntSoftwareLimit[i]) > m_trajJntPos[i] THEN
+	IF (GVL_CartMotorParameters.g_minJntPos[i] +  GVL_CartControlParameters.g_carJntSoftwareLimit[i]) >= m_trajJntPos[i] THEN
 		IF (m_tarPosInc[i] - m_lastPosInc[i]) <0 THEN
 			m_tarPosInc[i] := m_lastPosInc[i];
 		END_IF
 		calcCmdReachLimit[i] := TRUE;
 	
-	ELSIF m_trajJntPos[i]>(m_maxJntPos[i] -  GVL_CartControlParameters.g_carJntSoftwareLimit[i]) THEN
+	ELSIF m_trajJntPos[i]>=(m_maxJntPos[i] -  GVL_CartControlParameters.g_carJntSoftwareLimit[i]) THEN
 		IF (m_tarPosInc[i] - m_lastPosInc[i]) >0 THEN
 			m_tarPosInc[i] := m_lastPosInc[i];
 		END_IF

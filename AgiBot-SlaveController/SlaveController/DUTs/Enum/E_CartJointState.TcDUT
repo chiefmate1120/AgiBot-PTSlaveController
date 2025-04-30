@@ -17,6 +17,7 @@
 	CartJointState_SlowStop := 12,
 	CartJointState_StandColuAdjust := 13,
 	CartJointState_SupportLeg := 14,
+	CartJointState_PowerOff := 15,
 	
 	CartJointState_CycleTest:= 50,
 	CartJointState_MotionTest := 51,

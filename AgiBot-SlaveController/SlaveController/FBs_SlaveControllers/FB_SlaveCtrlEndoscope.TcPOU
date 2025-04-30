@@ -119,7 +119,7 @@ m_cmdJntVel[3]:= armDHJntVel[3];
 m_cmdWVelLocal := LIMIT (-GVL_SlaveMotorParameters.g_maxJntVel[8],  m_cmdWVelLocal, GVL_SlaveMotorParameters.g_maxJntVel[8]);
 
 // as there are two types scope holder, need to determin the rotate joint index
-IF i_slaveArm.instrument.onChipData.m_InstruID = 31 THEN
+IF i_slaveArm.instrument.onChipData.m_InstruID = InstruType_NewEndoscope THEN
 	scopeRotJntIdx :=7;
 	m_jntOPMode[6] := DriverOPMode_Trq;
 ELSE
@@ -136,6 +136,11 @@ m_cmdJntPos[1]:=m_simJntPos[1]+m_cmdJntVel[1]*g_slaveArmCtrlCycleTime;
 m_cmdJntPos[2]:=m_simJntPos[2]+m_cmdJntVel[2]*g_slaveArmCtrlCycleTime;
 m_cmdJntPos[3]:=m_simJntPos[3]+m_cmdJntVel[3]*g_slaveArmCtrlCycleTime;
 m_cmdJntPos[scopeRotJntIdx]:=m_simJntPos[scopeRotJntIdx]+m_cmdJntVel[scopeRotJntIdx]*g_slaveArmCtrlCycleTime;
+
+// joint6 output torque to help rotation motion
+IF m_jntOPMode[6] = DriverOPMode_Trq THEN
+	m_cmdJntTrq[6] := -0.5*i_slaveArm.cmdJntTrq[7];
+END_IF
 
 m_simJntPos := m_cmdJntPos;
 
@@ -282,7 +287,7 @@ rotateCompensate := -vecDot(jnt4JacoInv, wVelWrd);]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlEndoscope.calcCmdJntPos">
-      <LineId Id="1391" Count="76" />
+      <LineId Id="1509" Count="81" />
       <LineId Id="206" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlEndoscope.cmdVelCalc">

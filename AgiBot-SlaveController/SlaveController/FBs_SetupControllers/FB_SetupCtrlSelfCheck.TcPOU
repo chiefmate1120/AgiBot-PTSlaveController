@@ -5,6 +5,7 @@
 FUNCTION_BLOCK PUBLIC FB_SetupCtrlSelfCheck EXTENDS FB_SetupArmCtrlBase
 VAR CONSTANT
 	m_selfCheckMotionNum :INT :=1;
+	m_dataSampleNum :INT :=2000;
 END_VAR
 VAR
 	// slave self-check motion parameters
@@ -20,11 +21,52 @@ VAR
 	m_jntCtrlErr:Vec5d;
 	m_jntCtrlErrThres :Vec5d:=[2.0*g_deg2rad, 0.005,  0.005, 2(2.0*g_deg2rad)];
 	
+	// sample data pool
+	m_jnt3TrqDataPool :ARRAY[1..m_dataSampleNum] OF LREAL;
+	m_jnt3DataPoolIdx :INT:=1;
+	m_jnt3GravityBias :LREAL :=0;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
+    <Method Name="calcBias" Id="{9692a283-ec8c-4a4e-9d1d-3d1c407e9495}">
+      <Declaration><![CDATA[METHOD calcBias : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+VAR
+	dataSum:LREAL ;
+	i:INT;
+	q:LREAL;
+	armIdx:INT;
+	jnt3Friction :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[dataSum :=0;
+FOR i:=1 TO m_dataSampleNum DO
+	dataSum := dataSum + m_jnt3TrqDataPool[i];
+END_FOR
+
+m_jnt3GravityBias := dataSum/m_dataSampleNum-i_setupArm.jntGravity[3];
+
+armIdx:= i_setupArm.armIdx;
+q := LIMIT(GVL_SetupArmDynamics.g_setupJnt3GravityPosRange[armIdx,1], i_setupArm.curJntPos[3], GVL_SetupArmDynamics.g_setupJnt3GravityPosRange[armIdx,2]);
+jnt3Friction:=GVL_SetupArmDynamics.g_setupJnt3FrictionParams[armIdx,1]*EXPT(q,3)+GVL_SetupArmDynamics.g_setupJnt3FrictionParams[armIdx,2]*EXPT(q,2)+
+				GVL_SetupArmDynamics.g_setupJnt3FrictionParams[armIdx,3]*q+GVL_SetupArmDynamics.g_setupJnt3FrictionParams[armIdx,4];
+jnt3Friction:=ABS(jnt3Friction);
+			
+IF m_jnt3GravityBias > jnt3Friction THEN
+	m_jnt3GravityBias := m_jnt3GravityBias- jnt3Friction;
+ELSIF m_jnt3GravityBias < -jnt3Friction THEN
+	m_jnt3GravityBias := m_jnt3GravityBias + jnt3Friction;
+END_IF
+
+m_jnt3GravityBias := LIMIT(-10, m_jnt3GravityBias , 10);]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="calcCmdJntPos" Id="{d8beec4e-d9e1-4918-810b-b7d735a8f515}">
       <Declaration><![CDATA[// override this function in each exact controller
 METHOD PROTECTED calcCmdJntPos : BOOL
@@ -42,6 +84,18 @@ IF m_slefCheckPlanner[m_selfCheckTrajIdx].isGene = FALSE THEN
 	calcCmdJntPos:=FALSE;
 	RETURN;
 END_IF
+
+// sample joint3 torque data
+IF m_timePeriod > 0.5 THEN
+	IF m_jnt3DataPoolIdx<=m_dataSampleNum THEN
+		m_jnt3TrqDataPool[m_jnt3DataPoolIdx] := i_setupArm.curJntTrq[3];	
+		m_jnt3DataPoolIdx:=m_jnt3DataPoolIdx+1;
+	ELSE
+		calcBias(i_setupArm);
+		m_isFinished := TRUE;
+	END_IF	
+END_IF
+RETURN;
 
 // traj plan
 calcCmdJntPos :=m_slefCheckPlanner[m_selfCheckTrajIdx].evaluate(m_timePeriod, jntPos=> m_cmdJntPos, jntVel=>m_cmdJntVel, jntAcc=> m_cmdJntAcc);
@@ -86,8 +140,9 @@ END_VAR
       <Implementation>
         <ST><![CDATA[SUPER^.Init(i_setupArm,r_setupArmCtrlCmd);
 m_jntEnableFlag[3]:=1;
-m_jntEnableFlag[4]:=1;
-m_jntEnableFlag[5]:=1;
+m_jntOPMode[3]:=DriverOPMode_PosTrq;
+m_jntEnableFlag[4]:=0;
+m_jntEnableFlag[5]:=0;
 
 // traj plan
 m_selfCheckTrajIdx :=1;
@@ -115,11 +170,33 @@ END_IF;
     <LineIds Name="FB_SetupCtrlSelfCheck">
       <LineId Id="9" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SetupCtrlSelfCheck.calcBias">
+      <LineId Id="10" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="14" Count="2" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="30" Count="1" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="32" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SetupCtrlSelfCheck.calcCmdJntPos">
       <LineId Id="41" Count="0" />
       <LineId Id="37" Count="0" />
       <LineId Id="67" Count="0" />
       <LineId Id="39" Count="1" />
+      <LineId Id="151" Count="0" />
+      <LineId Id="158" Count="8" />
+      <LineId Id="150" Count="0" />
+      <LineId Id="167" Count="0" />
       <LineId Id="42" Count="0" />
       <LineId Id="33" Count="0" />
       <LineId Id="14" Count="0" />
@@ -137,6 +214,7 @@ END_IF;
     <LineIds Name="FB_SetupCtrlSelfCheck.init">
       <LineId Id="57" Count="0" />
       <LineId Id="136" Count="0" />
+      <LineId Id="197" Count="0" />
       <LineId Id="180" Count="1" />
       <LineId Id="148" Count="1" />
       <LineId Id="182" Count="0" />

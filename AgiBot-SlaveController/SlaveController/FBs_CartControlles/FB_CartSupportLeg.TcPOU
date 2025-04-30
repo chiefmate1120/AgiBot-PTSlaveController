@@ -16,7 +16,7 @@ VAR
 	m_maxJntCurrent : ARRAY [1..2] OF LREAL := [800,800];
 	
 	//output support leg break IO
-	m_supportLegBreak AT %Q* :ARRAY [1..2] OF  DINT;
+	m_supportLegBreak :ARRAY [1..2] OF  DINT;
 	
 	// time threshold to 5-8joint after it's enabled
 	m_cartAdjustStartWaitTime :LREAL := 0.2;
@@ -31,6 +31,9 @@ VAR
 	m_trocarNum : INT;
 	
 	m_jntOTG :ARRAY [1..2] OF FB_secOrdTrajFilter;
+	
+	//check error
+	m_errorID :Vec2i;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -50,10 +53,15 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[//In this method, 8 represents the overhang angle
-m_adjustStartTime :=LIMIT(0, m_adjustStartTime + g_cartCtrlCycleTime, 2);
+m_adjustStartTime :=LIMIT(0, m_adjustStartTime + g_cartCtrlCycleTime, 10);
 m_actJntPos := i_slaveCart.curJntPos;
+IF SafetyCheck.m_safetyCheckData.m_cartSteadyFootErr THEN
+	m_cmdJntPos[1] := m_actJntPos[1];
+	m_cmdJntPos[2] := m_actJntPos[2];
+	RETURN;
+END_IF
 
-IF m_trocarNum = 0 THEN
+IF m_trocarNum = 0 OR NOT i_slaveCart.m_drivingLeverSensorManual THEN
 	m_isFinished :=supportLegUp(i_slaveCart );
 ELSE
 	m_isFinished :=supportLegDown(i_slaveCart );
@@ -93,24 +101,30 @@ ELSE
 	m_jntOPMode[2]:= DriverOPMode_Pos;
 END_IF
 
-
-m_incJntPos[1] :=0;
-m_incJntPos[2] :=0;
-
-m_breakCloseTime[1] := 0;
-m_breakCloseTime[2] := 0;
-
-m_initJntPos[1] := i_slaveCart.curJntPos[1];
-m_initJntPos[2] := i_slaveCart.curJntPos[2];
-
-m_jntOTG[1].init(i_curCmdPos:= m_cmdJntPos[1], i_curCmdVel:= 0, i_maxV:=GVL_CartControlParameters.g_maxJntVel[1] , i_maxA:=GVL_CartControlParameters.g_maxJntAcc[1] , i_Ts:=g_cartCtrlCycleTime );
-m_jntOTG[2].init(i_curCmdPos:= m_cmdJntPos[2], i_curCmdVel:= 0, i_maxV:=GVL_CartControlParameters.g_maxJntVel[2] , i_maxA:=GVL_CartControlParameters.g_maxJntAcc[2] , i_Ts:=g_cartCtrlCycleTime );
+FOR i:=1 TO 2 DO
+	m_errorID[i] :=0;
+	m_incJntPos[i] :=0;
+	m_breakCloseTime[i] := 0;
+	m_initJntPos[i] := i_slaveCart.curJntPos[i];
+	m_jntOTG[i].init(i_curCmdPos:= m_cmdJntPos[i], i_curCmdVel:= 0, i_maxV:=GVL_CartControlParameters.g_maxJntVel[i] , i_maxA:=GVL_CartControlParameters.g_maxJntAcc[i] , i_Ts:=g_cartCtrlCycleTime );
+END_FOR
 
 m_adjustStartTime := 0;
 // update commands to arm
 copyCmds(r_cartCtrlCmd);]]></ST>
       </Implementation>
     </Method>
+    <Property Name="supportLegBreak" Id="{2dbeebf6-09fd-4537-af38-edf90364d7ea}">
+      <Declaration><![CDATA[PROPERTY supportLegBreak : ARRAY [1..2] OF DINT]]></Declaration>
+      <Get Name="Get" Id="{d647eb12-5653-4d84-abe5-bd3c0768571e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[supportLegBreak := m_supportLegBreak;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Method Name="supportLegDown" Id="{592d6ff1-ec90-406e-a353-607d1c838d00}">
       <Declaration><![CDATA[METHOD supportLegDown : BOOL
 VAR_IN_OUT CONSTANT
@@ -133,7 +147,7 @@ FOR i:=1 TO 2 DO
 	
 	IF 0 = m_supportLegBreak[i] THEN
 		IF ABS(m_tarJntPos[i]) > 0.03 THEN
-			m_incJntPos[i] := m_incJntPos[i] -  GVL_CartControlParameters.g_maxJntVel[i]/3 * g_cartCtrlCycleTime;
+			m_incJntPos[i] := m_incJntPos[i] -  GVL_CartControlParameters.g_maxJntVel[i]/5 * g_cartCtrlCycleTime;
 		ELSE
 			m_incJntPos[i] := m_incJntPos[i] -  GVL_CartControlParameters.g_maxJntVel[i] * g_cartCtrlCycleTime;
 		END_IF
@@ -157,17 +171,31 @@ VAR
 	i : INT;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-m_supportLegBreak[1] := 0;
+        <ST><![CDATA[m_supportLegBreak[1] := 0;
 m_supportLegBreak[2] := 0;
-
+m_jntOPMode[1]:= DriverOPMode_Trq;
+m_jntOPMode[2]:= DriverOPMode_Trq;	
+	
 IF m_adjustStartTime > m_cartAdjustStartWaitTime THEN
 	FOR i:=1 TO 2 DO
-		m_cmdJntTrq[i] := -500;
+		m_cmdJntTrq[i] := 0;
 	END_FOR
 	
-	IF NOT (i_slaveCart.m_supportLegSensor[1] OR i_slaveCart.m_supportLegSensor[2]) THEN
+	IF (i_slaveCart.m_supportLegSensor[1]=0 OR m_errorID[1]<>0) AND (i_slaveCart.m_supportLegSensor[2]=0 OR m_errorID[1]<>0) THEN
 		supportLegUp := TRUE;
+	END_IF
+	
+	IF m_adjustStartTime > 2.0 THEN
+		FOR i:=1 TO 2 DO
+			IF i_slaveCart.m_supportLegSensor[i]=1 THEN
+				m_cmdJntTrq[i] := 850;
+			END_IF
+			IF ABS(i_slaveCart.curJntCurrent[i]) > m_maxJntCurrent[i] AND ABS(i_slaveCart.curJntVel[i]) < 0.001 AND ABS(i_slaveCart.curJntPos[i]-m_initJntPos[i])>0.2 AND i_slaveCart.m_supportLegSensor[i]=1 THEN
+				m_errorID[i] := 1;
+			ELSIF  ABS(i_slaveCart.curJntCurrent[i]) > m_maxJntCurrent[i] AND ABS(i_slaveCart.curJntVel[i]) < 0.001 AND ABS(i_slaveCart.curJntPos[i]-m_initJntPos[i])<0.2 AND m_adjustStartTime>5 AND i_slaveCart.m_supportLegSensor[i]=1 THEN
+				m_errorID[i] := 2;
+			END_IF
+		END_FOR
 	END_IF
 END_IF]]></ST>
       </Implementation>
@@ -177,7 +205,12 @@ END_IF]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartSupportLeg.calcCmdJntPos">
-      <LineId Id="246" Count="8" />
+      <LineId Id="246" Count="3" />
+      <LineId Id="264" Count="0" />
+      <LineId Id="266" Count="1" />
+      <LineId Id="265" Count="0" />
+      <LineId Id="268" Count="0" />
+      <LineId Id="250" Count="4" />
       <LineId Id="14" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartSupportLeg.init">
@@ -197,19 +230,16 @@ END_IF]]></ST>
       <LineId Id="150" Count="0" />
       <LineId Id="104" Count="0" />
       <LineId Id="129" Count="0" />
-      <LineId Id="128" Count="0" />
-      <LineId Id="130" Count="0" />
-      <LineId Id="147" Count="0" />
-      <LineId Id="146" Count="0" />
-      <LineId Id="148" Count="0" />
-      <LineId Id="132" Count="0" />
-      <LineId Id="131" Count="0" />
-      <LineId Id="133" Count="0" />
-      <LineId Id="108" Count="1" />
-      <LineId Id="103" Count="0" />
+      <LineId Id="201" Count="0" />
+      <LineId Id="196" Count="0" />
+      <LineId Id="198" Count="2" />
+      <LineId Id="197" Count="0" />
       <LineId Id="57" Count="0" />
       <LineId Id="22" Count="1" />
       <LineId Id="21" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartSupportLeg.supportLegBreak.Get">
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartSupportLeg.supportLegDown">
       <LineId Id="18" Count="0" />
@@ -217,15 +247,20 @@ END_IF]]></ST>
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartSupportLeg.supportLegUp">
-      <LineId Id="26" Count="0" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="27" Count="0" />
-      <LineId Id="18" Count="1" />
-      <LineId Id="8" Count="1" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="10" Count="1" />
-      <LineId Id="5" Count="0" />
+      <LineId Id="53" Count="1" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="56" Count="3" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="61" Count="2" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="102" Count="4" />
+      <LineId Id="109" Count="2" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="75" Count="0" />
       <LineId Id="21" Count="0" />
     </LineIds>
   </POU>

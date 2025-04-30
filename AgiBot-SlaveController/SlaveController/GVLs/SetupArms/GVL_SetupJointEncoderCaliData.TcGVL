@@ -5,36 +5,20 @@
 // Robot8 --joints parameters of setup arms
 VAR_GLOBAL
 	// absolute encoder value at minimal joint positon
-	g_minLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT :=
-		[123569, 35609025, 59960, 7554, 105493,
-		 76588 , 33880077, 26600, 25300, 19950,
-		  92809, 39087738, 17590, 90344, 45244,
-		  97353, 37341559, 25800, 58586, 29942];
+	g_minLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT;
 		 
 	// absolute encoder value at maximum joint positon
-	g_maxLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT :=
-		[29697 , 34190666, 3898, 124046, 40136,
-		 113660, 32457000, 36064, 39847, 85214,
-		 129919 , 37687900,  27054, 104908, 111011,
-		  4419 , 35927748, 35262, 73122, 95128];
+	g_maxLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT;
 	
 	// absolute encoder value at calibrated positon
-	g_caliLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT :=
-		[10043, 34190666, 59960, 67515, 7194,
-		  94700, 32457000, 26600, 100632, 117990,
-		 111618, 37687900, 17590 , 35294, 78076,
-		  117777, 35927748, 25800, 4418, 128031];
+	g_caliLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT;
 	
 	 // if absolute encoder value cross zeros within joint motion range
-	g_linkEncZeroCross :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF INT :=
-		[1, 0, 1, 0, 1,
-		 0, 0, 0, 1, 1,
-		 0, 0, 0, 1, 0,
-		 1, 0, 0, 1, 1];
+	g_linkEncZeroCross :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF INT;
 		 
 	// joint SDO address				
-	g_setupArmNetID: ARRAY[1..4] OF T_AmsNetId:=['169.254.0.16.9.1','192.168.2.91.4.1','192.168.2.91.6.1','192.168.2.91.5.1'];
-	g_setupLEDNetPort:ARRAY[1..g_sArmNum] OF UINT :=[4(1001)];	
+	g_setupArmNetID: ARRAY[1..4] OF T_AmsNetId:=['169.254.223.120.10.1','192.168.2.91.4.1','192.168.2.91.6.1','192.168.2.91.5.1'];
+	g_setupLEDNetPort:ARRAY[1..g_sArmNum] OF UINT :=[4(1003)];	
 END_VAR
 
 VAR_GLOBAL CONSTANT		 
@@ -44,7 +28,7 @@ VAR_GLOBAL CONSTANT
 
 	// absolute encoder direction
 	g_asbEncoderDir :ARRAY[1..g_setupJntNum] OF INT :=[1, -1, 1, -1, 1];
-						
+													
 	// flag if joint can rotate multiple cycles
 	g_multipleCyclesJoint :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF INT :=
 		[0, 0, 0, 0, 0,

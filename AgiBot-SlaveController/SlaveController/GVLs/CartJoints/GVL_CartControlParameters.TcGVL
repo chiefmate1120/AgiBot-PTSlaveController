@@ -10,7 +10,7 @@ VAR_GLOBAL
 	g_curJntTrqLpfCutoffFreq :LREAL := 300;
 	
 	g_curBeamStretchJntInitPos :LREAL := 0.972;
-	g_carJntSoftwareLimit :vec8d := [4(0),0.005, 2*g_deg2Rad, 0.005, 2*g_deg2Rad];
+	g_carJntSoftwareLimit :vec8d := [4(0),0.005, 2*g_deg2Rad, 0.005, 1*g_deg2Rad];
 	
 	g_maxCartVel :ARRAY [1..4] OF LREAL:= [0.04, 0.05, 0.05, 5*g_deg2Rad];
 	
@@ -28,7 +28,7 @@ VAR_GLOBAL
 	
 	g_jntCtrlAngTolHigh :LREAL :=1*g_deg2Rad;
 	
-	g_cartInitialHeight : UINT := 1805;
+	g_cartInitialHeight : UINT := 1785;
 	g_cartOpenHorizonLaserHeight : UINT := 2000;
 	
 	g_wrenchSensorCutoffFreq  :LREAL := 10;

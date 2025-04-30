@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_AdjustLongPress" Id="{e0779f91-07c8-4baf-aa2d-030a1a40aeb6}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_AdjustLongPress
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	m_adjustOnTime :LREAL :=0;
+	m_timeThres :LREAL :=2.0;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="run" Id="{37acad5a-bbd5-4003-a087-e278f155bb55}">
+      <Declaration><![CDATA[// check if instrument is on
+METHOD run : BOOL
+VAR_INPUT
+	IOValue :UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[run := m_adjustOnTime>m_timeThres AND 4<>(IOValue AND 10#4);
+
+// adjust io is 3th bit 
+IF 4=(IOValue AND 10#4) THEN
+	m_adjustOnTime :=m_adjustOnTime+g_slaveArmCtrlCycleTime;
+ELSE
+	m_adjustOnTime :=0;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_AdjustLongPress">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_AdjustLongPress.run">
+      <LineId Id="61" Count="1" />
+      <LineId Id="49" Count="5" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

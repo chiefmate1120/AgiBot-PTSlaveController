@@ -21,7 +21,10 @@ STRUCT
 	
 	m_jntPosReachLimit : vec8b;
 	
-	m_inMotion : BOOL := false;
+	m_inMotion : BOOL := FALSE;
+	
+	//support leg error ID
+	m_supportLegErrID :Vec2i;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

@@ -21,7 +21,7 @@ STRUCT
 	
 	//Instrument Clamp Error
 	m_Error:BOOL;
-	m_ErrorID:INT;//1器械类型错误、2器械使用次数超限、3两个内窥镜
+	m_ErrorID:INT;//1器械类型错误、2器械使用次数超限、3两个内窥镜、4器械使用次数写入失败
 
 END_STRUCT
 END_TYPE

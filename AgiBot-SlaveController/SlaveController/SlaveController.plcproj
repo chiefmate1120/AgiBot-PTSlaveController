@@ -337,6 +337,9 @@
     <Compile Include="DUTs\Type\Vec3d.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Type\Vec3i.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Type\Vec4b.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -386,6 +389,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Auxiliary\FB_AdjustDetect.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Auxiliary\FB_AdjustLongPress.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Auxiliary\FB_cartJntDisenableDetect.TcPOU">
@@ -496,6 +502,9 @@
     <Compile Include="FBs_CartControlles\FB_CartCtrlStandColuAdjust.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_CartControlles\FB_CartPowerOff.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_CartControlles\FB_CartSupportLeg.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -503,6 +512,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Filters\FB_LowPassFilter.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_RobotDynamics\FB_FullArmKinematic.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_RobotDynamics\FB_InstruViewCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_RobotDynamics\FB_SetupGravity.TcPOU">
@@ -613,6 +628,9 @@
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlDisable.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlDynaCali.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlEndoscope.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -635,6 +653,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlInstruRetract.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlKineCaliSample.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlMasterSlave.TcPOU">
@@ -1102,10 +1123,29 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
+    <Compile Include="Logger\AGILOG_DEBUG.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Logger\AGILOG_INFO.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Logger\GVL_RunTimeLogger.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="Logger\LogDataType.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Logger\LogDataUnion.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Mains\CartControl.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Mains\RobotDynamics.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mains\runTimeLogger.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Mains\SafetyCheck.TcPOU">
@@ -1153,6 +1193,9 @@
     <Compile Include="SafetyCheck\SafetyCheckDUT\T_Buffer.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Sandbox\FB_BasicInstruControl_old.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Sandbox\FB_SetupArmCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -1163,6 +1206,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Sandbox\FB_SlaveCtrlMasterSlave_bak2.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Sandbox\FB_UltrosonicKnifeControl_old.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TaskCartControl.TcTTO">
@@ -1233,6 +1279,7 @@
     <Folder Include="GVLs\robotCail" />
     <Folder Include="GVLs\SetupArms" />
     <Folder Include="GVLs\SlaveArms" />
+    <Folder Include="Logger" />
     <Folder Include="Mains" />
     <Folder Include="Recipe" />
     <Folder Include="SafetyCheck" />

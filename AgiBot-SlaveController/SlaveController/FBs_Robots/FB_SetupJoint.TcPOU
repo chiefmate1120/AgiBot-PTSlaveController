@@ -38,17 +38,18 @@ m_maxJntPos	:=GVL_SetupMotorParameters.g_maxJntPos[m_armIdx,i_jntIdx];
 //link encoder calibartion data
 m_linkEncoderDir :=GVL_SetupJointEncoderCaliData.g_asbEncoderDir[i_jntIdx];
 m_linkEncLimitBuffer := GVL_SetupJointEncoderCaliData.g_linkEncLimitBuffer[i_jntIdx];
-m_minLinkEncoder :=GVL_SetupJointEncoderCaliData.g_minLinkEncoder[i_armIdx, i_jntIdx] - m_linkEncoderDir*m_linkEncLimitBuffer; // expand limit
-m_maxLinkEncoder :=GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncoderDir*m_linkEncLimitBuffer; // expand limit
+m_minLinkEncoder :=GVL_SetupJointEncoderCaliData.g_minLinkEncoder[i_armIdx, i_jntIdx] - m_linkEncLimitBuffer; // expand limit
+m_maxLinkEncoder :=GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncLimitBuffer; // expand limit
 m_caliLinkEncoder :=GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[i_armIdx, i_jntIdx];
+m_linkJntPosOffset := 0;
 m_linkEncCaliJntPos :=GVL_SetupJointEncoderCaliData.g_linkEncCaliJntPos[i_armIdx,i_jntIdx];
 m_linkEncZeroCross :=GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[i_armIdx, i_jntIdx];
 m_multiCycles :=GVL_SetupJointEncoderCaliData.g_multipleCyclesJoint[i_armIdx,i_jntIdx];
 
 // convert cali link encoder if joint cross zero
 IF 1=m_linkEncZeroCross THEN
-	m_minLinkEncoder :=GVL_SetupJointEncoderCaliData.g_minLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncoderDir*m_linkEncLimitBuffer; // expand limit
-	m_maxLinkEncoder :=GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[i_armIdx, i_jntIdx] - m_linkEncoderDir*m_linkEncLimitBuffer; // expand limit
+	m_minLinkEncoder :=GVL_SetupJointEncoderCaliData.g_minLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncLimitBuffer; // expand limit
+	m_maxLinkEncoder :=GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[i_armIdx, i_jntIdx] - m_linkEncLimitBuffer; // expand limit
 	IF m_caliLinkEncoder < m_minLinkEncoder THEN
 		m_caliLinkEncoder := GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncoderRes;
 	END_IF
@@ -121,26 +122,7 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupJoint.init">
-      <LineId Id="170" Count="1" />
-      <LineId Id="155" Count="0" />
-      <LineId Id="185" Count="1" />
-      <LineId Id="90" Count="0" />
-      <LineId Id="92" Count="4" />
-      <LineId Id="98" Count="3" />
-      <LineId Id="216" Count="0" />
-      <LineId Id="215" Count="0" />
-      <LineId Id="102" Count="8" />
-      <LineId Id="223" Count="1" />
-      <LineId Id="111" Count="1" />
-      <LineId Id="115" Count="2" />
-      <LineId Id="122" Count="6" />
-      <LineId Id="178" Count="0" />
-      <LineId Id="130" Count="1" />
-      <LineId Id="152" Count="1" />
-      <LineId Id="133" Count="1" />
-      <LineId Id="154" Count="0" />
-      <LineId Id="148" Count="3" />
-      <LineId Id="137" Count="5" />
+      <LineId Id="288" Count="58" />
       <LineId Id="39" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupJoint.updateStatus">

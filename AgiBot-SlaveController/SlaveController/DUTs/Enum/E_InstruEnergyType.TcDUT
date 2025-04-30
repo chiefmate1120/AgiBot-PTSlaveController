@@ -6,7 +6,8 @@
 	InstruEnergyType_UNKNOWM := 0,
 	InstruEnergyType_Unipolar := 1,
 	InstruEnergyType_Bipolar := 2,
-	InstruEnergyType_UltrasonicScalpel := 3
+	InstruEnergyType_UltrasonicScalpel := 3,
+	InstruEnergyType_ForceBipolar := 5
 );
 END_TYPE
 ]]></Declaration>

@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_InstruViewCheck" Id="{7964d976-fe93-456f-842c-b0386e5ee4c4}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_InstruViewCheck
+VAR
+	
+	// scoep projection matrix 
+	//SN: HA20160831
+	m_scopeRot :Mat3d :=[0.9961, 0.0541, 0.0703, 
+						-0.0572, 0.9975, 0.0424,
+						-0.0679, -0.0462, 0.9966];
+	m_scopePos :Vec3d:= [0.005, 0.002744, 0.005];
+	m_scopeFocal :LREAL :=2942;
+//	//SN: HA21938730
+//	m_scopeRot :Mat3d :=[0.9983, -0.0327, 0.048, 
+//						0.0319, 0.9993, 0.0179,
+//						-0.0486, -0.0164, 0.9987];
+//	m_scopePos :Vec3d:= [0.005, 0.000214, 0.00386];
+//	m_scopeFocal :LREAL :=1400;
+	
+//	//SN: HA20160831
+//	m_scopeRot :Mat3d :=[0.9952, 0.0185, 0.0961, 
+//						-0.0177, 0.9998, -0.0099,
+//						-0.0963, 0.0081, 0.9953];
+//	m_scopePos :Vec3d:= [-0.0006967, 0.001848, -0.005];
+//	m_scopeFocal :LREAL :=1420;
+
+	 // image boundary
+	 m_imgWidth :INT := 1920;
+	 m_ImgHeight :INT :=1080;
+
+	// arm kinematic function block
+	m_armKinematic :ARRAY[1..g_sArmNum] OF FB_FullArmKinematic;
+	
+	// instrument pose
+	m_instruReady:ARRAY[1..g_sArmNum] OF BOOL;
+	m_instruPose :ARRAY[1..g_sArmNum] OF ST_Frame;
+	
+	// endoscope pose
+	m_scopeReady :BOOL;
+	m_scopePose : ST_Frame;
+	
+	// instrument pose in scope 
+	m_instruPoseInScope :ARRAY[1..g_sArmNum] OF ST_Frame;
+	m_instruPosInScope :ARRAY[1..g_sArmNum] OF Vec3d;
+	
+	// instrument position in image([x_pixel, y_pixel, z_dir])
+	m_instruImgPos :ARRAY[1..g_sArmNum] OF Vec3d;
+	
+	// out-view instrument position on image boundary([x_pixel, y_pixel, z_dir])
+	 m_instruImgBoundPos :ARRAY[1..g_sArmNum] OF Vec3i;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="init" Id="{15e2d30a-31b4-4b83-bf76-03796ae588be}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO g_sArmNum DO
+	m_instruReady[i]:=FALSE;
+	m_armKinematic[i].init(i);
+	m_instruImgPos[i]:=g_zeroVec3d;
+	m_instruImgBoundPos[i]:=g_zeroVec3i;
+END_FOR
+m_scopeReady:=FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{1b33c268-2743-42e9-adb1-5a34b212184f}">
+      <Declaration><![CDATA[METHOD run : BOOL
+VAR_IN_OUT CONSTANT
+	// setup joint position
+	i_setupJntPos :ARRAY[1..g_sArmNum] OF Vec5d;
+	
+	// slave joint position
+	i_slaveDHJntPos :ARRAY[1..g_sArmNum] OF Vec6d;
+	
+	// instrument info
+	i_instruInfo : ARRAY[1..g_sArmNum] OF ST_InstruStatus;
+END_VAR
+
+VAR
+	i:INT;
+	tmpFrame: ST_Frame;
+	newPos:Vec3d ;
+	xb,yb : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_scopeReady := FALSE;
+// update instrument and endoscope pose
+FOR i:=1 TO g_sArmNum DO 
+	m_instruReady[i]:=FALSE;
+	IF i_instruInfo[i].m_ready THEN
+		m_instruReady[i]:=TRUE;
+		m_armKinematic[i].run(i_setupJntPos[i],i_slaveDHJntPos[i], i_instruInfo[i], m_instruPose[i]);
+		IF i_instruInfo[i].m_type = InstruType_Endoscope THEN
+			m_scopePose := m_instruPose[i];
+			m_scopeReady := TRUE;
+		END_IF
+	END_IF
+	
+	m_instruImgPos[i]:=g_zeroVec3d;
+	m_instruImgBoundPos[i]:=g_zeroVec3i;
+END_FOR
+
+IF m_scopeReady THEN
+	FOR i:=1 TO g_sArmNum DO
+		IF m_instruReady[i] THEN
+			// calculate instrument pose in endoscope
+			tmpFrame :=invFrame(m_scopePose);
+			m_instruPoseInScope[i] := transform(tmpFrame, m_instruPose[i]);
+			
+			// calculate instrument in image
+			IF ABS(m_instruPoseInScope[i].m_pos[3])>0.005 THEN
+				MatMultiVec(m_scopeRot, m_instruPoseInScope[i].m_pos, newPos);
+				vecSelfAdd(newPos, m_scopePos);
+				m_instruPosInScope[i]:=newPos;
+				m_instruImgPos[i][1]:= m_scopeFocal* newPos[1]/ABS(newPos[3]);
+				m_instruImgPos[i][2]:= -m_scopeFocal * newPos[2]/ABS(newPos[3]);
+				m_instruImgPos[i][3] := sign(newPos[3]); 
+			END_IF
+			
+			// check if instrument is  out of view
+			IF ABS(m_instruImgPos[i][1])>m_imgWidth OR ABS(m_instruImgPos[i][2])>m_ImgHeight THEN
+				IF ABS(m_instruImgPos[i][2]/m_instruImgPos[i][1]) > INT_TO_LREAL( m_ImgHeight)/INT_TO_LREAL(m_imgWidth) THEN
+					yb:=sign(m_instruImgPos[i][2])*m_ImgHeight;
+					xb:=LREAL_TO_INT(m_instruImgPos[i][1]*yb/m_instruImgPos[i][2]);
+				ELSE
+					xb:=sign(m_instruImgPos[i][1])*m_imgWidth;
+					yb:=LREAL_TO_INT(m_instruImgPos[i][2]*xb/m_instruImgPos[i][1]);
+				END_IF
+				m_instruImgBoundPos[i][1]:=xb;
+				m_instruImgBoundPos[i][2]:=yb;
+				m_instruImgBoundPos[i][3]:=LREAL_TO_INT(m_instruImgPos[i][3]);
+			END_IF
+						
+		END_IF
+	END_FOR
+END_IF
+
+
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_InstruViewCheck">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_InstruViewCheck.init">
+      <LineId Id="5" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_InstruViewCheck.run">
+      <LineId Id="192" Count="55" />
+      <LineId Id="34" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

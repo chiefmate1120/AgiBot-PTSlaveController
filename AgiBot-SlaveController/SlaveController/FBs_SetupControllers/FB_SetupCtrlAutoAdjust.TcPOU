@@ -3,17 +3,69 @@
   <POU Name="FB_SetupCtrlAutoAdjust" Id="{53032ea5-b008-491f-a641-5219ef32615c}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Setup Arm Adjust
 FUNCTION_BLOCK PUBLIC FB_SetupCtrlAutoAdjust EXTENDS FB_SetupArmCtrlBase
-VAR_INPUT
-END_VAR
-VAR_OUTPUT
-END_VAR
 VAR
+	// jnt5 adjust velocity
+	m_jnt5MaxAdjustVel :LREAL:=3.0*g_deg2Rad;
+	m_jnt5MaxAdjustVelWithTrocar :LREAL:=1.0*g_deg2Rad;
+	m_jnt5MaxAdjustVelNoTrocar :LREAL:=3.0*g_deg2Rad;
+	m_jnt5MaxAdjustAcc :LREAL:=10*g_deg2Rad;
+	m_jnt5MaxAdjustJerk :LREAL:=100*g_deg2Rad;
+	
+	// jnt5 enabled time period
+	m_jnt5EnableTime :LREAL :=0;
+	
+	// time threshold to drive jnt5 after it's enabled
+	m_jnt5AdjustWaitTime :LREAL := 0.25;
+	
+	// traj filter
+	m_jnt5TargetPos :LREAL;
+	m_jnt5MotionOTG :FB_thirdOrdTrajFilter;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
-    <Method Name="init" Id="{dd68468f-e9b8-4053-9776-4b6e1ffcee16}">
+    <Method Name="calcCmdJntPos" Id="{5404c0fa-9750-47fa-bb77-b814ebcded59}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+
+
+VAR 
+	i :INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF m_jntEnableFlag[5] = 0 THEN
+	RETURN;
+END_IF
+
+m_jnt5EnableTime := m_jnt5EnableTime + g_setupArmCtrlCycleTime;
+
+//check trocar single,change control velocity
+IF i_setupArm.trocarOn THEN
+	m_jnt5MaxAdjustVel := 1.0*g_deg2Rad;
+ELSE
+	m_jnt5MaxAdjustVel := 3.0*g_deg2Rad;
+END_IF
+m_jnt5MotionOTG.setMaxV(m_jnt5MaxAdjustVel);
+
+// update command position
+IF m_jnt5EnableTime>m_jnt5AdjustWaitTime THEN
+	// target joint postion
+	IF i_setupArm.jnt5AdjustDir >0 THEN
+		m_jnt5TargetPos := GVL_SetupMotorParameters.g_maxJntPos[i_setupArm.armIdx, 5] - g_setupJntPosLimitBuffer[5];
+	ELSIF  i_setupArm.jnt5AdjustDir <0 THEN
+		m_jnt5TargetPos := GVL_SetupMotorParameters.g_minJntPos[i_setupArm.armIdx, 5] + g_setupJntPosLimitBuffer[5];
+	END_IF
+	m_jnt5MotionOTG.run(i_targetPos:=m_jnt5TargetPos , i_targetVel:= 0.0, i_targetAcc:= 0.0, o_cmdAcc=> m_cmdJntAcc[5] , o_cmdVel=>m_cmdJntVel[5] , o_cmdPos=>m_cmdJntPos[5]);
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{d059da11-85f0-484c-8fc1-04c8d016a513}">
       <Declaration><![CDATA[METHOD PUBLIC init : BOOL
 VAR_IN_OUT CONSTANT
 	i_setupArm	:FB_SetupArm;
@@ -25,15 +77,40 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[SUPER^.Init(i_setupArm,r_setupArmCtrlCmd);
-
+m_jnt5EnableTime :=0;
+m_jnt5MaxAdjustVel :=3.0*g_deg2Rad;
+m_jnt5MotionOTG.init(i_curCmdPos:= m_cmdJntPos[5], i_curCmdVel:= 0, i_curCmdAcc:= 0, i_maxV:=m_jnt5MaxAdjustVel , i_maxA:=m_jnt5MaxAdjustAcc, i_maxJ := m_jnt5MaxAdjustJerk, i_Ts:=g_setupArmCtrlCycleTime );
+m_jntEnableFlag[5] :=  BOOL_TO_INT( NOT (SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_setupArm.armIdx, 0, 3] OR  SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_setupArm.armIdx, 5, 3]));
 ]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_SetupCtrlAutoAdjust">
       <LineId Id="9" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SetupCtrlAutoAdjust.calcCmdJntPos">
+      <LineId Id="357" Count="1" />
+      <LineId Id="356" Count="0" />
+      <LineId Id="359" Count="0" />
+      <LineId Id="294" Count="0" />
+      <LineId Id="360" Count="0" />
+      <LineId Id="325" Count="4" />
+      <LineId Id="300" Count="0" />
+      <LineId Id="375" Count="0" />
+      <LineId Id="302" Count="2" />
+      <LineId Id="308" Count="0" />
+      <LineId Id="361" Count="1" />
+      <LineId Id="364" Count="1" />
+      <LineId Id="363" Count="0" />
+      <LineId Id="377" Count="0" />
+      <LineId Id="315" Count="0" />
+      <LineId Id="115" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SetupCtrlAutoAdjust.init">
-      <LineId Id="57" Count="1" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="96" Count="0" />
       <LineId Id="12" Count="0" />
     </LineIds>
   </POU>

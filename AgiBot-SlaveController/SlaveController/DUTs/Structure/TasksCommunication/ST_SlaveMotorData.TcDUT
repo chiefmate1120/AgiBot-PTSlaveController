@@ -11,7 +11,7 @@ STRUCT
 	//motor encoder salta value
 	m_motorEncSalta :ARRAY[1..g_sArmNum] OF Vec8di;
 	
-	m_hallAngleAndEncoderAngle :ARRAY[1..g_sArmNum,1..g_sJntNum] OF UDINT;
+	m_hallAngleAndEncoderAngle :ARRAY[1..g_sArmNum,1..2] OF UDINT;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

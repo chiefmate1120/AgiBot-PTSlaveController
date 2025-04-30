@@ -22,6 +22,10 @@ VAR
 	//adjust start  time 
 	m_adjustStartTime :LREAL;
 	m_jntOTG : FB_secOrdTrajFilter;
+	
+	// filter cut-off frequency for joint 3 velocity
+	m_cmdJoystickLpfJnt3Freq : LREAL :=8;
+	m_cartCtrlFreq :LREAL:=8000;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -64,13 +68,13 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-IF (GVL_CartMotorParameters.g_minJntPos[5] + GVL_CartControlParameters.g_carJntSoftwareLimit[5]) > m_trjJntPos THEN
+IF (GVL_CartMotorParameters.g_minJntPos[5] + GVL_CartControlParameters.g_carJntSoftwareLimit[5]) >= m_trjJntPos THEN
 	IF (m_trjJntInc - m_lastTrajJntPos) <0 THEN
 		m_trjJntInc := m_lastTrajJntPos;
 	END_IF
 	calcCmdReachLimit := TRUE;
 
-ELSIF m_trjJntPos>(m_maxJntPos[5] - GVL_CartControlParameters.g_carJntSoftwareLimit[5]) THEN
+ELSIF m_trjJntPos>=(m_maxJntPos[5] - GVL_CartControlParameters.g_carJntSoftwareLimit[5]) THEN
 	IF (m_trjJntInc - m_lastTrajJntPos) >0 THEN
 		m_trjJntInc := m_lastTrajJntPos;
 	END_IF

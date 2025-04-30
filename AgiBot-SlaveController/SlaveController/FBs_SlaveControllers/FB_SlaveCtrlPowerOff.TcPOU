@@ -8,6 +8,7 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
+	m_time : LREAL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -31,10 +32,11 @@ VAR_IN_OUT CONSTANT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF m_timePeriod > i_slaveArm.armIdx THEN
+        <ST><![CDATA[m_time := m_time + g_slaveArmCtrlCycleTime;
+IF m_time > i_slaveArm.armIdx THEN
 	m_jntEnableFlag :=g_zeroVec8i;
 	m_isFinished := TRUE;
-	IF m_timePeriod  > 4 THEN
+	IF i_slaveArm.armIdx = 4 THEN
 		GVL_interactUI.g_plcPowerOffEnable := TRUE;
 	END_IF
 END_IF]]></ST>
@@ -60,19 +62,35 @@ END_VAR
 m_holdLastCmds := checkToHoldLastCmds(i_slaveArm);
 
 //init
-SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);]]></ST>
+//SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+m_jntOPMode:=g_slaveAllPosMode;
+IF FALSE = m_holdLastCmds THEN
+	m_cmdJntPos:=i_slaveArm.curJntPos;
+ELSE
+	m_cmdJntPos:=r_slaveArmCtrlCmd.m_cmdJntPos;
+END_IF
+
+m_jntEnableFlag := r_slaveArmCtrlCmd.m_jntEnableFlag;
+m_jntEnableFlag[4] := 0;
+m_jntEnableFlag[5] := 0;
+m_jntEnableFlag[6] := 0;
+m_jntEnableFlag[7] := 0;
+m_jntEnableFlag[8] := 0;
+
+m_time :=0;]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_SlaveCtrlPowerOff">
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlPowerOff.calcCmdJntPos">
+      <LineId Id="58" Count="0" />
       <LineId Id="37" Count="5" />
       <LineId Id="20" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlPowerOff.init">
-      <LineId Id="72" Count="3" />
-      <LineId Id="12" Count="0" />
+      <LineId Id="104" Count="18" />
+      <LineId Id="89" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

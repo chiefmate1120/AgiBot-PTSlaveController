@@ -28,7 +28,8 @@ VAR
 	
 	// joint current threshold which indicate panel is buckled with instrument
 	m_maxJntCurrent :Vec5d := [200, 200, 200, 220, 220];
-	m_maxJntCurrentOldEndoScope :Vec5d := [200, 200, 200, 350, 350];
+	m_maxJntCurrentOldEndoScope :Vec5d := [200, 200, 200, 500, 500];
+	m_maxJntCurrentNewEndoScope :Vec5d := [200, 200, 300, 300, 500];
 	
 	// command mount motion
 	m_targetMountPos :Vec8d;
@@ -152,12 +153,6 @@ FOR i:=1 TO 5 DO
 	m_jntOTG[i].init(m_targetMountPos[i+3], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
 	m_jointMounted[i]:=FALSE;
 END_FOR
-
-// TODO
-IF i_slaveArm.armIdx = 1 OR i_slaveArm.armIdx =3 THEN
-	m_maxJntCurrentOldEndoScope[4] := 220.0;
-	m_maxJntCurrentOldEndoScope[5] := 220.0;
-END_IF
 
 m_instruMountStatus:=0;
 m_scopeMountStatus:=0;
@@ -432,16 +427,15 @@ CASE m_scopeMountStatus OF
 		END_FOR
 	
 		// check if buckled
-		m_jointMounted[3]:=FALSE; 
-		m_jointMounted[4]:=FALSE; 
+		//m_jointMounted[3]:=FALSE; 
+		//m_jointMounted[4]:=FALSE; 
 		FOR i:=3 TO 4 DO
-			IF ABS(i_slaveArm.filtJntCurrent[i+3])> m_maxJntCurrent[i] THEN 
+			IF ABS(i_slaveArm.filtJntCurrent[i+3])> m_maxJntCurrentNewEndoScope[i] AND NOT m_jointMounted[i] THEN 
 				m_jointMounted[i]:=TRUE;
 				m_targetMountPos[i+3]:=curJntPos[i+3];
-				m_jntOTG[i].init(m_targetMountPos[i+3], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
-				
+				m_jntOTG[i].init(m_targetMountPos[i+3], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);	
 			ELSE
-				m_targetMountPos[i+3]:=curJntPos[i+3]+m_mountMotionAng[i];
+				m_targetMountPos[i+3]:=curJntPos[i+3]+m_mountMotionAng[i]/2;
 			END_IF
 		END_FOR
 		
@@ -619,10 +613,7 @@ END_FOR]]></ST>
       <LineId Id="53" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.init">
-      <LineId Id="239" Count="14" />
-      <LineId Id="274" Count="4" />
-      <LineId Id="273" Count="0" />
-      <LineId Id="254" Count="8" />
+      <LineId Id="239" Count="23" />
       <LineId Id="92" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.instruClampErrId.Get">
@@ -660,9 +651,7 @@ END_FOR]]></ST>
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.mountNewEndoscope">
-      <LineId Id="93" Count="47" />
-      <LineId Id="175" Count="0" />
-      <LineId Id="141" Count="24" />
+      <LineId Id="184" Count="72" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.mountUltraKnife">

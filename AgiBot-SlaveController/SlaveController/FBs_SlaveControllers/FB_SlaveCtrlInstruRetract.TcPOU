@@ -24,12 +24,12 @@ VAR
 	m_instruJntAcc : LREAL := 4*PI;
 	
 	// PID for joint8
-	m_retractCtrl : FB_PID;
-	m_retractKp:LREAL:=2000;
-	m_retractKd:LREAL:=100;
-	m_retractKi:LREAL:=8000;
-	m_retractKiLimit:LREAL:=300;
-	m_retractCtrlLimit:LREAL:=1000;
+//	m_retractCtrl : FB_PID;
+//	m_retractKp:LREAL:=2000;
+//	m_retractKd:LREAL:=100;
+//	m_retractKi:LREAL:=8000;
+//	m_retractKiLimit:LREAL:=300;
+//	m_retractCtrlLimit:LREAL:=1000;
 	
 	
 END_VAR
@@ -107,8 +107,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// TODO: re-tune joint3 controller, replace this local PID controller with the global one if possible
-m_cmdJntTrq := g_zeroVec8d;
-m_cmdJntTrq[3]:=m_retractCtrl.run(m_cmdJntPos[3],i_slaveArm.curJntPos[3], m_cmdJntVel[3], i_slaveArm.curJntVel[3]);]]></ST>
+m_cmdJntTrq := g_zeroVec8d;]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{7aae2cb5-3dc8-47a4-84c8-fce1eb91d921}">
@@ -123,7 +122,6 @@ END_VAR
 VAR
 	i:INT;
 	cycleNum:LREAL;
-	currentRatioMotor2Jnt:LREAL;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -131,7 +129,6 @@ END_VAR
 m_holdLastCmds := checkToHoldLastCmds(i_slaveArm);
 
 SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
-m_jntOPMode[3] := DriverOPMode_Trq;
 
 // decide target position
 m_jnt3TargetPos := GVL_SlaveMotorParameters.g_maxDHJntPos[3];
@@ -152,10 +149,6 @@ FOR i:=1 TO 5 DO
 	m_instruJntTargetPos[i]:=cycleNum* g_2Pi;
 	m_instruJntOTG[i].init(m_cmdJntPos[i+3], 0,m_instruJntVel, m_instruJntAcc, g_slaveArmCtrlCycleTime);
 END_FOR
-
-// init PID controller
-currentRatioMotor2Jnt:=GVL_SlaveMotorParameters.g_motorTrqConst[m_armIdx,3]*GVL_SlaveMotorParameters.g_motorReduction[m_armIdx,3]/1000;
-m_retractCtrl.init(g_slaveArmCtrlCycleTime,m_retractKp,m_retractKd,m_retractKi,m_retractKiLimit*currentRatioMotor2Jnt, m_retractCtrlLimit*currentRatioMotor2Jnt);
 
 // update commands to arm
 copyCmds(r_slaveArmCtrlCmd);]]></ST>
@@ -197,10 +190,12 @@ copyCmds(r_slaveArmCtrlCmd);]]></ST>
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruRetract.calcCmdJntTrq">
       <LineId Id="3" Count="1" />
-      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruRetract.init">
-      <LineId Id="352" Count="30" />
+      <LineId Id="396" Count="3" />
+      <LineId Id="401" Count="19" />
+      <LineId Id="440" Count="0" />
+      <LineId Id="426" Count="0" />
       <LineId Id="191" Count="0" />
     </LineIds>
   </POU>

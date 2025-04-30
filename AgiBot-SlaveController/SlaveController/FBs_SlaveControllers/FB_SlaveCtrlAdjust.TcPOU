@@ -16,6 +16,10 @@ VAR
 	// distance buffer from joint limit to start damp
 	m_limitBufferForDamp :Vec3d :=[20*g_deg2Rad, 20*g_deg2Rad, 0.03];
 	
+	// joint velocity threshold for coulomb friction transition
+	m_cFrictionVelThres : LREAL := 5.0 * g_deg2Rad;
+	m_frictionCompScale :LREAL :=0.1;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -35,10 +39,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[m_cmdJntPos[1]:=i_slaveArm.curJntPos[1];
-m_cmdJntPos[2]:=i_slaveArm.curJntPos[2];
-m_cmdJntPos[3]:=i_slaveArm.curJntPos[3];
-FOR i:= 6 TO 8 DO
+        <ST><![CDATA[FOR i:= 1 TO 8 DO
 	IF m_jntOPMode[i] = DriverOPMode_Trq THEN
 		m_cmdJntPos[i]:=i_slaveArm.curJntPos[i];
 	END_IF
@@ -60,6 +61,8 @@ VAR
 	i :INT;
 	dampScale :LREAL;
 	limitDis:LREAL;
+	transitScale:LREAL;
+	cFriction:LREAL;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -93,6 +96,15 @@ FOR i:=1 TO 3 DO
 		m_cmdJntTrq[i] :=m_cmdJntTrq[i] -i_slaveArm.curJntVel[i] * m_maxDamp[i] * dampScale;
 	END_IF
 END_FOR
+
+//add friction compensation for joint4
+FOR i:=1 TO 2 DO
+	transitScale := LIMIT(0, ABS(i_slaveArm.curJntVel[i]/m_cFrictionVelThres),1);
+	cFriction:= transitScale * sign(i_slaveArm.curJntVel[i]) * GVL_SlaveArmDynamics.g_slaveJntFriction[i_slaveArm.armIdx,i];
+	m_cmdJntTrq[i]:= m_cmdJntTrq[i]+m_frictionCompScale*cFriction;
+END_FOR
+
+
 ]]></ST>
       </Implementation>
     </Method>
@@ -140,6 +152,11 @@ IF i_slaveArm.instrument.onChipData.m_InstruReadSucceed THEN
 	END_IF
 END_IF
 
+// hold joint3 if instrument mount failed
+IF i_slaveArm.instruOn AND NOT(SlaveArmControl.m_slaveRobot.m_instrumentMountedFlag[i_slaveArm.armIdx]) THEN
+	m_jntOPMode[3]:=DriverOPMode_PosTrq;
+END_IF
+
 // update commands to arm
 copyCmds(r_slaveArmCtrlCmd);
 ]]></ST>
@@ -149,20 +166,24 @@ copyCmds(r_slaveArmCtrlCmd);
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlAdjust.calcCmdJntPos">
-      <LineId Id="90" Count="2" />
-      <LineId Id="113" Count="0" />
-      <LineId Id="116" Count="1" />
-      <LineId Id="114" Count="1" />
-      <LineId Id="101" Count="0" />
+      <LineId Id="147" Count="5" />
       <LineId Id="39" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlAdjust.calcCmdJntTrq">
       <LineId Id="217" Count="0" />
-      <LineId Id="175" Count="28" />
+      <LineId Id="259" Count="8" />
+      <LineId Id="175" Count="0" />
+      <LineId Id="185" Count="18" />
+      <LineId Id="232" Count="1" />
+      <LineId Id="239" Count="0" />
+      <LineId Id="242" Count="1" />
+      <LineId Id="240" Count="1" />
+      <LineId Id="236" Count="0" />
+      <LineId Id="231" Count="0" />
       <LineId Id="53" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlAdjust.init">
-      <LineId Id="157" Count="32" />
+      <LineId Id="231" Count="37" />
       <LineId Id="12" Count="0" />
     </LineIds>
   </POU>

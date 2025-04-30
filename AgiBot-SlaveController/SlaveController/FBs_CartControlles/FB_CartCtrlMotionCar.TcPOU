@@ -16,11 +16,11 @@ VAR
 	
 	// new strategy
 	m_mass :LREAL :=1;
-	m_friction : LREAL :=1.5;
+	m_friction : LREAL :=2;
 	m_cmdLinearAcc :LREAL:=0;
-	m_maxLinearAcc:LREAL :=4;
+	m_maxLinearAcc:LREAL :=2*pi;
 	m_cmdLinearVel :LREAL :=0;
-	m_maxLinearVel :LREAL := 2;
+	m_maxLinearVel :LREAL := pi;
 	m_staticVelThres :LREAL:=0;
 	m_pushForce :LREAL :=0;
 	m_startMove :BOOL:=FALSE;

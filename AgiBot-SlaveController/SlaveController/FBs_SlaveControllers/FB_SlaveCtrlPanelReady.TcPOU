@@ -13,8 +13,29 @@ END_VAR
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
+    <Method Name="init" Id="{17ec49ee-ddd6-4572-9a43-d8d0ff339593}">
+      <Declaration><![CDATA[// override this function in each exact controller
+// NOTICE: set joint control mode here, and do some initialization if needed
+METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//init
+SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="FB_SlaveCtrlPanelReady">
       <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlPanelReady.init">
+      <LineId Id="12" Count="0" />
+      <LineId Id="15" Count="1" />
     </LineIds>
   </POU>
 </TcPlcObject>

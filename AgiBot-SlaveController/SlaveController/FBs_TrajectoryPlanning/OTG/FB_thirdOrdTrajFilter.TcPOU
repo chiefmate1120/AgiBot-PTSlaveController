@@ -93,7 +93,21 @@ o_cmdAcc:=m_cmdAcc+m_cmdJerk*m_Ts;
 o_cmdVel:=m_cmdVel+(o_cmdAcc+m_cmdAcc)*m_Ts/2;
 o_cmdPos:=m_cmdPos+(o_cmdVel+m_cmdVel)*m_Ts/2;
 
+m_cmdAcc := o_cmdAcc;
+m_cmdVel := o_cmdVel;
+m_cmdPos := o_cmdPos;
+
 ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="setMaxV" Id="{8a1d6bdc-ef96-40ca-8eba-ead79ae47c70}">
+      <Declaration><![CDATA[METHOD setMaxV : BOOL
+VAR_INPUT
+	i_maxV :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_maxV :=i_maxV;]]></ST>
       </Implementation>
     </Method>
     <Method Name="uv" Id="{7e6645fc-31d8-444f-bd4e-35c2089f853f}">
@@ -126,7 +140,13 @@ uv:=MAX(ua_min,MIN(ucv,ua_max));
     </LineIds>
     <LineIds Name="FB_thirdOrdTrajFilter.run">
       <LineId Id="29" Count="27" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="69" Count="1" />
       <LineId Id="59" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_thirdOrdTrajFilter.setMaxV">
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_thirdOrdTrajFilter.uv">

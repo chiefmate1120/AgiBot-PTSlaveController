@@ -18,7 +18,7 @@ END_VAR
 VAR_GLOBAL
 	g_arrayErrCodeArm:ARRAY [1..g_maxNum] OF ARRAY [0..100] OF UDINT;	
 	g_zeroVec100i : ARRAY [1..100] OF ULINT;	
-	g_zeroErrCodeArray : ARRAY [0..30] OF UDINT;
+	g_zeroErrCodeArray : ARRAY [0..50] OF UDINT;
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

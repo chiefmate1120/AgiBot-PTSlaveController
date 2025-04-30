@@ -441,7 +441,7 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_JointBase.linkEnc2Pos">
-      <LineId Id="54" Count="21" />
+      <LineId Id="84" Count="21" />
       <LineId Id="38" Count="0" />
     </LineIds>
     <LineIds Name="FB_JointBase.linkPos.Get">
@@ -469,25 +469,21 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="11" Count="0" />
     </LineIds>
     <LineIds Name="FB_JointBase.updateCmds">
-      <LineId Id="90" Count="12" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="32" Count="1" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="34" Count="1" />
+      <LineId Id="30" Count="0" />
       <LineId Id="53" Count="0" />
     </LineIds>
     <LineIds Name="FB_JointBase.updateStatus">
-      <LineId Id="18" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="16" Count="1" />
-      <LineId Id="52" Count="0" />
-      <LineId Id="7" Count="0" />
-      <LineId Id="6" Count="0" />
-      <LineId Id="33" Count="1" />
-      <LineId Id="38" Count="1" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="36" Count="0" />
-      <LineId Id="22" Count="0" />
-      <LineId Id="27" Count="0" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="28" Count="1" />
+      <LineId Id="56" Count="18" />
       <LineId Id="11" Count="0" />
     </LineIds>
   </POU>

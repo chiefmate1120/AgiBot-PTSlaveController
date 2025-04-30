@@ -9,9 +9,6 @@ END_VAR
 VAR
 	// power box joint motor rated current
 	m_wristJntRatedCurrent : DINT := 200;
-
-	//motor hall angle and encoder angle;   
-	m_hallAngleAndEncoderAngle AT %I* : UDINT;
 END_VAR
 
 ]]></Declaration>
@@ -168,7 +165,7 @@ END_IF
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveJoint.init">
-      <LineId Id="295" Count="60" />
+      <LineId Id="393" Count="60" />
       <LineId Id="39" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveJoint.updateCmds">

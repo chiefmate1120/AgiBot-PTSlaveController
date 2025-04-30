@@ -20,8 +20,8 @@ STRUCT
 	m_cmdArmPos : 	vec6d;		
 	m_instruOpenAngle:LREAL;		
 	
-	m_promptStatus:ARRAY [1..30] OF BOOL;
-	m_promptLocation:ARRAY [1..30] OF UDINT;
+	m_promptStatus:ARRAY [1..50] OF BOOL;
+	m_promptLocation:ARRAY [1..50] OF UDINT;
 	
 	
 	SlaveStopButton:BOOL;

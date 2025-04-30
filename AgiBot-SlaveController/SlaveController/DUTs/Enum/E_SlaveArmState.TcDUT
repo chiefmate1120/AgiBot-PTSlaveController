@@ -28,7 +28,9 @@
 	SlaveArmState_Stop :=23,
 	SlaveArmState_PowerOff := 24,
 	SlaveArmState_SelfCheckTransport := 25,
-	
+	SlaveArmState_kineCaliSample := 26,
+	SlaveArmState_slaveDynaCali := 27,
+		
 	SlaveArmState_MotionTest:=50,
 	SlaveArmState_CycleTest:=51,
 	SlaveArmState_FrictionTest:=52,

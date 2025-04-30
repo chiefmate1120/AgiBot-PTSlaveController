@@ -7,8 +7,10 @@ VAR
 	//Driving force of the car io
 	m_driveForce AT %I* :ARRAY [1..6] OF DINT;
 	m_cartDriveForce :Vec6d;
-	m_cartDriveForceOffset:Vec6d:= [-0.5,2.0,4(0.0)];
+	m_cartDriveForceBak : Vec6d;
+	m_cartDriveForceOffset:Vec6d := [6(0.0)];
 	m_cartDriveForceLpf :ARRAY[1..6] OF FB_LowPassFilter;
+	m_cartDriveForceCaliFinshed: BOOL;
 	
 	//stabilizing foot sensor  (normally-closed contact)
 	m_supportLegSensor AT%I* :ARRAY [1..2] OF BOOL;
@@ -62,6 +64,8 @@ VAR
 	m_CommunicationCycleInitMZSub2:ARRAY [1..3] OF FB_EcCoESdoWrite;
 	m_CommunicationCycleSub1:INT:=1;
 	m_CommunicationCycleSub2:INT:=-3;
+	m_initDriveMaxTorque: ARRAY [1..3] OF FB_EcCoESdoWrite;
+	m_initDriveMaxTorqueValue :  ARRAY [1..3] OF UINT := [3500,3500,5000];
 	
 	//update ui information
 	m_joystickSignalIO AT %I* : ARRAY [1..8] OF UDINT;
@@ -77,6 +81,9 @@ VAR
 	m_midJntPos : LREAL := 0.1;
 	enableTon : ARRAY [1..4] OF FB_TON;
 
+	// velocity filter
+	m_jntVelLpf :FB_LowPassFilter;
+	columnJntVel : LREAL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -115,10 +122,13 @@ END_VAR
 	IF sign<>0 THEN
 		value := -value;
 	END_IF
-	m_cartDriveForce[i]:=value;
+	m_cartDriveForceBak[i]:=value-m_cartDriveForceOffset[i];
+	
 	m_cartDriveForce[i] := m_cartDriveForceLpf[i].run(value)-m_cartDriveForceOffset[i];
 END_FOR
-]]></ST>
+
+//calculate the standrad deviation,calibrate the force sensor.
+m_cartDriveForceCaliFinshed :=cartDriveForceCali(m_cartDriveForce);]]></ST>
       </Implementation>
     </Method>
     <Property Name="cartDockingState" Id="{86905c60-a5d0-40a0-947e-e9a92fd9b4c8}" FolderPath="property\">
@@ -170,6 +180,84 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Method Name="cartDriveForceCali" Id="{ae6d6b05-90d7-4f47-83fa-c0e2ddc672c9}">
+      <Declaration><![CDATA[METHOD cartDriveForceCali : BOOL
+VAR_IN_OUT CONSTANT
+	driveForce :ARRAY [1..6] OF LREAL;
+END_VAR
+VAR_STAT
+	s_driveForceList:ARRAY [1..3] OF ARRAY [1..10] OF LREAL;
+	s_driveForce:ARRAY [1..3] OF LREAL;
+	s_meanValue:ARRAY [1..3] OF LREAL;
+	s_varianceAccum :ARRAY [1..3] OF LREAL;
+	s_variance :ARRAY [1..3] OF LREAL;
+	s_standradDeviation :ARRAY [1..3] OF LREAL;
+	s_index : INT;
+	s_time : INT;
+	s_100 :INT:=100;
+	s_caliFinshed :BOOL := FALSE;
+END_VAR
+VAR
+	i : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//calculate the standrad deviation,calibrate the force sensor.
+s_time :=LIMIT(1, s_time + 1,1001);
+IF (s_time MOD s_100) =0 THEN
+	s_index :=LIMIT(1, s_index + 1,10);
+	s_driveForceList[1][s_index] := driveForce[1];
+	s_driveForceList[2][s_index] := driveForce[2];
+	s_driveForceList[3][s_index] := driveForce[3];
+END_IF
+
+IF s_index = 10 AND NOT s_caliFinshed THEN
+	//calculate mean value
+	FOR i := 1 TO 10 DO
+	    s_driveForce[1]:=s_driveForce[1] + s_driveForceList[1][i];
+		s_driveForce[2]:=s_driveForce[2] + s_driveForceList[2][i];
+		s_driveForce[3]:=s_driveForce[3] + s_driveForceList[3][i];
+	END_FOR
+	s_meanValue[1] := s_driveForce[1]/10;
+	s_meanValue[2] := s_driveForce[2]/10;
+	s_meanValue[3] := s_driveForce[3]/10;
+	
+	//calculate variance
+	FOR i := 1 TO 10 DO
+		s_varianceAccum[1] := (s_driveForceList[1][i]-s_meanValue[1])*(s_driveForceList[1][i]-s_meanValue[1]);
+		s_varianceAccum[2] := (s_driveForceList[2][i]-s_meanValue[2])*(s_driveForceList[2][i]-s_meanValue[2]);
+		s_varianceAccum[3] := (s_driveForceList[3][i]-s_meanValue[3])*(s_driveForceList[3][i]-s_meanValue[3]);
+	END_FOR
+	s_variance[1] := s_varianceAccum[1]/(10-1);
+	s_variance[2] := s_varianceAccum[2]/(10-1);
+	s_variance[3] := s_varianceAccum[3]/(10-1);
+	
+	//calculate standrad deviation
+	s_standradDeviation[1] := SQRT(s_variance[1]);
+	s_standradDeviation[2] := SQRT(s_variance[2]);
+	s_standradDeviation[3] := SQRT(s_variance[3]);
+	
+	IF s_standradDeviation[1] < 0.006 AND s_standradDeviation[2] < 0.006 AND s_standradDeviation[3] < 0.006 THEN
+		s_caliFinshed := TRUE;
+		m_cartDriveForceOffset[1] := s_driveForceList[1][1];
+		m_cartDriveForceOffset[2] := s_driveForceList[2][1];
+		m_cartDriveForceOffset[3] := s_driveForceList[3][1];
+	ELSE
+		s_time := 0;
+		s_caliFinshed := FALSE;
+		FOR i := 1 TO 10 DO
+			s_driveForceList[1][s_index] := 0;
+			s_driveForceList[2][s_index] := 0;
+			s_driveForceList[3][s_index] := 0;
+			s_driveForce[1]:=0;
+			s_driveForce[2]:=0;
+			s_driveForce[3]:=0;
+		END_FOR
+		s_index :=0;
+	END_IF
+END_IF
+cartDriveForceCali := s_caliFinshed;]]></ST>
+      </Implementation>
+    </Method>
     <Property Name="cartDriveForceOffset" Id="{9a1396aa-1b93-41f1-806e-2a06c794ff5a}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY cartDriveForceOffset :REFERENCE TO Vec6d]]></Declaration>
       <Get Name="Get" Id="{3be5ef95-a677-4a5d-b626-bceb80d09b06}">
@@ -195,6 +283,7 @@ VAR_INPUT
 END_VAR
 VAR
 	i:INT;
+	//columnJntVel : LREAL;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[//check overhang rotation button
@@ -208,7 +297,8 @@ END_FOR
 m_trocarOnFlag := BOOL_TO_INT(m_trocarFlag[1]) + BOOL_TO_INT(m_trocarFlag[2]) + BOOL_TO_INT(m_trocarFlag[3]) + BOOL_TO_INT(m_trocarFlag[4]);
 
 //setup robot joint 3 adjust and drive column movement
-m_columnAdjustEnable :=columnAdjustEnable(o_columnJntVel => m_columnJntVel  );
+m_columnAdjustEnable :=columnAdjustEnable(o_columnJntVel => columnJntVel);
+m_columnJntVel := m_jntVelLpf.run(columnJntVel);
 ]]></ST>
       </Implementation>
     </Method>
@@ -455,10 +545,11 @@ END_FOR
 // update cart status if joint position is re-init
 updateStatus();
 
-
+//setup arm joint3 
+m_jntVelLpf.init(1, GVL_CartControlParameters.g_curJntVelLpfCutoffFreq/3, g_cartCtrlFreq);
 
 //MingZhi drive example Initialize the communication period
-FOR i := 1 TO 3 BY 1 DO
+FOR i := 1 TO 3 DO
 	m_CommunicationCycleInitMZSub1[i](sNetID:= GVL_CartJointEncoderCaliData.g_slaveCartNetID,
 				nSlaveAddr := GVL_CartJointEncoderCaliData.g_slaveCartJointNetPort[i+2],
 				nSubIndex:=1,nIndex:=16#60C2,pSrcBuf:=ADR(m_CommunicationCycleSub1),cbBufLen:=SIZEOF(m_CommunicationCycleSub1),bExecute:=TRUE);
@@ -473,6 +564,14 @@ FOR i := 1 TO 3 BY 1 DO
 	
 	IF NOT m_CommunicationCycleInitMZSub2[i].bBusy THEN
 		m_CommunicationCycleInitMZSub2[i](bExecute:=FALSE);
+	END_IF
+	
+	m_initDriveMaxTorque[i](sNetId:= GVL_CartJointEncoderCaliData.g_slaveCartNetID,
+					nSlaveAddr:= GVL_CartJointEncoderCaliData.g_slaveCartJointNetPort[i+2],
+					nSubIndex:= 0, nIndex:= 16#6072, pSrcBuf:= ADR(m_initDriveMaxTorqueValue[i]), cbBufLen:= SIZEOF(m_initDriveMaxTorqueValue[i]), bExecute:= TRUE );
+	
+	IF NOT m_initDriveMaxTorque[i].bBusy THEN
+		m_initDriveMaxTorque[i](bExecute:=FALSE);
 	END_IF
 END_FOR
 ]]></ST>
@@ -595,7 +694,7 @@ FOR i:=1 TO g_sJntNum DO
 		m_cartJoints[i].updateCmd(DriverOPMode_Pos,m_cmdJntPos[i],m_cmdJntTrq[i],m_cmdJntVel[i]);
 	ELSIF i_cartCtrlCmd.m_jntOPMode[i]=DriverOPMode_Trq THEN
 		m_cmdJntPos[i]:=0;
-		m_cartJoints[i].updateCmd(DriverOPMode_Pos,m_cmdJntPos[i],m_cmdJntTrq[i],m_cmdJntVel[i]);
+		m_cartJoints[i].updateCmd(DriverOPMode_Trq,m_cmdJntPos[i],m_cmdJntTrq[i],m_cmdJntVel[i]);
 	ELSIF i_cartCtrlCmd.m_jntOPMode[i]=DriverOPMode_MZPos  THEN
 		m_cmdJntTrq[i]:=0;
 		m_cmdJntVel[i]:=0;
@@ -646,7 +745,7 @@ END_FOR ]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.calcCartDriveForce">
-      <LineId Id="3" Count="21" />
+      <LineId Id="69" Count="24" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.cartDockingState.Get">
@@ -664,6 +763,10 @@ END_FOR ]]></ST>
     <LineIds Name="FB_SlaveCart.cartDriveForce.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SlaveCart.cartDriveForceCali">
+      <LineId Id="3" Count="53" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SlaveCart.cartDriveForceOffset.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
@@ -672,6 +775,7 @@ END_FOR ]]></ST>
     </LineIds>
     <LineIds Name="FB_SlaveCart.checkIO">
       <LineId Id="81" Count="11" />
+      <LineId Id="99" Count="0" />
       <LineId Id="73" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.cmdJntPos.Get">
@@ -732,7 +836,14 @@ END_FOR ]]></ST>
     </LineIds>
     <LineIds Name="FB_SlaveCart.init">
       <LineId Id="152" Count="3" />
-      <LineId Id="164" Count="33" />
+      <LineId Id="164" Count="12" />
+      <LineId Id="219" Count="0" />
+      <LineId Id="177" Count="19" />
+      <LineId Id="204" Count="0" />
+      <LineId Id="206" Count="3" />
+      <LineId Id="211" Count="1" />
+      <LineId Id="210" Count="0" />
+      <LineId Id="197" Count="0" />
       <LineId Id="57" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.joystickSignalAnalysis">

@@ -10,6 +10,9 @@ STRUCT
 	
 	//motor encoder salta value
 	m_motorEncSalta :ARRAY[1..g_sArmNum] OF Vec5di;
+	
+	//check spring breakage from joint 3
+	m_springBreakageCheck : ARRAY [1..g_sArmNum] OF UDINT;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

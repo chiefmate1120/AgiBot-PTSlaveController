@@ -5,11 +5,14 @@
 FUNCTION_BLOCK PUBLIC FB_SetupCtrlStop EXTENDS FB_SetupArmCtrlBase
 VAR
 	// stop motion is terminated after set time period
-	m_maxStopPeriod :LREAL := 0.12;
+	m_maxStopPeriod :LREAL := 0.22;
 	
 	// deceleration period 
-	m_decPeriod :LREAL := 0.1;
+	m_decPeriod :LREAL := 0.2;
 
+	// max damp
+	m_maxDamp : LREAL := 500;
+	m_maxDampJ4 : LREAL := 50;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -46,8 +49,44 @@ FOR i := 3 TO 5 DO
 		nextCmdVel := m_cmdJntVel[i] + m_cmdJntAcc[i]*g_setupArmCtrlCycleTime;
 		m_cmdJntPos[i] := m_cmdJntPos[i] + (nextCmdVel + m_cmdJntVel[i])*g_setupArmCtrlCycleTime/2.0;
 		m_cmdJntVel[i] := nextCmdVel;
+		IF m_jntOPMode[i] = DriverOPMode_Trq THEN
+			m_cmdJntPos[i] := i_setupArm.curJntPos[i];
+		END_IF
 	END_IF
 END_FOR
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdJntTrq" Id="{3cc64cb7-b620-44e5-bc28-af1af5510c38}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntTrq : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+VAR
+	i:INT;
+	vel :LREAL;
+	scale:LREAL;
+	ratio:LREAL;
+	dampScale :LREAL;
+	limitDis:LREAL;
+	dampOffset : LREAL;
+	transitScale:LREAL;
+	cFriction:LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// set joint torque to zero in default
+m_cmdJntTrq := g_zeroVec5d;
+
+// add damp near joint stop 
+dampOffset:=-m_maxDamp * i_setupArm.curJntVel[3];
+
+// add friction compensation for joint3
+m_cmdJntTrq[3]:=LIMIT(-g_largeNum, dampOffset,30);
+
+//add friction compensation for joint4
+m_cmdJntTrq[4]:= -m_maxDampJ4 * i_setupArm.curJntVel[4];
 
 ]]></ST>
       </Implementation>
@@ -71,14 +110,16 @@ END_VAR
 m_holdLastCmds := checkToHoldLastCmds(i_setupArm);
 SUPER^.Init(i_setupArm,r_setupArmCtrlCmd);
 
-m_jntEnableFlag :=g_zeroVec5i;// setup arm joint is diabled by default
-
 // determine joint deceleration
 FOR i:=3 TO 5 DO 
+	IF (r_setupArmCtrlCmd.m_jntOPMode[i] = DriverOPMode_Pos OR r_setupArmCtrlCmd.m_jntOPMode[i] = DriverOPMode_PosTrq) THEN
 		m_jntOPMode[i] := DriverOPMode_Pos;
-		m_cmdJntVel[i] := i_setupArm.curJntVel[i];
-		m_cmdJntAcc[i] := -i_setupArm.curJntVel[i]/m_decPeriod;
-		m_jntEnableFlag[i] := BOOL_TO_INT(r_setupArmCtrlCmd.m_jntEnableFlag[i]=1 AND (r_setupArmCtrlCmd.m_jntOPMode[i] = DriverOPMode_Pos OR r_setupArmCtrlCmd.m_jntOPMode[i] = DriverOPMode_PosTrq));
+	ELSE
+		m_jntOPMode[i] := DriverOPMode_Trq;
+	END_IF
+	m_cmdJntVel[i] := i_setupArm.curJntVel[i];
+	m_cmdJntAcc[i] := -i_setupArm.curJntVel[i]/m_decPeriod;
+	m_jntEnableFlag[i] := r_setupArmCtrlCmd.m_jntEnableFlag[i];
 END_FOR
 
 IF m_jntEnableFlag[3] = 0 THEN
@@ -105,13 +146,28 @@ END_IF
       <LineId Id="240" Count="1" />
       <LineId Id="271" Count="0" />
       <LineId Id="273" Count="2" />
+      <LineId Id="286" Count="2" />
       <LineId Id="242" Count="0" />
       <LineId Id="237" Count="0" />
       <LineId Id="211" Count="0" />
       <LineId Id="98" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SetupCtrlStop.calcCmdJntTrq">
+      <LineId Id="388" Count="1" />
+      <LineId Id="423" Count="0" />
+      <LineId Id="459" Count="1" />
+      <LineId Id="434" Count="1" />
+      <LineId Id="437" Count="2" />
+      <LineId Id="442" Count="1" />
+      <LineId Id="359" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SetupCtrlStop.init">
-      <LineId Id="252" Count="17" />
+      <LineId Id="252" Count="2" />
+      <LineId Id="257" Count="2" />
+      <LineId Id="282" Count="1" />
+      <LineId Id="285" Count="1" />
+      <LineId Id="284" Count="0" />
+      <LineId Id="261" Count="8" />
       <LineId Id="74" Count="0" />
     </LineIds>
   </POU>

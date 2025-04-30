@@ -42,10 +42,10 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// safety check
-IF ABS(i_setupArm.curJntVel[3]) > 0.1 THEN
-	m_isFinished:=TRUE;
-	RETURN;
-END_IF
+//IF ABS(i_setupArm.curJntVel[3]) > 0.15 THEN
+//	m_isFinished:=TRUE;
+//	RETURN;
+//END_IF
 
 // check if planner is ready
 IF m_caliPlanner[m_caliTrajIdx].isGene = FALSE THEN

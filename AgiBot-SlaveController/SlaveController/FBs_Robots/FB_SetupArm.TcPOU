@@ -19,6 +19,14 @@ VAR
 	m_jnt5AdjustDir :INT:=0; // -1, 0, 1;
 	m_manualAdjustDetect : FB_setupAdjustDetect;
 	m_jnt5AdjustDetect : FB_setupJnt5AdjustDetect;
+	m_trocarOnFlag :BOOL :=FALSE;
+	m_trocarDetect : FB_TrocarDetect;
+	
+	//arm aseptic cover megnet check
+	m_asepticMegnetCheck  AT %I* :DINT;
+	
+	//check spring breakage from joint 3
+	m_springBreakageCheck AT %I* : UDINT;
 	
 	// arm cartesian data, defined in cart origin
 	m_curCartPose	:ST_Frame;
@@ -43,6 +51,7 @@ VAR
 	
 	// arm gravity
 	m_jntGravity : Vec5d:=g_zeroVec5d;
+	m_jntGravityBias :Vec5d :=g_zeroVec5d;
 	
 	// joint position controller
 	m_jntPIDCtrl :ARRAY[1..g_setupJntNum] OF FB_PID;
@@ -50,7 +59,7 @@ VAR
 	//arm light out to drive
 	m_lightIO AT %Q* :DINT;
 	
-	// output arm lightd
+	// output arm light
 	m_SdoWrite:ARRAY [1..4] OF FB_EcCoESdoWrite;
 	
 	//IP of operating arm
@@ -119,7 +128,8 @@ ELSE
 	m_jnt5AdjustDir := m_jnt5AdjustDetect.run(m_adjustIO);
 END_IF
 
-
+// check trocar
+m_trocarOnFlag := m_trocarDetect.run(m_adjustIO);
 ]]></ST>
       </Implementation>
     </Method>
@@ -140,8 +150,8 @@ m_lightIO := UDINT_TO_DINT(i_lightCtrlWord);
 // trig sdo write
 lightCtrlWord := SHL(i_lightCtrlWord,16);
 m_SdoWrite[1](sNetId:= m_armNetId, nSlaveAddr:= m_jointAddrJ8, nSubIndex:= 0, nIndex:= 16#6085, pSrcBuf:=ADR(lightCtrlWord) , cbBufLen:=SIZEOF(lightCtrlWord) , bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
-m_SdoWrite[2](sNetId:= m_setupNetId, nSlaveAddr:= m_jointAddrJ3, nSubIndex:= 0, nIndex:= 16#6085, pSrcBuf:=ADR(lightCtrlWord) , cbBufLen:=SIZEOF(lightCtrlWord) , bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
-m_SdoWrite[3](sNetId:= m_armNetId, nSlaveAddr:= m_jointAddrPbox, nSubIndex:= 0, nIndex:= 16#6097, pSrcBuf:= ADR(lightCtrlWord), cbBufLen:= SIZEOF(lightCtrlWord), bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
+m_SdoWrite[2](sNetId:= m_armNetId, nSlaveAddr:= m_jointAddrJ3, nSubIndex:= 0, nIndex:= 16#6085, pSrcBuf:=ADR(lightCtrlWord) , cbBufLen:=SIZEOF(lightCtrlWord) , bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
+m_SdoWrite[3](sNetId:= m_armNetId, nSlaveAddr:= m_jointAddrPbox, nSubIndex:= 0, nIndex:= 16#6085, pSrcBuf:= ADR(lightCtrlWord), cbBufLen:= SIZEOF(lightCtrlWord), bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
 
 // disable sdo write
 IF NOT m_SdoWrite[1].bBusy AND  NOT m_SdoWrite[2].bBusy THEN
@@ -464,6 +474,26 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Property Name="jntGravityBias" Id="{98e9447b-dbcb-43f9-9939-c5f9658d66f6}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY jntGravityBias :REFERENCE to Vec5d]]></Declaration>
+      <Get Name="Get" Id="{45c5ec0b-01e0-48e0-8f64-7a1d89f2d1fe}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[jntGravityBias ref=m_jntGravityBias;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{4abadf39-71db-4fe9-89b5-4fa9c3a50b80}">
+        <Declaration><![CDATA[PUBLIC 
+VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_jntGravityBias := jntGravityBias;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
     <Property Name="manualAdjustOn" Id="{06fd6985-ca41-4e66-8b96-f30c8a6d0e2c}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY manualAdjustOn : bool]]></Declaration>
       <Get Name="Get" Id="{6b9e44f9-af7c-4368-b8c0-d50cceeb95b2}">
@@ -508,6 +538,17 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Property Name="trocarOn" Id="{1f7ffdba-b6f7-4752-8981-43bd23a041b0}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY PUBLIC trocarOn : bool]]></Declaration>
+      <Get Name="Get" Id="{5ea85821-1b7c-464a-945d-cbdff065bbdf}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[trocarOn := m_trocarOnFlag;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Method Name="updateCmds" Id="{6d34fc6a-e3f4-42a7-8c5b-e82cddc386d1}">
       <Declaration><![CDATA[// update joints control command
 METHOD PUBLIC updateCmds : BOOL
@@ -536,7 +577,7 @@ FOR i:=1 TO g_setupJntNum DO
 	ELSIF i_armCtrlCmd.m_jntOPMode[i]=DriverOPMode_Trq THEN
 		// gravity feedforward
 		m_jntPIDCtrl[i].reset();
-		m_cmdJntTrq[i]:=m_cmdJntTrq[i]+m_jntGravity[i]+GVL_SetupArmDynamics.g_setupJntGravityOffset[m_armIdx, i];
+		m_cmdJntTrq[i]:=m_cmdJntTrq[i]+m_jntGravity[i]+m_jntGravityBias[i]+GVL_SetupArmDynamics.g_setupJntGravityOffset[m_armIdx, i];
 		m_joints[i].updateCmds(DriverOPMode_Trq,i_armCtrlCmd.m_cmdJntPos[i],m_cmdJntTrq[i]);
 	ELSE
 		m_jntPIDCtrl[i].reset();
@@ -603,18 +644,11 @@ forwardKinematic(m_curJntPos,m_curCartPose,m_rcPos);
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArm.checkDisplayLED">
-      <LineId Id="72" Count="1" />
-      <LineId Id="68" Count="0" />
-      <LineId Id="71" Count="0" />
-      <LineId Id="61" Count="2" />
-      <LineId Id="69" Count="0" />
-      <LineId Id="59" Count="0" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="31" Count="0" />
-      <LineId Id="21" Count="0" />
+      <LineId Id="3" Count="10" />
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArm.checkIO">
-      <LineId Id="27" Count="13" />
+      <LineId Id="50" Count="14" />
       <LineId Id="13" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArm.checkLight">
@@ -703,10 +737,7 @@ forwardKinematic(m_curJntPos,m_curCartPose,m_rcPos);
       <LineId Id="50" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArm.init">
-      <LineId Id="220" Count="25" />
-      <LineId Id="262" Count="0" />
-      <LineId Id="254" Count="0" />
-      <LineId Id="246" Count="0" />
+      <LineId Id="262" Count="28" />
       <LineId Id="205" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArm.isEnabled">
@@ -720,6 +751,12 @@ forwardKinematic(m_curJntPos,m_curCartPose,m_rcPos);
     <LineIds Name="FB_SetupArm.jntGravity.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SetupArm.jntGravityBias.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupArm.jntGravityBias.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SetupArm.manualAdjustOn.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
@@ -730,6 +767,9 @@ forwardKinematic(m_curJntPos,m_curCartPose,m_rcPos);
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArm.rcPos.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupArm.trocarOn.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArm.updateCmds">
@@ -746,22 +786,8 @@ forwardKinematic(m_curJntPos,m_curCartPose,m_rcPos);
       <LineId Id="14" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArm.updateStatus">
-      <LineId Id="14" Count="0" />
-      <LineId Id="26" Count="2" />
-      <LineId Id="135" Count="0" />
-      <LineId Id="103" Count="0" />
-      <LineId Id="120" Count="0" />
-      <LineId Id="128" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="63" Count="1" />
-      <LineId Id="13" Count="0" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="81" Count="3" />
-      <LineId Id="142" Count="1" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="85" Count="0" />
-      <LineId Id="90" Count="2" />
+      <LineId Id="156" Count="23" />
+      <LineId Id="92" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

@@ -1,0 +1,145 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_CartPowerOff" Id="{b2454179-7ec7-4ec5-8f34-e97cd4af4dc7}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_CartPowerOff EXTENDS FB_CartCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	//output support leg break IO
+	m_supportLegBreak :ARRAY [1..2] OF  DINT;
+	
+	// time threshold to 5-8joint after it's enabled
+	m_cartAdjustStartWaitTime :LREAL := 0.2;
+	
+	//adjust start  time 
+	m_adjustStartTime :LREAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{815a29ea-6288-402c-8876-55286ad97a38}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	// slave cart joint data
+	i_slaveCart :FB_SlaveCart;
+END_VAR
+
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//In this method, 8 represents the overhang angle
+m_adjustStartTime :=LIMIT(0, m_adjustStartTime + g_cartCtrlCycleTime, 2);
+
+m_isFinished :=supportLegUp(i_slaveCart );
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{38f0555f-5b60-46bf-a5ad-9de6adcb181b}">
+      <Declaration><![CDATA[// override this function in each exact controller
+// NOTICE: set joint control mode here, and do some initialization if needed
+METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveCart	:FB_SlaveCart;
+END_VAR
+VAR_IN_OUT 
+	r_cartCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
+m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
+
+SUPER^.init(i_slaveCart,r_cartCtrlCmd);
+
+m_jntEnableFlag[1] :=1;
+m_jntEnableFlag[2] :=1;
+
+m_jntOPMode[1]:= DriverOPMode_Trq;
+m_jntOPMode[2]:= DriverOPMode_Trq;	
+
+m_adjustStartTime := 0;
+// update commands to arm
+copyCmds(r_cartCtrlCmd);]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="supportLegBreak" Id="{621b1375-7d5a-434f-8b7a-bb65581340cf}">
+      <Declaration><![CDATA[PROPERTY supportLegBreak : ARRAY [1..2] OF DINT]]></Declaration>
+      <Get Name="Get" Id="{cc2ce868-d9c6-4943-9361-d1a75a4ed62b}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[supportLegBreak := m_supportLegBreak;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="supportLegUp" Id="{44d8502b-312d-4feb-9a41-704ba81e21d3}">
+      <Declaration><![CDATA[METHOD supportLegUp : BOOL
+VAR_IN_OUT CONSTANT
+	// slave cart joint data
+	i_slaveCart :FB_SlaveCart;
+END_VAR
+VAR
+	i : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+m_supportLegBreak[1] := 0;
+m_supportLegBreak[2] := 0;
+
+IF m_adjustStartTime > m_cartAdjustStartWaitTime THEN
+	FOR i:=1 TO 2 DO
+		m_cmdJntTrq[i] := -500;
+	END_FOR
+	
+	IF NOT (i_slaveCart.m_supportLegSensor[1] OR i_slaveCart.m_supportLegSensor[2]) THEN
+		supportLegUp := TRUE;
+	END_IF
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_CartPowerOff">
+      <LineId Id="52" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartPowerOff.calcCmdJntPos">
+      <LineId Id="246" Count="1" />
+      <LineId Id="265" Count="1" />
+      <LineId Id="254" Count="0" />
+      <LineId Id="14" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartPowerOff.init">
+      <LineId Id="88" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="154" Count="0" />
+      <LineId Id="149" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="22" Count="1" />
+      <LineId Id="21" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartPowerOff.supportLegBreak.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartPowerOff.supportLegUp">
+      <LineId Id="26" Count="0" />
+      <LineId Id="35" Count="10" />
+      <LineId Id="21" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

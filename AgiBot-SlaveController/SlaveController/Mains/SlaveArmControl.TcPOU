@@ -95,7 +95,7 @@ END_VAR
       <Implementation>
         <ST><![CDATA[masterStatus.m_masterHeartBeat := masterInputData.m_heartBeat;
 masterStatus.m_motionScale := masterInputData.m_motionScale;
-masterStatus.m_slaveSelfCheckFlag := masterInputData.m_slaveSelfCheckFlag OR GVL_interactUI.g_salveSelfCheckEnable;
+masterStatus.m_slaveSelfCheckFlag :=m_slaveCheckDetect.run(masterInputData.m_slaveSelfCheckFlag OR GVL_interactUI.g_salveSelfCheckEnable);
 masterStatus.m_masterStopButton := masterInputData.m_masterStopButton;
 masterStatus.m_uiResetFault := masterInputData.m_uiResetFault;
 
@@ -165,6 +165,7 @@ FOR i:= 1 TO g_sArmNum DO
 	slaveOutputData.m_curArmPose[i].m_pos :=slavePoseInScope.m_pos;
 	slaveOutputData.m_curArmPose[i].m_rot :=slavePoseInScope.m_rot;
 	slaveOutputData.m_masterSlavePoseError[i] :=slaveStatus.m_masterSlavePoseError[i];
+	//slaveOutputData.m_trocarOnFlag[i] := m_slaveRobot.m_slaveArms[i].trocarOn OR m_slaveRobot.m_instrumentMountedFlag[i];
 END_FOR
 
 
@@ -185,10 +186,12 @@ END_VAR
         <ST><![CDATA[// arm disable
 FOR i:=1 TO g_sArmNum DO 
 	m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i]:= FALSE;
+	
+	IF GVL_interactUI.g_armIsDisable = i OR m_armIsDisable[i] THEN
+		m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i]:= TRUE;
+	END_IF
 END_FOR
-IF GVL_interactUI.g_armIsDisable >0 AND GVL_interactUI.g_armIsDisable<= g_sArmNum THEN
-	m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[GVL_interactUI.g_armIsDisable]:= TRUE;
-END_IF
+
 
 FOR i:=1 TO g_sArmNum DO 
 	IF m_slaveRobot.m_slaveArmState[i] = SlaveArmState_MasterSlave THEN
@@ -206,6 +209,7 @@ END_VAR
 VAR
 	i , j: INT;
 	teleSlaveArmIdx :ARRAY[1..g_mArmNum] OF E_MatchedSlaveArmIdx;
+	masterslaveMode :BOOL;
 END_VAR
 
 VAR_STAT
@@ -227,8 +231,8 @@ GVL_interactUI.g_armStateMachine.m_stateMachineArm4:=m_slaveStatus.m_armState[4]
 
 //arm is adjustment state
 FOR i := 1 TO g_sArmNum BY 1 DO
-	IF m_slaveStatus.m_armState[i] = SlaveArmState_Adjust OR SetupArmControl.m_setupStatus.m_armState[i] = SetupArmState_ManualAdjust 
-							OR SetupArmControl.m_setupStatus.m_armState[i] = SetupArmState_AutoAdjust THEN
+	IF m_slaveStatus.m_armState[i] = SlaveArmState_Adjust OR m_slaveInputDataPool.m_setupStatus.m_armState[i] = SetupArmState_ManualAdjust 
+							OR m_slaveInputDataPool.m_setupStatus.m_armState[i] = SetupArmState_AutoAdjust THEN
 		GVL_interactUI.g_armIsAdjustment[i] := 1;
 	ELSE
 		GVL_interactUI.g_armIsAdjustment[i] := 0;
@@ -281,6 +285,7 @@ FOR i := 1 TO g_sArmNum DO
 	//instrument pedal hover and pedal active
 	GVL_interactUI.g_instruInformatiom[i].m_pedalHover:=FALSE;
 	GVL_interactUI.g_instruInformatiom[i].m_pedalActive := 0;
+	GVL_interactUI.g_instruInformatiom[i].m_strongStatus:=m_slaveRobot.m_slaveArms[i].instrument.forceBipolarMode AND m_slaveRobot.m_slaveArms[i].m_joints[4].m_motorInputs.m_statusWord = DriverStatusWord_OP;
 	FOR j := 1 TO g_mArmNum BY 1 DO
 		teleSlaveArmIdx[j] := m_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx[j];
 		 IF  teleSlaveArmIdx[j] > 0 AND teleSlaveArmIdx[j] <= 4  THEN
@@ -289,7 +294,6 @@ FOR i := 1 TO g_sArmNum DO
 			ELSE
 				GVL_interactUI.g_instruInformatiom[teleSlaveArmIdx[j]].m_pedalHover:=FALSE;
 			END_IF
-			
 			GVL_interactUI.g_instruInformatiom[teleSlaveArmIdx[j]].m_pedalActive := m_slaveRobot.m_slaveArms[teleSlaveArmIdx[j]].updatePedalActive(teleSlaveArmIdx[j] , m_slaveInputDataPool.m_masterStatus.m_electricKnifePedalTrigger[j]);
 		END_IF
 	END_FOR
@@ -304,22 +308,27 @@ FOR i := 1 TO g_sArmNum DO
 	m_slaveRobot.m_slaveArms[i].m_instrument.writeNumOfUseToChip(GVL_interactUI.g_instruInformatiom[i].m_useLifeplc + 1 =  GVL_interactUI.g_instruInformatiom[i].m_useLifeUi AND m_slaveRobot.m_slaveArms[i].m_instrument.onChipData.m_InstruReadSucceed, GVL_interactUI.g_instruInformatiom[i].m_useLifeUi);
 
 	//intrument total number of use
-	GVL_interactUI.g_instruInformatiom[i].m_instruTotalLife := m_slaveRobot.m_slaveArms[i].m_instrument.instruTypeInfo.m_maxUseNum;
-	//The coordinates of the instrument relative to the endoscope for UI display
-	
-	
-	GVL_IO.g_joint8IO[i][1] := m_slaveRobot.m_slaveArms[i].m_adjustOnFlag;
-	GVL_IO.g_joint8IO[i][2] := SetupArmControl.m_setupRobot.m_setupArms[i].m_jnt5AdjustDir = 1;
-	GVL_IO.g_joint8IO[i][3] := SetupArmControl.m_setupRobot.m_setupArms[i].m_jnt5AdjustDir = -1;
-	GVL_IO.g_joint8IO[i][4] := SetupArmControl.m_setupRobot.m_setupArms[i].m_manualAdjustOnFlag;
-	GVL_IO.g_joint8IO[i][5] := m_slaveRobot.m_slaveArms[i].m_trocarOnFlag;
-	GVL_IO.g_jointPowerBoxIO[i][1] := (m_slaveRobot.m_slaveArms[i].m_panelInstrumentOnIO AND 10#4) = 4;
-	GVL_IO.g_jointPowerBoxIO[i][2] := (m_slaveRobot.m_slaveArms[i].m_panelInstrumentOnIO AND 10#8) = 8;
-	GVL_IO.g_jointPowerBoxIO[i][3] := (m_slaveRobot.m_slaveArms[i].m_panelInstrumentOnIO AND 10#1) = 1;
-	GVL_IO.g_jointPowerBoxIO[i][4] := (m_slaveRobot.m_slaveArms[i].m_panelInstrumentOnIO AND 10#2) = 2;
-	GVL_IO.g_jointPowerBoxIO[i][5] := (m_slaveRobot.m_slaveArms[i].m_panelInstrumentOnIO AND 10#64) = 64;
-	GVL_IO.g_endoscopeSingle[i][1] := (m_slaveRobot.m_slaveArms[i].m_panelInstrumentOnIO AND 10#16) = 16;
-	GVL_IO.g_endoscopeSingle[i][2] := (m_slaveRobot.m_slaveArms[i].m_panelInstrumentOnIO AND 10#32) = 32;
+	GVL_interactUI.g_instruInformatiom[i].m_instruTotalLife :=UDINT_TO_UINT( m_slaveRobot.m_slaveArms[i].m_instrument.m_maxUsageNum);
+END_FOR
+
+// instrument out-of-view information
+masterslaveMode := FALSE;
+FOR i := 1 TO g_sArmNum DO
+	IF m_slaveStatus.m_armState[i] = SlaveArmState_masterSlave THEN
+		masterslaveMode := TRUE;
+		EXIT;
+	END_IF
+END_FOR
+FOR i := 1 TO g_sArmNum DO
+	IF true THEN
+		GVL_interactUI.g_instruInformatiom[i].m_instruPosX:=0;
+		GVL_interactUI.g_instruInformatiom[i].m_instruPosY:=0;
+		GVL_interactUI.g_instruInformatiom[i].m_instruPosZ:=0;
+	ELSE
+		GVL_interactUI.g_instruInformatiom[i].m_instruPosX:=m_slaveInputDataPool.m_slaveDynaData.m_insruViewData[i][1];
+		GVL_interactUI.g_instruInformatiom[i].m_instruPosY:=m_slaveInputDataPool.m_slaveDynaData.m_insruViewData[i][2];
+		GVL_interactUI.g_instruInformatiom[i].m_instruPosZ:=m_slaveInputDataPool.m_slaveDynaData.m_insruViewData[i][3];
+	END_IF
 END_FOR
 
 
@@ -327,26 +336,61 @@ END_FOR
       </Implementation>
     </Method>
     <LineIds Name="SlaveArmControl">
-      <LineId Id="595" Count="36" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="295" Count="0" />
+      <LineId Id="243" Count="0" />
+      <LineId Id="335" Count="0" />
+      <LineId Id="245" Count="1" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="112" Count="1" />
+      <LineId Id="141" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="375" Count="0" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="205" Count="0" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="207" Count="1" />
+      <LineId Id="169" Count="0" />
+      <LineId Id="171" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="173" Count="0" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="174" Count="0" />
+      <LineId Id="210" Count="0" />
+      <LineId Id="209" Count="0" />
+      <LineId Id="211" Count="0" />
+      <LineId Id="88" Count="0" />
       <LineId Id="87" Count="0" />
     </LineIds>
     <LineIds Name="SlaveArmControl.masterInputDataCast">
-      <LineId Id="86" Count="16" />
+      <LineId Id="115" Count="16" />
       <LineId Id="17" Count="0" />
     </LineIds>
     <LineIds Name="SlaveArmControl.slaveOutputDataCast">
-      <LineId Id="246" Count="37" />
+      <LineId Id="299" Count="38" />
       <LineId Id="8" Count="0" />
     </LineIds>
     <LineIds Name="SlaveArmControl.UIInputProcess">
-      <LineId Id="78" Count="12" />
+      <LineId Id="78" Count="2" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="99" Count="1" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="84" Count="6" />
       <LineId Id="69" Count="0" />
     </LineIds>
     <LineIds Name="SlaveArmControl.UIOutputProcess">
-      <LineId Id="419" Count="93" />
-      <LineId Id="527" Count="11" />
-      <LineId Id="550" Count="1" />
-      <LineId Id="513" Count="2" />
+      <LineId Id="652" Count="115" />
       <LineId Id="34" Count="0" />
     </LineIds>
   </POU>
