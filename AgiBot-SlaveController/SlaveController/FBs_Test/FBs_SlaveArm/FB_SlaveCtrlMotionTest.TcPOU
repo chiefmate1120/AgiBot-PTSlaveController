@@ -585,6 +585,8 @@ END_FOR
 m_cmdYawAngle := m_cmdYawAngLpf.run(m_simDHJntPos[6]);
 m_cmdYawVel := m_cmdYawVelLpf.run(m_simDHJointVel[6]);
 
+
+(*
 IF i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeS OR i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeU THEN
 	IF m_armIdx = 1 OR m_armIdx = 3 THEN
 		m_usKnifeControllerDC.run(instruCmdJntPos,instruCmdJntVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
@@ -598,6 +600,15 @@ ELSE
 		m_basicInstruController.run(instruCmdJntPos,instruCmdJntVel, m_cmdYawAngle, m_cmdYawVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
 	END_IF	
 END_IF
+*)
+
+
+IF i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeS OR i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeU THEN
+	m_usKnifeController.run(instruCmdJntPos,instruCmdJntVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);	
+ELSE
+	m_basicInstruController.run(instruCmdJntPos,instruCmdJntVel, m_cmdYawAngle, m_cmdYawVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
+END_IF
+
 
 FOR i:=1 TO 5 DO
 	m_cmdJntTrq[i+3]:=instruJntCtrlTrq[i];
@@ -1529,7 +1540,9 @@ END_CASE
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMotionTest.calJntTrq">
       <LineId Id="18" Count="0" />
-      <LineId Id="22" Count="11" />
+      <LineId Id="22" Count="9" />
+      <LineId Id="99" Count="1" />
+      <LineId Id="32" Count="1" />
       <LineId Id="71" Count="0" />
       <LineId Id="73" Count="0" />
       <LineId Id="75" Count="1" />
@@ -1539,7 +1552,17 @@ END_CASE
       <LineId Id="79" Count="0" />
       <LineId Id="81" Count="1" />
       <LineId Id="80" Count="0" />
-      <LineId Id="19" Count="1" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="20" Count="0" />
       <LineId Id="37" Count="1" />
       <LineId Id="21" Count="0" />
       <LineId Id="5" Count="0" />

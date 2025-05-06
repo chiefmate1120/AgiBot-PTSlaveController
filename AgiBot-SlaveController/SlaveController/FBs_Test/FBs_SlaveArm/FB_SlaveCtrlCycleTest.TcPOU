@@ -220,9 +220,21 @@ CASE m_testStep OF
 		
 	10: //Trajectory parameter initialization
 		startDHPos:=i_slaveArm.curDHJntPos;
-		endDHPos:=m_targetJntPos[m_pointNum];		
-		i_slaveArm.instrument.instruIK(startDHPos,0, o_jntPos=>m_startJntPos);
-		i_slaveArm.instrument.instruIK(endDHPos,0, o_jntPos=>m_endJntPos);
+		endDHPos:=m_targetJntPos[m_pointNum];	
+		
+		IF (i_slaveArm.instrument.m_instruType=InstruType_UNKNOWM) THEN
+			FOR i:=1 TO 3 BY 1 DO
+				m_startJntPos[i]:=startDHPos[i];
+				m_endJntPos[i]:=endDHPos[i];
+			END_FOR
+			FOR i:=4 TO 8 BY 1 DO
+				m_startJntPos[i]:=i_slaveArm.curJntPos[i];
+				m_endJntPos[i]:=i_slaveArm.curJntPos[i];
+			END_FOR
+		ELSE
+			i_slaveArm.instrument.instruIK(startDHPos,0, o_jntPos=>m_startJntPos);
+			i_slaveArm.instrument.instruIK(endDHPos,0, o_jntPos=>m_endJntPos);
+		END_IF
 		
 		//add code for test
 		targetJntPos:=m_unitFun.slaveArmUnit2SystemN8(i_dataTest:= g_cycleTest.m_targetJntPos[m_armId,m_pointNum]);
@@ -444,7 +456,12 @@ END_IF
       <LineId Id="11" Count="0" />
       <LineId Id="68" Count="0" />
       <LineId Id="45" Count="0" />
-      <LineId Id="71" Count="1" />
+      <LineId Id="315" Count="1" />
+      <LineId Id="325" Count="6" />
+      <LineId Id="319" Count="0" />
+      <LineId Id="321" Count="0" />
+      <LineId Id="323" Count="1" />
+      <LineId Id="320" Count="0" />
       <LineId Id="70" Count="0" />
       <LineId Id="246" Count="0" />
       <LineId Id="252" Count="0" />
