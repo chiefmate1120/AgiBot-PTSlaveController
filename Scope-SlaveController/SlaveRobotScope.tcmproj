@@ -10,6 +10,9 @@
     <Content Include="cart.tcscopex">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="SetupGravityCaliData.svdx">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="SetupGravityCaliData.tcscopex">
       <SubType>Content</SubType>
     </Content>

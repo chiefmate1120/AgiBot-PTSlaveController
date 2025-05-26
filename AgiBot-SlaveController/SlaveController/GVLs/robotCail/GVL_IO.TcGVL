@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <GVL Name="GVL_IO" Id="{18725397-b09d-4cfc-b8ec-bb650bd2e6c0}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	g_joint6IO : ARRAY [1..g_sArmNum] OF ARRAY [1..2] OF BOOL;
+	g_joint8IO : ARRAY [1..g_sArmNum] OF ARRAY [1..5] OF BOOL;
+	g_jointPowerBoxIO : ARRAY [1..g_sArmNum] OF ARRAY [1..5] OF BOOL;
+	g_lightTest : ARRAY [1..g_sArmNum] OF BOOL;
+	g_armLight_BlueOn :ARRAY [1..g_sArmNum] OF BOOL;
+	g_armLight_BlueBlink :ARRAY [1..g_sArmNum] OF BOOL;
+	g_armLight_AmberBlink :ARRAY [1..g_sArmNum] OF BOOL;
+	g_armLight_RedBlink :ARRAY [1..g_sArmNum] OF BOOL;
+	g_armLight_GreenOn :ARRAY [1..g_sArmNum] OF BOOL;
+	g_armLight_GreenBlink :ARRAY [1..g_sArmNum] OF BOOL;
+	g_armLight_redOn :ARRAY [1..g_sArmNum] OF BOOL;
+	g_armLight_AmberOn :ARRAY [1..g_sArmNum] OF BOOL;
+	g_armLight_BluePulse :ARRAY [1..g_sArmNum] OF BOOL;
+	g_armLight_PowerOff :ARRAY [1..g_sArmNum] OF BOOL;
+	
+	g_LEDValueDisplay : ARRAY [1..g_sArmNum] OF BOOL;
+	
+	g_endoscopeSingle : ARRAY [1..g_sArmNum] OF ARRAY [1..2] OF BOOL;
+	g_asepticMegnetCheck : ARRAY [1..g_sArmNum] OF ARRAY [1..2] OF BOOL;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

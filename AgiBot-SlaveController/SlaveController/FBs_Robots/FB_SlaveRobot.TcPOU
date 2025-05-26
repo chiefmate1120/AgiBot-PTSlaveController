@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveRobot
 VAR_INPUT
@@ -45,7 +45,8 @@ VAR
 	
 	// matched master arm state
 	m_matchedMasterArmState :ARRAY[1..g_sArmNum] OF E_MasterArmState:=[4(E_MasterArmState.MasterArmState_Error)];
-	
+	m_lastMatchedMasterArmState :ARRAY[1..g_sArmNum] OF E_MasterArmState:=[4(E_MasterArmState.MasterArmState_Error)];
+		
 	// flag if panel and instrument mounted
 	m_panelMountedFlag :ARRAY[1..g_sArmNum] OF BOOL :=[4(FALSE)];
 	m_instrumentMountedFlag :ARRAY[1..g_sArmNum] OF BOOL :=[4(FALSE)];
@@ -80,6 +81,17 @@ VAR
 	m_armStop :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlStop;
 	m_poweroff :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlPowerOff;
 	m_selfCheckTransport :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlSelfCheckTransport;
+	m_kineCaliSample :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlKineCaliSample;
+	m_slaveDynaCali :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlDynaCali;
+	
+	//add code for test
+	//m_Performance :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlPerformance;
+	m_motionTest :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlMotionTest;
+	m_cycleTest :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlCycleTest;
+	m_frictionTest :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlFrictionTest;
+	m_responseTest :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlResponseTest;
+	m_armCali :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlArmCali;
+	m_dragFreeTest :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlDargFreeTest;
 	
 	// arm controller interface
 	m_armCtrl :ARRAY[1..g_sArmNum] OF I_SlaveArmCtrl;
@@ -97,7 +109,8 @@ END_VAR
 VAR_INPUT
 END_VAR
 VAR
-	i:int;
+	i:INT;
+	logStr :STRING;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[FOR i:=1 TO g_sArmNum DO 
@@ -114,6 +127,14 @@ END_VAR]]></Declaration>
 		// init next controller
 		m_armCtrl[i].Init(m_slaveArms[i],m_armCtrlCmds[i]);
 		m_slaveArms[i].updateCmds(m_armCtrlCmds[i]);
+		
+		// log
+		logStr := 'SlaveArm ';
+		AGILOG_INFO(logStr, i_printTime:=TRUE, i_lineBreak:=0);
+		AGILOG_INFO(i, i_printTime:=FALSE, i_lineBreak:=0);
+		logStr := ' Transit To :';
+		AGILOG_INFO(logStr, i_printTime:=FALSE, i_lineBreak:=0);
+		AGILOG_INFO(m_slaveArmState[i], i_printTime:=FALSE, i_lineBreak:=1);
 	END_IF
 END_FOR]]></ST>
       </Implementation>
@@ -124,13 +145,16 @@ VAR_IN_OUT
 	// slave robot information, including arm status and cartesian data
 	r_slaveStatus :ST_SlaveStatus;
 	
+	//setup motor in_output to safety check
+	r_slavepMotorData : ST_slaveMotorData;
+	
 	// slave robot joint data
 	r_slaveJointsData :ST_SlaveJointData;
 	
 END_VAR
 
 VAR
-	i:INT;
+	i,j:INT;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -155,6 +179,7 @@ FOR i:=1 TO g_sArmNum DO
 	// cartesion
 	r_slaveStatus.m_curArmPose[i]:=m_slaveArms[i].curCartPose;
 	r_slaveStatus.m_simArmPose[i]:=m_slaveArms[i].simCartPose;
+	r_slaveStatus.m_simDHJntPos[i] := m_armMasterSlave[i].simDHJntPos;
 	r_slaveStatus.m_masterSlavePoseError[i] := m_armMasterSlave[i].masterSlavePoseErr;
 	// joint
 	r_slaveJointsData.m_curMotorPos[i]:=m_slaveArms[i].curMotorPos;
@@ -162,11 +187,22 @@ FOR i:=1 TO g_sArmNum DO
 	r_slaveJointsData.m_curJntPos[i]:=m_slaveArms[i].curJntPos;
 	r_slaveJointsData.m_curJntVel[i]:=m_slaveArms[i].curJntVel;
 	r_slaveJointsData.m_rawJntCurrent[i] := m_slaveArms[i].rawJntCurrent;
+	r_slaveJointsData.m_curDHJntPos[i]:=m_slaveArms[i].curDHJntPos;
+	
 	// command info
 	// cartesion
 	r_slaveStatus.m_cmdArmPose[i]:=m_slaveArms[i].cmdCartPose;
 	// joint info
 	r_slaveJointsData.m_cmdJntPos[i]:=m_slaveArms[i].cmdJntPos;
+	
+	//motor info
+	r_slavepMotorData.m_motorEncSalta[i]:=m_slaveArms[i].motorEncSalta;
+	r_slavepMotorData.m_hallAngleAndEncoderAngle[i,1]:=m_slaveArms[i].m_hallAngleAndEncoderAngle[1];
+	r_slavepMotorData.m_hallAngleAndEncoderAngle[i,2]:=m_slaveArms[i].m_hallAngleAndEncoderAngle[2];
+	FOR j:= 1 TO g_sJntNum DO
+		r_slavepMotorData.m_slaveMotorInput[i,j]:=m_slaveArms[i].m_joints[j].m_motorInputs;
+		r_slavepMotorData.m_slaveMotorOutput[i,j] := m_slaveArms[i].m_joints[j].m_motorOutputs;
+	END_FOR
 	
 END_FOR]]></ST>
       </Implementation>
@@ -224,6 +260,16 @@ END_VAR
 	m_armCtrlFactory[i,SlaveArmState_Stop] := m_armStop[i];
 	m_armCtrlFactory[i,SlaveArmState_PowerOff] := m_poweroff[i];
 	m_armCtrlFactory[i,SlaveArmState_SelfCheckTransport] := m_selfCheckTransport[i];
+	m_armCtrlFactory[i,SlaveArmState_kineCaliSample] := m_kineCaliSample[i];
+	m_armCtrlFactory[i,SlaveArmState_slaveDynaCali] := m_slaveDynaCali[i];
+	
+	//add code for test
+	m_armCtrlFactory[i,SlaveArmState_MotionTest] := m_motionTest[i];
+	m_armCtrlFactory[i,SlaveArmState_CycleTest] := m_cycleTest[i];
+	m_armCtrlFactory[i,SlaveArmState_FrictionTest] := m_frictionTest[i];
+	m_armCtrlFactory[i,SlaveArmState_ResponseTest] := m_responseTest[i];
+	m_armCtrlFactory[i,SlaveArmState_armCali] := m_armCali[i];
+	m_armCtrlFactory[i,SlaveArmState_DargFreeTest] := m_dragFreeTest[i];
 	
 	
 	// assign controller
@@ -239,7 +285,7 @@ VAR_IN_OUT CONSTANT
 	i_slaveInputDataPool:ST_SlaveInputDataPool;
 END_VAR
 VAR
-	i:INT;
+	i,j:INT;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_motionScale := i_slaveInputDataPool.m_masterStatus.m_motionScale;
@@ -251,15 +297,15 @@ m_masterOnLine := m_masterOnLineCheck.check(i_slaveInputDataPool.m_masterStatus.
 // check if endoscope is mounted
 m_endoscopeMounted := FALSE;
 FOR i:=1 TO g_sArmNum DO 
-	IF m_slaveArms[i].instrument.m_instruType=InstruType_endoscope THEN
+	IF m_slaveArms[i].instrument.m_instruType=InstruType_endoscope AND m_instrumentMountedFlag[i] =TRUE THEN
 		m_endoscopeMounted := TRUE;
 		m_endoscopePose := transform(i_slaveInputDataPool.m_setupStatus.m_curEndPose[i], m_slaveArms[i].curCartPose);
 		m_endoScopeType := m_slaveArms[i].instrument.curScopeType;
-		
-		//set endoscope  posture from UI data
-		updateScopeUIInfo();
 	END_IF
 END_FOR
+		
+//set endoscope  posture from UI data
+updateScopeUIInfo();
 
 // update arm status
 FOR i:=1 TO g_sArmNum DO
@@ -287,9 +333,7 @@ FOR i:=1 TO g_sArmNum DO
 
 	// update commands to drivers
 	m_slaveArms[i].updateCmds(m_armCtrlCmds[i]);
-END_FOR
-
-]]></ST>
+END_FOR]]></ST>
       </Implementation>
     </Method>
     <Method Name="stateMachine" Id="{b9cc8560-9309-49e3-93b5-28cb02b4f5cc}">
@@ -315,7 +359,11 @@ FOR i:=1 TO g_sArmNum DO
 		m_panelMountedFlag[i]:=FALSE;
 	END_IF
 	IF m_slaveArms[i].instruOn = FALSE THEN
-		m_instrumentMountedFlag[i]:=FALSE;			
+		m_instrumentMountedFlag[i]:=FALSE;		
+		m_mountInstru[i].instruClampErrId:=0;	
+		// clear instrument control backlash
+		m_slaveArms[i].instruJntBacklash:=g_zeroVec5d;		
+		m_armMasterSlave[i].clearBacklash();
 	END_IF
 END_FOR
 
@@ -363,9 +411,9 @@ FOR i:=1 TO g_sArmNum DO
 		// init
 		SlaveArmState_Init:
 			m_selfCheckPass[i]:=FALSE;
-			m_slaveArms[i].instrument.resetArmLED :=TRUE;
+			
 			// to selfcheck
-			IF m_armCtrl[i].isFinished AND i_slavesInputDataPool.m_masterStatus.m_slaveSelfCheckFlag  THEN
+			IF m_armCtrl[i].isFinished AND i_slavesInputDataPool.m_masterStatus.m_slaveSelfCheckFlag AND NOT m_slaveArms[i].instruOn  THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_SelfCheck;
 			// to adjust
 			ELSIF m_slaveArms[i].adjustOn THEN
@@ -375,6 +423,7 @@ FOR i:=1 TO g_sArmNum DO
 		//self check
 		SlaveArmState_SelfCheck:
 			// to standby
+			m_slaveArms[i].instrument.resetArmLED :=TRUE;
 			IF m_armCtrl[i].isFinished  THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
 				m_selfCheckPass[i]:=TRUE;
@@ -435,7 +484,7 @@ FOR i:=1 TO g_sArmNum DO
 						m_nextSlaveArmState[i]:=SlaveArmState_InstruReady;
 					END_IF
 				// to mount instrument/endoscope
-				ELSIF m_slaveArms[i].readyForInstruMount() THEN
+				ELSIF m_slaveArms[i].readyForInstruMount() AND m_mountInstru[i].instruClampErrId=0 THEN
 					m_nextSlaveArmState[i]:=SlaveArmState_MountInstru;
 				END_IF
 			// to instrument retract
@@ -451,17 +500,21 @@ FOR i:=1 TO g_sArmNum DO
 			// to panel ready
 			IF NOT(m_slaveArms[i].instruOn)  THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_PanelReady;
-			ELSIF m_armCtrl[i].isFinished THEN
-				m_instrumentMountedFlag[i] :=TRUE;
 				
-				// to instrument invasion
-				IF m_instruInvasionEnableFlag[i] THEN
-					m_nextSlaveArmState[i] := SlaveArmState_InstruInvasion;
-				// to panel ready
-				ELSE
-					m_nextSlaveArmState[i]:=SlaveArmState_PanelReady;
-				END_IF
+			ELSIF m_armCtrl[i].isFinished AND  m_mountInstru[i].instruClampErrId = 0 THEN
+					m_instrumentMountedFlag[i] :=TRUE;
 				
+					// to instrument invasion
+					IF m_instruInvasionEnableFlag[i] THEN
+						m_nextSlaveArmState[i] := SlaveArmState_InstruInvasion;
+					// to panel ready		
+					ELSE
+						m_nextSlaveArmState[i]:=SlaveArmState_PanelReady;
+					END_IF
+
+			ELSIF m_armCtrl[i].isFinished AND  m_mountInstru[i].instruClampErrId > 0 THEN
+				// to panel ready		
+				m_nextSlaveArmState[i]:=SlaveArmState_PanelReady;
 			END_IF
 		
 		// instrument ready
@@ -469,23 +522,29 @@ FOR i:=1 TO g_sArmNum DO
 			// to instrument retract
 			IF  NOT(m_slaveArms[i].instruOn)  THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
+			
 			// to Adjust
 			ELSIF (m_slaveArms[i].adjustOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
 			// to master-slave
 			ELSIF MasterArmState_MasterSlave = m_matchedMasterArmState[i] THEN
 				m_nextSlaveArmState[i] := SlaveArmState_MasterSlave;
+				IF m_lastMatchedMasterArmState[i] = MasterArmState_EndoScope OR m_lastMatchedMasterArmState[i] = MasterArmState_Clutch THEN
+					m_armMasterSlave[i].gripperCtrlFlag:=FALSE;
+				ELSE
+					m_armMasterSlave[i].gripperCtrlFlag:=TRUE;
+				END_IF
 			END_IF
 		
 		//master slave control
 		SlaveArmState_MasterSlave:
+			m_slaveArms[i].instruJntBacklash :=  m_armMasterSlave[i].InstruBacklash;
 			// to Adjust
 			IF (m_slaveArms[i].adjustOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
 			// to stop
 			ELSIF MasterArmState_MasterSlave <> m_matchedMasterArmState[i] OR m_armCtrl[i].isFinished THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Stop;
-				m_armStop[i].setInstruBacklash(m_armMasterSlave[i].InstruBacklash);
 			// to instrument retract
 			ELSIF  NOT(m_slaveArms[i].panelOn) OR NOT(m_slaveArms[i].instruOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
@@ -536,7 +595,7 @@ FOR i:=1 TO g_sArmNum DO
 					m_nextSlaveArmState[i] :=SlaveArmState_Init;
 				// to standby
 				ELSE
-					m_nextSlaveArmState[i] :=SlaveArmState_Standby;
+					m_nextSlaveArmState[i] :=SlaveArmState_Stop;
 				END_IF
 			END_IF
 		
@@ -594,7 +653,13 @@ FOR i:=1 TO g_sArmNum DO
 		SlaveArmState_Stop:
 			// to standby
 			IF  m_armCtrl[i].isFinished THEN
-				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
+				IF m_lastSlaveArmState[i] = SlaveArmState_Endoscope THEN
+					m_nextSlaveArmState[i]:=SlaveArmState_ScopeReady;
+				ELSIF m_lastSlaveArmState[i] = SlaveArmState_MasterSlave THEN
+					m_nextSlaveArmState[i]:=SlaveArmState_InstruReady;
+				ELSE
+					m_nextSlaveArmState[i]:=SlaveArmState_Standby;
+				END_IF
 			END_IF
 		
 		// instrument retract
@@ -632,12 +697,95 @@ FOR i:=1 TO g_sArmNum DO
 					m_nextSlaveArmState[i] :=SlaveArmState_Init;
 				END_IF
 			END_IF
-			
+		
+		// transport selfcheck 
 		SlaveArmState_SelfCheckTransport:	
 			IF m_armCtrl[i].isFinished THEN
 				m_nextSlaveArmState[i] :=SlaveArmState_Standby;
 			END_IF
+			
+		// kinematic calibration
+		SlaveArmState_kineCaliSample:	
+			IF m_armCtrl[i].isFinished THEN
+				m_nextSlaveArmState[i] :=SlaveArmState_Standby;
+			END_IF
+			
+		// dynamic calibration
+		SlaveArmState_slaveDynaCali:	
+			IF m_armCtrl[i].isFinished THEN
+				m_nextSlaveArmState[i] :=SlaveArmState_Standby;
+			END_IF
 	END_CASE
+	
+	
+	
+	//**************************************add for test***************************************//
+	// to precision test
+	IF (g_motionTest.m_enterPrecisionTestMode[i]=TRUE) OR (g_motionTest.m_singleMotorControl[i]=TRUE) AND NOT(m_slaveArmState[i]=SlaveArmState_MotionTest) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_MotionTest;
+	END_IF
+	
+	// precision test exit
+	IF (g_motionTest.m_enterPrecisionTestMode[i]=FALSE) AND (g_motionTest.m_singleMotorControl[i]=FALSE) AND (m_slaveArmState[i]=SlaveArmState_MotionTest) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_Standby;
+	END_IF
+	
+	// to SlaveArmState_TestCycle
+	IF (g_cycleTest.m_enterCycleTestMode[i] OR g_cycleTest.m_enterESDTest[i]) AND NOT(m_slaveArmState[i]=SlaveArmState_CycleTest) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_CycleTest;
+	END_IF
+	
+	// SlaveArmState_TestCycle exit
+	IF (g_cycleTest.m_enterCycleTestMode[i]=FALSE) AND (g_cycleTest.m_enterESDTest[i]=FALSE) AND (m_slaveArmState[i]=SlaveArmState_CycleTest) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_Standby;
+	END_IF
+		
+	// to SlaveArmState_TestFriction
+	IF (g_frictionTest.m_testMode[i]=TRUE) AND NOT(m_slaveArmState[i]=SlaveArmState_FrictionTest) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_FrictionTest;
+	END_IF
+	
+	// SlaveArmState_TestFriction exit
+	IF (g_frictionTest.m_testMode[i]=FALSE) AND (m_slaveArmState[i]=SlaveArmState_FrictionTest) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_Standby;
+	END_IF
+
+	//robot calibration 
+	IF GVL_armCali.g_armEnterCaliMode[i] AND (m_slaveArmState[i]<=SlaveArmState_Standby) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_armCali;
+	ELSIF NOT GVL_armCali.g_armEnterCaliMode[i] AND (m_slaveArmState[i]=SlaveArmState_armCali) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_Init;
+	END_IF	
+	
+	// to SlaveArmState_DargFreeTest
+	IF (g_motionRangeTest.m_testMode[i]=TRUE) AND NOT(m_slaveArmState[i]=SlaveArmState_DargFreeTest) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_DargFreeTest;
+	END_IF
+	
+	// SlaveArmState_DargFreeTest exit
+	IF (g_motionRangeTest.m_testMode[i]=FALSE) AND (m_slaveArmState[i]=SlaveArmState_DargFreeTest) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_Standby;
+	END_IF
+	
+	// to SlaveArmState_ResponseTest
+	IF (g_responseTest.m_testMode[i]=TRUE) AND NOT(m_slaveArmState[i]=SlaveArmState_ResponseTest) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_ResponseTest;
+	END_IF
+	
+	// SlaveArmState_ResponseTest exit
+	IF (g_responseTest.m_testMode[i]=FALSE) AND (m_slaveArmState[i]=SlaveArmState_ResponseTest) THEN
+		m_nextSlaveArmState[i] := SlaveArmState_Standby;
+	END_IF	
+	
+	//fault mask
+	IF (g_specialSignal.m_faultMask[i]) THEN
+		EXIT;
+	END_IF
+	
+	
+	
+	
+	
 	
 	// control is forbidden if setup arm is not in Hold
 	IF SetupArmState_Hold <> i_slavesInputDataPool.m_setupStatus.m_armState[i] AND
@@ -652,11 +800,13 @@ FOR i:=1 TO g_sArmNum DO
 	// error check
 	ELSIF i_slavesInputDataPool.m_safetyData.m_slaveErrFlag[i] AND NOT m_slaveArms[i].adjustOn THEN
 		m_nextSlaveArmState[i]:=SlaveArmState_Error;
-	END_IF
-	
-	IF GVL_interactUI.g_uiPowerOffEnable THEN	
+		//poweroff
+	ELSIF  GVL_interactUI.g_uiPowerOffEnable THEN	
 		m_nextSlaveArmState[i]:= SlaveArmState_PowerOff;
 	END_IF
+	
+	// update last master state
+	m_lastMatchedMasterArmState[i] := m_matchedMasterArmState[i];
 END_FOR]]></ST>
       </Implementation>
     </Method>
@@ -668,10 +818,15 @@ VAR
 	i:INT;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// check if endoscope is mounted
+        <ST><![CDATA[// reset if  endoscope is unmounted
+IF NOT(m_endoscopeMounted) THEN
+	GVL_interactUI.g_scopeUpDown := 1 ;
+	m_lastEndoScopePostureUI:=1;
+	RETURN;
+END_IF
+
 FOR i:=1 TO g_sArmNum DO 
 	IF m_slaveArms[i].instrument.m_instruType=InstruType_endoscope THEN
-		
 		// update command endoscope posture from UI
 		IF GVL_interactUI.g_scopeUpDown <> m_lastEndoScopePostureUI AND m_slaveArms[i].instrument.curScopeType = EndoScopeType_30 THEN
 			IF GVL_interactUI.g_scopeUpDown = 1 THEN
@@ -690,7 +845,6 @@ FOR i:=1 TO g_sArmNum DO
 			END_IF
 		END_IF
 		m_lastEndoScopePostureRobot := m_slaveArms[i].instrument.curScopePosture;
-		
 	END_IF
 END_FOR
 
@@ -704,29 +858,32 @@ m_lastEndoScopePostureUI := GVL_interactUI.g_scopeUpDown;
       <LineId Id="33" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.controllerTransit">
-      <LineId Id="21" Count="0" />
-      <LineId Id="6" Count="12" />
-      <LineId Id="5" Count="0" />
+      <LineId Id="34" Count="22" />
       <LineId Id="22" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.getStatus">
-      <LineId Id="186" Count="33" />
+      <LineId Id="303" Count="45" />
       <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.Init">
-      <LineId Id="189" Count="49" />
+      <LineId Id="308" Count="59" />
       <LineId Id="61" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.run">
-      <LineId Id="238" Count="46" />
-      <LineId Id="22" Count="0" />
+      <LineId Id="344" Count="45" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.stateMachine">
-      <LineId Id="2162" Count="354" />
+      <LineId Id="4944" Count="76" />
+      <LineId Id="5412" Count="0" />
+      <LineId Id="5021" Count="375" />
+      <LineId Id="5422" Count="0" />
+      <LineId Id="5420" Count="1" />
+      <LineId Id="5397" Count="0" />
+      <LineId Id="5402" Count="2" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.updateScopeUIInfo">
-      <LineId Id="47" Count="26" />
+      <LineId Id="79" Count="30" />
       <LineId Id="39" Count="0" />
     </LineIds>
   </POU>

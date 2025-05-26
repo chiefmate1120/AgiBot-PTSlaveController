@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_setupJnt5AdjustDetect" Id="{11a489ef-1382-4370-ad13-f9936b9d700b}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_setupJnt5AdjustDetect
 VAR_INPUT
@@ -27,14 +27,14 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// joint3 positive auto adjust is 3th bit
-IF 2=(IOValue AND 10#34) THEN
+IF 2=(IOValue AND 10#2) THEN
 	m_pAutoAdjustOnCounts :=MIN(m_pAutoAdjustOnCounts +1,m_adjustOnCountThres);
 ELSE
 	m_pAutoAdjustOnCounts :=0;
 END_IF
 
 // joint3 negative auto adjust is 2th bit
-IF 1=(IOValue AND 10#33) THEN
+IF 1=(IOValue AND 10#1) THEN
 	m_nAutoAdjustOnCounts :=MIN(m_nAutoAdjustOnCounts +1,m_adjustOnCountThres);
 ELSE
 	m_nAutoAdjustOnCounts :=0;
@@ -53,7 +53,7 @@ END_IF]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_setupJnt5AdjustDetect.run">
-      <LineId Id="93" Count="19" />
+      <LineId Id="121" Count="19" />
       <LineId Id="80" Count="0" />
     </LineIds>
   </POU>

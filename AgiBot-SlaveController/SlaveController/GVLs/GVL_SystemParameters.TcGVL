@@ -3,7 +3,7 @@
   <GVL Name="GVL_SystemParameters" Id="{6ebbff17-e303-4344-870e-d2871229e24f}">
     <Declaration><![CDATA[VAR_GLOBAL CONSTANT
 		
-	g_SWVersion : STRING := '2(1.0.0.1)';
+	g_SWVersion : STRING := '1(1.2.0.1)';
 	
 	g_mArmNum :INT := 2;	
 	g_mJntNum :INT := 7;	
@@ -26,9 +26,14 @@
 	g_cartCtrlFreq :LREAL := 1.0/g_cartCtrlCycleTime;
 	
 	// wait time before robot init  for ethercat to stablize 
-	g_robotInitWaitTime : LREAL := 10.0;
+	g_robotInitWaitTime : LREAL := 2.0;
 
-	g_robotSafetyCheckWaitTime : LREAL :=10.1;
+	g_robotSafetyCheckWaitTime : LREAL :=3.0;
+	//recipe
+	RecipeDefinitionName :ARRAY [1..8] OF STRING := ['arm1LinkEncValue', 'arm2LinkEncValue', 'arm3LinkEncValue', 'arm4LinkEncValue',
+																								'Arm1Dynamics','Arm2Dynamics','Arm3Dynamics','Arm4Dynamics'];
+	RecipeDefinitionNameCart : STRING := 'SlaveCartEncValue';
+
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

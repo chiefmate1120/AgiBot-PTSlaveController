@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_CartCtrlInit" Id="{4e4d6d84-764b-422d-abbc-80316d089754}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CartCtrlInit EXTENDS FB_CartCtrlBase
 VAR_INPUT
@@ -7,6 +7,11 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
+	m_driveForceOffset:Vec6d;
+	m_maxOffset:Vec6d;
+	m_minOffset:Vec6d;
+	m_dataNum:LREAL :=0;
+	m_offsetThres:LREAL:=1;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -19,10 +24,34 @@ VAR_IN_OUT CONSTANT
 	// slave cart joint data
 	i_slaveCart :FB_SlaveCart;
 END_VAR
+
+VAR
+	i:INT;
+	driveForce :Vec6d;
+END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF m_timePeriod > 1.0 THEN
-	m_isFinished := true;
+        <ST><![CDATA[IF m_isFinished THEN
+	RETURN;
+END_IF
+
+driveForce:= i_slaveCart.cartDriveForce;
+vecSelfAdd(m_driveForceOffset, driveForce);
+m_dataNum := m_dataNum + 1;
+FOR i:=1 TO 6 DO
+	m_maxOffset[i]:=MAX(m_maxOffset[i], driveForce[i]);
+	m_minOffset[i]:=MIN(m_minOffset[i], driveForce[i]);
+END_FOR
+
+IF m_timePeriod > 1.0 THEN
+	vecSelfMultiNum(m_driveForceOffset, 1.0/m_dataNum);
+	m_isFinished := TRUE;
+	FOR i:=1 TO 6 DO 
+		m_driveForceOffset[i]:=LIMIT(-m_offsetThres, m_driveForceOffset[i], m_offsetThres);
+		IF m_maxOffset[i]-m_minOffset[i]>m_offsetThres THEN
+			m_driveForceOffset:=g_zeroVec6d;
+		END_IF
+	END_FOR
 END_IF]]></ST>
       </Implementation>
     </Method>
@@ -39,6 +68,11 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[SUPER^.init(i_slaveCart,r_cartCtrlCmd);
+m_jntEnableFlag :=g_zeroVec8i;
+m_dataNum:=0;
+m_driveForceOffset:=g_zeroVec6d;
+m_maxOffset:=g_zeroVec6d;
+m_minOffset:=g_zeroVec6d;
 
 // update commands to arm
 copyCmds(r_cartCtrlCmd);]]></ST>
@@ -48,11 +82,29 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlInit.calcCmdJntPos">
-      <LineId Id="9" Count="1" />
+      <LineId Id="41" Count="3" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="22" Count="1" />
+      <LineId Id="37" Count="1" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="48" Count="1" />
+      <LineId Id="47" Count="0" />
       <LineId Id="8" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlInit.init">
       <LineId Id="11" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="45" Count="1" />
       <LineId Id="22" Count="1" />
       <LineId Id="21" Count="0" />
     </LineIds>

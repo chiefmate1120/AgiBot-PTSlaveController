@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArm
 VAR_INPUT
@@ -32,8 +32,11 @@ VAR
 	m_adjustFallEdge :BOOL:=false;
 	m_adjustFallEdgeDetect : F_TRIG;
 	
+	//motor hall angle and encoder angle;   
+	m_hallAngleAndEncoderAngle AT %I* :ARRAY [1..2] OF UDINT;
+	
 	//endoscope type and posture switch
-	m_endoscopeTypeSwitch : FB_IOToggleCheck;
+	m_endoscopeTypeSwitch : FB_IOCheck;
 	m_endoscopePostureSwitch : FB_IOToggleCheck;
 	
 	// instrument instance
@@ -64,7 +67,12 @@ VAR
 	m_cmdJntCurrent : Vec8d;
 	m_cmdJntPos :Vec8d;
 	m_cmdJntVel :Vec8d;
-		
+	m_motorEncSalta : vec8di;
+	m_lastMotorEnc:Vec8di;
+	
+	// intrument joint backlash
+	m_instruJntBacklash :Vec5d:=g_zeroVec5d;
+	
 	// arm dynamic data
 	m_jntGravity : Vec8d:=g_zeroVec8d;
 	m_jntMassMat : Mat3d;
@@ -89,6 +97,15 @@ VAR
 	
 	// code execute time measure
 	m_codeTime : Profiler;
+	
+	//endoscope switch right eye or lefe eye
+	m_buttonPressTime : TIME :=T#3S;
+	m_buttonPressTon : TON;
+	m_buttonUnpress : F_TRIG;
+	m_scopeTypeSwitch : BOOL;
+	m_scopeTypeSwitchEnable : BOOL;
+	m_scopeTypeSwitchR: R_TRIG;
+	m_switchEye : BOOL;
 	
 END_VAR
 ]]></Declaration>
@@ -150,9 +167,9 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[d1:=GVL_SlaveArmKinematic.g_d1;
-L:=m_instrument.kinematicParameters.m_rodLength;
-a:=m_instrument.kinematicParameters.m_headLength;
-//b:=m_instrument.kinematicParameters.m_fingerLength;
+L:=m_instrument.instruTypeInfo.m_rodLength;
+a:=m_instrument.instruTypeInfo.m_headLength;
+//b:=m_instrument.instruTypeInfo.m_fingerLength;
 b:=0;
 
 q3:=i_DHJntPos[3];
@@ -249,14 +266,25 @@ m_instrument.readParameters(startFlag);
 
 // check endoscope type and posture 
 // only check when electric Knife is off 
-IF SlaveArmControl.m_masterRobotData.m_electricKnifePedalTrigger[1] = 0 AND SlaveArmControl.m_masterRobotData.m_electricKnifePedalTrigger[2] = 0 THEN
-	IF m_endoscopeTypeSwitch.check((m_panelInstrumentOnIO AND 16#20)=32) THEN
+// endoscope type switch button ,within 3s short press ->swtich left right eye ,more than 3s long press -> switch scope type.   
+m_buttonUnpress(CLK:= m_endoscopeTypeSwitch.check((m_panelInstrumentOnIO AND 16#20)=32) AND NOT m_scopeTypeSwitch, Q=> m_switchEye);
+m_buttonPressTon(IN:=m_endoscopeTypeSwitch.check((m_panelInstrumentOnIO AND 16#20)=32) , PT:= m_buttonPressTime, Q=> m_scopeTypeSwitch, ET=> );
+m_scopeTypeSwitchR(CLK:= m_scopeTypeSwitch, Q=> m_scopeTypeSwitchEnable);
+IF SlaveArmControl.m_masterRobotData.m_electricKnifePedalTrigger[1] = 0 AND SlaveArmControl.m_masterRobotData.m_electricKnifePedalTrigger[2] = 0 AND GVL_interactUI.g_scopeTurnOverEnable THEN
+	IF m_switchEye THEN
+		IF GVL_interactUI.g_switchLeftRightEye = 0 THEN
+			GVL_interactUI.g_switchLeftRightEye := 1;
+		ELSE
+			GVL_interactUI.g_switchLeftRightEye := 0;
+		END_IF		
+	ELSIF m_scopeTypeSwitchEnable THEN
 		IF m_instrument.curScopeType = EndoScopeType_30 THEN
 			m_instrument.nextScopeType := EndoscopeType_0;
 		ELSE
 			m_instrument.nextScopeType := EndoscopeType_30;
 		END_IF
 	END_IF
+	
 	IF m_endoscopePostureSwitch.check((m_panelInstrumentOnIO AND 16#10)=16) AND m_instrument.curScopeType = EndoScopeType_30  THEN
 		IF m_instrument.curScopePosture = EndoScopePosture_HeadDown THEN
 			m_instrument.nextScopePosture := EndoscopePosture_HeadUp;
@@ -497,9 +525,9 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[d1:=GVL_SlaveArmKinematic.g_d1;
-L:=m_instrument.kinematicParameters.m_rodLength;
-a:=m_instrument.kinematicParameters.m_headLength;
-//b:=m_instrument.kinematicParameters.m_fingerLength;
+L:=m_instrument.instruTypeInfo.m_rodLength;
+a:=m_instrument.instruTypeInfo.m_headLength;
+//b:=m_instrument.instruTypeInfo.m_fingerLength;
 b:=0;
 
 q3:=i_DHJntPos[3];
@@ -561,13 +589,14 @@ END_VAR]]></Declaration>
 m_armIdx:=i_armIdx;
 m_curGripAngle:=0;
 m_simGripAngle:=0;
+m_instruJntBacklash := g_zeroVec5d;
 
 // joint init
 FOR i:=1 TO g_sJntNum DO
 	IF i<4 THEN
 		m_joints[i].init(m_armIdx, i,g_slaveArmCtrlCycleTime, 1);
 	ELSE
-		m_joints[i].init(m_armIdx, i,g_slaveArmCtrlCycleTime, 4);
+		m_joints[i].init(m_armIdx, i,g_slaveArmCtrlCycleTime, 2);
 	END_IF
 END_FOR
 
@@ -576,18 +605,18 @@ initJntPos();
 
 // joint controller init
 FOR i:=1 TO g_sJntNum DO 
-	currentRatioMotor2Jnt:=GVL_SlaveMotorParameters.g_motorTrqConst[i]*GVL_SlaveMotorParameters.g_motorReduction[i]/1000;
-	m_jntPIDCtrl[i].init(g_slaveArmCtrlCycleTime,GVL_slaveControlParameters.g_posKp[i],GVL_slaveControlParameters.g_posKd[i],
-		GVL_slaveControlParameters.g_posKi[i], GVL_slaveControlParameters.g_posKiLimit[i]* currentRatioMotor2Jnt,
-		GVL_slaveControlParameters.g_posCtrlLimit[i]*currentRatioMotor2Jnt);
+	currentRatioMotor2Jnt:=GVL_SlaveMotorParameters.g_motorTrqConst[m_armIdx,i]*GVL_SlaveMotorParameters.g_motorReduction[m_armIdx,i]/1000;
+	m_jntPIDCtrl[i].init(g_slaveArmCtrlCycleTime,GVL_slaveControlParameters.g_posKp[m_armIdx,i],GVL_slaveControlParameters.g_posKd[m_armIdx,i],
+		GVL_slaveControlParameters.g_posKi[m_armIdx,i], GVL_slaveControlParameters.g_posKiLimit[m_armIdx,i]* currentRatioMotor2Jnt,
+		GVL_slaveControlParameters.g_posCtrlLimit[m_armIdx,i]*currentRatioMotor2Jnt);
 END_FOR
 
 // instrument init
 m_instrument.init(i_armIdx);
 
 // endosocpe toggle button check
-m_endoscopeTypeSwitch.init(0, 500);
-m_endoscopePostureSwitch.init(0,500);
+m_endoscopeTypeSwitch.init(0, 100);
+m_endoscopePostureSwitch.init(0,100);
 
 ]]></ST>
       </Implementation>
@@ -609,6 +638,26 @@ END_FOR
 updateStatus();]]></ST>
       </Implementation>
     </Method>
+    <Property Name="instruJntBacklash" Id="{88009436-63a3-453e-90cc-655a8a6c10d7}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY instruJntBacklash :REFERENCE TO Vec5d]]></Declaration>
+      <Get Name="Get" Id="{042c0ee1-c963-40d8-8b91-055199bc99cd}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[instruJntBacklash ref=m_instruJntBacklash;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{f4769db0-ca40-4b10-b4c1-f1e63de83403}">
+        <Declaration><![CDATA[
+VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_instruJntBacklash := instruJntBacklash;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
     <Property Name="instrument" Id="{ef5d0758-d499-4e04-a177-87950f9a716b}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY instrument : REFERENCE TO FB_Instrument]]></Declaration>
       <Get Name="Get" Id="{3a5249de-ec45-4e88-a302-3df6650a3ff5}">
@@ -659,8 +708,8 @@ END_VAR
 	RETURN;
 END_IF
 
-instruReady := m_curJntPos[3] < (m_instrument.kinematicParameters.m_rodLength+m_instrument.kinematicParameters.m_headLength
-									+ m_instrument.kinematicParameters.m_fingerLength - GVL_SlaveArmKinematic.g_minInstruRCDis+checkBuffer);
+instruReady := m_curJntPos[3] < (m_instrument.instruTypeInfo.m_rodLength+m_instrument.instruTypeInfo.m_headLength
+									+ m_instrument.instruTypeInfo.m_fingerLength - GVL_SlaveArmKinematic.g_minInstruRCDis+checkBuffer);
 ]]></ST>
       </Implementation>
     </Method>
@@ -760,9 +809,9 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[d1:=GVL_SlaveArmKinematic.g_d1;
-L:=m_instrument.kinematicParameters.m_rodLength;
-a:=m_instrument.kinematicParameters.m_headLength;
-//b:=m_instrument.kinematicParameters.m_fingerLength;
+L:=m_instrument.instruTypeInfo.m_rodLength;
+a:=m_instrument.instruTypeInfo.m_headLength;
+//b:=m_instrument.instruTypeInfo.m_fingerLength;
 b:=0;
 
 q2 := i_DHJntPos[2];
@@ -834,6 +883,17 @@ r_jaco[6,6]:=c5*s1*s2 - s5*(c1*s4 - c2*c4*s1);
 ]]></ST>
       </Implementation>
     </Method>
+    <Property Name="motorEncSalta" Id="{cac3b6ae-212c-47f6-a859-06f1af5707c8}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY motorEncSalta : REFERENCE TO Vec8di]]></Declaration>
+      <Get Name="Get" Id="{53bde125-32fa-4f18-8625-e39b709edbe1}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[motorEncSalta ref= m_motorEncSalta;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Property Name="panelOn" Id="{38ffa1da-012d-4dbc-ad5b-314577ed285b}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY panelOn : bool]]></Declaration>
       <Get Name="Get" Id="{b8c5f533-4196-44c4-9a48-01cc1ca3c250}">
@@ -895,8 +955,8 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[m_instruInvasionDepth := m_curJntPos[3]-m_instrument.kinematicParameters.m_rodLength-
-				cos(m_curDHJntPos[5]+pi/2)*(m_instrument.kinematicParameters.m_headLength	+ m_instrument.kinematicParameters.m_fingerLength * COS(m_curDHJntPos[6]));
+        <ST><![CDATA[m_instruInvasionDepth := m_curJntPos[3]-m_instrument.instruTypeInfo.m_rodLength-
+				cos(m_curDHJntPos[5]+pi/2)*(m_instrument.instruTypeInfo.m_headLength	+ m_instrument.instruTypeInfo.m_fingerLength * COS(m_curDHJntPos[6]));
 					]]></ST>
       </Implementation>
     </Method>
@@ -1006,7 +1066,12 @@ FOR i:=1 TO g_sJntNum DO
 	ELSE
 		m_jntPIDCtrl[i].reset();
 		m_cmdJntTrq[i]:=0;
-		m_joints[i].updateCmds(DriverOPMode_Pos,m_cmdJntPos[i],m_cmdJntTrq[i]);
+		IF i>3 THEN
+			// add instrument joint backlash
+			m_joints[i].updateCmds(DriverOPMode_Pos,m_cmdJntPos[i]+m_instruJntBacklash[i-3],m_cmdJntTrq[i]);
+		ELSE
+			m_joints[i].updateCmds(DriverOPMode_Pos,m_cmdJntPos[i],m_cmdJntTrq[i]);
+		END_IF
 	END_IF
 	
 END_FOR
@@ -1025,6 +1090,51 @@ m_jntGravity[1]:=slaveDynaData.m_gravity[m_armIdx][1];
 m_jntGravity[2]:=slaveDynaData.m_gravity[m_armIdx][2];
 m_jntGravity[3]:=slaveDynaData.m_gravity[m_armIdx][3];
 ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="updatePedalActive" Id="{7bed4cda-379a-4915-a79f-0e0230b2eb73}">
+      <Declaration><![CDATA[METHOD updatePedalActive : UINT
+VAR_IN_OUT CONSTANT
+	i_armId : E_MatchedSlaveArmIdx;
+	i_electricKnifePedalTrigger : UINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE m_instrument.InstruTypeInfo.m_energyType OF
+	InstruEnergyType_Unipolar:
+		IF 1 = i_electricKnifePedalTrigger THEN
+			updatePedalActive := 1;
+		ELSIF 2 = i_electricKnifePedalTrigger THEN
+			updatePedalActive := 2;
+		ELSE
+			updatePedalActive := 0;
+		END_IF
+		
+	InstruEnergyType_Bipolar:
+		IF 2 = i_electricKnifePedalTrigger THEN
+			updatePedalActive := 2;
+		ELSE
+			updatePedalActive := 0;
+		END_IF
+		
+	InstruEnergyType_UltrasonicScalpel:
+		IF 1 = i_electricKnifePedalTrigger THEN
+			updatePedalActive := 1;
+		ELSIF 2 = i_electricKnifePedalTrigger THEN
+			updatePedalActive := 2;
+		ELSE
+			updatePedalActive := 0;
+		END_IF
+	
+	InstruEnergyType_ForceBipolar:
+		IF 2 = i_electricKnifePedalTrigger THEN
+			updatePedalActive := 2;
+		ELSE
+			updatePedalActive := 0;
+		END_IF
+	ELSE
+		updatePedalActive := 0;
+END_CASE	]]></ST>
       </Implementation>
     </Method>
     <Method Name="updateSimStatus" Id="{f15ad7c2-6655-4b50-9555-9aa968e8753f}">
@@ -1065,15 +1175,25 @@ checkIO();
 
 // get joint data
 FOR i:=1 TO g_sJntNum DO
-	m_curMotorPos[i]:=m_joints[i].motorPos;
-	m_curLinkPos[i]:=m_joints[i].linkPos;
-	m_curLinkSingle[i]:=m_joints[i].linkSingle;
-	m_curJntPos[i]:=m_joints[i].jntPos;
+	// remove instrument joint backlash
+	IF i>3 THEN
+		m_curMotorPos[i]:=m_joints[i].motorPos - m_instruJntBacklash[i-3];
+		m_curLinkPos[i]:=m_joints[i].linkPos - m_instruJntBacklash[i-3];
+		m_curLinkSingle[i]:=m_joints[i].linkSingle - m_instruJntBacklash[i-3];
+		m_curJntPos[i]:=m_joints[i].jntPos - m_instruJntBacklash[i-3];
+	ELSE
+		m_curMotorPos[i]:=m_joints[i].motorPos;
+		m_curLinkPos[i]:=m_joints[i].linkPos;
+		m_curLinkSingle[i]:=m_joints[i].linkSingle;
+		m_curJntPos[i]:=m_joints[i].jntPos;
+	END_IF
 	m_curJntVel[i]:=m_joints[i].jntVel;
 	m_curJntTrq[i]:=m_joints[i].jntTrq;
 	m_rawJntCurrent[i]:=m_joints[i].rawCurrent;
 	m_filtJntCurrent[i]:=m_joints[i].filtCurrent;
 	m_cmdJntCurrent[i]:=m_joints[i].cmdCurrent;
+	m_motorEncSalta[i] := ABS(m_joints[i].m_motorInputs.m_motorEncoder - m_lastMotorEnc[i]);
+	m_lastMotorEnc[i] := m_joints[i].m_motorInputs.m_motorEncoder;
 END_FOR 
 
 // instrument kinematic
@@ -1111,29 +1231,19 @@ matMultiVec(m_jaco, m_curDHJntVel, m_curCartTwist);
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.checkIO">
-      <LineId Id="21" Count="1" />
-      <LineId Id="133" Count="0" />
-      <LineId Id="58" Count="1" />
-      <LineId Id="56" Count="0" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="6" Count="2" />
-      <LineId Id="112" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="36" Count="0" />
-      <LineId Id="41" Count="0" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="42" Count="0" />
-      <LineId Id="38" Count="0" />
-      <LineId Id="85" Count="0" />
-      <LineId Id="84" Count="0" />
-      <LineId Id="39" Count="0" />
-      <LineId Id="114" Count="0" />
-      <LineId Id="70" Count="0" />
-      <LineId Id="125" Count="0" />
-      <LineId Id="141" Count="1" />
-      <LineId Id="145" Count="12" />
-      <LineId Id="143" Count="1" />
-      <LineId Id="74" Count="0" />
+      <LineId Id="165" Count="23" />
+      <LineId Id="230" Count="0" />
+      <LineId Id="217" Count="0" />
+      <LineId Id="213" Count="0" />
+      <LineId Id="224" Count="0" />
+      <LineId Id="189" Count="1" />
+      <LineId Id="225" Count="0" />
+      <LineId Id="218" Count="0" />
+      <LineId Id="226" Count="2" />
+      <LineId Id="221" Count="0" />
+      <LineId Id="191" Count="5" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="197" Count="8" />
       <LineId Id="45" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.cmdCartPose.Get">
@@ -1197,13 +1307,19 @@ matMultiVec(m_jaco, m_curDHJntVel, m_curCartTwist);
       <LineId Id="29" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.init">
-      <LineId Id="240" Count="31" />
+      <LineId Id="412" Count="32" />
       <LineId Id="80" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.initJntPos">
       <LineId Id="7" Count="3" />
       <LineId Id="32" Count="1" />
       <LineId Id="25" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.instruJntBacklash.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.instruJntBacklash.Set">
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.instrument.Get">
       <LineId Id="6" Count="0" />
@@ -1242,6 +1358,9 @@ matMultiVec(m_jaco, m_curDHJntVel, m_curCartTwist);
     <LineIds Name="FB_SlaveArm.modifyJaco">
       <LineId Id="436" Count="71" />
       <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.motorEncSalta.Get">
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.panelOn.Get">
       <LineId Id="2" Count="0" />
@@ -1304,6 +1423,7 @@ matMultiVec(m_jaco, m_curDHJntVel, m_curCartTwist);
       <LineId Id="21" Count="0" />
       <LineId Id="20" Count="0" />
       <LineId Id="96" Count="0" />
+      <LineId Id="126" Count="4" />
       <LineId Id="64" Count="0" />
       <LineId Id="14" Count="0" />
       <LineId Id="9" Count="1" />
@@ -1315,12 +1435,20 @@ matMultiVec(m_jaco, m_curDHJntVel, m_curCartTwist);
       <LineId Id="19" Count="1" />
       <LineId Id="14" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SlaveArm.updatePedalActive">
+      <LineId Id="47" Count="33" />
+      <LineId Id="13" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SlaveArm.updateSimStatus">
       <LineId Id="50" Count="9" />
       <LineId Id="24" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.updateStatus">
-      <LineId Id="204" Count="35" />
+      <LineId Id="255" Count="9" />
+      <LineId Id="305" Count="10" />
+      <LineId Id="268" Count="5" />
+      <LineId Id="297" Count="1" />
+      <LineId Id="274" Count="16" />
       <LineId Id="47" Count="0" />
     </LineIds>
   </POU>

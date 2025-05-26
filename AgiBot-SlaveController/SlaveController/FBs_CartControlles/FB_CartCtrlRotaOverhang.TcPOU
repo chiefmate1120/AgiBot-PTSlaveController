@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
-  <POU Name="FB_CartCtrlRotaOverhang" Id="{29cc6caf-ba9e-4e23-b00b-4fe9f9dc2a55}" SpecialFunc="None">
+  <POU Name="FB_CartCtrlRotaOverhang" Id="{1013ab41-66c2-4818-805a-b5539ad146f9}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CartCtrlRotaOverhang EXTENDS FB_CartCtrlBase
 VAR_INPUT
 END_VAR
@@ -10,6 +10,7 @@ VAR
 
 	m_actJntPos: Vec8d;
 	m_tarJntPos: Vec8d;
+	m_lastPosInc: Vec8d;
 	m_cmdJntDir : INT;
 	m_rotaAngle:LREAL:=5 * g_deg2Rad ;
 	m_initJntPos : LREAL;
@@ -24,13 +25,19 @@ VAR
 	m_adjustStartTime :LREAL;
 
 	m_jntOTG : FB_secOrdTrajFilter;
+	
+	m_isCollision :BOOL;
+	m_Collsion:ARRAY[1..g_sArmNum] OF BOOL;
+	
+	m_collsionR : R_TRIG;
+	m_collsionDir : INT;
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[
 ]]></ST>
     </Implementation>
-    <Method Name="calcCmdJntPos" Id="{b0118fa5-e7c7-4cd0-aa70-f550ff0fbcb1}">
+    <Method Name="calcCmdJntPos" Id="{81194c6e-7e7e-4721-ae43-bb4fd18c74bc}">
       <Declaration><![CDATA[// override this function in each exact controller
 METHOD PROTECTED calcCmdJntPos : BOOL
 VAR_IN_OUT CONSTANT
@@ -43,6 +50,14 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[//In this method, 8 represents the overhang angle
+m_isCollision := FALSE;
+FOR i := 1 TO g_sArmNum DO
+	m_Collsion[i] := collisionDetection(armID:= i);
+	m_isCollision := m_isCollision OR m_Collsion[i];
+END_FOR
+
+m_collsionR(CLK:= m_isCollision, Q=> );
+
 m_adjustStartTime :=LIMIT(0, m_adjustStartTime + g_cartCtrlCycleTime, 1);
 m_actJntPos := i_slaveCart.curJntPos;
 IF i_slaveCart.m_rotaOverhangOnFlag = 2 THEN
@@ -50,17 +65,140 @@ IF i_slaveCart.m_rotaOverhangOnFlag = 2 THEN
 ELSIF i_slaveCart.m_rotaOverhangOnFlag = 4 THEN
 	m_cmdJntDir := 1;
 END_IF
+IF m_collsionR.Q THEN
+	m_collsionDir := m_cmdJntDir;
+END_IF
+
+IF m_collsionDir = m_cmdJntDir AND m_isCollision THEN
+	//m_cmdJntDir :=0;
+END_IF
 
 IF m_adjustStartTime > m_cartAdjustStartWaitTime THEN
 	m_tarJntInc := m_tarJntInc + m_cmdJntDir * m_rotaAngle * g_cartCtrlCycleTime;
-	
+	m_jntPosReachLimit[8] := calcCmdReachLimit();
 	m_tarJntPos[8] := LIMIT(GVL_CartMotorParameters.g_minJntPos[8] + m_carJntSoftwareLimit[8], m_initJntPos + m_tarJntInc, GVL_CartMotorParameters.g_maxJntPos[8] - m_carJntSoftwareLimit[8]);
 
 	m_jntOTG.run(i_targetPos:= m_tarJntPos[8], i_targetVel:= 0.0, o_cmdAcc=> , o_cmdVel=> , o_cmdPos=>m_cmdJntPos[8] );
 END_IF]]></ST>
       </Implementation>
     </Method>
-    <Method Name="init" Id="{2c8ff6c6-52e2-4069-83ca-2c9575363ae7}">
+    <Method Name="calcCmdReachLimit" Id="{96b58c74-821f-484f-8487-c649f86b6477}">
+      <Declaration><![CDATA[METHOD calcCmdReachLimit : BOOL
+VAR_INPUT
+END_VAR
+
+VAR
+	i : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+IF (GVL_CartMotorParameters.g_minJntPos[8] + GVL_CartControlParameters.g_carJntSoftwareLimit[8]) > (m_initJntPos + m_tarJntInc) THEN
+	IF (m_tarJntInc - m_lastPosInc[8]) <0 THEN
+		m_tarJntInc := m_lastPosInc[8];
+	END_IF
+	calcCmdReachLimit := TRUE;
+
+ELSIF (m_initJntPos + m_tarJntInc)>(GVL_CartMotorParameters.g_maxJntPos[8] - GVL_CartControlParameters.g_carJntSoftwareLimit[8]) THEN
+	IF (m_tarJntInc - m_lastPosInc[8]) >0 THEN
+		m_tarJntInc := m_lastPosInc[8];
+	END_IF
+	calcCmdReachLimit := TRUE;
+END_IF
+m_lastPosInc[8] := m_tarJntInc;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="collisionDetection" Id="{616ff554-ab5b-47ea-b2b6-580412f8e9f2}">
+      <Declaration><![CDATA[METHOD collisionDetection : BOOL
+VAR_INPUT
+	armID :INT;
+END_VAR
+
+VAR
+	columnRadius: LREAL := 0.14;
+	safeRange: LREAL := 0.05;
+	q1,q2,q3,q4: LREAL;
+	x,y,z,a: LREAL;
+	x_p1,y_p1,x_p2,y_p2: LREAL;
+
+	m_armIdx: INT;
+	Radius,Angle,R1,q,q4max: LREAL;
+	
+	rJnt2: LREAL := 0.06;
+	
+	c2,s2,c3,s3,c23,s23: LREAL;
+	disP0ToP2: LREAL;
+	disLine2Base: LREAL;
+	railWidth : lreal := 0.05527;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_armIdx := armID;
+q1 := m_actJntPos[7] + GVL_CartControlParameters.g_curBeamStretchJntInitPos;
+q2 := m_actJntPos[8];
+q3 := SetupArmControl.m_setupJointsData.m_curLinkPos[armID][1];
+q4 := SetupArmControl.m_setupJointsData.m_curLinkPos[armID][2];
+
+Radius:=0.170; Angle:=60.0*g_deg2Rad;
+R1:=Radius;  q:=Angle;
+IF (m_armIdx=1) THEN
+	x:=-R1; y:=0; z:=0;  q4max := 0.605;
+	
+ELSIF (m_armIdx=2) THEN
+	x:=-R1*COS(q); y:=-R1*SIN(q); z:=0;  q4max := 0.610;
+	
+ELSIF (m_armIdx=3) THEN	
+	x:=R1*COS(q); y:=-R1*SIN(q); z:=0; q4max := 0.610;
+	
+ELSIF (m_armIdx=4) THEN	 
+	x:=R1; y:=0; z:=0; q4max := 0.645;
+END_IF
+
+IF q4 < (q4max ) THEN
+	q4 := q4max+0.06 ;
+	IF m_armIdx=2 OR m_armIdx=3 THEN
+		a := 0;
+	ELSIF m_armIdx=1 THEN
+		a := 0.0623;
+	ELSE 
+		a := 0.09062;	
+	END_IF
+ELSE
+	q4 := q4 + rJnt2;
+	IF m_armIdx=1 THEN
+		a := 0.01975;
+	ELSIF m_armIdx=2 OR m_armIdx=3 THEN
+		a := 0.12687;
+	ELSE
+		a := 0.1727;	
+	END_IF
+END_IF
+
+c2 :=COS(q2); s2 := SIN(q2); c3 := COS(q3); s3 := SIN(q3); c23 := COS(q2 + q3); s23 := SIN(q2 + q3);
+ 
+x_p1 := c2*x - s2*y;
+y_p1 := q1 + c2*y + s2*x;
+
+x_p2 := c23*q4 - a*s23 + c2*x - s2*y;
+y_p2 := q1 + a*c23 + c2*y + q4*s23 + s2*x;
+
+disP0ToP2 := SQRT(x_p2*x_p2 +(y_p2 - q1)*(y_p2 - q1) );
+
+IF  ( q1 - columnRadius) - disP0ToP2 > 0.01 THEN
+	collisionDetection := FALSE;
+ELSE
+	disLine2Base := lineDistance(x1:=x_p1 , y1:=y_p1 , x2:=x_p2 , y2:=y_p2 );
+	IF (disLine2Base - columnRadius - railWidth) > safeRange THEN
+		collisionDetection := FALSE;
+	ELSE	
+		collisionDetection := TRUE;
+	END_IF
+END_IF
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{3c22ae36-a62a-46eb-b5b5-90476bcbe032}">
       <Declaration><![CDATA[// override this function in each exact controller
 // NOTICE: set joint control mode here, and do some initialization if needed
 METHOD PUBLIC init : BOOL
@@ -85,13 +223,46 @@ m_jntEnableFlag[8] :=1;
 m_jntOPMode[8]:= DriverOPMode_Pos;
 m_initJntPos :=m_cmdJntPos[8];
 m_tarJntInc := 0;
-
+m_lastPosInc := g_zeroVec8d;
+//m_collsionDir := 0;
+m_isCollision := FALSE;
 m_jntOTG.init(i_curCmdPos:= m_cmdJntPos[8], i_curCmdVel:= 0, i_maxV:=GVL_CartControlParameters.g_maxJntVel[8] , i_maxA:=GVL_CartControlParameters.g_maxJntAcc[8] , i_Ts:=g_cartCtrlCycleTime );
 
 
 m_adjustStartTime := 0;
+
+m_isCollision := FALSE;
+m_Collsion[1] := FALSE;
+m_Collsion[2] := FALSE;
+m_Collsion[3] := FALSE;
+m_Collsion[4] := FALSE;
 // update commands to arm
 copyCmds(r_cartCtrlCmd);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="lineDistance" Id="{a6e52306-baf1-4864-aee0-d2bb09c749d8}">
+      <Declaration><![CDATA[METHOD lineDistance : LREAL
+VAR_INPUT
+	x1:LREAL;
+	y1:LREAL;
+	x2:LREAL;
+	y2:LREAL;
+END_VAR
+
+VAR
+	k: LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF ABS(x2 -x1) > 1E-9 THEN
+	k := (y2 - y1)/(x2 -x1);
+ELSE
+	lineDistance := x1;	
+	RETURN;
+END_IF
+
+lineDistance := ABS(y1 - k*x1)/SQRT(k*k+1);
+
+]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_CartCtrlRotaOverhang">
@@ -100,11 +271,22 @@ copyCmds(r_cartCtrlCmd);]]></ST>
     </LineIds>
     <LineIds Name="FB_CartCtrlRotaOverhang.calcCmdJntPos">
       <LineId Id="12" Count="0" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="105" Count="1" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="107" Count="0" />
       <LineId Id="77" Count="0" />
       <LineId Id="72" Count="0" />
       <LineId Id="88" Count="1" />
       <LineId Id="91" Count="1" />
       <LineId Id="90" Count="0" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="131" Count="2" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="134" Count="1" />
       <LineId Id="87" Count="0" />
       <LineId Id="10" Count="0" />
       <LineId Id="76" Count="0" />
@@ -113,6 +295,54 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="70" Count="0" />
       <LineId Id="68" Count="0" />
       <LineId Id="14" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlRotaOverhang.calcCmdReachLimit">
+      <LineId Id="36" Count="0" />
+      <LineId Id="56" Count="11" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlRotaOverhang.collisionDetection">
+      <LineId Id="30" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="15" Count="1" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="35" Count="12" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="108" Count="1" />
+      <LineId Id="111" Count="3" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="86" Count="1" />
+      <LineId Id="115" Count="1" />
+      <LineId Id="118" Count="3" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="73" Count="1" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="80" Count="1" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="6" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlRotaOverhang.init">
       <LineId Id="88" Count="0" />
@@ -125,10 +355,26 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="39" Count="0" />
       <LineId Id="73" Count="1" />
       <LineId Id="31" Count="0" />
+      <LineId Id="132" Count="1" />
       <LineId Id="59" Count="1" />
       <LineId Id="57" Count="0" />
-      <LineId Id="22" Count="1" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="116" Count="3" />
+      <LineId Id="23" Count="0" />
       <LineId Id="21" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlRotaOverhang.lineDistance">
+      <LineId Id="10" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="15" Count="1" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="17" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="SafetyCheck" Id="{54e6e883-3f22-4a40-9066-2b433bf8009c}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM SafetyCheck
 VAR
@@ -27,6 +27,12 @@ VAR
 	// cart joint data
 	m_cartJointsData AT %I* :ST_CartJointData;
 	
+	//setup motor in_output to safety check
+	m_setupMotorData AT %I* : ST_SetupMotorData;
+	
+	//slave motor in_output to safety check
+	m_slaveMotorData AT %I* : ST_SlaveMotorData;
+	
 	//emergency stop and stop botton
 	m_stopButton AT %I*: BOOL;
 	m_emergencyStopButton AT %I*: BOOL;
@@ -34,13 +40,18 @@ VAR
 	//warning tone
 	m_warningTone AT %Q*:ARRAY [1..4] OF BOOL;
 	
-	m_initFlag:bool;
+	//joystick Signal safety check
+	m_joystickSignalIOSafetyCheck AT %I* : ARRAY [1..4] OF UDINT;
 	
+	//brake distance check outpurt
+	m_brakeDistanceCheck AT %Q* : BOOL;
+	
+	i , j: INT;
+	m_initFlag:bool;
 	m_SafetyCheck : Fb_SafetyCheck;
 	m_checkVariable : ARRAY[1..g_maxNum] OF checkInputVariable;
 	m_EtherCATCheck :ARRAY [1..g_maxNum,1..g_maxArmJoint] OF Fb_EtherCATCheck;
-	m_errCode :ARRAY [1..3] OF UDINT;
-	i , j: INT;
+	m_EtherCATClearCRC :ARRAY [1..g_sArmNum] OF Fb_EtherCATCheck;
 	
 	//error robot data record
 	m_dataRecord : Fb_dataRecord;
@@ -49,21 +60,64 @@ VAR
 	m_dsrRcpPos :ARRAY[1..g_sArmNum] OF Vec3d;
 	m_rcpPosErrCounts :ARRAY[1..g_sArmNum] OF INT := [4(0)];
 	m_rcpPosErr :ARRAY[1..g_sArmNum] OF Vec3d;		// rcp position error
-	m_curJntPosLast : ARRAY [1..g_maxArmNum] OF vec13di;  
-	m_armErrCodeRefreshLast : ARRAY [1..4] OF UINT;
+	m_motorEncoderSaltaValue : ARRAY [1..g_maxArmNum] OF vec13di;  
 	
-	m_armsRS:ARRAY [1..g_maxArmNum,1..30] OF RS;//复位优先双稳态器
-	m_cartRS:ARRAY [1..30] OF RS;//复位优先双稳态器
+	m_armsRS:ARRAY [1..g_maxArmNum,1..50] OF RS;//复位优先双稳态器
+	m_cartRS:ARRAY [1..50] OF RS;//复位优先双稳态器
 	m_scopeArmNoReady : BOOL;
 	m_joysticksTrigger : BOOL;
 	// wait time before robot init  for ethercat to be statble 
 	m_safetyCheckInitWaitTime : LREAL:=0;
 	
-	m_test : DINT;
+	m_EtherCATAllOP : BOOL:=FALSE;
+	m_armEtherCATInOP : vec4b;
+	m_dumpEnergy : UDINT;
+	
+	m_mStopButton : FB_MasterStopButtonDetect;
+	m_sStopButton : FB_MasterStopButtonDetect;
+	
+	//recipe read-write commands
+	RecipeManCommands:   RecipeManCommands;
+	m_bReadRecipeStep:   INT := 1;
+	m_bWriteRecipeStep:   INT := 1;
+	m_bReadRecipe:  BOOL := TRUE;
+	m_bWriteRecipe: BOOL := FALSE;
+	m_caliFileWriteTon :ARRAY [1..g_sArmNum] OF TON ;
+	m_linkPosWriteCaliData:ARRAY [1..4] OF ARRAY [1..8] OF TON ;
+	m_powerBoxWriteCaliData:ARRAY [1..4] OF TON ;
+	m_caliFileWriteTonOfCart :TON ;
+	m_linkPosWriteCaliDataOfCart:ARRAY [1..8] OF TON ;
+	m_loadConfigFileOK :BOOL :=false;
+	
+	//workHeart
+	m_workHeartTon0 : TON;
+	m_workHeartTon1 : TON;
+	
+	// flag if master are connected
+	m_masterOnLine :BOOL :=FALSE;
+	m_masterOnLineCheck :FB_masterConnectionCheck;
+	
+	//robot system operates sound 
+	m_systemVoiceR:ARRAY [1..g_sArmNum,1..10] OF R_TRIG;
+	m_systemVoiceF:ARRAY [1..g_sArmNum,1..10] OF F_TRIG;
+	m_systemVoiceRS:ARRAY [1..g_sArmNum,1..10] OF RS;
+	m_systemVoiceTon:ARRAY [1..g_sArmNum,1..10] OF FB_TON;
+	m_checkArmKeepTriggerTon :ARRAY [1..g_sArmNum] OF FB_TON;
+	m_trocarOnDetectTon:ARRAY [1..g_sArmNum] OF FB_TON;
+	m_armStateLast:ARRAY[1..g_sArmNum] OF E_SlaveArmState;
+	m_systemVoiceTriggerTime :TIME:=T#100MS;
+	m_armKeepTriggerState :Vec4b;
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[// reset data
+m_loadConfigFileOK:=loadConfigFile();
+IF NOT(m_loadConfigFileOK) THEN
+	RETURN;
+END_IF
+GVL_interactUI.g_systemVoice := systemVoice();
+communicationCheck();
+
 IF FALSE = m_initFlag  THEN
 	FOR i:=1  TO g_sArmNum DO 
 		m_safetyCheckData.m_slaveErrFlag[i]:=FALSE;
@@ -79,15 +133,21 @@ armSafetyCheckAllowed();
 
 robotPromptMassageCast();
 
+//check EtherCAT status of arm and cart , if All EtherCAT is OP then start system safty check
+IF (NOT m_safetyCheckData.m_armEtherCATAllOP OR NOT m_safetyCheckData.m_cartEtherCATAllOP) AND NOT m_EtherCATAllOP THEN
+	GVL_interactUI.g_errIdType1:= m_SafetyCheck.checkOPStatus(m_armEtherCATInOP, m_safetyCheckData.m_cartEtherCATAllOP);
+	RETURN;
+END_IF
+
 // wait communication to be stable
 IF(m_safetyCheckInitWaitTime<g_robotSafetyCheckWaitTime) THEN
 	m_safetyCheckInitWaitTime := m_safetyCheckInitWaitTime+g_setupArmCtrlCycleTime;
 	RETURN;
 END_IF
-
+m_EtherCATAllOP := TRUE;
 
 FOR i:=1  TO g_maxNum DO
-	m_SafetyCheck.systemSafetyCheck(i,m_checkVariable,m_cartJointsData,m_setupJointsData,m_slaveJointData);
+	m_SafetyCheck.systemSafetyCheck(i,m_armEtherCATInOP[i],m_checkVariable,m_cartJointsData,m_setupJointsData,m_slaveJointData);
 END_FOR
 
 
@@ -101,22 +161,14 @@ m_SafetyCheck.errCodeUpdating();
 GVL_interactUI.g_errIdType3:=m_SafetyCheck.o_ErrCode[3];
 GVL_interactUI.g_errIdType2:=m_SafetyCheck.o_ErrCode[2];
 GVL_interactUI.g_errIdType1:=m_SafetyCheck.o_ErrCode[1];
+GVL_interactUI.g_errIdType0:=m_SafetyCheck.o_ErrCode[0];
 GVL_interactUI.g_popupErrorArm1 := m_SafetyCheck.m_armErrCodePopup[1];
 GVL_interactUI.g_popupErrorArm2 := m_SafetyCheck.m_armErrCodePopup[2];
 GVL_interactUI.g_popupErrorArm3 := m_SafetyCheck.m_armErrCodePopup[3];
 GVL_interactUI.g_popupErrorArm4 := m_SafetyCheck.m_armErrCodePopup[4];
-FOR i:=1  TO g_sArmNum DO
-	IF m_SafetyCheck.m_armErrCodeRefresh[i] <> m_armErrCodeRefreshLast[i] THEN
-		GVL_interactUI.g_popupRefresh[i] := 1;
-	END_IF
-	m_armErrCodeRefreshLast[i] := m_SafetyCheck.m_armErrCodeRefresh[i];
-END_FOR
 
 //clear fault
-IF GVL_interactUI.g_uiFaultReset=1 OR m_masterRobotData.m_uiResetFault = 1 THEN
-	m_SafetyCheck.errFlagReset();
-	GVL_interactUI.g_uiFaultReset := 0;
-END_IF
+clearErrorFault();
 
 //robot record information
 m_dataRecord.run(m_checkVariable , m_cartStatus , m_cartJointsData , m_setupStatus , m_slaveStatus , m_setupJointsData , m_slaveJointData );
@@ -136,22 +188,18 @@ END_VAR]]></Declaration>
 	FOR j := 1 TO g_maxArmJoint DO
 		IF j > 5 THEN
 			//fault code 16#3003 
-			m_SafetyCheck.checkPermit[i].m_linkEncErr[j] := m_checkVariable[i].m_slaveDriverInput[j-g_setupJntNum]^.m_statusWord<>0;
-			//fault code 16#3002 
-			m_SafetyCheck.checkPermit[i].m_currentIsNotUpdate[j] :=m_checkVariable[i].m_slaveDriverInput[j-g_setupJntNum]^.m_statusWord<>0 ;
+			m_SafetyCheck.checkPermit[i].m_linkEncErr[j] := m_checkVariable[i].m_slaveDriverInput[j-g_setupJntNum].m_statusWord<>0;
 			//fault code 16#2002
-			m_SafetyCheck.checkPermit[i].m_armJntFollowErr[j] := m_checkVariable[i].m_slaveDriverInput[j-g_setupJntNum]^.m_statusWord = DriverStatusWord_OP ;
+			m_SafetyCheck.checkPermit[i].m_armJntFollowErr[j] := m_checkVariable[i].m_slaveDriverInput[j-g_setupJntNum].m_statusWord = DriverStatusWord_OP ;
 			//fault code 16#200B
-			m_SafetyCheck.checkPermit[i].m_jntCurrentCtrlErr[j] := m_checkVariable[i].m_slaveDriverOutput[j-g_setupJntNum]^.m_opMode = DriverOPMode_Trq;
+			m_SafetyCheck.checkPermit[i].m_jntCurrentCtrlErr[j] :=SlaveArmControl.m_slaveRobot.m_armCtrlCmds[i].m_jntEnableFlag[j-g_setupJntNum]  = DriverOPMode_Trq AND m_slaveMotorData.m_slaveMotorOutput[i,j-g_setupJntNum].m_opMode = DriverOPMode_Trq ;
 		ELSE
 			//fault code 16#3003 
-			m_SafetyCheck.checkPermit[i].m_linkEncErr[j] := m_checkVariable[i].m_setupDriverInput[j]^.m_statusWord<>0;
-			//fault code 16#3002
-			m_SafetyCheck.checkPermit[i].m_currentIsNotUpdate[j] := m_checkVariable[i].m_setupDriverInput[j]^.m_statusWord<>0 AND j > 2;
+			m_SafetyCheck.checkPermit[i].m_linkEncErr[j] := m_checkVariable[i].m_setupDriverInput[j].m_statusWord<>0;
 			//fault code 16#2002
-			m_SafetyCheck.checkPermit[i].m_armJntFollowErr[j] := m_checkVariable[i].m_setupDriverInput[j]^.m_statusWord = DriverStatusWord_OP AND j > 2;
+			m_SafetyCheck.checkPermit[i].m_armJntFollowErr[j] := m_checkVariable[i].m_setupDriverInput[j].m_statusWord = DriverStatusWord_OP AND j > 2;
 			//fault code 16#200B
-			m_SafetyCheck.checkPermit[i].m_jntCurrentCtrlErr[j] := m_checkVariable[i].m_setupDriverOutput[j]^.m_opMode = DriverOPMode_Trq AND j > 2;
+			m_SafetyCheck.checkPermit[i].m_jntCurrentCtrlErr[j] := SetupArmControl.m_setupRobot.m_armCtrlCmds[i].m_jntEnableFlag[j] = DriverOPMode_Trq AND m_setupMotorData.m_setupMotorOutput[i,j].m_opMode = DriverOPMode_Trq AND j > 2;
 			
 		END_IF
 		//fault code 16#3002
@@ -164,16 +212,20 @@ END_VAR]]></Declaration>
 		m_SafetyCheck.checkPermit[i].m_outOfLimit[j] := TRUE;
 		//fault code 16#3008
 		m_SafetyCheck.checkPermit[i].m_motPhieErr[j] := TRUE;
+		//fault code 16#3009
+		m_SafetyCheck.checkPermit[i].m_springBreakageCheck := m_checkVariable[i].m_setupDriverInput[j].m_statusWord<>0 ;
 		//fault code 16#2003
 		m_SafetyCheck.checkPermit[i].m_jntVelErr[j] := TRUE;
 		//fault code 16#2004
-		m_SafetyCheck.checkPermit[i].m_spacePoseErr[j] := m_slaveStatus.m_armState[i] = SlaveArmState_MasterSlave AND  norm(m_slaveStatus.m_masterSlavePoseError[i])<g_smallNum;
+		m_SafetyCheck.checkPermit[i].m_spacePoseErr := m_slaveStatus.m_armState[i] = SlaveArmState_MasterSlave;
 		//fault code 16#2005
 		m_SafetyCheck.checkPermit[i].m_jntCurrentErr[j] := TRUE;
 		//fault code 16#2007
-		m_SafetyCheck.checkPermit[i].m_fixedPointErr := m_slaveStatus.m_armState[i] = SlaveArmState_MasterSlave;
+		m_SafetyCheck.checkPermit[i].m_fixedPointErr := m_setupStatus.m_armState[i] = SetupArmState_Hold;
 		//fault code 16#2008
 		m_SafetyCheck.checkPermit[i].m_cmdJntSaltation[j] := m_slaveStatus.m_armState[i] = SlaveArmState_MasterSlave;
+		//fault code 16#200A
+		m_SafetyCheck.checkPermit[i].m_simCmdSalta := m_slaveStatus.m_armState[i] = SlaveArmState_MasterSlave;
 		//fault code 16#200F
 		m_SafetyCheck.checkPermit[i].m_instruOpenAngle := FALSE;
 	END_FOR
@@ -194,40 +246,41 @@ END_VAR]]></Declaration>
 	//emergency stop 、stop button and ui stop 
 	m_checkVariable[i].EmergencyStop := m_emergencyStopButton;
 	m_checkVariable[i].PCStopButton := GVL_interactUI.g_stopButtonFormUI;
-	m_checkVariable[i].SlaveStopButton := m_stopButton;
-	m_checkVariable[i].MasterStopButton := m_masterRobotData.m_masterStopButton;
+	m_checkVariable[i].SlaveStopButton := m_sStopButton.run(m_stopButton);
+	m_checkVariable[i].MasterStopButton := m_mStopButton.run(m_masterRobotData.m_masterStopButton);
 	
-	IF NOT(m_slaveStatus.m_armState[i] = SlaveArmState_MasterSlave OR m_slaveStatus.m_armState[i] = SlaveArmState_EndoScope) THEN
+	//IF NOT(m_slaveStatus.m_armState[i] = SlaveArmState_MasterSlave OR m_slaveStatus.m_armState[i] = SlaveArmState_EndoScope) THEN
+	IF (m_setupStatus.m_armState[i] <> SetupArmState_Hold) THEN
 		m_dsrRcpPos[i] := m_setupStatus.m_rcPos[i];
 	END_IF
 	m_checkVariable[i].m_rcpCheck := m_SafetyCheck.rcpErrCheck(m_dsrRcpPos[i],  m_setupStatus.m_rcPos[i], m_rcpPosErrCounts[i] ,m_rcpPosErr[i]);
-	m_checkVariable[i].m_spacePoseErr := m_SafetyCheck.poseErrCheck(m_slaveStatus.m_cmdArmPose[i], m_slaveStatus.m_simArmPose[i] );
+	m_checkVariable[i].m_spacePoseErr := m_SafetyCheck.rotErrCheck(m_slaveStatus.m_masterSlavePoseError[i]);
+	m_checkVariable[i].m_cmdArmPos := m_slaveStatus.m_simDHJntPos[i];
 	
 	//slave robot input cast
 	FOR j:=1 TO  g_sJntNum DO 		
-		m_checkVariable[i].m_slaveDriverInput[j] := ADR(SlaveArmControl.m_slaveRobot.m_slaveArms[i].m_joints[j].m_motorInputs);
-		m_checkVariable[i].m_slaveDriverOutput[j] := ADR(SlaveArmControl.m_slaveRobot.m_slaveArms[i].m_joints[j].m_motorOutputs);
+		m_checkVariable[i].m_slaveDriverInput[j] := m_slaveMotorData.m_slaveMotorInput[i,j];
+		m_checkVariable[i].m_slaveDriverOutput[j] := m_slaveMotorData.m_slaveMotorOutput[i,j];
+		m_checkVariable[i].m_hallAndEncoderAngle[j] := m_slaveMotorData.m_hallAngleAndEncoderAngle[i,j];
 		m_checkVariable[i].m_EtherCATState[j+g_setupJntNum] := m_EtherCATCheck[i,j+g_setupJntNum].EtherCATVerify(GVL_SlaveJointEncoderCaliData.g_slaveArmNetID[i],g_JointNetPort[j+g_setupJntNum]);
-		m_checkVariable[i].m_motorEncoderSaltaValue[j+g_setupJntNum] := ABS(SlaveArmControl.m_slaveRobot.m_slaveArms[i].m_joints[j].m_motorInputs.m_motorEncoder - m_curJntPosLast[i][j+g_setupJntNum]);
-		m_curJntPosLast[i][j+g_setupJntNum] := SlaveArmControl.m_slaveRobot.m_slaveArms[i].m_joints[j].m_motorInputs.m_motorEncoder;
+		m_checkVariable[i].m_motorEncoderSaltaValue[j+g_setupJntNum] := m_slaveMotorData.m_motorEncSalta[i][j];
 	END_FOR
 	
 	//setup robot input cast
-	FOR j:=1 TO  g_setupJntNum DO 		
-		m_checkVariable[i].m_setupDriverInput[j] := ADR(SetupArmControl.m_setupRobot.m_setupArms[i].m_joints[j].m_motorInputs);
-		m_checkVariable[i].m_setupDriverOutput[j] := ADR(SetupArmControl.m_setupRobot.m_setupArms[i].m_joints[j].m_motorOutputs);
+	FOR j:=1 TO  g_setupJntNum DO 	
+		m_checkVariable[i].m_setupDriverInput[j] := m_setupMotorData.m_setupMotorInput[i,j];
+		m_checkVariable[i].m_setupDriverOutput[j] := m_setupMotorData.m_setupMotorOutput[i,j];
 		m_checkVariable[i].m_EtherCATState[j] := m_EtherCATCheck[i,j].EtherCATVerify(GVL_SlaveJointEncoderCaliData.g_slaveArmNetID[i],g_JointNetPort[j]);
-		m_checkVariable[i].m_motorEncoderSaltaValue[j] := ABS(SetupArmControl.m_setupRobot.m_setupArms[i].m_joints[j].m_motorInputs.m_motorEncoder - m_curJntPosLast[i][j]);
-		m_curJntPosLast[i][j] := SetupArmControl.m_setupRobot.m_setupArms[i].m_joints[j].m_motorInputs.m_motorEncoder;
+		m_checkVariable[i].m_motorEncoderSaltaValue[j] := m_setupMotorData.m_motorEncSalta[i][j];
 	END_FOR
-
 END_FOR
+
 
 //setup robot in-out variable cast
 FOR j:=1 TO  g_cartJntNum DO
 	m_checkVariable[5].EmergencyStop := m_emergencyStopButton;
 	m_checkVariable[5].PCStopButton := GVL_interactUI.g_stopButtonFormUI;
-	m_checkVariable[5].SlaveStopButton := m_stopButton;
+	m_checkVariable[5].SlaveStopButton := m_sStopButton.run(m_stopButton);
 	m_checkVariable[5].m_cartDriverInput[j] := CartControl.m_cartRobot.m_slaveCart.m_cartJoints[j].m_motorInputs;
 	m_checkVariable[5].m_cartDriverOutput[j] := CartControl.m_cartRobot.m_slaveCart.m_cartJoints[j].m_motorOutputs;
 	m_checkVariable[5].m_cartEtherCATState[j] := m_EtherCATCheck[5,j].EtherCATVerify(GVL_CartJointEncoderCaliData.g_slaveCartNetID,GVL_CartJointEncoderCaliData.g_slaveCartJointNetPort[j]);
@@ -235,10 +288,151 @@ END_FOR
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="checkEtherCATAll" Id="{a164738b-81a3-4c66-88e6-d907208d76aa}">
+      <Declaration><![CDATA[METHOD checkEtherCATAll : BOOL
+VAR_IN_OUT CONSTANT
+	i_EtherCATState: ARRAY [1..g_maxNum] OF checkInputVariable;
+END_VAR
+VAR_OUTPUT
+	o_EtherCATInOP : BOOL;
+	o_armEtherCATInOP : vec4b;
+	o_cartEtherCATAllOP : BOOL;
+END_VAR
+
+VAR
+	i , j :INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i := 1 TO g_sArmNum DO
+	FOR j := 1 TO g_maxArmJoint DO
+		//m_EtherCATCheck[i,j].setSlaveStatus(GVL_SlaveJointEncoderCaliData.g_slaveArmNetID[i],g_JointNetPort[j]);
+	END_FOR
+END_FOR
+
+o_EtherCATInOP := TRUE;
+FOR i := 1 TO g_sArmNum DO
+	o_armEtherCATInOP[i] := TRUE;
+	FOR j := 1 TO g_maxArmJoint DO
+		IF FALSE = i_EtherCATState[i].m_EtherCATState[j].EtherCATState AND i <> GVL_interactUI.g_armIsDisable THEN
+			o_armEtherCATInOP[i] := FALSE;
+			o_EtherCATInOP := FALSE;
+			EXIT;
+		END_IF
+	END_FOR
+	IF NOT o_armEtherCATInOP[i] OR NOT o_EtherCATInOP THEN
+		EXIT;
+	END_IF
+END_FOR
+
+FOR j := 1 TO g_maxCartJoint DO
+	//m_EtherCATCheck[5,j].setSlaveStatus(GVL_CartJointEncoderCaliData.g_slaveCartNetID,GVL_CartJointEncoderCaliData.g_slaveCartJointNetPort[j]);
+END_FOR
+
+o_cartEtherCATAllOP := TRUE;
+FOR j := 1 TO g_maxCartJoint DO
+	IF FALSE = i_EtherCATState[5].m_cartEtherCATState[j].EtherCATState THEN
+		o_cartEtherCATAllOP := FALSE;
+		EXIT;
+	END_IF
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="clearErrorFault" Id="{4538f7d4-f9eb-4e43-b333-a31d3b56574d}">
+      <Declaration><![CDATA[METHOD clearErrorFault : BOOL
+VAR_INPUT
+END_VAR
+
+VAR
+	clearFault : BOOL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// clear CRC lost frame
+clearFault := GVL_interactUI.g_uiFaultReset=1 OR m_masterRobotData.m_uiResetFault = 1;
+FOR i:=1 TO g_sArmNum DO 
+	m_EtherCATClearCRC[i].clearCRCError(GVL_SlaveJointEncoderCaliData.g_slaveArmNetID[i],clearFault);
+END_FOR
+//clear fault
+IF clearFault THEN
+	m_SafetyCheck.errFlagReset();
+	GVL_interactUI.g_uiFaultReset := 0;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="communicationCheck" Id="{50ac3c80-6bd7-4832-ad7c-bbfbaa36f395}">
+      <Declaration><![CDATA[METHOD communicationCheck : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[checkEtherCATAll(m_checkVariable , o_EtherCATInOP=>m_safetyCheckData.m_armEtherCATAllOP,o_armEtherCATInOP=> m_armEtherCATInOP, o_cartEtherCATAllOP=> m_safetyCheckData.m_cartEtherCATAllOP );
+
+m_brakeDistanceCheck :=NOT UINT_TO_BOOL( GVL_interactUI.g_stopButtonFormUI);
+
+//work heart
+m_workHeartTon0(IN:= GVL_interactUI.g_heartBeat = 1, PT:= T#1S, Q=> , ET=> );
+m_workHeartTon1(IN:= GVL_interactUI.g_heartBeat = 0, PT:= T#1S, Q=> , ET=> );
+IF m_workHeartTon0.Q THEN
+	GVL_interactUI.g_heartBeat :=0 ;
+ELSIF m_workHeartTon1.Q THEN
+	GVL_interactUI.g_heartBeat  :=1 ;
+END_IF
+
+//master online
+m_masterOnLine := m_masterOnLineCheck.check(m_masterRobotData.m_heartBeat );
+
+GVL_interactUI.g_slaveRunAlone := NOT m_masterOnLine;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="jointEncoderCaliCast" Id="{38e8df63-8a70-4816-82e7-e0e3cbf778d9}">
+      <Declaration><![CDATA[METHOD jointEncoderCaliCast : BOOL
+VAR_INPUT
+	armIdx : INT;
+END_VAR
+VAR 
+	i : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+FOR i := 1 TO 8 DO
+	m_linkPosWriteCaliData[armIdx][i](IN:= GVL_armCali.g_linkPosWriteCaliData[armIdx][i], PT:= T#3S, Q=> GVL_armCali.g_linkPosWriteCaliDataTrigger[armIdx][i], ET=> );
+	IF GVL_armCali.g_linkPosWriteCaliDataTrigger[armIdx][i] THEN
+		IF i<=5 THEN
+			GVL_SetupJointEncoderCaliData.g_minLinkEncoder[armIdx,i] := GVL_armCali.g_linkLimitFristPos[armIdx][i];
+			GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[armIdx,i] := GVL_armCali.g_linkLimitSecondPos[armIdx][i];
+			GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[armIdx,i] := GVL_armCali.g_linkHomePos[armIdx][i];
+			GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[armIdx,i] := GVL_armCali.g_linkZeroCrossOrNot[armIdx][i];
+		ELSE
+			GVL_SlaveJointEncoderCaliData.g_minLinkEncoder[armIdx,i-5] := GVL_armCali.g_linkLimitFristPos[armIdx][i];
+			GVL_SlaveJointEncoderCaliData.g_maxLinkEncoder[armIdx,i-5] := GVL_armCali.g_linkLimitSecondPos[armIdx][i];
+			GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[armIdx,i-5] := GVL_armCali.g_linkHomePos[armIdx][i];
+			GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[armIdx,i-5] := GVL_armCali.g_linkZeroCrossOrNot[armIdx][i];
+		END_IF
+	END_IF
+END_FOR
+FOR i := 1 TO 5 DO
+	m_powerBoxWriteCaliData[armIdx](IN:= GVL_armCali.g_powerBoxPosWrite[armIdx], PT:= T#3S, Q=>GVL_armCali.g_powerBoxPosWriteTrigger[armIdx] , ET=> );
+	IF GVL_armCali.g_powerBoxPosWriteTrigger[armIdx] THEN
+		GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[armIdx,i+3] := GVL_armCali.g_powerBoxLinkHomePos[armIdx][i];
+	END_IF
+END_FOR
+
+FOR i := 1 TO g_cartJntNum DO
+	m_linkPosWriteCaliDataOfCart[i](IN:= GVL_armCali.g_linkPosWriteCaliDataOfCart[i], PT:= T#3S, Q=> GVL_armCali.g_linkPosWriteCaliDataTriggerOfCart[i], ET=> );
+	IF GVL_armCali.g_linkPosWriteCaliDataTriggerOfCart[i] THEN
+		GVL_CartJointEncoderCaliData.g_minLinkEncoder[i] := GVL_armCali.g_linkLimitFristPosOfCart[i];
+		GVL_CartJointEncoderCaliData.g_maxLinkEncoder[i] := GVL_armCali.g_linkLimitSecondPosOfCart[i];
+		GVL_CartJointEncoderCaliData.g_caliLinkEncoder[i] := GVL_armCali.g_linkHomePosOfCart[i];
+		GVL_CartJointEncoderCaliData.g_linkEncZeroCross[i] := GVL_armCali.g_linkZeroCrossOrNotOfCart[i];
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="joystickAdjust" Id="{38ce96d9-75fc-4e3b-9d39-89b30533a7ac}">
       <Declaration><![CDATA[METHOD joystickAdjust : BOOL
 VAR_IN_OUT CONSTANT
-	i_joystickValue : vec8d;
+	i_joystickValue : ARRAY [1..4] OF UDINT;
 END_VAR
 
 VAR
@@ -247,11 +441,68 @@ END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[
 FOR i := 1 TO 4 DO
-	IF 492 > i_joystickValue[i] OR i_joystickValue[i] > 532 THEN
+	IF  (i_joystickValue[i]>1 AND i_joystickValue[i]<492) OR i_joystickValue[i] > 532 THEN
 		joystickAdjust := TRUE;
 		EXIT;
 	END_IF
 END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="loadConfigFile" Id="{a9343549-3fa6-461f-98d4-d8ffc4dbad86}">
+      <Declaration><![CDATA[METHOD loadConfigFile : BOOL
+VAR
+	ReturnDwordRead:DWORD;
+	ReturnDwordWrite:DWORD;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//read recipe
+IF (m_bReadRecipeStep<=g_sArmNum*2 AND m_bReadRecipeStep>0) THEN
+	//The method loads a recipe from the specified recipe file.  It subsequently writes the recipe into the PLC variables.
+    ReturnDwordRead:=RecipeManCommands.LoadAndWriteRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionName[m_bReadRecipeStep] , RecipeName:='RecipeRecord');
+	IF ReturnDwordRead = ERR_OK THEN
+		m_bReadRecipeStep:=m_bReadRecipeStep+1; 
+	END_IF
+END_IF 
+loadConfigFile := m_bReadRecipeStep>g_sArmNum*2;
+
+//write recipe
+FOR i := 1 TO g_sArmNum DO
+	jointEncoderCaliCast(i);
+	m_caliFileWriteTon[i](IN:=GVL_armCali.g_caliDataWrite[i], PT:= T#3S, Q=> GVL_armCali.g_caliDataWriteTrigger[i], ET=> );
+	IF GVL_armCali.g_caliDataWriteTrigger[i] THEN
+		//This method creates a new recipe in the specified recipe definition. It subsequently reads the current PLC values into the new recipe and saves it as a recipe file with a standard name.
+	 	RecipeManCommands.CreateRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionName[i] , RecipeName:='RecipeRecord' );
+	 	ReturnDwordWrite:=RecipeManCommands.ReadAndSaveRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionName[i] , RecipeName:='RecipeRecord' );
+	END_IF
+END_FOR
+
+// read Recipe 
+IF (m_bReadRecipe) THEN
+	//The method loads a recipe from the specified recipe file.  It subsequently writes the recipe into the PLC variables.
+     ReturnDwordRead:=RecipeManCommands.LoadAndWriteRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionNameCart, RecipeName:='RecipeRecord');	 
+     m_bReadRecipe:=FALSE; 
+END_IF
+loadConfigFile := loadConfigFile AND (ReturnDwordRead = ERR_OK);
+
+//write recipe
+//IF (m_bWriteRecipe) THEN
+//	//This method creates a new recipe in the specified recipe definition. It subsequently reads the current PLC values into the new recipe and saves it as a recipe file with a standard name.
+//	 RecipeManCommands.CreateRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionNameCart , RecipeName:='RecipeRecord' );
+//	 ReturnDwordWrite:=RecipeManCommands.ReadAndSaveRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionNameCart , RecipeName:='RecipeRecord' );
+//	 m_bWriteRecipe:=FALSE;
+//END_IF
+
+//write recipe
+//IF (m_bWriteRecipe) THEN
+	m_caliFileWriteTonOfCart(IN:= GVL_armCali.g_caliDataWriteOfCart, PT:= T#3S, Q=> GVL_armCali.g_caliDataWriteTriggerOfCart, ET=> );
+	IF GVL_armCali.g_caliDataWriteTriggerOfCart THEN
+		//This method creates a new recipe in the specified recipe definition. It subsequently reads the current PLC values into the new recipe and saves it as a recipe file with a standard name.
+		 RecipeManCommands.CreateRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionNameCart , RecipeName:='RecipeRecord' );
+		 ReturnDwordWrite:=RecipeManCommands.ReadAndSaveRecipe(RecipeDefinitionName:=GVL_SystemParameters.RecipeDefinitionNameCart , RecipeName:='RecipeRecord' );
+		 m_bWriteRecipe:=FALSE;
+	END_IF
+//END_IF]]></ST>
       </Implementation>
     </Method>
     <Method Name="readErrFlag" Id="{c6c3fbb5-bc5f-41ea-91b5-687651d637ca}">
@@ -266,7 +517,8 @@ END_VAR
 END_FOR
 
 
-GVL_interactUI.g_slaveRecoverErrFlag := BOOL_TO_INT((m_SafetyCheck.m_armErrFlag[1,2] OR m_SafetyCheck.m_armErrFlag[2,2] OR m_SafetyCheck.m_armErrFlag[3,2] OR m_SafetyCheck.m_armErrFlag[4,2]
+GVL_interactUI.g_slaveRecoverErrFlag := BOOL_TO_INT(((m_SafetyCheck.m_armErrFlag[1,2] AND GVL_interactUI.g_armIsDisable<>1) OR (m_SafetyCheck.m_armErrFlag[2,2] AND GVL_interactUI.g_armIsDisable<>2)
+												 OR (m_SafetyCheck.m_armErrFlag[3,2] AND GVL_interactUI.g_armIsDisable<>3) OR (m_SafetyCheck.m_armErrFlag[4,2] AND GVL_interactUI.g_armIsDisable<>4)
 														OR m_SafetyCheck.m_armErrFlag[g_cartNum,2] OR m_SafetyCheck.m_jntErrFlag[g_cartNum,0,2]) AND GVL_interactUI.g_slaveRunAlone) ;
 
 //cart error flag
@@ -300,6 +552,7 @@ VAR
 	m_uiCtrlJoystickEnable : BOOL;
 	instrument: INT;
 	armSelfCheckPass : BOOL;
+	teleSlaveArmIdx : ARRAY [1..2] OF INT;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[FOR i := 1 TO 4 DO
@@ -316,31 +569,31 @@ END_VAR]]></Declaration>
 	m_checkVariable[i].m_promptLocation[2] := i + 3;
 	
 	//0*1023				
-	m_armsRS[i,3](SET:= m_slaveStatus.m_instruReadErrId[i]=1, 
+	m_armsRS[i,3](SET:= m_slaveStatus.m_instruReadErrId[i]=1 AND m_slaveStatus.m_selfCheckPass[i], 
 							RESET1:= NOT m_armsRS[i,3].SET OR NOT m_slaveStatus.m_instruInstallStatus[i] , 
 							Q1=> m_checkVariable[i].m_promptStatus[3]);
 	m_checkVariable[i].m_promptLocation[3] := i + 3;
 						
 	//0*1024	
-	m_armsRS[i,4](SET:= m_slaveStatus.m_instruReadErrId[i]=2, 
+	m_armsRS[i,4](SET:= m_slaveStatus.m_instruReadErrId[i]=2 AND m_slaveStatus.m_selfCheckPass[i],
 							RESET1:=NOT m_armsRS[i,4].SET OR NOT m_slaveStatus.m_instruInstallStatus[i], 
 							Q1=> m_checkVariable[i].m_promptStatus[4]);
 	m_checkVariable[i].m_promptLocation[4] := i + 3;
 	
 	//0*1025
-	m_armsRS[i,5](SET:= m_slaveStatus.m_instruClampErrId[i]=1, 
+	m_armsRS[i,5](SET:= m_slaveStatus.m_instruClampErrId[i]=1 AND m_slaveStatus.m_selfCheckPass[i],
 							RESET1:=NOT m_armsRS[i,5].SET OR NOT m_slaveStatus.m_instruInstallStatus[i], 
 							Q1=> m_checkVariable[i].m_promptStatus[5]);
 	m_checkVariable[i].m_promptLocation[5] := i + 3;
 	
 	 //0*1026
-	m_armsRS[i,6](SET:= m_slaveStatus.m_instruClampErrId[i]=2, 
+	m_armsRS[i,6](SET:= m_slaveStatus.m_instruClampErrId[i]=2 AND m_slaveStatus.m_selfCheckPass[i],
 							RESET1:=NOT m_armsRS[i,6].SET OR NOT m_slaveStatus.m_instruInstallStatus[i], 
 							Q1=> m_checkVariable[i].m_promptStatus[6]);
 	m_checkVariable[i].m_promptLocation[6] := i + 3;
 	
 	//0*1027
-	m_armsRS[i,7](SET:= m_slaveStatus.m_instruReadErrId[i]=3, 
+	m_armsRS[i,7](SET:= m_slaveStatus.m_instruReadErrId[i]=3 AND m_slaveStatus.m_selfCheckPass[i],
 							RESET1:=NOT m_armsRS[i,7].SET OR NOT m_slaveStatus.m_instruInstallStatus[i], 
 							Q1=> m_checkVariable[i].m_promptStatus[7]);
 	m_checkVariable[i].m_promptLocation[7] := i + 3;
@@ -360,24 +613,19 @@ END_VAR]]></Declaration>
 	//m_checkVariable[i].m_promptLocation[10] := i + 3;	
 	
 	 //0*102B
-	FOR j:=1 TO g_mArmNum DO 
-		IF i = m_masterRobotData.m_teleSlaveArmIdx[j] THEN
-			m_armsRS[i,11](SET:=m_slaveStatus.m_armState[i] = SlaveArmState_Disable AND m_masterRobotData.m_tryMSControl[j] =1, 
-									RESET1:= NOT m_armsRS[i,11].SET, 
-									Q1=> m_checkVariable[i].m_promptStatus[11]);
-			m_checkVariable[i].m_promptLocation[11] := i + 3;
-		END_IF
-	END_FOR
+	m_armsRS[i,11](SET:= m_slaveStatus.m_instruReadErrId[i]=4 AND m_slaveStatus.m_selfCheckPass[i],
+							RESET1:= NOT m_armsRS[i,11].SET, 
+							Q1=> m_checkVariable[i].m_promptStatus[11]);
+	m_checkVariable[i].m_promptLocation[11] := i + 3;	
+
 	
 	//0*102C
-	FOR j:=1 TO g_mArmNum DO 
-		IF i = m_masterRobotData.m_teleSlaveArmIdx[j] THEN
-			m_armsRS[i,12](SET:=NOT ((SlaveArmState_InstruReady<= m_slaveStatus.m_armState[i] AND m_slaveStatus.m_armState[i] <= SlaveArmState_EndoScope) OR m_slaveStatus.m_armState[i]=SlaveArmState_Stop) AND m_masterRobotData.m_tryMSControl[j] =1 AND m_slaveStatus.m_instruStauts[i].m_ready AND m_slaveStatus.m_armState[i] <> SlaveArmState_Disable, 
-									RESET1:= NOT m_armsRS[i,12].SET, 
-									Q1=> m_checkVariable[i].m_promptStatus[12]);
-			m_checkVariable[i].m_promptLocation[12] := i + 3;
-		END_IF
-	END_FOR
+	m_armsRS[i,12](SET:= SlaveArmState_PanelReady= m_slaveStatus.m_armState[i] AND m_masterRobotData.m_tryMSControl[1] =1 AND m_slaveStatus.m_armState[i] <> SlaveArmState_Disable
+							 AND m_slaveStatus.m_instruStauts[i].m_ready AND InstruType_endoscope <> m_slaveStatus.m_instruStauts[i].m_type AND m_setupStatus.m_armState[i] = SetupArmState_Hold , 
+							RESET1:= NOT m_armsRS[i,12].SET, 
+							Q1=> m_checkVariable[i].m_promptStatus[12]);
+	m_checkVariable[i].m_promptLocation[12] := i + 3;
+
 	
 				
 	//0*102D
@@ -395,26 +643,60 @@ END_VAR]]></Declaration>
 	
 	//0*102F
 	IF InstruType_endoscope = m_slaveStatus.m_instruStauts[i].m_type AND m_slaveStatus.m_endoscopeMounted THEN
-		m_scopeArmNoReady := m_slaveStatus.m_armState[i] <> SlaveArmState_ScopeReady AND m_slaveStatus.m_armState[i] <> SlaveArmState_EndoScope;
+		m_scopeArmNoReady :=  SlaveArmState_PanelReady= m_slaveStatus.m_armState[i] AND  m_slaveStatus.m_instruStauts[i].m_ready AND InstruType_endoscope = m_slaveStatus.m_instruStauts[i].m_type AND m_setupStatus.m_armState[i] = SetupArmState_Hold;
 		m_armsRS[i,15](SET:= (NOT m_slaveStatus.m_endoscopeMounted OR m_scopeArmNoReady) AND (m_masterRobotData.m_tryMSControl[1] =1 OR m_masterRobotData.m_tryMSControl[2] =1), 
 								RESET1:= NOT m_armsRS[i,15].SET, 
 								Q1=> m_checkVariable[i].m_promptStatus[15]);
 		m_checkVariable[i].m_promptLocation[15] := i + 3;	
 	ELSE
 		m_checkVariable[i].m_promptStatus[15] := FALSE;
+		m_checkVariable[i].m_promptLocation[15] := i + 3;	
 	END_IF
+	
+	//1037
+	teleSlaveArmIdx := m_masterRobotData.m_teleSlaveArmIdx;
+	FOR j:=1 TO g_mArmNum DO 
+		IF i = teleSlaveArmIdx[j] THEN
+			m_armsRS[i,23](SET:=m_slaveStatus.m_armState[i] = SlaveArmState_PanelReady AND m_masterRobotData.m_tryMSControl[j] =1 AND NOT m_slaveStatus.m_instruStauts[i].m_ready 
+											 AND m_slaveStatus.m_endoscopeMounted AND NOT m_scopeArmNoReady, 
+									RESET1:= NOT m_armsRS[i,23].SET, 
+									Q1=> m_checkVariable[i].m_promptStatus[23]);
+			m_checkVariable[i].m_promptLocation[23] := i + 3; EXIT;
+		ELSE
+			 m_checkVariable[i].m_promptStatus[23] := FALSE;
+		END_IF
+	END_FOR
+	
+	//1038
+	//m_armsRS[i,24](SET:= m_slaveStatus.m_panelInstallStatus[i] AND  m_setupStatus.m_asepticMegnetCheck[i] = 6, 
+	//						RESET1:= NOT m_armsRS[i,24].SET, 
+	//						Q1=> m_checkVariable[i].m_promptStatus[24]);
+	//m_checkVariable[i].m_promptLocation[24] := i + 3;
+	
+	//103C 内窥镜翻转中
+	m_armsRS[i,28](SET:= SlaveArmState_ScopeToggle = m_slaveStatus.m_armState[i], 
+							RESET1:= NOT m_armsRS[i,28].SET, 
+							Q1=> m_checkVariable[i].m_promptStatus[28]);
+	m_checkVariable[i].m_promptLocation[28] := i + 3;
+		
+	//103D instrument zero position read error
+	//m_armsRS[i,29](SET:= m_slaveStatus.m_panelInstallStatus[i] AND  m_setupStatus.m_asepticMegnetCheck[i] = 6, 
+	//						RESET1:= NOT m_armsRS[i,29].SET, 
+	//						Q1=> m_checkVariable[i].m_promptStatus[29]);
+	//m_checkVariable[i].m_promptLocation[29] := i + 3;
 END_FOR
 
 
 //0*1030			
-m_cartRS[16](SET:= NOT m_slaveStatus.m_masterOnLine, 
-						RESET1:= m_slaveStatus.m_masterOnLine, 
+m_cartRS[16](SET:= NOT m_masterOnLine, 
+						RESET1:= m_masterOnLine, 
 						Q1=> m_checkVariable[g_cartNum].m_promptStatus[16]);
 m_checkVariable[g_cartNum].m_promptLocation[16] := 16#0C;
 
 //0*1031
+m_dumpEnergy := GVL_interactUI.g_dumpEnergyUPS;
 m_cartRS[17](SET:=NOT SlaveArmControl.m_slaveInputDataPool.m_UIData.m_masterSlaveFlag AND GVL_interactUI.g_dumpEnergyUPS < 30 AND (m_masterRobotData.m_tryMSControl[1] =1 OR m_masterRobotData.m_tryMSControl[2] =1), 
-						RESET1:=  SlaveArmControl.m_slaveInputDataPool.m_UIData.m_masterSlaveFlag AND NOT (m_masterRobotData.m_tryMSControl[1] =1 OR m_masterRobotData.m_tryMSControl[2] =1), 
+						RESET1:=  SlaveArmControl.m_slaveInputDataPool.m_UIData.m_masterSlaveFlag OR  GVL_interactUI.g_dumpEnergyUPS >= 30 OR NOT (m_masterRobotData.m_tryMSControl[1] =1 OR m_masterRobotData.m_tryMSControl[2] =1), 
 						Q1=> m_checkVariable[g_cartNum].m_promptStatus[17]);
 m_checkVariable[g_cartNum].m_promptLocation[17] := g_cartNum + 3;
 
@@ -432,8 +714,8 @@ m_cartRS[19](SET:= m_cartStatus.m_sdrivingLeverSensorManualFlag,
 m_checkVariable[g_cartNum].m_promptLocation[19] := g_cartNum + 3;
 
  //0*1034
-m_uiCtrlJoystickEnable := m_cartStatus.m_uiControl.m_cameraJoystickEnable OR m_cartStatus.m_uiControl.m_joystickEnable;
-m_joysticksTrigger :=  joystickAdjust(m_cartStatus.m_joystickValue);
+m_uiCtrlJoystickEnable := m_cartStatus.m_uiControl.m_cameraJoystickEnable OR m_cartStatus.m_uiControl.m_joystickEnable OR m_cartStatus.m_uiControl.m_heightLimitAdjustEnable;
+m_joysticksTrigger :=  joystickAdjust(m_joystickSignalIOSafetyCheck);
 m_cartRS[20](SET:= m_cartStatus.m_trocarOnFlag=0 AND NOT m_uiCtrlJoystickEnable AND m_joysticksTrigger, 
 						RESET1:= NOT m_cartRS[20].SET, 
 						Q1=> m_checkVariable[g_cartNum].m_promptStatus[20]);
@@ -448,12 +730,168 @@ m_cartRS[21](SET:= m_cartStatus.m_trocarOnFlag>0 AND m_uiCtrlAdjustFlag,
 m_checkVariable[g_cartNum].m_promptLocation[21] := g_cartNum + 3;
 
 //0*1036
-m_cartRS[22](SET:= m_cartStatus.m_uiControl.m_joystickEnable AND (m_cartStatus.m_jntPosReachLimit[5] OR m_cartStatus.m_jntPosReachLimit[6] OR m_cartStatus.m_jntPosReachLimit[7] OR m_cartStatus.m_jntPosReachLimit[8]), 
+m_cartRS[22](SET:=  (m_cartStatus.m_jntPosReachLimit[5] OR m_cartStatus.m_jntPosReachLimit[6] OR m_cartStatus.m_jntPosReachLimit[7] OR m_cartStatus.m_jntPosReachLimit[8]), 
 						RESET1:= NOT m_cartRS[22].SET, 
 						Q1=> m_checkVariable[g_cartNum].m_promptStatus[22]);
 m_checkVariable[g_cartNum].m_promptLocation[22] := g_cartNum + 3;
 
-						
+//0*1039
+//m_cartRS[22](SET:=  (m_cartStatus.m_jntPosReachLimit[5] OR m_cartStatus.m_jntPosReachLimit[6] OR m_cartStatus.m_jntPosReachLimit[7] OR m_cartStatus.m_jntPosReachLimit[8]), 
+//						RESET1:= NOT m_cartRS[22].SET, 
+//						Q1=> m_checkVariable[g_cartNum].m_promptStatus[22]);
+//m_checkVariable[g_cartNum].m_promptLocation[22] := g_cartNum + 3;
+					
+//0*103A
+m_cartRS[26](SET:= m_joystickSignalIOSafetyCheck[1] = 0 OR m_joystickSignalIOSafetyCheck[2] = 0 OR m_joystickSignalIOSafetyCheck[3] = 0 OR m_joystickSignalIOSafetyCheck[4] = 0, 
+						RESET1:= NOT m_cartRS[26].SET, 
+						Q1=> m_checkVariable[g_cartNum].m_promptStatus[26]);
+m_checkVariable[g_cartNum].m_promptLocation[26] := g_cartNum + 3;
+
+//0*103E
+m_cartRS[30](SET:= NOT CartControl.m_cartRobot.m_slaveCart.m_cartDriveForceCaliFinshed, 
+						RESET1:= NOT m_cartRS[30].SET, 
+						Q1=> m_checkVariable[g_cartNum].m_promptStatus[30]);
+m_checkVariable[g_cartNum].m_promptLocation[30] := g_cartNum + 3;
+
+//0*103F
+m_cartRS[31](SET:= m_cartStatus.m_supportLegErrID[1]=2 OR m_cartStatus.m_supportLegErrID[2]=2, 
+						RESET1:= NOT m_cartRS[31].SET, 
+						Q1=> m_checkVariable[g_cartNum].m_promptStatus[31]);
+m_checkVariable[g_cartNum].m_promptLocation[31] := g_cartNum + 3;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="systemVoice" Id="{1acc2045-db42-420c-8757-38d389cdc385}">
+      <Declaration><![CDATA[METHOD systemVoice : INT
+VAR_INPUT
+END_VAR
+VAR
+	i : INT;
+END_VAR
+VAR_STAT
+	panelInstalled : Vec4b;
+	instruCtrlAdjust : Vec4b;
+	instruCtrlAdjustFallEdge : Vec4b;
+	manualCtrlAdjust : Vec4b;
+	manualCtrlAdjustFallEdge : Vec4b;
+	trocarInstalled : Vec4b;
+	instruInstalled : Vec4b;
+	instruInvasion : Vec4b;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i := 1 TO g_sArmNum DO
+	//panel installed succeed 
+	m_systemVoiceR[i,1](CLK:=SlaveArmControl.m_slaveRobot.m_panelMountedFlag[i]  , Q=> );
+	IF m_systemVoiceR[i,1].Q THEN
+		panelInstalled[i]:=TRUE;
+	END_IF
+	m_systemVoiceTon[i,1](IN:= panelInstalled[i], PT:= m_systemVoiceTriggerTime, Q=> , ET=> );
+	m_systemVoiceRS[i,1](SET:= panelInstalled[i], RESET1:= m_systemVoiceTon[i,1].Q , Q1=> );
+	IF m_systemVoiceRS[i,1].Q1 THEN
+		systemVoice := systemVoice_triger3;
+		RETURN;
+	ELSE
+		panelInstalled[i]:=FALSE;
+	END_IF
+
+	//adjust button trigger and slave arm state at SlaveArmState_Adjust status
+	m_systemVoiceR[i,2](CLK:= m_slaveStatus.m_armState[i] = SlaveArmState_Adjust, Q=> );
+	IF m_systemVoiceR[i,2].Q THEN
+		instruCtrlAdjust[i] := TRUE;
+	END_IF
+	m_systemVoiceTon[i,2](IN:= instruCtrlAdjust[i], PT:= m_systemVoiceTriggerTime, Q=> , ET=> );
+	m_systemVoiceRS[i,2](SET:= instruCtrlAdjust[i], RESET1:= m_systemVoiceTon[i,2].Q , Q1=> );
+	IF m_systemVoiceRS[i,2].Q1 THEN
+		systemVoice := systemVoice_end4;
+		RETURN;
+	ELSE
+		instruCtrlAdjust[i] := FALSE;
+	END_IF
+	
+	//slave arm state exit SlaveArmState_Adjust status
+	m_checkArmKeepTriggerTon[i](IN:=NOT SlaveArmControl.m_slaveRobot.m_slaveArms[i].adjustOn AND m_slaveStatus.m_armState[i] = SlaveArmState_Adjust, PT:= T#0.01S, Q=> , ET=> );
+	IF m_checkArmKeepTriggerTon[i].Q THEN
+		m_armKeepTriggerState[i]:=TRUE;
+	END_IF
+	m_systemVoiceF[i,3](CLK:=m_armKeepTriggerState[i] AND m_slaveStatus.m_armState[i] = SlaveArmState_Adjust, Q=> );
+	IF m_systemVoiceF[i,3].Q THEN
+		instruCtrlAdjustFallEdge[i] := TRUE;
+	END_IF
+	m_systemVoiceTon[i,3](IN:= instruCtrlAdjustFallEdge[i], PT:= m_systemVoiceTriggerTime, Q=> , ET=> );
+	m_systemVoiceRS[i,3](SET:= instruCtrlAdjustFallEdge[i], RESET1:= m_systemVoiceTon[i,3].Q , Q1=> );
+	IF m_systemVoiceRS[i,3].Q1 THEN
+		systemVoice := systemVoice_end4;
+		m_armKeepTriggerState[i]:=FALSE;
+		RETURN;
+	ELSE
+		instruCtrlAdjustFallEdge[i] := FALSE;
+	END_IF
+	
+	//adjust button trigger and setup arm state at SetupArmState_ManualAdjust status
+	//m_systemVoiceR[i,4](CLK:=SetupArmControl.m_setupRobot.m_setupArms[i].manualAdjustOn AND m_setupStatus.m_armState[i] = SetupArmState_ManualAdjust, Q=> );
+	//IF m_systemVoiceR[i,4].Q THEN
+	//	manualCtrlAdjust[i] := TRUE;
+	//END_IF
+	//m_systemVoiceTon[i,4](IN:= manualCtrlAdjust[i], PT:= m_systemVoiceTriggerTime, Q=> , ET=> );
+	//m_systemVoiceRS[i,4](SET:= manualCtrlAdjust[i], RESET1:= m_systemVoiceTon[i,4].Q , Q1=> );
+	//IF m_systemVoiceRS[i,4].Q1 THEN
+	//	systemVoice := systemVoice_end4;
+	//	RETURN;
+	//ELSE
+	//	manualCtrlAdjust[i] := FALSE;
+	//END_IF
+	
+	//slave arm state exit SetupArmState_ManualAdjust status
+	//m_systemVoiceF[i,5](CLK:= SetupArmControl.m_setupRobot.m_setupArms[i].manualAdjustOn AND m_setupStatus.m_armState[i] = SetupArmState_ManualAdjust, Q=> );
+	//IF m_systemVoiceF[i,5].Q THEN
+	//	manualCtrlAdjustFallEdge[i] := TRUE;
+	//END_IF
+	//m_systemVoiceTon[i,5](IN:= manualCtrlAdjustFallEdge[i], PT:= m_systemVoiceTriggerTime, Q=> , ET=> );
+	//m_systemVoiceRS[i,5](SET:= manualCtrlAdjustFallEdge[i], RESET1:= m_systemVoiceTon[i,5].Q , Q1=> );
+	//IF m_systemVoiceRS[i,5].Q1 THEN
+	//	systemVoice := systemVoice_end4;
+	//	RETURN;
+	//ELSE
+	//	manualCtrlAdjustFallEdge[i] := FALSE;
+	//END_IF
+	
+	//trocar installed
+	m_trocarOnDetectTon[i](IN:= m_slaveStatus.m_trocarOnFlag[i], PT:= T#1S, Q=> trocarInstalled[i], ET=> );
+	m_systemVoiceTon[i,6](IN:= trocarInstalled[i], PT:= m_systemVoiceTriggerTime, Q=> , ET=> );
+	m_systemVoiceRS[i,6](SET:= trocarInstalled[i], RESET1:= m_systemVoiceTon[i,6].Q OR NOT trocarInstalled[i], Q1=> );
+	IF m_systemVoiceRS[i,6].Q1 THEN
+		systemVoice := systemVoice_triger3;
+		RETURN;
+	END_IF
+	
+	//instrument or endoscope installed
+	m_systemVoiceR[i,7](CLK:=SlaveArmControl.m_slaveRobot.m_instrumentMountedFlag[i]  , Q=> );
+	IF m_systemVoiceR[i,7].Q THEN
+		instruInstalled[i]:=TRUE;
+	END_IF
+	m_systemVoiceTon[i,7](IN:= instruInstalled[i], PT:= m_systemVoiceTriggerTime, Q=> , ET=> );
+	m_systemVoiceRS[i,7](SET:= instruInstalled[i], RESET1:= m_systemVoiceTon[i,7].Q , Q1=> );
+	IF m_systemVoiceRS[i,7].Q1 THEN
+		systemVoice := systemVoice_triger3;
+		RETURN;
+	ELSE
+		instruInstalled[i]:=FALSE;
+	END_IF
+	
+	//slave arm state exit SlaveArmState_InstruInvasion status
+	m_systemVoiceR[i,8](CLK:= m_armStateLast[i] =SlaveArmState_InstruInvasion AND (m_slaveStatus.m_armState[i] = SlaveArmState_PanelReady OR m_slaveStatus.m_armState[i] = SlaveArmState_InstruReady), Q=> );
+	IF m_systemVoiceR[i,8].Q THEN
+		instruInvasion[i] := TRUE;
+	END_IF
+	m_armStateLast[i] := m_slaveStatus.m_armState[i];
+	m_systemVoiceTon[i,8](IN:= instruInvasion[i], PT:= m_systemVoiceTriggerTime, Q=> , ET=> );
+	m_systemVoiceRS[i,8](SET:= instruInvasion[i], RESET1:= m_systemVoiceTon[i,8].Q , Q1=> );
+	IF m_systemVoiceRS[i,8].Q1 THEN
+		systemVoice := systemVoice_triger3;
+		RETURN;
+	ELSE
+		instruInvasion[i] := FALSE;
+	END_IF
+END_FOR
 ]]></ST>
       </Implementation>
     </Method>
@@ -461,9 +899,19 @@ m_checkVariable[g_cartNum].m_promptLocation[22] := g_cartNum + 3;
       <Declaration><![CDATA[METHOD warningTone : vec4b
 VAR_INPUT
 END_VAR
-]]></Declaration>
+VAR
+	i : INT;
+	armStateIsPackage : BOOL;
+END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF (GVL_interactUI.g_curErrType=3) THEN
+        <ST><![CDATA[FOR i := 1 TO g_sArmNum DO
+	IF m_slaveStatus.m_armState[i] = SlaveArmState_Package OR (m_setupStatus.m_armState[i] = SetupArmState_AutoAdjust AND SetupArmControl.m_setupRobot.m_setupArms[i].jnt5AdjustDir <> 0) THEN
+		armStateIsPackage := TRUE;
+		EXIT;
+	END_IF
+END_FOR
+
+IF (GVL_interactUI.g_curErrType=3) THEN
 	warningTone[1] := TRUE;
 	warningTone[2] := FALSE;
 	warningTone[3] := FALSE;
@@ -471,11 +919,16 @@ ELSIF (GVL_interactUI.g_curErrType=2) THEN
 	warningTone[1] := FALSE;
 	warningTone[2] := TRUE;
 	warningTone[3] := FALSE;
-ELSIF m_cartStatus.m_CartState >= CartJointState_Movement AND  m_cartStatus.m_CartState <= CartJointState_StandColuAdjust THEN
+ELSIF (m_cartStatus.m_jntPosReachLimit[5] OR m_cartStatus.m_jntPosReachLimit[6] OR m_cartStatus.m_jntPosReachLimit[7] OR m_cartStatus.m_jntPosReachLimit[8]) THEN 
+	warningTone[1] := FALSE;
+	warningTone[2] := TRUE;
+	warningTone[3] := TRUE;
+ELSIF (m_cartStatus.m_CartState >= CartJointState_HangAdjust AND  m_cartStatus.m_CartState <= CartJointState_RotaOverhang) OR m_cartStatus.m_CartState = CartJointState_StandColuAdjust OR armStateIsPackage THEN
 	warningTone[1] := TRUE;
 	warningTone[2] := FALSE;
 	warningTone[3] := TRUE;
-ELSIF (CartControl.m_cartRobot.m_slaveCart.m_columnJntVel <> 0 AND NOT CartControl.m_cartRobot.m_slaveCart.m_columnAdjustEnable) THEN
+	
+ELSIF (ABS(CartControl.m_cartRobot.m_slaveCart.m_columnJntVel) > g_smallNum AND NOT CartControl.m_cartRobot.m_slaveCart.m_columnAdjustEnable) THEN
 	warningTone[1] := FALSE;
 	warningTone[2] := FALSE;
 	warningTone[3] := TRUE;
@@ -493,42 +946,132 @@ END_IF
       </Implementation>
     </Method>
     <LineIds Name="SafetyCheck">
-      <LineId Id="350" Count="56" />
-      <LineId Id="469" Count="0" />
-      <LineId Id="408" Count="0" />
+      <LineId Id="1514" Count="63" />
       <LineId Id="66" Count="0" />
     </LineIds>
     <LineIds Name="SafetyCheck.armSafetyCheckAllowed">
-      <LineId Id="137" Count="45" />
+      <LineId Id="137" Count="4" />
+      <LineId Id="144" Count="6" />
+      <LineId Id="153" Count="15" />
+      <LineId Id="195" Count="1" />
+      <LineId Id="169" Count="9" />
+      <LineId Id="188" Count="1" />
+      <LineId Id="179" Count="3" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="SafetyCheck.armSafetyCheckInputCast">
-      <LineId Id="256" Count="41" />
+      <LineId Id="500" Count="42" />
       <LineId Id="164" Count="0" />
+    </LineIds>
+    <LineIds Name="SafetyCheck.checkEtherCATAll">
+      <LineId Id="54" Count="3" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="99" Count="2" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="71" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="46" Count="0" />
+    </LineIds>
+    <LineIds Name="SafetyCheck.clearErrorFault">
+      <LineId Id="3" Count="1" />
+      <LineId Id="20" Count="1" />
+      <LineId Id="8" Count="5" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="SafetyCheck.communicationCheck">
+      <LineId Id="3" Count="13" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="20" Count="0" />
+    </LineIds>
+    <LineIds Name="SafetyCheck.jointEncoderCaliCast">
+      <LineId Id="3" Count="31" />
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="SafetyCheck.joystickAdjust">
       <LineId Id="3" Count="5" />
       <LineId Id="2" Count="0" />
     </LineIds>
+    <LineIds Name="SafetyCheck.loadConfigFile">
+      <LineId Id="52" Count="0" />
+      <LineId Id="34" Count="2" />
+      <LineId Id="79" Count="2" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="87" Count="8" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="59" Count="14" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="97" Count="9" />
+      <LineId Id="96" Count="0" />
+    </LineIds>
     <LineIds Name="SafetyCheck.readErrFlag">
-      <LineId Id="29" Count="7" />
+      <LineId Id="29" Count="6" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="36" Count="0" />
       <LineId Id="39" Count="17" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="SafetyCheck.robotPromptMassageCast">
-      <LineId Id="342" Count="151" />
+      <LineId Id="889" Count="57" />
+      <LineId Id="1120" Count="2" />
+      <LineId Id="957" Count="134" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="1104" Count="4" />
+      <LineId Id="1103" Count="0" />
+    </LineIds>
+    <LineIds Name="SafetyCheck.systemVoice">
+      <LineId Id="346" Count="1" />
+      <LineId Id="495" Count="3" />
+      <LineId Id="349" Count="4" />
+      <LineId Id="499" Count="1" />
+      <LineId Id="354" Count="16" />
+      <LineId Id="479" Count="0" />
+      <LineId Id="460" Count="2" />
+      <LineId Id="371" Count="7" />
+      <LineId Id="463" Count="0" />
+      <LineId Id="379" Count="42" />
+      <LineId Id="502" Count="2" />
+      <LineId Id="501" Count="0" />
+      <LineId Id="423" Count="4" />
+      <LineId Id="505" Count="1" />
+      <LineId Id="428" Count="16" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="SafetyCheck.warningTone">
-      <LineId Id="24" Count="7" />
-      <LineId Id="71" Count="2" />
-      <LineId Id="70" Count="0" />
-      <LineId Id="48" Count="3" />
-      <LineId Id="55" Count="0" />
-      <LineId Id="64" Count="2" />
-      <LineId Id="63" Count="0" />
-      <LineId Id="56" Count="3" />
-      <LineId Id="40" Count="0" />
+      <LineId Id="121" Count="1" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="77" Count="7" />
+      <LineId Id="112" Count="2" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="85" Count="3" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="89" Count="13" />
       <LineId Id="2" Count="0" />
     </LineIds>
   </POU>

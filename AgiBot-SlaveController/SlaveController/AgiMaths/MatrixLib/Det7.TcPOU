@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="Det7" Id="{a87caff6-9780-4148-8c5d-14158f678cc4}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION Det7 : LREAL
 VAR_IN_OUT CONSTANT

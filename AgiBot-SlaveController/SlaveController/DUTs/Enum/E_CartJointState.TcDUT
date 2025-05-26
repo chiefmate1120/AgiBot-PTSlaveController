@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="E_CartJointState" Id="{5b3e26ea-76aa-4e76-aec8-fbec7ae650b2}">
     <Declaration><![CDATA[TYPE E_CartJointState :
 (
@@ -17,8 +17,12 @@
 	CartJointState_SlowStop := 12,
 	CartJointState_StandColuAdjust := 13,
 	CartJointState_SupportLeg := 14,
+	CartJointState_PowerOff := 15,
 	
-	CartJointState_totalNum := CartJointState_SupportLeg
+	CartJointState_CycleTest:= 50,
+	CartJointState_MotionTest := 51,
+	CartJointState_cartCali := 52,
+	CartJointState_totalNum := CartJointState_cartCali
 );
 END_TYPE]]></Declaration>
   </DUT>

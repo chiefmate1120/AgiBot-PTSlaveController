@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_SetupMotorParameters" Id="{590429ce-7b59-494f-8e91-c9a6977c774b}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49991'}
 {attribute 'qualified_only'}
@@ -7,8 +7,7 @@ VAR_GLOBAL CONSTANT
 	// encoder resolution
 	//TODO: resolution of joint 2/3 need verification
 	g_incEncoderRes :ARRAY[1..g_setupJntNum] OF DINT :=[5(65536)];
-	g_absEncoderRes :ARRAY[1..g_setupJntNum] OF DINT :=[131072,8192, 65536, 2(16777215)];
-	g_absEncoderResFR :ARRAY[1..g_setupJntNum] OF DINT :=[131072,8192, 65536, 2(131072)];
+	g_absEncoderRes :ARRAY[1..g_setupJntNum] OF DINT :=[131072,8192, 65536, 2(131072)];
 	
 	// reduction ratio
 	g_motorReduction :ARRAY[1..g_setupJntNum] OF LREAL :=[1,1,2*pi/0.1256,81,160];

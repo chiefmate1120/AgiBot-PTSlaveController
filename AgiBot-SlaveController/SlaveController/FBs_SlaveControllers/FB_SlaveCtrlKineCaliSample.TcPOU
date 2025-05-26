@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_SlaveCtrlKineCaliSample" Id="{02f01ec7-1d58-4e6b-a7e5-6da2475a150e}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Slave Arm Adjust
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlKineCaliSample EXTENDS FB_SlaveCtrlAdjust
+VAR CONSTANT
+	m_sampleNum :INT :=15;
+END_VAR
+VAR
+	// sample joint position 
+	m_sampleSetupJntPos :ARRAY[1..m_sampleNum] OF Vec5d;
+	m_sampleSlaveJntPos :ARRAY[1..m_sampleNum] OF Vec6d;
+	
+	// sample signal
+	m_sampleSignal : FB_AdjustLongPress;
+	
+	// current sample number
+	m_curSampleNum :INT :=1;
+	
+	m_logStr:STRING;
+	m_armStr:STRING;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{8eef563d-63aa-4579-9d6b-9b74bcf7e387}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.calcCmdJntPos(i_endoscopePose,i_masterStatus, i_setupStatus, i_slaveArm);
+
+IF m_curSampleNum > m_sampleNum THEN
+	m_isFinished :=TRUE;
+	RETURN;
+END_IF
+	
+IF m_sampleSignal.run(i_slaveArm.m_adjustIO) THEN
+	
+	m_sampleSetupJntPos[m_curSampleNum] := SetupArmControl.m_setupRobot.m_setupArms[i_slaveArm.armIdx].curJntPos;
+	m_sampleSlaveJntPos[m_curSampleNum] := i_slaveArm.curDHJntPos;
+	
+	AGILOG_DEBUG(m_armStr, FALSE, 1);
+	
+//	AGILOG_DEBUG(SetupArmControl.m_setupRobot.m_setupArms[i_slaveArm.armIdx].curJntPos, FALSE, 2);
+//	AGILOG_DEBUG(i_slaveArm.curDHJntPos, FALSE, 1);
+	
+	AGILOG_DEBUG(RobotDynamics.m_instruViewCheck.m_instruPoseInScope[i_slaveArm.armIdx].m_pos,FALSE, 1);
+	
+	m_curSampleNum := m_curSampleNum +1;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{bbf7086f-25aa-4720-8f00-d9a234c6d91e}">
+      <Declaration><![CDATA[METHOD PUBLIC Init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//init
+SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+
+m_curSampleNum:=1;
+
+m_logStr := '########Start kinematic calibration sampling.########';
+AGILOG_DEBUG(m_logStr, TRUE, 1);
+
+m_armStr := concat('slaveArm', INT_TO_STRING(i_slaveArm.armIdx));
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveCtrlKineCaliSample">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlKineCaliSample.calcCmdJntPos">
+      <LineId Id="218" Count="19" />
+      <LineId Id="200" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlKineCaliSample.Init">
+      <LineId Id="246" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="254" Count="0" />
+      <LineId Id="253" Count="0" />
+      <LineId Id="264" Count="0" />
+      <LineId Id="263" Count="0" />
+      <LineId Id="262" Count="0" />
+      <LineId Id="273" Count="0" />
+      <LineId Id="272" Count="0" />
+      <LineId Id="274" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

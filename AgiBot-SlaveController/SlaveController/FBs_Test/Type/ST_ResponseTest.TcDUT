@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_ResponseTest" Id="{374974dd-979a-4744-b02a-68ef72829198}">
+    <Declaration><![CDATA[TYPE ST_ResponseTest :
+STRUCT
+	//enter test mode
+	m_testMode:ARRAY[1..g_sArmNum] OF BOOL;
+	
+	//motion start
+	m_startMotion:ARRAY[1..g_sArmNum] OF BOOL;
+	
+	//joint motion frequency
+	m_jntMotionFreq :Vec6d :=[0.2, 0.2, 0.1, 3(0.1)];
+	
+	//joint motion range
+	m_jntMotionRange :Vec6d :=[pi/6, pi/6, 0.050, 3(pi/6)];
+	
+	//test joint id
+	m_testJntIdx :INT :=1;
+	
+	//step test joint angle
+	m_jntStep : LREAL := 3*g_deg2Rad;
+	
+	//arm test steps
+	m_stepCycle:LREAL:=5;	
+	
+	//frequency test flag	
+	m_freqTestFlag :ARRAY[1..6] OF BOOL;
+
+	//step test flag
+	m_stepTestFlag :ARRAY[1..6] OF BOOL;	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

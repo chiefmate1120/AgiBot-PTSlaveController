@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_MotionRangeTest" Id="{cefe2a82-8cf3-458c-8d74-925ecd792277}">
+    <Declaration><![CDATA[TYPE ST_MotionRangeTest :
+STRUCT
+	//enter test mode flag
+	m_testMode:ARRAY[1..g_sArmNum] OF BOOL;
+	
+	//slave arm data
+	m_slaveJntPos:ARRAY[1..g_sArmNum] OF Vec8d;
+	m_slaveJntPosMin:ARRAY[1..g_sArmNum] OF Vec8d;
+	m_slaveJntPosMax:ARRAY[1..g_sArmNum] OF Vec8d;
+	m_slaveJntPosRange:ARRAY[1..g_sArmNum] OF Vec8d;
+	
+	//setup arm data
+	m_setupJntPos:ARRAY[1..g_sArmNum] OF Vec5d;
+	m_setupJntPosMin:ARRAY[1..g_sArmNum] OF Vec5d;
+	m_setupJntPosMax:ARRAY[1..g_sArmNum] OF Vec5d;
+	m_setupJntPosRange:ARRAY[1..g_sArmNum] OF Vec5d;
+	
+	//slave arm enable flag
+	m_slaveJntEnable:ARRAY[1..g_sJntNum] OF BOOL;
+	
+	//setup arm enable flag
+	m_setupJntEnable:ARRAY[1..g_setupJntNum] OF BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

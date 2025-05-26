@@ -11,6 +11,9 @@ STRUCT
 	
 	// position of remote center point
 	m_rcPos :ARRAY[1..g_sArmNum] OF Vec3d;
+	
+	//arm aseptic cover megnet check
+	m_asepticMegnetCheck : ARRAY[1..g_sArmNum] OF DINT;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_SetupJointEncoderCaliData_3" Id="{99de9dbd-bea7-4a13-9e2d-f3c9b68014d6}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 // Robot3 --joints parameters of setup arms

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_CartCtrlBase" Id="{d6cf23e6-1ee8-4a24-a297-ce6d0439587b}" SpecialFunc="None">
     <Declaration><![CDATA[// Slave Arm Base Controller, Hold at Current Posture
 FUNCTION_BLOCK FB_CartCtrlBase IMPLEMENTS I_CartJointCtrl
@@ -27,8 +27,7 @@ VAR
 	m_cmdJntTrq : VEC8d;
 	m_jntOPMode : Vec8i;
 	m_jntEnableFlag :Vec8i;
-
-	
+	m_jntPosReachLimit : Vec8b;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -128,7 +127,7 @@ END_IF
 m_cmdJntVel:=g_zeroVec8d;
 m_cmdJntAcc:=g_zeroVec8d;
 m_cmdJntTrq:=g_zeroVec8d;
-
+m_jntPosReachLimit := g_zeroVec8b;
 // update commands to arm
 copyCmds(r_cartCtrlCmd);
 ]]></ST>
@@ -145,6 +144,17 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Property Name="jntPosReachLimit" Id="{bf613eb0-f2fc-4d7d-9adf-e7bc6b0a919e}">
+      <Declaration><![CDATA[PROPERTY jntPosReachLimit : vec8b]]></Declaration>
+      <Get Name="Get" Id="{2b9bdd4b-2c22-4037-a684-23648d50185d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[jntPosReachLimit := m_jntPosReachLimit;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Method Name="reset" Id="{018e472d-cb2f-470b-92ec-da7f58636ee5}">
       <Declaration><![CDATA[{warning '添加方法实现'}
 METHOD reset : BOOL
@@ -152,6 +162,7 @@ METHOD reset : BOOL
       <Implementation>
         <ST><![CDATA[m_isFinished:=FALSE;
 m_timePeriod:=0;
+m_jntPosReachLimit:=g_zeroVec8b;
 ]]></ST>
       </Implementation>
     </Method>
@@ -188,7 +199,7 @@ calcCmdJntVel(i_slaveCart);
 copyCmds(r_cartCtrlCmd);
 
 // update time period
-m_timePeriod := m_timePeriod+g_slaveArmCtrlCycleTime;
+m_timePeriod := m_timePeriod+g_cartCtrlCycleTime;
 ]]></ST>
       </Implementation>
     </Method>
@@ -228,7 +239,7 @@ m_timePeriod := m_timePeriod+g_slaveArmCtrlCycleTime;
       <LineId Id="37" Count="0" />
       <LineId Id="50" Count="0" />
       <LineId Id="38" Count="0" />
-      <LineId Id="84" Count="0" />
+      <LineId Id="147" Count="0" />
       <LineId Id="86" Count="0" />
       <LineId Id="94" Count="0" />
       <LineId Id="83" Count="0" />
@@ -236,13 +247,17 @@ m_timePeriod := m_timePeriod+g_slaveArmCtrlCycleTime;
     <LineIds Name="FB_CartCtrlBase.isFinished.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
+    <LineIds Name="FB_CartCtrlBase.jntPosReachLimit.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
     <LineIds Name="FB_CartCtrlBase.reset">
       <LineId Id="7" Count="0" />
       <LineId Id="13" Count="0" />
       <LineId Id="10" Count="0" />
+      <LineId Id="16" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlBase.run">
-      <LineId Id="171" Count="19" />
+      <LineId Id="202" Count="19" />
       <LineId Id="10" Count="0" />
     </LineIds>
   </POU>

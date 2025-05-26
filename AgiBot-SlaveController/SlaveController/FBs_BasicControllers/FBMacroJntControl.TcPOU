@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FBMacroJntControl" Id="{c6765291-f864-4e5d-ade5-fd4917fa51c5}" SpecialFunc="None">
     <Declaration><![CDATA[// Author: Feijian Ni
 // Date: 2023.11.22

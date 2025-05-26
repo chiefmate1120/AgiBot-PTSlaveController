@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_JointBase" Id="{9ce08388-a134-4497-8af1-f051329728ca}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_JointBase
 VAR_INPUT
@@ -14,6 +14,7 @@ VAR
 	// motor IO
 	m_motorInputs AT%I*	:ST_MotorInputs;
 	m_motorOutputs AT%Q* :ST_MotorOutputs;
+
 	
 	// cycle time
 	m_cycleTime :LREAL;
@@ -26,6 +27,7 @@ VAR
 	m_linkEncZeroCross :INT;
 	m_initMotorEnc : DINT;
 	m_multiCycles :INT;
+	m_linkJntPosOffset:LREAL;
 	
 	// joint position from link encoder after power on
 	m_initLinkPos :LREAL;
@@ -109,10 +111,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_motorOutputs.m_controlWord:=DriverCtrlWord_INIT;
-IF GVL_interactUI.g_uiFaultReset=1 OR SafetyCheck.m_masterRobotData.m_uiResetFault = 1 THEN
-	m_motorOutputs.m_controlWord:=DriverCtrlWord_FaultReset;
-END_IF
-disable:=true;]]></ST>
+disable:=TRUE;]]></ST>
       </Implementation>
     </Method>
     <Method Name="enable" Id="{cf1e8549-8fbc-49c1-a41e-ead1f2db1255}">
@@ -246,9 +245,7 @@ m_lastLinkEncoder:=m_motorInputs.m_linkEncoder;
 // convert link encoder if joint cross zero
 newLinkEnc := m_motorInputs.m_linkEncoder;
 IF 1=m_linkEncZeroCross AND 0 = m_multiCycles THEN
-	IF 1=m_linkEncoderDir AND m_motorInputs.m_linkEncoder < m_minLinkEncoder THEN
-		newLinkEnc := m_motorInputs.m_linkEncoder + m_linkEncoderRes;
-	ELSIF -1=m_linkEncoderDir AND m_motorInputs.m_linkEncoder < m_maxLinkEncoder THEN
+	IF m_motorInputs.m_linkEncoder < m_minLinkEncoder THEN
 		newLinkEnc := m_motorInputs.m_linkEncoder + m_linkEncoderRes;
 	END_IF
 END_IF
@@ -257,7 +254,7 @@ END_IF
 incLinkPos := (newLinkEnc-m_caliLinkEncoder)*m_linkEnc2PosRatio;
 
 // absolute joint position
-linkEnc2Pos := incLinkPos + m_linkEncCaliJntPos + 2*PI* m_linkEncCycles;]]></ST>
+linkEnc2Pos := incLinkPos + m_linkEncCaliJntPos + 2*PI* m_linkEncCycles + m_linkJntPosOffset;]]></ST>
       </Implementation>
     </Method>
     <Property Name="linkPos" Id="{e503da77-c373-4ba2-b314-228646ff52c0}" FolderPath="property\">
@@ -404,7 +401,7 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_JointBase.disable">
-      <LineId Id="10" Count="3" />
+      <LineId Id="10" Count="0" />
       <LineId Id="6" Count="0" />
     </LineIds>
     <LineIds Name="FB_JointBase.enable">
@@ -444,23 +441,7 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_JointBase.linkEnc2Pos">
-      <LineId Id="6" Count="0" />
-      <LineId Id="46" Count="0" />
-      <LineId Id="16" Count="0" />
-      <LineId Id="19" Count="2" />
-      <LineId Id="18" Count="0" />
-      <LineId Id="47" Count="0" />
-      <LineId Id="39" Count="0" />
-      <LineId Id="9" Count="0" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="33" Count="0" />
-      <LineId Id="26" Count="5" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="34" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="36" Count="0" />
+      <LineId Id="84" Count="21" />
       <LineId Id="38" Count="0" />
     </LineIds>
     <LineIds Name="FB_JointBase.linkPos.Get">
@@ -502,21 +483,7 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="53" Count="0" />
     </LineIds>
     <LineIds Name="FB_JointBase.updateStatus">
-      <LineId Id="18" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="16" Count="1" />
-      <LineId Id="52" Count="0" />
-      <LineId Id="7" Count="0" />
-      <LineId Id="6" Count="0" />
-      <LineId Id="33" Count="1" />
-      <LineId Id="38" Count="1" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="36" Count="0" />
-      <LineId Id="22" Count="0" />
-      <LineId Id="27" Count="0" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="28" Count="1" />
+      <LineId Id="56" Count="18" />
       <LineId Id="11" Count="0" />
     </LineIds>
   </POU>

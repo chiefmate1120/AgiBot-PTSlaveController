@@ -132,7 +132,7 @@ END_VAR]]></Declaration>
 	
 	m_cmdVel := o_cmdVel;
 	m_cmdPos := o_cmdPos;
-    ]]></ST>
+    	]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_secOrdTrajFilter">

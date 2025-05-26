@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_LowPassFilter" Id="{22bde730-b1df-4d37-a2fe-82eb863bc978}" SpecialFunc="None">
     <Declaration><![CDATA[// Low pass filter based on tusin transformation
 // Author: Ni Feijian

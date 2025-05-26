@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_CartRobot" Id="{1219119a-c34a-4efb-a0e2-076d2e563cc0}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CartRobot
 VAR_INPUT
@@ -17,6 +17,9 @@ VAR
 	m_openHorizonLaser AT  %Q* :DINT;
 	m_openCrossLaser AT  %Q* :DINT;
 		
+	//output support leg break IO
+	m_supportLegBreak AT %Q* :ARRAY [1..2] OF  DINT;
+	
 	//cart suppor leg depoly finshed
 	m_supportLegFinshed : BOOL;
 	
@@ -42,6 +45,13 @@ VAR
 	m_cartSlowStop : FB_CartCtrlSlowDown;
 	m_cartStandColuAdjust : FB_CartCtrlStandColuAdjust;
 	m_cartSupportLeg : FB_CartSupportLeg;
+	m_cartPowerOff : FB_CartPowerOff;
+	
+	//add for test
+	m_cartCycleTest : FB_CartCtrlCycleTest;
+	m_cartMotionTest : FB_CartCtrlMotionTest;
+	m_cartCali : FB_CartCtrlCali;
+	
 	
 	// cart controller interface
 	m_cartCtrl : I_CartJointCtrl;
@@ -52,6 +62,14 @@ VAR
 	m_asepticDeploymentAllowed :BOOL;
 	m_cartMoveAllowed :BOOL;
 	m_rotaOverhangAllowed :BOOL;
+	
+	//laser Timer
+	m_closeCrossLaser : TON;
+	m_closeHorizontalLaser : TON;
+	m_sterileComplete : R_TRIG;
+	
+	//support leg error ID
+	m_supportLegErrID : Vec2i;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -78,7 +96,8 @@ r_cartStatus.m_sdrivingLeverSensorManualFlag :=NOT m_slaveCart.m_drivingLeverSen
 //r_cartStatus.m_stabilizerDeployedFlag
 r_cartStatus.m_trocarOnFlag := m_slaveCart.m_trocarOnFlag;
 r_cartStatus.m_joystickValue := m_slaveCart.m_joystickSignal;
-r_cartStatus.m_jntPosReachLimit := m_cartAdjust.jntPosReachLimit;
+r_cartStatus.m_jntPosReachLimit := m_cartCtrl.jntPosReachLimit;
+r_cartStatus.m_supportLegErrID := m_supportLegErrID;
 
 r_cartJointsData.m_cmdJntPos := m_slaveCart.cmdJntPos;
 r_cartJointsData.m_cmdJntVel := m_slaveCart.cmdJntVel;
@@ -125,6 +144,12 @@ m_cartCtrlFactory[CartJointState_RotaOverhang] := m_cartRotaOverhang;
 m_cartCtrlFactory[CartJointState_SlowStop] := m_cartSlowStop;
 m_cartCtrlFactory[CartJointState_StandColuAdjust] := m_cartStandColuAdjust;
 m_cartCtrlFactory[CartJointState_SupportLeg] := m_cartSupportLeg;
+m_cartCtrlFactory[CartJointState_PowerOff] := m_cartPowerOff;
+
+//add for test
+m_cartCtrlFactory[CartJointState_CycleTest] := m_cartCycleTest;
+m_cartCtrlFactory[CartJointState_MotionTest] := m_cartMotionTest;
+m_cartCtrlFactory[CartJointState_cartCali] := m_cartCali;
 
 // assign controller
 m_cartCtrl:=m_cartCtrlFactory[m_cartState];
@@ -137,18 +162,52 @@ m_cartCtrl.Init(m_slaveCart,m_cartCtrlCmds);
       <Declaration><![CDATA[METHOD laserIO : BOOL
 VAR_INPUT
 END_VAR
-]]></Declaration>
+
+VAR
+	i : INT;
+	openCrossLaser : BOOL;
+	sterileComplete : BOOL;
+	armAdjust : BOOL;
+END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-//cross laser IO output , when slave self check succeed , and trocar  install at least one
-IF GVL_interactUI.g_slaveSelfCheckStatus = 2 AND m_slaveCart.m_trocarOnFlag = 0 THEN
-	m_openCrossLaser := 1;
+        <ST><![CDATA[IF (m_slaveCart.curJntPos[5] * 1000 + GVL_CartControlParameters.g_cartInitialHeight) < GVL_CartControlParameters.g_cartOpenHorizonLaserHeight OR m_slaveCart.m_trocarOnFlag >= 2  THEN
+	m_openCrossLaser := 0;
+	m_openHorizonLaser :=  0;
+	RETURN;
+END_IF
+
+FOR i := 1 TO g_sArmNum DO
+	armAdjust := SetupArmControl.m_setupRobot.m_setupArmState[i] = SetupArmState_ManualAdjust OR SlaveArmControl.m_slaveRobot.m_slaveArmState[i] = SlaveArmState_Adjust;
+	IF armAdjust THEN
+		EXIT;
+	END_IF
+END_FOR
+
+//Horizontal laser IO output ,when adjusting the trolley or moving the trolley
+IF  (m_cartState >= CartJointState_Movement AND m_cartState <= CartJointState_StandColuAdjust) THEN
+	m_openHorizonLaser :=  1;
 ELSE
+	m_openHorizonLaser :=  0;
+END_IF
+
+//sterile deployment not completed, disable cross laser
+IF GVL_interactUI.g_cartOperation.m_setupSterileState = 0 THEN
+	RETURN;
+END_IF
+
+//cross laser IO output , when slave self check succeed , and trocar  install at least one
+m_sterileComplete(CLK:= GVL_interactUI.g_cartOperation.m_setupSterileState = 1, Q=>sterileComplete );
+openCrossLaser := sterileComplete OR  (m_cartState >= CartJointState_Movement AND m_cartState <= CartJointState_StandColuAdjust) OR armAdjust;
+IF openCrossLaser THEN
+	m_openCrossLaser := 1;
+END_IF
+m_closeCrossLaser(IN:= m_openCrossLaser=1 AND NOT openCrossLaser, PT:= T#20S, Q=> , ET=> );
+IF m_closeCrossLaser.Q THEN
 	m_openCrossLaser := 0;
 END_IF
 
 //Horizontal laser IO output ,when adjusting the trolley or moving the trolley
-IF (m_slaveCart.curJntPos[5] * 1000 + GVL_CartControlParameters.g_cartInitialHeight) > GVL_CartControlParameters.g_cartOpenHorizonLaserHeight AND  (m_cartState = CartJointState_Movement OR m_cartState = CartJointState_HangAdjust) THEN
+IF  (m_cartState >= CartJointState_Movement AND m_cartState <= CartJointState_StandColuAdjust) THEN
 	m_openHorizonLaser :=  1;
 ELSE
 	m_openHorizonLaser :=  0;
@@ -183,8 +242,6 @@ END_IF
 // run controller
 m_cartCtrl.run(m_slaveCart,m_cartCtrlCmds);
 
-
-
 m_slaveCart.updateCmds(m_cartCtrlCmds);]]></ST>
       </Implementation>
     </Method>
@@ -201,7 +258,8 @@ END_VAR
         <ST><![CDATA[m_hangAdjustAllowed := m_slaveCart.m_trocarOnFlag=0 AND ( i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_joystickEnable OR i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_cameraJoystickEnable);
 m_asepticDeploymentAllowed := m_slaveCart.m_trocarOnFlag=0 AND ((i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_dockingEnable AND m_slaveCart.cartDockingState=0) 
 												OR (i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_drapingEnable AND m_slaveCart.cartDrapingState=0)) AND NOT ( i_cartDataPool.m_safetyData.m_cartAdjustErr OR i_cartDataPool.m_safetyData.m_cartStandColumnErr) ;
-m_cartMoveAllowed := m_slaveCart.m_trocarOnFlag=0 AND  (m_carHandChassisDriveUnlock[1] OR m_carHandChassisDriveUnlock[2]) AND NOT i_cartDataPool.m_safetyData.m_cartWheelErr AND NOT m_supportLegFinshed;
+m_cartMoveAllowed := m_slaveCart.m_trocarOnFlag=0 AND  (m_carHandChassisDriveUnlock[1] OR m_carHandChassisDriveUnlock[2])
+						 AND NOT i_cartDataPool.m_safetyData.m_cartWheelErr AND NOT m_supportLegFinshed AND m_slaveCart.m_cartDriveForceCaliFinshed;
 m_rotaOverhangAllowed := m_slaveCart.m_trocarOnFlag=0 AND m_slaveCart.m_rotaOverhangOnFlag > 1 AND NOT i_cartDataPool.m_safetyData.m_cartOverhangErr;
 
 // state machine transit
@@ -242,8 +300,11 @@ CASE m_cartState OF
 		ELSIF m_slaveCart.m_trocarOnFlag=0 AND  m_slaveCart.m_columnAdjustEnable  THEN
 			m_nextCartState := CartJointState_StandColuAdjust;
 			
-		ELSIF ( (m_slaveCart.m_trocarOnFlag>=3 AND NOT m_supportLegFinshed) OR (m_slaveCart.m_trocarOnFlag=0 AND m_supportLegFinshed))
-						AND NOT  i_cartDataPool.m_safetyData.m_cartSteadyFootErr THEN
+		ELSIF (((m_slaveCart.m_trocarOnFlag>=3 AND NOT m_supportLegFinshed) OR (m_slaveCart.m_trocarOnFlag=0 AND m_supportLegFinshed))
+						AND NOT  i_cartDataPool.m_safetyData.m_cartSteadyFootErr AND m_slaveCart.m_drivingLeverSensorManual) AND m_supportLegErrID[1]<>2 AND m_supportLegErrID[2]<>2 THEN
+			m_nextCartState := CartJointState_SupportLeg;
+			
+		ELSIF  (m_supportLegFinshed AND NOT m_slaveCart.m_drivingLeverSensorManual) THEN
 			m_nextCartState := CartJointState_SupportLeg;
 		END_IF
 		
@@ -301,16 +362,61 @@ CASE m_cartState OF
 		END_IF
 		
 	CartJointState_SupportLeg:
+		m_supportLegBreak := m_cartSupportLeg.supportLegBreak;
+		m_supportLegErrID := m_cartSupportLeg.m_errorID;
 		IF m_cartCtrl.isFinished  THEN
-			IF NOT( m_slaveCart.m_supportLegSensor[1] AND m_slaveCart.m_supportLegSensor[2]) THEN
+			IF m_slaveCart.m_supportLegSensor[1]=0 AND m_slaveCart.m_supportLegSensor[2]=0 THEN
+				m_supportLegFinshed := FALSE;
+			ELSIF (m_supportLegErrID[1] <> 0 AND m_slaveCart.m_supportLegSensor[2]=0) OR (m_slaveCart.m_supportLegSensor[1]=0 AND m_supportLegErrID[2] <> 0 ) OR (m_supportLegErrID[1] <> 0  AND m_supportLegErrID[2] <> 0 ) THEN
 				m_supportLegFinshed := FALSE;
 			ELSE
 				m_supportLegFinshed := TRUE;
 			END_IF
-			
 			m_nextCartState :=CartJointState_Ready;
 		END_IF
+		
+	CartJointState_PowerOff:
+		m_supportLegBreak := m_cartPowerOff.supportLegBreak;
+		IF m_cartCtrl.isFinished  THEN
+			IF m_cartPowerOff.m_timePeriod > 5.0 THEN
+				GVL_interactUI.g_plcPowerOffEnable := TRUE;
+			END_IF
+		END_IF
 END_CASE
+
+
+//****************************add for test******************************//
+// to CartJointState_CycleTest
+IF (g_cycleTest.m_carEnterCycleTest OR g_cycleTest.m_carEnterESDTest) AND NOT(m_cartState=CartJointState_CycleTest) THEN
+	m_nextCartState := CartJointState_CycleTest;
+END_IF
+
+//CartJointState_CycleTest exit
+IF (m_cartState=CartJointState_CycleTest) AND (g_cycleTest.m_carEnterCycleTest=FALSE) AND (g_cycleTest.m_carEnterESDTest=FALSE) THEN
+	m_nextCartState :=CartJointState_Ready;
+END_IF
+
+// to CartJointState_MotionTest
+IF (g_motionTest.m_enterJntTestModeCar=TRUE) AND NOT(m_cartState=CartJointState_MotionTest) THEN
+	m_nextCartState := CartJointState_MotionTest;
+END_IF
+
+// CartJointState_MotionTest exit
+IF (g_motionTest.m_enterJntTestModeCar=FALSE) AND (m_cartState=CartJointState_MotionTest) THEN
+	m_nextCartState := CartJointState_Ready;
+END_IF
+
+//robot calibration 
+IF GVL_armCali.g_CartEnterCaliMode AND (m_cartState<=CartJointState_Ready) THEN
+	m_nextCartState := CartJointState_cartCali;
+ELSIF NOT GVL_armCali.g_CartEnterCaliMode AND (m_cartState=CartJointState_cartCali) THEN
+	m_nextCartState := CartJointState_Ready;
+END_IF	
+
+//to cart poweroff
+IF GVL_interactUI.g_uiPowerOffEnable THEN
+	m_nextCartState :=CartJointState_PowerOff;
+END_IF
 
 // Controller transit
 IF m_nextCartState<> m_cartState THEN
@@ -334,23 +440,29 @@ END_IF
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.getStatus">
-      <LineId Id="69" Count="14" />
+      <LineId Id="69" Count="7" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="77" Count="6" />
       <LineId Id="15" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.init">
-      <LineId Id="144" Count="31" />
+      <LineId Id="198" Count="37" />
       <LineId Id="57" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.laserIO">
-      <LineId Id="3" Count="12" />
+      <LineId Id="81" Count="40" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.run">
-      <LineId Id="93" Count="20" />
+      <LineId Id="93" Count="17" />
+      <LineId Id="113" Count="0" />
       <LineId Id="51" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.stateMachine">
-      <LineId Id="313" Count="128" />
+      <LineId Id="676" Count="127" />
+      <LineId Id="833" Count="27" />
+      <LineId Id="832" Count="0" />
+      <LineId Id="804" Count="20" />
       <LineId Id="22" Count="0" />
     </LineIds>
   </POU>

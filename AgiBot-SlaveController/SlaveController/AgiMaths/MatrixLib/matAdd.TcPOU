@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="matAdd" Id="{4e22d7b7-80d8-4535-9c7a-bbfaf09d968a}" SpecialFunc="None">
     <Declaration><![CDATA[// C = A + B;
 FUNCTION matAdd : BOOL

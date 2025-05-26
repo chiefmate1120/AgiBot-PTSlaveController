@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_InstrumentDetect" Id="{b69ad326-ec41-4095-b403-6a4f502c7c86}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_InstrumentDetect
 VAR_INPUT

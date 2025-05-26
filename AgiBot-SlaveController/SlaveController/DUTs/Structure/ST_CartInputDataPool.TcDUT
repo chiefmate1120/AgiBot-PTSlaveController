@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="ST_CartInputDataPool" Id="{52655851-7a50-4c98-9a1e-ea6f4c6758df}">
     <Declaration><![CDATA[//TODO:  check if used
 TYPE ST_CartInputDataPool :

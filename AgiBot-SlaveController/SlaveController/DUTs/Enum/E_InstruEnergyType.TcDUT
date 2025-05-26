@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="E_InstruEnergyType" Id="{f57dfaf9-6283-4690-886c-617d250dd045}">
+    <Declaration><![CDATA[TYPE E_InstruEnergyType :
+(
+	InstruEnergyType_UNKNOWM := 0,
+	InstruEnergyType_Unipolar := 1,
+	InstruEnergyType_Bipolar := 2,
+	InstruEnergyType_UltrasonicScalpel := 3,
+	InstruEnergyType_ForceBipolar := 5
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

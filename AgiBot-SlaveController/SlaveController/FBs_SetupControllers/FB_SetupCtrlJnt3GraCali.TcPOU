@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SetupCtrlJnt3GraCali" Id="{918257b4-79e0-4cbe-9388-5407668bd820}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: setup arm gravity calibration
 // For trajectory synchronizaiton, the planner generate a trajecotry for setup joint3/5 and slave joint 1-3, but only former used here 
@@ -42,10 +42,10 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// safety check
-IF ABS(i_setupArm.curJntVel[3]) > 0.1 THEN
-	m_isFinished:=TRUE;
-	RETURN;
-END_IF
+//IF ABS(i_setupArm.curJntVel[3]) > 0.15 THEN
+//	m_isFinished:=TRUE;
+//	RETURN;
+//END_IF
 
 // check if planner is ready
 IF m_caliPlanner[m_caliTrajIdx].isGene = FALSE THEN

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_IOToggleCheck" Id="{7ee96876-d402-4755-8a4c-673d3024915f}" SpecialFunc="None">
     <Declaration><![CDATA[// return true if IO is triggerd for a set time period
 // only return ture for one cycle, waiting for IO to be released and check for next time

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="matMultiVec" Id="{8fa1fc4e-9bb5-44b4-829c-607306747973}" SpecialFunc="None">
     <Declaration><![CDATA[// vecB = matA * vecA
 FUNCTION matMultiVec : bool

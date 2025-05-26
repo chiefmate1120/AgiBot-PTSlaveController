@@ -15,11 +15,32 @@ VAR
 	m_crcError : ST_EcCrcError;
 	
 	m_EtherCATVerify : ST_EtherCATState;
+
+	m_clearCRCError : FB_EcMasterFrameStatisticClearCRC;
+	m_setSlaveState : FB_EcSetSlaveState;
+	
+	m_stateStorage : ARRAY [1..10000] OF BYTE;
+	index:  INT;
+	m_clearCRCErrorTime : LREAL;
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
+    <Method Name="clearCRCError" Id="{4f0edc7d-de27-450a-ae29-6fd12dd64097}">
+      <Declaration><![CDATA[METHOD clearCRCError : BOOL
+VAR_INPUT
+	armsNetID:T_AmsNetID;
+	bEnable:BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_clearCRCError(sNetId:= armsNetID, bExecute:= bEnable, tTimeout:= T#5S, bBusy=> , bError=> , nErrId=> );
+IF NOT m_clearCRCError.bBusy THEN
+	m_clearCRCError.bExecute:=FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="EtherCATVerify" Id="{700221e4-3451-4ebe-a364-9420b7ed5cfc}">
       <Declaration><![CDATA[METHOD EtherCATVerify : ST_EtherCATState
 VAR_INPUT
@@ -33,6 +54,8 @@ m_commuEtherCATState(sNetId:= armsNetID, nSlaveAddr:= jntAddr, bExecute:= TRUE, 
 
 IF NOT m_commuEtherCATState.bBusy THEN
 	m_commuEtherCATState(bExecute:=FALSE);
+	index :=LIMIT(1, index + 1,10000);
+	m_stateStorage[index] := m_EcSlaveState.deviceState;
 	IF m_EcSlaveState.deviceState = EC_DEVICE_STATE_OP THEN
 		m_EtherCATVerify.EtherCATState := TRUE;
 	ELSE
@@ -49,17 +72,49 @@ IF NOT m_crcVerify.bBusy THEN
 	m_EtherCATVerify.CRCPortC := MAX(EtherCATVerify.CRCPortC,m_crcError.portC);
 END_IF
 
+//clear EtherCAT CRC error ,if there are no more than 10 frames in 1 minute
+IF (m_EtherCATVerify.CRCPortA <= g_minLossFrame AND m_EtherCATVerify.CRCPortA > 0)
+		OR (m_EtherCATVerify.CRCPortB <= g_minLossFrame AND m_EtherCATVerify.CRCPortB > 0) 
+		OR (m_EtherCATVerify.CRCPortC <= g_minLossFrame AND m_EtherCATVerify.CRCPortC > 0)  THEN
+	m_clearCRCErrorTime := m_clearCRCErrorTime + GVL_SystemParameters.g_cartCtrlCycleTime;
+	IF m_clearCRCErrorTime > 60 THEN
+		m_clearCRCError(sNetId:= armsNetID, bExecute:= TRUE, tTimeout:= T#5S, bBusy=> , bError=> , nErrId=> );
+		IF NOT m_clearCRCError.bBusy THEN
+			m_clearCRCError.bExecute:=FALSE;
+			m_clearCRCErrorTime := 0;
+		END_IF
+	END_IF
+ELSE
+	m_clearCRCErrorTime := 0;
+END_IF
+
 EtherCATVerify := m_EtherCATVerify;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="setSlaveStatus" Id="{7c770756-e79f-4aa9-9319-7935ec5d023d}">
+      <Declaration><![CDATA[METHOD setSlaveStatus : BOOL
+VAR_INPUT
+	armsNetID:T_AmsNetID;
+	jntAddr:UINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_setSlaveState(sNetId:=armsNetID , nSlaveAddr:= jntAddr, bExecute:= TRUE, tTimeout:= T#5S, reqState:= EC_DEVICE_STATE_OP, currState=> );]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_EtherCATCheck">
       <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EtherCATCheck.clearCRCError">
+      <LineId Id="24" Count="2" />
+      <LineId Id="14" Count="0" />
     </LineIds>
     <LineIds Name="FB_EtherCATCheck.EtherCATVerify">
       <LineId Id="7" Count="1" />
       <LineId Id="11" Count="0" />
       <LineId Id="10" Count="0" />
       <LineId Id="12" Count="0" />
+      <LineId Id="57" Count="1" />
       <LineId Id="48" Count="3" />
       <LineId Id="47" Count="0" />
       <LineId Id="13" Count="0" />
@@ -69,8 +124,22 @@ EtherCATVerify := m_EtherCATVerify;]]></ST>
       <LineId Id="28" Count="0" />
       <LineId Id="30" Count="1" />
       <LineId Id="26" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="83" Count="1" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="78" Count="3" />
+      <LineId Id="76" Count="1" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="70" Count="0" />
       <LineId Id="23" Count="0" />
       <LineId Id="22" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EtherCATCheck.setSlaveStatus">
+      <LineId Id="5" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

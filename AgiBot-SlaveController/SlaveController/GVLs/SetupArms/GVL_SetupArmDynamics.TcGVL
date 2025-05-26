@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_SetupArmDynamics" Id="{96973c4d-5076-49a0-8f19-dd257b767c40}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49992'}
 {attribute 'qualified_only'}
@@ -27,10 +27,10 @@ VAR_GLOBAL
 	 q(- [q0,q1]*)
  	// setup joint3 gravity parameter
 	g_setupJnt3GravityParams :ARRAY[1..4, 1..4] OF LREAL :=
-	[0, 0, 0, -40,
-	 6677.5, -1043.32, 172.742, -62.7166,
-	 -19440.6, 6756.8, -461.779, -47.1478,
-	 0, 0, 0, -40];
+	[18415.9, -6170.46, 772.079, -76.3418,
+	 24680.5, -8146.99, 956.337, -76.1279,
+	 6466.1, -2049.28, 349.493, -56.93,
+	 6950.88, -2591.06, 419.637, -61.8389];
 	 
 	(* setup joint3 friction parameters
 	 graParams = [p1mp2,p3,p4]
@@ -38,16 +38,16 @@ VAR_GLOBAL
 	 q(- [q0,q1]*)
  	// setup joint3 friction parameter
 	g_setupJnt3FrictionParams :ARRAY[1..4, 1..4] OF LREAL :=
-	[0, 0, 0, 10,
-	 -4102.72, 1538.8, -204.654, 21.1721,
-	 646.87, -110.209, -12.6064, 13.0919,
-	0, 0, 0, 10];
+	[-12079.3, 3716.86, -362.796, 28.0203,
+	 364.221, -287.738, 49.1598, 12.3404, 
+	 4006.38, -1257.29, 114.572, 8.6548,
+	 -752.815, 65.6002, -7.55191, 15.2936];
 	
 	g_setupJnt3GravityPosRange :ARRAY[1..4, 1..2] OF REAL :=
-	[0.0189, 	0.1789,
-	 0.0182,    0.1784,
-	 0.0189,    0.1789,
-	 0.0189,    0.1789];
+	[0.0377, 	0.1817,
+	 0.0378,    0.1819,
+	 0.0378,    0.1818,
+	 0.0377,    0.1817];
  	
 	// joint gravity offset
 	g_setupJntGravityOffset :ARRAY[1..4,1..5] OF REAL := 
@@ -55,6 +55,9 @@ VAR_GLOBAL
 	 0, 0, 0, 0,  0,
 	 0, 0, 0, 0,  0,
 	 0, 0, 0, 0,  0];
+	 
+	 // joint4 friciton
+	 g_setupJnt4Friction:ARRAY [1..4] OF REAL :=[4(2.5)];
 
 END_VAR]]></Declaration>
   </GVL>

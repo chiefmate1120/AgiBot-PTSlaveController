@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <Itf Name="I_CartJointCtrl" Id="{61bf6462-ad6f-42ce-aa92-46f13907cfac}">
     <Declaration><![CDATA[INTERFACE I_CartJointCtrl
 ]]></Declaration>
@@ -16,6 +16,12 @@ END_VAR
     <Property Name="isFinished" Id="{f68f056f-8ca4-4772-b8d9-7f98d2c32a35}">
       <Declaration><![CDATA[PROPERTY isFinished : BOOL]]></Declaration>
       <Get Name="Get" Id="{1574e3fb-b57c-409a-98cc-cb892f12816d}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="jntPosReachLimit" Id="{691b3f06-a968-4209-858f-27ef9337a356}">
+      <Declaration><![CDATA[PROPERTY jntPosReachLimit : vec8b]]></Declaration>
+      <Get Name="Get" Id="{942beee9-557c-408e-a0a3-b61532a1e0e4}">
         <Declaration><![CDATA[]]></Declaration>
       </Get>
     </Property>

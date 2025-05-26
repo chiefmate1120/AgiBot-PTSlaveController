@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_HeartbeatDetect" Id="{486f1896-2368-4412-bcb6-b0e058b4d35b}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_HeartbeatDetect
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	m_heartbeatLowCount :INT :=0;
+	m_heartbeatHighCount :INT :=0;
+	m_heartbeatCountThres :INT :=500;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="run" Id="{3e7a4fc3-a1b0-4ce0-ad1f-146139077201}">
+      <Declaration><![CDATA[// check if instrument is on
+METHOD run : BOOL
+VAR_INPUT
+	IOValue :UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//heartbeat cycle 100ms
+IF IOValue = 0 THEN
+	m_heartbeatHighCount:=0;
+	m_heartbeatLowCount :=MIN(m_heartbeatLowCount +1,2*m_heartbeatCountThres);
+ELSIF  IOValue = 1 THEN
+	m_heartbeatLowCount:=0;
+	m_heartbeatHighCount :=MIN(m_heartbeatHighCount +1,2*m_heartbeatCountThres);
+END_IF
+
+run := NOT(m_heartbeatLowCount >= m_heartbeatCountThres OR m_heartbeatHighCount>=m_heartbeatCountThres);]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_HeartbeatDetect">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HeartbeatDetect.run">
+      <LineId Id="42" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

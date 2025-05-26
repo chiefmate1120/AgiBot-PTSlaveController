@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="vecSelfAdd" Id="{5193c9f8-f507-4a60-8fdd-14e14d5544bb}" SpecialFunc="None">
     <Declaration><![CDATA[// A +=B
 FUNCTION vecSelfAdd : BOOL

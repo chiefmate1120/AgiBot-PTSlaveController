@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="CartControl" Id="{c247957a-c15a-480d-acbc-bde71223345b}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM CartControl
 VAR
@@ -16,23 +16,28 @@ VAR
 	
 	// wait time before cart init for ethercat to be statble 
 	m_cartInitWaitTime : LREAL:=0;
+	m_cartEtherCATOPTime : LREAL:=0;
 	
 	// cart init flag
-	m_cartInit :BOOL :=FALSE;
-	
-	m_workHeartTon0 : TON;
-	m_workHeartTon1 : TON;
-	
+	m_cartInit :BOOL :=FALSE;	
 	m_cartInSterileStateTon :Ton;
 	m_cartInSterileState :BOOL;
+	
 	//Aseptic sleeve is installed flag
 	m_asepticInstalledFlag : Vec4b;
 	m_slaveArmDisableFlag : Vec4b;
+	m_surgicalStatusF :F_TRIG;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[// wait communication to be stable
-IF(m_cartInitWaitTime<g_robotInitWaitTime) THEN
+      <ST><![CDATA[//check cart EtherCAT state is OP
+IF NOT m_cartDataPool.m_safetyData.m_cartEtherCATAllOP AND NOT m_cartInit THEN
+	m_cartEtherCATOPTime := m_cartEtherCATOPTime + g_cartCtrlCycleTime;
+	RETURN;
+END_IF
+
+// wait communication to be stable
+IF(m_cartInitWaitTime<g_robotInitWaitTime) OR NOT(SafetyCheck.m_loadConfigFileOK) THEN
 	m_cartInitWaitTime := m_cartInitWaitTime+g_cartCtrlCycleTime;
 	RETURN;
 END_IF
@@ -74,7 +79,7 @@ m_cartDataPool.m_UIData.m_ctrlEnableFromUI := GVL_interactUI.g_uiCtrl;
 //打开ui_control.limit_height_adjusting后可以调整立柱，并实时将立柱当前高度上传
 IF (GVL_interactUI.g_uiCtrl.m_heightLimitAdjustEnable=TRUE) THEN
 	m_cartDataPool.m_UIData.m_standColumnHightLimit := GVL_CartMotorParameters.g_maxJntPos[5];
-ELSIF  (GVL_interactUI.g_uiCtrl.m_heightLimitAdjustEnable=FALSE) AND GVL_interactUI.g_heightLimitEnbale AND ABS((m_cartDataPool.m_UIData.m_standColumnHightLimit *1000+1850)-GVL_interactUI.g_heightLimitFromUI)>5 THEN
+ELSIF  (GVL_interactUI.g_uiCtrl.m_heightLimitAdjustEnable=FALSE) AND GVL_interactUI.g_heightLimitEnbale AND ABS((m_cartDataPool.m_UIData.m_standColumnHightLimit *1000+GVL_CartControlParameters.g_cartInitialHeight)-GVL_interactUI.g_heightLimitFromUI)>5 THEN
 	m_cartDataPool.m_UIData.m_standColumnHightLimit := UINT_TO_LREAL(GVL_interactUI.g_heightLimitFromUI-GVL_CartControlParameters.g_cartInitialHeight)/1000;
 ELSIF GVL_interactUI.g_heightLimitEnbale=FALSE THEN
 	m_cartDataPool.m_UIData.m_standColumnHightLimit := GVL_CartMotorParameters.g_maxJntPos[5];
@@ -97,22 +102,13 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[//TODO
-//work heart
-m_workHeartTon0(IN:= GVL_interactUI.g_heartBeat = 1, PT:= T#1S, Q=> , ET=> );
-m_workHeartTon1(IN:= GVL_interactUI.g_heartBeat = 0, PT:= T#1S, Q=> , ET=> );
-IF m_workHeartTon0.Q THEN
-	GVL_interactUI.g_heartBeat :=0 ;
-ELSIF m_workHeartTon1.Q THEN
-	GVL_interactUI.g_heartBeat  :=1 ;
-END_IF
-
 GVL_interactUI.g_cartOperation.m_drapingAdjustState := m_cartRobot.m_slaveCart.m_cartDataFromUI.m_cartDrapingState;
 GVL_interactUI.g_cartOperation.m_dockingAdjustState := m_cartRobot.m_slaveCart.m_cartDataFromUI.m_cartDockingState;
 
 GVL_interactUI.g_trocarStatus := INT_TO_BOOL(m_cartRobot.m_slaveCart.m_trocarOnFlag);
 
-GVL_interactUI.g_slaveRunAlone := NOT SlaveArmControl.m_slaveRobot.m_masterOnLine;
-GVL_interactUI.g_joysticksTrigger := SafetyCheck.m_joysticksTrigger;
+//GVL_interactUI.g_slaveRunAlone := NOT SlaveArmControl.m_slaveRobot.m_masterOnLine;
+GVL_interactUI.g_joysticksTrigger := SafetyCheck.m_joysticksTrigger OR m_cartStatus.m_uiControl.m_cameraJoystickEnable OR m_cartStatus.m_uiControl.m_joystickEnable OR m_cartStatus.m_uiControl.m_heightLimitAdjustEnable;;
 
 IF GVL_interactUI.g_surgicalStatus = 1 THEN
 	IF NOT SlaveArmControl.m_slaveRobotData.m_slaveAllowInMS THEN
@@ -122,6 +118,10 @@ IF GVL_interactUI.g_surgicalStatus = 1 THEN
 ELSE
 	GVL_interactUI.g_cartOperation.m_setupSterileState := BOOL_TO_UINT(m_asepticInstalledFlag[1]) AND BOOL_TO_UINT(m_asepticInstalledFlag[2]) AND BOOL_TO_UINT(m_asepticInstalledFlag[3]) AND BOOL_TO_UINT(m_asepticInstalledFlag[4]) ;
 	m_slaveArmDisableFlag := SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag;	
+END_IF
+
+m_surgicalStatusF(CLK:= GVL_interactUI.g_surgicalStatus = 1, Q=> );
+IF m_surgicalStatusF.Q THEN
 	GVL_interactUI.g_InstruSeriesRecord := g_zeroVec100i;
 END_IF
 
@@ -167,16 +167,20 @@ END_IF
       </Implementation>
     </Method>
     <LineIds Name="CartControl">
+      <LineId Id="243" Count="0" />
+      <LineId Id="197" Count="1" />
+      <LineId Id="200" Count="0" />
+      <LineId Id="199" Count="0" />
+      <LineId Id="201" Count="0" />
       <LineId Id="145" Count="21" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="CartControl.UIInputProcess">
-      <LineId Id="82" Count="18" />
-      <LineId Id="102" Count="0" />
+      <LineId Id="110" Count="19" />
       <LineId Id="68" Count="0" />
     </LineIds>
     <LineIds Name="CartControl.UIOutputProcess">
-      <LineId Id="281" Count="66" />
+      <LineId Id="425" Count="61" />
       <LineId Id="95" Count="0" />
     </LineIds>
   </POU>

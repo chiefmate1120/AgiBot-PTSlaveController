@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="RobotDynamics" Id="{798b314f-0a53-4e08-997d-5fefed426c86}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM RobotDynamics
 
@@ -28,7 +28,9 @@ VAR
 	// slave dynamic block
 	m_slaveDynamicModel :ARRAY[1..g_sArmNum] OF FB_SlaveDynamic;
 	
-
+	// instument out-of-view check
+	m_instruViewCheck :FB_InstruViewCheck;
+	
 	// code execute time measure
 	m_codeTime : Profiler;
 	
@@ -40,6 +42,11 @@ END_VAR
     <Implementation>
       <ST><![CDATA[m_codeTime(START:=TRUE, RESET:=TRUE);
 
+// wait config file loaded
+IF NOT(SafetyCheck.m_loadConfigFileOK) THEN
+	RETURN;
+END_IF
+
 // robot dynamic model init
 IF m_robotDynaInit =FALSE THEN
 	FOR i:=1 TO g_sArmNum DO
@@ -47,6 +54,7 @@ IF m_robotDynaInit =FALSE THEN
 		m_setupGravityModel[i].init(i);
 		m_slaveDynamicModel[i].init(i);
 	END_FOR
+	m_instruViewCheck.init();
 
 	m_robotDynaInit:=TRUE;
 END_IF
@@ -62,29 +70,14 @@ FOR i:=1 TO g_sArmNum DO
 	m_slaveDynaData.m_massMat[i]:= m_slaveDynamicModel[i].jntMassMat;
 END_FOR
 
+m_instruViewCheck.run(m_setupJointData.m_curJntPos, m_slaveJointsData.m_curDHJntPos, m_instruInfo);
+m_slaveDynaData.m_insruViewData:=m_instruViewCheck.m_instruImgBoundPos;
 
 m_codeTime(START:=FALSE);
 ]]></ST>
     </Implementation>
     <LineIds Name="RobotDynamics">
-      <LineId Id="81" Count="0" />
-      <LineId Id="161" Count="0" />
-      <LineId Id="15" Count="1" />
-      <LineId Id="24" Count="1" />
-      <LineId Id="294" Count="0" />
-      <LineId Id="331" Count="0" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="17" Count="1" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="31" Count="0" />
-      <LineId Id="28" Count="1" />
-      <LineId Id="332" Count="0" />
-      <LineId Id="30" Count="0" />
-      <LineId Id="295" Count="0" />
-      <LineId Id="333" Count="3" />
-      <LineId Id="27" Count="0" />
-      <LineId Id="260" Count="1" />
-      <LineId Id="83" Count="0" />
+      <LineId Id="450" Count="33" />
       <LineId Id="110" Count="0" />
     </LineIds>
   </POU>

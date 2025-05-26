@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlInstruRetract" Id="{596332da-68eb-4244-8a80-7e3d57b3bb9f}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm joint3 retract to up limit
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlInstruRetract EXTENDS FB_SlaveArmCtrlBase
@@ -22,6 +22,14 @@ VAR
 	m_instruJntTargetPos :Vec5d;
 	m_instruJntVel :LREAL := 2*PI;
 	m_instruJntAcc : LREAL := 4*PI;
+	
+	// PID for joint8
+//	m_retractCtrl : FB_PID;
+//	m_retractKp:LREAL:=2000;
+//	m_retractKd:LREAL:=100;
+//	m_retractKi:LREAL:=8000;
+//	m_retractKiLimit:LREAL:=300;
+//	m_retractCtrlLimit:LREAL:=1000;
 	
 	
 END_VAR
@@ -80,6 +88,26 @@ curJntVel := i_slaveArm.curJntVel;
 m_isFinished := (ABS(m_cmdJntPos[3] - m_jnt3TargetPos) <g_cartCtrlPosTolLow AND trackErr < g_jntCtrlAngTolLoW 
 			AND norm(curJntVel) <g_jntStaticVelThres);
 ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdJntTrq" Id="{24cd49e3-93cf-41f3-8feb-c2dc5ff73b79}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntTrq : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	i :INT;
+	dampScale :LREAL;
+	limitDis:LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// TODO: re-tune joint3 controller, replace this local PID controller with the global one if possible
+m_cmdJntTrq := g_zeroVec8d;]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{7aae2cb5-3dc8-47a4-84c8-fce1eb91d921}">
@@ -160,8 +188,14 @@ copyCmds(r_slaveArmCtrlCmd);]]></ST>
       <LineId Id="236" Count="0" />
       <LineId Id="98" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SlaveCtrlInstruRetract.calcCmdJntTrq">
+      <LineId Id="3" Count="1" />
+    </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruRetract.init">
-      <LineId Id="301" Count="25" />
+      <LineId Id="396" Count="3" />
+      <LineId Id="401" Count="19" />
+      <LineId Id="440" Count="0" />
+      <LineId Id="426" Count="0" />
       <LineId Id="191" Count="0" />
     </LineIds>
   </POU>

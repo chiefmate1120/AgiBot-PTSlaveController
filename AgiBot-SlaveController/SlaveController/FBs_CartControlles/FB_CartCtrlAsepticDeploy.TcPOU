@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_CartCtrlAsepticDeploy" Id="{2938379a-3fa1-4919-bcaa-4be4c07fb559}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CartCtrlAsepticDeploy EXTENDS FB_CartCtrlBase
 VAR_INPUT
@@ -94,6 +94,7 @@ END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
 SUPER^.init(i_slaveCart,r_cartCtrlCmd);
+m_cmdJntPos[5]:=i_slaveCart.m_curJntPos[5];
 
 m_jntEnableFlag[5] :=1;
 m_jntEnableFlag[6] :=1;
@@ -111,6 +112,7 @@ m_incTarJntPos := g_zeroVec8d;
 m_tarJntPos := g_zeroVec8d;
 m_jntPosArrival := g_zeroVec8b;
 
+
 IF i_slaveCart.ctrlEnable.m_dockingEnable THEN
 	m_initTarJntPos := i_slaveCart.m_cartDataFromUI.m_cartSpecificPosDocking;
 ELSIF i_slaveCart.ctrlEnable.m_drapingEnable THEN
@@ -118,7 +120,7 @@ ELSIF i_slaveCart.ctrlEnable.m_drapingEnable THEN
 END_IF
 
 FOR i := 1 TO 4 BY 1 DO
-	m_jntOTG[i+4].init(i_curCmdPos:= m_cmdJntPos[i+4], i_curCmdVel:= 0, i_maxV:=GVL_CartControlParameters.g_maxJntVel[i+4] , i_maxA:=GVL_CartControlParameters.g_maxJntAcc[i+4] , i_Ts:=g_cartCtrlCycleTime );
+	m_jntOTG[i+4].init(i_curCmdPos:= m_cmdJntPos[i+4], i_curCmdVel:= 0, i_maxV:=GVL_CartControlParameters.g_maxJntVel[i+4]/2 , i_maxA:=GVL_CartControlParameters.g_maxJntAcc[i+4] , i_Ts:=g_cartCtrlCycleTime );
 END_FOR
 //m_initTarJntPos := m_tarJntPos;
 m_adjustStartTime := 0;
@@ -135,7 +137,9 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="14" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlAsepticDeploy.init">
-      <LineId Id="136" Count="30" />
+      <LineId Id="178" Count="18" />
+      <LineId Id="225" Count="0" />
+      <LineId Id="197" Count="12" />
       <LineId Id="21" Count="0" />
     </LineIds>
   </POU>

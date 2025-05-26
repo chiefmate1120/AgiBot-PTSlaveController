@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="addVec7" Id="{7f08a62c-564e-4a4d-aa2c-e8ed8f70fa3e}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION addVec7 : vec7d
 VAR_IN_OUT CONSTANT

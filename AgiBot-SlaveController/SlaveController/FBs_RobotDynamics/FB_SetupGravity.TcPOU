@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SetupGravity" Id="{5452bfb6-8061-49fa-846a-f3728f3e7824}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SetupGravity
 VAR_INPUT

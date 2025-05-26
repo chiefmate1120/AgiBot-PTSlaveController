@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="LogDataUnion" Id="{d4e37f0e-f816-42a3-b502-ae87e7e0d008}">
+    <Declaration><![CDATA[TYPE LogDataUnion :
+UNION
+	m_string:STRING(95); // total size 96byte
+	m_real :REAL;
+	m_lreal :LREAL;
+	m_dint :DINT;
+	m_int :INT;
+	m_word :WORD;
+	m_dword: DWORD;
+	m_array :ARRAY[1..9] OF LREAL;
+END_UNION
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

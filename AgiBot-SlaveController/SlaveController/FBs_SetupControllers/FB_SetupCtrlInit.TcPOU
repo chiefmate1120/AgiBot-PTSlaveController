@@ -1,14 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SetupCtrlInit" Id="{eac05193-39e5-4249-a95b-72d2422e8330}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Setup Arm Init
 FUNCTION_BLOCK PUBLIC FB_SetupCtrlInit EXTENDS FB_SetupArmCtrlBase
-VAR_INPUT
-END_VAR
-VAR_OUTPUT
-END_VAR
+
 VAR
 	m_initState :INT :=0;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -28,9 +26,11 @@ VAR
 	curJntVel :Vec5d;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF m_timePeriod > 1.0 then
+        <ST><![CDATA[IF m_timePeriod > 0 THEN
 	m_isFinished :=TRUE;
-END_IF]]></ST>
+END_IF
+
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{dbcec065-8704-4c57-a097-e13d35679382}">
@@ -49,7 +49,8 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[SUPER^.Init(i_setupArm,r_setupArmCtrlCmd);
-]]></ST>
+// TODO: setup joint3 would "jump" a bit when transit from torque mode to position mode
+m_jntOPMode[3] := DriverOPMode_Trq;]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_SetupCtrlInit">
@@ -57,11 +58,13 @@ END_VAR
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupCtrlInit.calcCmdJntPos">
-      <LineId Id="98" Count="0" />
-      <LineId Id="109" Count="1" />
+      <LineId Id="141" Count="3" />
+      <LineId Id="129" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupCtrlInit.init">
-      <LineId Id="11" Count="1" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="12" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

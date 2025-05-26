@@ -4,14 +4,14 @@
     <Declaration><![CDATA[{attribute 'qualified_only'}
 // Robot3 --joints parameters of setup arms
 VAR_GLOBAL
-	// absolute encoder value at minimal joint positon  2873378  289000
-	g_minLinkEncoder :ARRAY[1..g_cartJntNum] OF DINT :=[0, 0, 0, 0, 27616627, 78529, 22410851, 114258];
+	// absolute encoder value at minimal joint positon 
+	g_minLinkEncoder :ARRAY[1..g_cartJntNum] OF DINT;
 		 
 	// absolute encoder value at maximum joint positon
-	g_maxLinkEncoder :ARRAY[1..g_cartJntNum] OF DINT :=[0, 0, 0, 0, 24720108, 101778, 24474011, 105483 ];
+	g_maxLinkEncoder :ARRAY[1..g_cartJntNum] OF DINT;
 	
 	// absolute encoder value at calibrated positon
-	g_caliLinkEncoder :ARRAY[1..g_cartJntNum] OF DINT :=[0, 0, 0, 0, 27616627, 90321, 24474011, 43437];
+	g_caliLinkEncoder :ARRAY[1..g_cartJntNum] OF DINT;
 	
 	 // if absolute encoder value cross zeros within joint motion range
 	g_linkEncZeroCross :ARRAY[1..g_cartJntNum] OF INT :=[0, 0, 0, 0, 0, 0, 0, 1];
@@ -31,7 +31,7 @@ VAR_GLOBAL
 	
 	 // joint SDO address
 	g_slaveCartNetID: T_AmsNetId:='169.254.45.61.8.1';
-	g_slaveCartJointNetPort:ARRAY[1..g_cartJntNum] OF UINT :=[1001,    1002,	1003,	1004,	1005,	1007,	1008,	1009];
+	g_slaveCartJointNetPort:ARRAY[1..g_cartJntNum] OF UINT :=[1004,    1005,	 1002,	1003,	1001,	1006,	1007,	1008];
 
 END_VAR]]></Declaration>
   </GVL>

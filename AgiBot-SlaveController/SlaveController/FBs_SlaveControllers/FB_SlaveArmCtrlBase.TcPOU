@@ -17,6 +17,9 @@ VAR
 	// flag to hold last commands
 	m_holdLastCmds :BOOL := FALSE;
 	
+	// arm index
+	m_armIdx: INT;
+	
 	// arm control data
 	// NOTE: simulated joint position is usd for kinematic controller 
 	//		while command joint position is used for real robot controller
@@ -81,10 +84,7 @@ END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF isFinished THEN
 	RETURN;
-END_IF
-
-// set joint torque to zero in default
-m_cmdJntTrq := g_zeroVec8d;]]></ST>
+END_IF]]></ST>
       </Implementation>
     </Method>
     <Method Name="checkToHoldLastCmds" Id="{90f04ad1-6a41-4802-98b4-abd6341aeded}">
@@ -174,6 +174,7 @@ m_cmdJntVel:=g_zeroVec8d;
 m_cmdJntAcc:=g_zeroVec8d;
 m_cmdJntTrq:=g_zeroVec8d;
 m_FFJntTrq :=g_zeroVec8d;
+m_armIdx:= i_slaveArm.armIdx;
 
 // update commands to arm
 copyCmds(r_slaveArmCtrlCmd);
@@ -221,10 +222,12 @@ END_VAR]]></Declaration>
 	RETURN;
 END_IF
 
+(*
 // check if arm enabled
 IF FALSE = i_slaveArm.isEnabled(m_jntEnableFlag) THEN
 	RETURN;
 END_IF
+*)
 
 // calculate command joint position--Motion control
 calcCmdJntPos(i_endoscopePose, i_masterStatus, i_setupStatus, i_slaveArm);
@@ -237,6 +240,7 @@ copyCmds(r_slaveArmCtrlCmd);
 
 // update time period
 m_timePeriod := m_timePeriod+g_slaveArmCtrlCycleTime;
+
 ]]></ST>
       </Implementation>
     </Method>
@@ -260,9 +264,6 @@ END_VAR
     </LineIds>
     <LineIds Name="FB_SlaveArmCtrlBase.calcCmdJntTrq">
       <LineId Id="36" Count="2" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="17" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArmCtrlBase.checkToHoldLastCmds">
       <LineId Id="6" Count="6" />
@@ -279,22 +280,7 @@ END_VAR
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArmCtrlBase.init">
-      <LineId Id="49" Count="0" />
-      <LineId Id="61" Count="0" />
-      <LineId Id="60" Count="0" />
-      <LineId Id="71" Count="1" />
-      <LineId Id="114" Count="0" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="125" Count="1" />
-      <LineId Id="115" Count="0" />
-      <LineId Id="136" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="50" Count="0" />
-      <LineId Id="38" Count="0" />
-      <LineId Id="146" Count="0" />
-      <LineId Id="84" Count="0" />
-      <LineId Id="86" Count="0" />
-      <LineId Id="94" Count="0" />
+      <LineId Id="166" Count="18" />
       <LineId Id="83" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArmCtrlBase.isFinished.Get">
@@ -306,19 +292,7 @@ END_VAR
       <LineId Id="10" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArmCtrlBase.run">
-      <LineId Id="138" Count="3" />
-      <LineId Id="86" Count="0" />
-      <LineId Id="88" Count="2" />
-      <LineId Id="46" Count="0" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="14" Count="1" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="137" Count="0" />
-      <LineId Id="18" Count="0" />
-      <LineId Id="27" Count="0" />
-      <LineId Id="61" Count="0" />
-      <LineId Id="84" Count="1" />
+      <LineId Id="170" Count="22" />
       <LineId Id="10" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArmCtrlBase.timePeriod.Get">

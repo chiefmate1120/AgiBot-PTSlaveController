@@ -1,0 +1,1127 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="MainTestPart" Id="{b83618ba-430f-4dc7-b8e8-725dcbac1ae2}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MainTestPart
+VAR
+	//**************************write data to file or read data from file****************************//
+	m_FB_CSV_TextMode_ReadWrite1:FB_CSV_TextMode_ReadWrite;	
+	m_bWrite: BOOL;
+	m_writedata:ARRAY[0..19,0..9] OF LREAL;
+	m_bRead:BOOL;
+	m_readdata:ARRAY[0..10000,0..120] OF LREAL;
+	
+	
+	
+	
+	//**********************************single arm test related data****************************//
+	m_armSelect:INT:=1;
+	m_writeStart:BOOL;
+	m_writeFinished:BOOL;
+	m_writeStep:INT:=-1;
+	m_fileId:INT;
+	sFileName:T_MaxString;
+	slaveArmFlag:BOOL;
+	
+	//data
+	m_time:LREAL;
+	m_row,m_col:INT;
+	m_testDataWriteEnable:BOOL;	
+	
+	m_jntTrqD2,m_jntTrqD3:ARRAY[0..(gvl_const.g_writeDataNum-1),0..5] OF LREAL;
+	m_jntPosD2,m_jntPosD3:ARRAY[0..(gvl_const.g_writeDataNum-1),0..5] OF LREAL;
+	m_cmdDHjntPosD2,m_cmdDHjntPosD3:ARRAY[0..(gvl_const.g_writeDataNum-1),0..5] OF LREAL;
+	m_data:ARRAY[0..(gvl_const.g_writeDataNum-1),0..5] OF LREAL;
+	
+	//pointer to global variables
+	g_pcmdDHJntPosD2,g_pJntPosD2,g_pJntTrqD2:POINTER TO ARRAY[1..g_sArmNum,1..6,1..gvl_const.g_recordDataNum] OF LREAL;
+	g_pcmdDHJntPosD3,g_pJntPosD3,g_pJntTrqD3:POINTER TO ARRAY[1..g_sArmNum,1..6,1..gvl_const.g_recordDataNum] OF LREAL;
+	
+	//data from global variables
+	m_cmdDHJntPosD2_data,m_JntPosD2_data,m_JntTrqD2_data:ARRAY[1..g_sArmNum,1..6,1..gvl_const.g_recordDataNum] OF LREAL;
+	m_cmdDHJntPosD3_data,m_JntPosD3_data,m_JntTrqD3_data:ARRAY[1..g_sArmNum,1..6,1..gvl_const.g_recordDataNum] OF LREAL;
+	
+	
+	
+	
+	
+	//**********************************write precision test data**********************************//
+	m_armMatId:INT:=1;
+	m_matWriteStep:INT:=-1;
+	m_matrixData:ARRAY[0..3,0..3] OF LREAL;
+	m_frontPose:ST_Frame;	
+	m_pfrontPose:POINTER TO ST_Frame;
+	
+	
+	
+	//*****************************Variables related to precision testing******************************//
+	m_uiControlMode:ARRAY[1..4,0..GVL_Const.g_controlModeNum] OF BOOL;	
+	m_uiControlModeL:ARRAY[1..4,0..GVL_Const.g_controlModeNum] OF BOOL;
+	m_controlModeInit:ARRAY[1..4,0..GVL_Const.g_controlModeNum] OF BOOL;
+    m_controlMode_TRIG:ARRAY[1..4,0..GVL_Const.g_controlModeNum] OF  R_TRIG;
+	m_controlMode_FTRIG:ARRAY[1..4,0..GVL_Const.g_controlModeNum] OF  F_TRIG;
+
+	//unit function
+	m_unitFun:FB_UnitTransform;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//write the data to file example
+dataWriteExp();
+
+//HMI for accuracy test
+uiDataForPrecision();
+
+//write data related to precision test
+writePrecisionData();
+
+//information update
+infoUpdate();
+
+//joint get home
+controlSignalAnalysis();
+
+//write arm friction test data
+writeArmTestData();
+]]></ST>
+    </Implementation>
+    <Method Name="cartInfoUpdate" Id="{e2abd282-3224-4ce8-9e7b-736da8384d14}">
+      <Declaration><![CDATA[METHOD cartInfoUpdate : BOOL
+VAR_IN_OUT CONSTANT
+	// slave cart joint data
+	i_slaveCart :FB_SlaveCart;
+END_VAR
+
+VAR
+	i: INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//update system information
+FOR i:=1 TO g_cartJntNum BY 1 DO
+	//motor input and output information
+	g_systemInfo.m_cartJntInfo[i].m_motorInput:=i_slaveCart.m_cartJoints[i].m_motorInputs;
+	g_systemInfo.m_cartJntInfo[i].m_motorOutput:=i_slaveCart.m_cartJoints[i].m_motorOutputs;
+	
+	//joint position and max/min
+	g_systemInfo.m_cartJntInfo[i].m_curJntPos:=i_slaveCart.curJntPos[i];
+	g_systemInfo.m_cartJntInfo[i].m_curLinkPos:=i_slaveCart.curLinkPos[i];
+	g_systemInfo.m_cartJntInfo[i].m_encErr:=i_slaveCart.curJntPos[i]-i_slaveCart.curLinkPos[i];
+	
+	//joint min and max
+	g_systemInfo.m_cartJntInfo[i].m_jntMax:=GVL_CartMotorParameters.g_maxJntPos[i];
+	g_systemInfo.m_cartJntInfo[i].m_jntMin:=GVL_CartMotorParameters.g_minJntPos[i];
+END_FOR
+
+
+//update system information
+FOR i:=1 TO g_cartJntNum BY 1 DO
+	//motor input and output information
+	g_systemInfo.m_cartInfo.m_motorInput[i]:=i_slaveCart.m_cartJoints[i].m_motorInputs;
+	g_systemInfo.m_cartInfo.m_motorOutput[i]:=i_slaveCart.m_cartJoints[i].m_motorOutputs;	
+	g_systemInfo.m_cartInfo.m_encErr[i]:=i_slaveCart.curJntPos[i]-i_slaveCart.curLinkPos[i];
+END_FOR
+
+//joint position
+g_systemInfo.m_cartInfo.m_curJntPos:=i_slaveCart.curJntPos;
+g_systemInfo.m_cartInfo.m_curLinkPos:=i_slaveCart.curLinkPos;
+g_systemInfo.m_cartInfo.m_curJntPosDegMM:=m_unitFun.carArmUnit2User(i_dataSystem:= i_slaveCart.curJntPos);
+g_systemInfo.m_cartInfo.m_curJntVelDegMM:=m_unitFun.carArmUnit2User(i_dataSystem:= i_slaveCart.curJntVel);
+
+
+//joint min and max
+g_systemInfo.m_cartInfo.m_jntMax:=GVL_CartMotorParameters.g_maxJntPos;
+g_systemInfo.m_cartInfo.m_jntMin:=GVL_CartMotorParameters.g_minJntPos;
+
+//state machine
+g_systemInfo.m_cartInfo.m_stateMachine:=CartControl.m_cartRobot.m_cartState;
+
+//IP Address
+g_systemInfo.m_cartInfo.m_IPAddress:=GVL_CartJointEncoderCaliData.g_slaveCartNetID;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="controlSignalAnalysis" Id="{600771a8-3e3f-46e2-8822-6a6fc4cde8bd}">
+      <Declaration><![CDATA[//*********Analyze the signals of the interactive interface*********//
+METHOD controlSignalAnalysis : BOOL
+VAR_INPUT
+END_VAR
+
+VAR
+	i,k:INT;
+	m_armId:INT;
+	originJntPosUser:Vec6d;
+	
+	originJntPos_Setup:Vec5d;
+	originJntPosUser_Setup:Vec5d;
+	
+	originJntPos_car:Vec8d;
+	originJntPosUser_car:Vec8d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//go home signal
+FOR m_armId:=1 TO 4 BY 1 DO	
+	//slave arm joint
+	FOR i:=1 TO 3 BY 1 DO
+		IF (g_motionTest.m_goHome[m_armId][i]=TRUE) AND (SlaveArmControl.m_slaveRobot.m_slaveArmState[m_armId]=SlaveArmState_MotionTest) THEN
+			g_motionTest.m_controlMode[m_armId]:=1;
+			g_motionTest.m_startMotion[m_armId]:=TRUE;
+			g_motionTest.m_singleMotorIncControl[m_armId]:=FALSE;
+			
+			//slave arm target joint position
+			originJntPosUser:=m_unitFun.slaveArmUnit2User(gvl_const.g_originJntPos);
+			g_motionTest.m_targetJntPosN8[m_armId]:=g_motionTest.m_actJntPos[m_armId];			
+			g_motionTest.m_targetJntPosN8[m_armId][i]:=originJntPosUser[i];
+			
+			//setup arm target joint position
+			g_motionTest.m_targetJntPosSetup[m_armId]:=g_motionTest.m_actJntPosSetup[m_armId];
+			
+			//exit for cycle
+			EXIT;
+		END_IF
+	END_FOR
+	
+	//setup arm joint
+	FOR i:=4 TO 5 BY 1 DO
+		IF (g_motionTest.m_goHomeSetup[m_armId][i]=TRUE) AND (SetupArmControl.m_setupRobot.m_setupArmState[m_armId]=SetupArmState_MotionTest) THEN
+			g_motionTest.m_controlMode[m_armId]:=1;
+			g_motionTest.m_startMotion[m_armId]:=TRUE;
+			g_motionTest.m_singleMotorIncControl[m_armId]:=FALSE;
+			
+			//slave arm target joint position
+			g_motionTest.m_targetJntPosN8[m_armId]:=g_motionTest.m_actJntPos[m_armId];
+			
+			//setup arm target joint position
+			FOR k:=1 TO 5 BY 1 DO
+				originJntPos_Setup[k]:=GVL_SetupJointEncoderCaliData.g_linkEncCaliJntPos[m_armId,k];
+			END_FOR
+			originJntPosUser_Setup:=m_unitFun.setupArmUnit2User(originJntPos_Setup);			
+			g_motionTest.m_targetJntPosSetup[m_armId]:=g_motionTest.m_actJntPosSetup[m_armId];
+			g_motionTest.m_targetJntPosSetup[m_armId][i]:=originJntPosUser_Setup[i];
+			
+			//exit for cycle
+			EXIT;
+		END_IF
+	END_FOR
+END_FOR
+
+
+
+//cart joint go home---//左支撑-右支撑-左轮-右轮-立柱升降-横梁旋转-横梁伸缩-悬吊旋转
+FOR i:=6 TO 8 BY 1 DO
+	IF (g_motionTest.m_goHomeCar[i]=TRUE) AND (CartControl.m_cartRobot.m_cartState=CartJointState_MotionTest) THEN
+			g_motionTest.m_controlModeCar:=1;			
+			g_motionTest.m_jntTestModeIncCar:=FALSE;
+			
+			//cart target joint position
+			originJntPos_car:=GVL_CartJointEncoderCaliData.g_linkEncCaliJntPos;
+			originJntPosUser_car:=m_unitFun.carArmUnit2User(originJntPos_car);			
+			g_motionTest.m_targetJntPosCar:=g_motionTest.m_curJntPosCar;
+			g_motionTest.m_targetJntPosCar[i]:=originJntPosUser_car[i];
+			
+			//exit for cycle
+			EXIT;
+	END_IF
+END_FOR
+
+
+
+
+//go home signal
+FOR m_armId:=1 TO g_sArmNum BY 1 DO
+	FOR i:=1 TO 3 BY 1 DO
+		IF (g_motionTest.m_goHome[m_armId][i]) OR (g_motionTest.m_singleMotorStartMotion[m_armId][i]) OR (g_motionTest.m_singleMotorStartIncMotion[m_armId][i]) THEN
+			g_motionTest.m_controlMode[m_armId]:=1;
+			g_motionTest.m_startMotion[m_armId]:=TRUE;		
+			g_motionTest.m_singleMotorIncControl[m_armId]:=FALSE;		
+			EXIT; //exit for cycle
+		END_IF
+	END_FOR
+END_FOR
+
+
+//go home signal---setup
+FOR m_armId:=1 TO g_sArmNum BY 1 DO
+	FOR i:=4 TO 5 BY 1 DO
+		IF (g_motionTest.m_goHomeSetup[m_armId][i]) OR (g_motionTest.m_singleMotorStartMotionSetup[m_armId][i]) OR (g_motionTest.m_singleMotorStartIncMotionSetup[m_armId][i]) THEN
+			g_motionTest.m_controlMode[m_armId]:=1;
+			g_motionTest.m_startMotion[m_armId]:=TRUE;
+			g_motionTest.m_singleMotorIncControl[m_armId]:=FALSE;				
+			EXIT; //exit for cycle
+		END_IF
+	END_FOR
+END_FOR
+
+
+//cart joint go home---//左支撑-右支撑-左轮-右轮-立柱升降-横梁旋转-横梁伸缩-悬吊旋转
+FOR i:=6 TO 8 BY 1 DO
+	IF (g_motionTest.m_goHomeCar[i]=TRUE) OR (g_motionTest.m_singleMotorStartMotion_Car[i]) OR (g_motionTest.m_singleMotorStartIncMotion_Car[i]) THEN
+			g_motionTest.m_controlModeCar:=1;
+			g_motionTest.m_jntTestModeIncCar:=FALSE;						
+			EXIT; //exit for cycle
+	END_IF
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="dataWriteExp" Id="{83e2b061-240b-48f5-a37e-40e2d8eb7275}">
+      <Declaration><![CDATA[METHOD dataWriteExp : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+(*
+m_FB_CSV_TextMode_ReadWrite1(	sNetId:= '', 	sFileName:='D:\file20241213.csv' , 	bBusy=> , 	bError=> , 	nErrorID=> , 	nErrorState=> );
+
+m_FB_CSV_TextMode_ReadWrite1.M_WriteCsv(	bExecute:=m_bWrite , 	nMode:= FOPEN_MODEWRITE OR FOPEN_MODETEXT, 
+	ptPointer:=ADR(m_writedata) , 	nRows:= 19, 	nColumns:=9 );
+
+m_FB_CSV_TextMode_ReadWrite1.M_ReadCsv(bExecute:=m_bRead , ptPointer:= ADR(m_readdata), nRows:=10000 , nColumns:= 120);
+IF NOT m_FB_CSV_TextMode_ReadWrite1.bBusy THEN
+	m_bWrite:=FALSE;
+	m_bRead:=FALSE;
+END_IF
+*)]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="infoUpdate" Id="{b5ebbaa2-522b-48df-8c3d-8db966613fb9}">
+      <Declaration><![CDATA[METHOD infoUpdate : BOOL
+VAR_INPUT
+	
+END_VAR
+
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//update the system information
+FOR i:= 1 TO 4 BY 1 DO
+	IF (SlaveArmControl.m_robotInit=TRUE) THEN
+		slaveInfoUpdate(i_slaveArm:= SlaveArmControl.m_slaveRobot.m_slaveArms[i]);
+	END_IF
+	
+	IF (SetupArmControl.m_robotInit=TRUE) THEN
+		setupInfoUpdate(i_setupArm:= SetupArmControl.m_setupRobot.m_setupArms[i]);	
+	END_IF	
+END_FOR
+
+
+//cart information
+IF (CartControl.m_cartInit=TRUE) THEN
+	cartInfoUpdate(i_slaveCart:= CartControl.m_cartRobot.m_slaveCart);
+END_IF
+
+
+//update the instrument information
+FOR i:= 1 TO 4 BY 1 DO
+	IF (SlaveArmControl.m_robotInit=TRUE) THEN
+		updateInstrument(i_slaveArm:= SlaveArmControl.m_slaveRobot.m_slaveArms[i]);
+	END_IF
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="setupInfoUpdate" Id="{726937ad-c793-4cb6-b2ba-884c3cb448f0}">
+      <Declaration><![CDATA[METHOD setupInfoUpdate : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+
+VAR
+	i: INT;
+	k:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//update system information
+FOR i:=1 TO g_setupJntNum BY 1 DO
+	k:=i_setupArm.armIdx;
+	
+	//motor input and output information
+	g_systemInfo.m_setupJntInfo[k,i].m_motorInput:=i_setupArm.m_joints[i].m_motorInputs;
+	g_systemInfo.m_setupJntInfo[k,i].m_motorOutput:=i_setupArm.m_joints[i].m_motorOutputs;
+	
+	//joint position and max/min
+	g_systemInfo.m_setupJntInfo[k,i].m_curJntPos:=i_setupArm.curJntPos[i];
+	g_systemInfo.m_setupJntInfo[k,i].m_curLinkPos:=i_setupArm.curLinkPos[i];
+	g_systemInfo.m_setupJntInfo[k,i].m_encErr:=i_setupArm.curJntPos[i]-i_setupArm.curLinkPos[i];
+	
+	//joint min and max
+	g_systemInfo.m_setupJntInfo[k,i].m_jntMax:=GVL_SetupMotorParameters.g_maxJntPos[k,i];
+	g_systemInfo.m_setupJntInfo[k,i].m_jntMin:=GVL_SetupMotorParameters.g_minJntPos[k,i];
+END_FOR
+
+
+//update system information
+FOR i:=1 TO g_setupJntNum BY 1 DO
+	k:=i_setupArm.armIdx;
+	
+	//motor input and output information
+	g_systemInfo.m_setupInfo[k].m_motorInput[i]:=i_setupArm.m_joints[i].m_motorInputs;
+	g_systemInfo.m_setupInfo[k].m_motorOutput[i]:=i_setupArm.m_joints[i].m_motorOutputs;
+	g_systemInfo.m_setupInfo[k].m_encErr[i]:=i_setupArm.curJntPos[i]-i_setupArm.curLinkPos[i];
+	
+	//joint min and max
+	g_systemInfo.m_setupInfo[k].m_jntMax[i]:=GVL_SetupMotorParameters.g_maxJntPos[k,i];
+	g_systemInfo.m_setupInfo[k].m_jntMin[i]:=GVL_SetupMotorParameters.g_minJntPos[k,i];
+END_FOR
+
+//joint position and max/min
+g_systemInfo.m_setupInfo[k].m_curJntPos:=i_setupArm.curJntPos;
+g_systemInfo.m_setupInfo[k].m_curLinkPos:=i_setupArm.curLinkPos;
+g_systemInfo.m_setupInfo[k].m_curJntPosDegMM:=m_unitFun.setupArmUnit2User(i_dataSystem:= i_setupArm.curJntPos);
+g_systemInfo.m_setupInfo[k].m_curJntVelDegMM:=m_unitFun.setupArmUnit2User(i_dataSystem:= i_setupArm.curJntVel);
+
+//state machine
+g_systemInfo.m_setupInfo[k].m_stateMachine:=SetupArmControl.m_setupRobot.m_setupArmState[k];
+
+//IP Address
+g_systemInfo.m_setupInfo[k].m_IPAddress:=GVL_SetupJointEncoderCaliData.g_setupArmNetID[k];
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="slaveInfoUpdate" Id="{9cd30ad6-d5c6-4dd0-8305-55b6bc134650}">
+      <Declaration><![CDATA[METHOD slaveInfoUpdate : BOOL
+VAR_INPUT
+	// endoscope pose in cart coordinate
+	//i_endoscopePose : ST_Frame;
+	
+	// master arm data
+	//i_masterStatus :ST_MasterStatus;
+	
+	// setup arm data
+	//i_setupStatus: ST_SetupStatus;
+	
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR
+	i:INT;
+	k:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//update system information
+FOR i:=1 TO g_sJntNum BY 1 DO
+	k:=i_slaveArm.armIdx;
+	
+	//motor input and output information
+	g_systemInfo.m_slaveJntInfo[k,i].m_motorInput:=i_slaveArm.m_joints[i].m_motorInputs;
+	g_systemInfo.m_slaveJntInfo[k,i].m_motorOutput:=i_slaveArm.m_joints[i].m_motorOutputs;
+	
+	//joint position
+	g_systemInfo.m_slaveJntInfo[k,i].m_curJntPos:=i_slaveArm.curJntPos[i];
+	g_systemInfo.m_slaveJntInfo[k,i].m_curLinkPos:=i_slaveArm.curLinkPos[i];
+	g_systemInfo.m_slaveJntInfo[k,i].m_encErr:=i_slaveArm.curJntPos[i]-i_slaveArm.curLinkPos[i];
+	
+	//joint max and min
+	g_systemInfo.m_slaveJntInfo[k,i].m_jntMax:=GVL_SlaveMotorParameters.g_maxJntPos[i];
+	g_systemInfo.m_slaveJntInfo[k,i].m_jntMin:=GVL_SlaveMotorParameters.g_minJntPos[i];		
+END_FOR
+
+
+
+//update system information
+FOR i:=1 TO g_sJntNum BY 1 DO
+	k:=i_slaveArm.armIdx;	
+	//motor input and output information
+	g_systemInfo.m_slaveInfo[k].m_motorInput[i]:=i_slaveArm.m_joints[i].m_motorInputs;
+	g_systemInfo.m_slaveInfo[k].m_motorOutput[i]:=i_slaveArm.m_joints[i].m_motorOutputs;		
+	g_systemInfo.m_setupInfo[k].m_encErr[i]:=i_slaveArm.curJntPos[i]-i_slaveArm.curLinkPos[i];
+END_FOR
+
+//joint position
+g_systemInfo.m_slaveInfo[k].m_curJntPos:=i_slaveArm.curJntPos;
+g_systemInfo.m_slaveInfo[k].m_curLinkPos:=i_slaveArm.curLinkPos;
+g_systemInfo.m_slaveInfo[k].m_curJntPosDegMM:=m_unitFun.slaveArmUnit2UserN8(i_dataSystem:= i_slaveArm.curJntPos);
+g_systemInfo.m_slaveInfo[k].m_curJntVelDegMM:=m_unitFun.slaveArmUnit2UserN8(i_dataSystem:= i_slaveArm.curJntVel);
+
+//joint max and min
+g_systemInfo.m_slaveInfo[k].m_jntMax:=GVL_SlaveMotorParameters.g_maxJntPos;
+g_systemInfo.m_slaveInfo[k].m_jntMin:=GVL_SlaveMotorParameters.g_minJntPos;
+
+//state machine
+g_systemInfo.m_slaveInfo[k].m_stateMachine:=SlaveArmControl.m_slaveRobot.m_slaveArmState[k];
+
+//IP Address
+g_systemInfo.m_slaveInfo[k].m_IPAddress:=GVL_SlaveJointEncoderCaliData.g_slaveArmNetID[k];
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="uiDataForPrecision" Id="{9a887a90-c99e-4390-abdb-ad0ecd202ca8}">
+      <Declaration><![CDATA[METHOD uiDataForPrecision : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i: INT;
+	j : INT;
+	armId:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//data from ui
+m_uiControlMode:=g_motionTest.m_uiArmMode;
+
+
+//the interface relate to variable g_motionTest.m_uiArmMode
+FOR i:=1 TO 4  DO
+	FOR j:=1 TO GVL_Const.g_controlModeNum DO 
+		//Monitoring button signal rising edge
+		m_controlMode_TRIG[i,j](CLK:=m_uiControlMode[i,j],Q=>);
+		
+		IF (m_controlMode_TRIG[i,j].Q) AND (g_motionTest.m_controlMode[i]=0) THEN
+			g_motionTest.m_controlMode[i]:=j;
+		END_IF		
+		
+		//Monitoring button signal falling edge
+		m_controlMode_FTRIG[i,j](CLK:=m_uiControlMode[i,j]);		
+	END_FOR
+END_FOR
+
+
+//Upload variables for displaying button colors
+g_motionTest.m_uiArmModeL:=m_controlModeInit;
+FOR i:=1 TO 4  DO
+	g_motionTest.m_uiArmModeL[i,g_motionTest.m_controlMode[i]]:=TRUE;
+END_FOR
+
+
+//If the motion ends, set the relevant variables to false
+FOR i:=1 TO 4  DO
+	IF g_motionTest.m_controlMode[i]<>0 THEN
+		g_motionTest.m_startMotion[i]:=TRUE;
+	ELSE
+		g_motionTest.m_startMotion[i]:=FALSE;
+	END_IF
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="updateInstrument" Id="{80cb968a-3d0b-4b5a-a912-964eb0f206df}">
+      <Declaration><![CDATA[METHOD updateInstrument : BOOL
+
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[GVL_UIData.g_instrument.m_armId := LIMIT(1,GVL_UIData.g_instrument.m_armId, 4);
+IF i_slaveArm.armIdx=GVL_UIData.g_instrument.m_armId THEN
+	GVL_UIData.g_instrument.m_instrumentSN:=i_slaveArm.instrument.onChipData.m_InstruseriesNum;
+	GVL_UIData.g_instrument.m_instruNameCH:=i_slaveArm.instrument.m_instruTypeInfo.m_instruNameCH;
+	GVL_UIData.g_instrument.m_instruUsageCounts:=i_slaveArm.instrument.onChipData.m_InstruUsageCounts;
+	GVL_UIData.g_instrument.m_maxUseNum:=i_slaveArm.instrument.m_instruTypeInfo.m_maxUseNum;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="writeArmTestData" Id="{75371ddd-c0a5-4294-8245-87433006a1e9}">
+      <Declaration><![CDATA[METHOD writeArmTestData : BOOL
+VAR_INPUT
+END_VAR
+
+VAR
+	i,j:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+FOR i:=1 TO 4 BY 1 DO
+	//slave arm
+	IF (g_frictionTest.m_writeData[i]=TRUE) THEN
+		g_frictionTest.m_writeData[i]:=FALSE;
+		m_armSelect:=i;
+		m_writeStart:=TRUE;
+		slaveArmFlag:=TRUE;
+	END_IF
+	
+	//setup arm
+	IF (g_frictionTestSetup.m_writeData[i]=TRUE) THEN
+		g_frictionTestSetup.m_writeData[i]:=FALSE;
+		m_armSelect:=i;
+		m_writeStart:=TRUE;
+		slaveArmFlag:=FALSE;
+	END_IF	
+END_FOR
+
+
+IF (m_writeStart=TRUE) THEN
+	m_writeStep:=0;
+	m_writeStart:=FALSE;
+	m_writeFinished:=FALSE;
+END_IF
+
+
+CASE m_writeStep OF
+	0: //init parameters		
+		m_row:=gvl_const.g_writeDataNum-1;
+		m_col:=5;	
+		
+		IF (slaveArmFlag=TRUE) THEN
+			g_pcmdDHJntPosD2:=ADR(g_frictionTest.m_cmdDHJntPosD2); g_pcmdDHJntPosD3:=ADR(g_frictionTest.m_cmdDHJntPosD3);
+			g_pJntPosD2:=ADR(g_frictionTest.m_jntPosD2); g_pJntPosD3:=ADR(g_frictionTest.m_jntPosD3);
+			g_pJntTrqD2:=ADR(g_frictionTest.m_jntTrqD2);  g_pJntTrqD3:=ADR(g_frictionTest.m_jntTrqD3);
+		ELSE
+			g_pcmdDHJntPosD2:=ADR(g_frictionTestSetup.m_cmdDHJntPosD2); g_pcmdDHJntPosD3:=ADR(g_frictionTestSetup.m_cmdDHJntPosD3);
+			g_pJntPosD2:=ADR(g_frictionTestSetup.m_jntPosD2); g_pJntPosD3:=ADR(g_frictionTestSetup.m_jntPosD3);
+			g_pJntTrqD2:=ADR(g_frictionTestSetup.m_jntTrqD2);  g_pJntTrqD3:=ADR(g_frictionTestSetup.m_jntTrqD3);
+		END_IF				
+		
+		m_cmdDHJntPosD2_data:=g_pcmdDHJntPosD2^;	m_cmdDHJntPosD3_data:=g_pcmdDHJntPosD3^;
+		m_JntPosD2_Data:=g_pJntPosD2^;	m_JntPosD3_Data:=g_pJntPosD3^;
+		m_JntTrqD2_Data:=g_pJntTrqD2^;	m_JntTrqD3_Data:=g_pJntTrqD3^;
+		
+		FOR i:=0 TO m_col BY 1 DO
+			FOR j:=0 TO m_row BY 1 DO
+				m_cmdDHjntPosD2[j,i]:=m_cmdDHJntPosD2_data[m_armSelect,i+1,j+1]; m_cmdDHjntPosD3[j,i]:=m_cmdDHJntPosD3_data[m_armSelect,i+1,j+1];
+				m_jntPosD2[j,i]:=m_JntPosD2_Data[m_armSelect,i+1,j+1]; m_jntPosD3[j,i]:=m_JntPosD3_Data[m_armSelect,i+1,j+1];
+				m_jntTrqD2[j,i]:=m_JntTrqD2_Data[m_armSelect,i+1,j+1]; m_jntTrqD3[j,i]:=m_JntTrqD3_Data[m_armSelect,i+1,j+1];
+			END_FOR
+		END_FOR
+		
+		m_fileId:=0;
+		m_time:=0;
+		m_writeStep:=10;
+	
+		
+	10: //enable
+		m_fileId:=m_fileId+1;
+		IF (m_fileId=1) THEN
+			sFileName:='C:\file1.txt';
+			m_data:=m_jntPosD2;
+		ELSIF (m_fileId=2) THEN
+			sFileName:='C:\file2.txt';
+			m_data:=m_jntPosD3;
+		ELSIF (m_fileId=3) THEN
+			sFileName:='C:\file3.txt';
+			m_data:=m_jntTrqD2;
+		ELSIF (m_fileId=4) THEN
+			sFileName:='C:\file4.txt';
+			m_data:=m_jntTrqD3;
+		ELSIF (m_fileId=5) THEN
+			sFileName:='C:\file5.txt';
+			m_data:=m_cmdDHjntPosD2;
+		ELSIF (m_fileId=6) THEN
+			sFileName:='C:\file6.txt';
+			m_data:=m_cmdDHjntPosD3;
+		END_IF	
+		m_testDataWriteEnable:=TRUE;
+		m_writeStep:=20;
+		
+				
+	20: //write the joint position
+		m_FB_CSV_TextMode_ReadWrite1(	sNetId:= '', 	sFileName:=sFileName , 	bBusy=> , 	bError=> , 	nErrorID=> , 	nErrorState=> );
+		m_FB_CSV_TextMode_ReadWrite1.M_WriteCsv(	bExecute:=m_testDataWriteEnable , 	nMode:= FOPEN_MODEWRITE OR FOPEN_MODETEXT, 
+			ptPointer:=ADR(m_data) , 	nRows:= INT_TO_UINT(m_row), 	nColumns:=INT_TO_UINT(m_col) );
+			
+		//timer
+		m_time:=m_time+0.010;
+		
+		IF (NOT m_FB_CSV_TextMode_ReadWrite1.bBusy) THEN
+			m_FB_CSV_TextMode_ReadWrite1.M_WriteCsv(	bExecute:=FALSE , 	nMode:= FOPEN_MODEWRITE OR FOPEN_MODETEXT, 
+			ptPointer:=ADR(m_data) , 	nRows:= INT_TO_UINT(m_row), 	nColumns:=INT_TO_UINT(m_col) );
+			m_testDataWriteEnable:=FALSE;
+			m_writeStep:=30;
+			m_time:=0;
+		END_IF
+	
+		
+	30: //enable
+		m_time:=m_time+0.010;
+		IF (m_time>1) THEN
+			m_time:=0;
+			
+			IF (m_fileId>=6) THEN
+				m_writeStep:=40;
+			ELSE
+				m_testDataWriteEnable:=TRUE;
+				m_writeStep:=10;
+			END_IF			
+		END_IF		
+		
+
+	40: //end
+		m_writeFinished:=TRUE;
+		m_writeStep:=-1;
+
+		
+	-1: //
+END_CASE
+
+
+//data write flag
+i:=LIMIT(1,m_armSelect,4);
+IF (m_writeStep=10) THEN	
+	IF (slaveArmFlag=TRUE) THEN
+		g_frictionTest.m_duringWriteData[i]:=TRUE;
+	ELSE
+		g_frictionTestSetup.m_duringWriteData[i]:=TRUE;
+	END_IF	
+ELSIF (m_writeStep=40) THEN
+	g_frictionTest.m_duringWriteData[i]:=FALSE;
+	g_frictionTestSetup.m_duringWriteData[i]:=FALSE;
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="writePrecisionData" Id="{029cd9d3-0755-4d4e-9858-76805cdd3ded}">
+      <Declaration><![CDATA[METHOD writePrecisionData : BOOL
+VAR_INPUT
+	
+END_VAR
+VAR
+	i,j:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+FOR i:=1 TO 4 BY 1 DO
+	IF (g_motionTest.m_writeData[i]=TRUE) THEN
+		g_motionTest.m_writeData[i]:=FALSE;
+		m_armMatId:=i;
+		m_matWriteStep:=0;
+	END_IF
+END_FOR
+
+
+CASE m_matWriteStep OF
+	0: //prepare for the data
+		m_pfrontPose:=ADR(g_motionTest.m_frontPose[m_armMatId]);
+		m_frontPose:=m_pfrontPose^;
+		
+		//m_frontPose:=g_motionTest.m_frontPose[m_armMatId];
+		FOR i:=1 TO 3 BY 1 DO			
+			FOR j:=1 TO 3 BY 1 DO
+				m_matrixData[i-1,j-1]:=m_frontPose.m_rot[i,j];
+			END_FOR
+		END_FOR
+		
+		FOR i:=1 TO 3 BY 1 DO
+			m_matrixData[i-1,4-1]:=m_frontPose.m_pos[i];
+		END_FOR
+		m_matrixData[4-1,4-1]:=1;
+		m_matWriteStep:=10;
+		
+		
+	10:
+		IF (m_armMatId=1) THEN
+			sFileName:='C:\arm1.txt';
+		ELSIF (m_armMatId=2) THEN
+			sFileName:='C:\arm2.txt';
+		ELSIF (m_armMatId=3) THEN
+			sFileName:='C:\arm3.txt';
+		ELSIF (m_armMatId=4) THEN
+			sFileName:='C:\arm4.txt';
+		END_IF
+		
+		m_row:=3;
+		m_col:=3;
+		m_time:=0;
+		m_matWriteStep:=20;
+		
+		
+	20: //write the joint position
+		m_FB_CSV_TextMode_ReadWrite1(	sNetId:= '', 	sFileName:=sFileName , 	bBusy=> , 	bError=> , 	nErrorID=> , 	nErrorState=> );
+		m_FB_CSV_TextMode_ReadWrite1.M_WriteCsv(	bExecute:=TRUE , 	nMode:= FOPEN_MODEWRITE OR FOPEN_MODETEXT, 
+			ptPointer:=ADR(m_matrixData) , 	nRows:= INT_TO_UINT(m_row), 	nColumns:=INT_TO_UINT(m_col) );
+			
+		//timer
+		m_time:=m_time+0.010;
+		
+		IF (NOT m_FB_CSV_TextMode_ReadWrite1.bBusy) THEN
+			m_FB_CSV_TextMode_ReadWrite1.M_WriteCsv(	bExecute:=FALSE , 	nMode:= FOPEN_MODEWRITE OR FOPEN_MODETEXT, 
+			ptPointer:=ADR(m_matrixData) , 	nRows:= INT_TO_UINT(m_row), 	nColumns:=INT_TO_UINT(m_col) );
+			m_matWriteStep:=30;
+			m_time:=0;
+		END_IF
+	
+	
+	30: //end
+		m_matWriteStep:=-1;
+
+		
+	-1: //
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="MainTestPart">
+      <LineId Id="215" Count="7" />
+      <LineId Id="284" Count="0" />
+      <LineId Id="223" Count="0" />
+      <LineId Id="154" Count="0" />
+      <LineId Id="347" Count="2" />
+      <LineId Id="414" Count="0" />
+      <LineId Id="412" Count="1" />
+      <LineId Id="283" Count="0" />
+    </LineIds>
+    <LineIds Name="MainTestPart.cartInfoUpdate">
+      <LineId Id="32" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="42" Count="1" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="55" Count="1" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="88" Count="4" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="103" Count="2" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="107" Count="2" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="137" Count="4" />
+      <LineId Id="133" Count="0" />
+    </LineIds>
+    <LineIds Name="MainTestPart.controlSignalAnalysis">
+      <LineId Id="187" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="36" Count="3" />
+      <LineId Id="132" Count="0" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="43" Count="1" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="45" Count="2" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="50" Count="2" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="62" Count="1" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="76" Count="1" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="67" Count="1" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="82" Count="1" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="109" Count="5" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="92" Count="1" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="186" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="165" Count="5" />
+      <LineId Id="188" Count="0" />
+      <LineId Id="171" Count="11" />
+      <LineId Id="189" Count="0" />
+      <LineId Id="183" Count="2" />
+      <LineId Id="162" Count="1" />
+      <LineId Id="190" Count="5" />
+      <LineId Id="204" Count="1" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="80" Count="0" />
+    </LineIds>
+    <LineIds Name="MainTestPart.dataWriteExp">
+      <LineId Id="39" Count="1" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="33" Count="4" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="38" Count="0" />
+    </LineIds>
+    <LineIds Name="MainTestPart.infoUpdate">
+      <LineId Id="18" Count="0" />
+      <LineId Id="7" Count="1" />
+      <LineId Id="30" Count="2" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="35" Count="2" />
+      <LineId Id="45" Count="1" />
+      <LineId Id="48" Count="4" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="19" Count="0" />
+    </LineIds>
+    <LineIds Name="MainTestPart.setupInfoUpdate">
+      <LineId Id="31" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="45" Count="1" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="67" Count="1" />
+      <LineId Id="41" Count="1" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="57" Count="1" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="88" Count="7" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="101" Count="2" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="107" Count="2" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="135" Count="4" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="MainTestPart.slaveInfoUpdate">
+      <LineId Id="18" Count="1" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="186" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="66" Count="1" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="39" Count="1" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="147" Count="0" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="131" Count="2" />
+      <LineId Id="135" Count="2" />
+      <LineId Id="159" Count="0" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="155" Count="0" />
+      <LineId Id="148" Count="2" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="207" Count="0" />
+      <LineId Id="152" Count="2" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="227" Count="3" />
+      <LineId Id="181" Count="0" />
+      <LineId Id="235" Count="0" />
+      <LineId Id="231" Count="0" />
+    </LineIds>
+    <LineIds Name="MainTestPart.uiDataForPrecision">
+      <LineId Id="190" Count="0" />
+      <LineId Id="261" Count="2" />
+      <LineId Id="188" Count="1" />
+      <LineId Id="142" Count="1" />
+      <LineId Id="191" Count="0" />
+      <LineId Id="144" Count="0" />
+      <LineId Id="275" Count="0" />
+      <LineId Id="145" Count="0" />
+      <LineId Id="147" Count="0" />
+      <LineId Id="149" Count="0" />
+      <LineId Id="192" Count="1" />
+      <LineId Id="151" Count="0" />
+      <LineId Id="158" Count="1" />
+      <LineId Id="178" Count="0" />
+      <LineId Id="195" Count="0" />
+      <LineId Id="177" Count="0" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="264" Count="2" />
+      <LineId Id="179" Count="0" />
+      <LineId Id="196" Count="0" />
+      <LineId Id="165" Count="6" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="240" Count="0" />
+    </LineIds>
+    <LineIds Name="MainTestPart.updateInstrument">
+      <LineId Id="6" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="7" Count="2" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="MainTestPart.writeArmTestData">
+      <LineId Id="19" Count="0" />
+      <LineId Id="291" Count="0" />
+      <LineId Id="331" Count="0" />
+      <LineId Id="292" Count="3" />
+      <LineId Id="338" Count="0" />
+      <LineId Id="296" Count="0" />
+      <LineId Id="323" Count="0" />
+      <LineId Id="332" Count="0" />
+      <LineId Id="327" Count="3" />
+      <LineId Id="339" Count="0" />
+      <LineId Id="324" Count="0" />
+      <LineId Id="297" Count="0" />
+      <LineId Id="310" Count="0" />
+      <LineId Id="31" Count="1" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="155" Count="0" />
+      <LineId Id="154" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="33" Count="2" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="335" Count="0" />
+      <LineId Id="342" Count="2" />
+      <LineId Id="340" Count="0" />
+      <LineId Id="345" Count="1" />
+      <LineId Id="341" Count="0" />
+      <LineId Id="337" Count="0" />
+      <LineId Id="334" Count="0" />
+      <LineId Id="277" Count="0" />
+      <LineId Id="224" Count="0" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="228" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="278" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="132" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="223" Count="0" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="195" Count="0" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="159" Count="0" />
+      <LineId Id="162" Count="1" />
+      <LineId Id="171" Count="0" />
+      <LineId Id="165" Count="1" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="167" Count="0" />
+      <LineId Id="169" Count="0" />
+      <LineId Id="173" Count="0" />
+      <LineId Id="168" Count="0" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="174" Count="0" />
+      <LineId Id="280" Count="4" />
+      <LineId Id="279" Count="0" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="153" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="179" Count="0" />
+      <LineId Id="215" Count="0" />
+      <LineId Id="213" Count="1" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="176" Count="0" />
+      <LineId Id="178" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="216" Count="0" />
+      <LineId Id="51" Count="1" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="180" Count="0" />
+      <LineId Id="183" Count="1" />
+      <LineId Id="188" Count="2" />
+      <LineId Id="192" Count="2" />
+      <LineId Id="191" Count="0" />
+      <LineId Id="185" Count="0" />
+      <LineId Id="150" Count="0" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="106" Count="1" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="248" Count="0" />
+      <LineId Id="265" Count="2" />
+      <LineId Id="258" Count="0" />
+      <LineId Id="353" Count="0" />
+      <LineId Id="356" Count="0" />
+      <LineId Id="358" Count="1" />
+      <LineId Id="357" Count="0" />
+      <LineId Id="268" Count="1" />
+      <LineId Id="360" Count="0" />
+      <LineId Id="262" Count="0" />
+      <LineId Id="259" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="MainTestPart.writePrecisionData">
+      <LineId Id="16" Count="0" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="78" Count="1" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="83" Count="1" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="6" Count="1" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="100" Count="1" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="30" Count="2" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="36" Count="3" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="70" Count="2" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="61" Count="5" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="68" Count="1" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="41" Count="11" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="23" Count="3" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

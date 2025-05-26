@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_interactUI" Id="{b6fc928c-802a-4bca-a5ad-5de470837f32}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 VAR_GLOBAL
@@ -34,11 +34,17 @@ VAR_GLOBAL
 	//instrument information
 	g_instruInformatiom :ARRAY[1..4] OF  ST_instruInfomation;
 	
-	//UPS power supply mode : line voltage supply : 1 , battery powered : 2
-	g_powerSupplyModeUPS : UINT;
+	//UPS power supply mode : line voltage supply : 0 , battery powered : 1
+	g_powerSupplyModeUPS AT %I*: UDINT;
 	
 	//UPS dump energy
-	g_dumpEnergyUPS : UINT:=51;
+	g_dumpEnergyUPS  AT %I*: UDINT;
+	
+	//communation check for UPS
+	g_upsComStatus  AT %I*: UDINT;
+	
+	//turnoff ups
+	g_upsTurnOff AT %Q*:  UDINT;
 	
 	//ui shutdown button enable
 	g_uiPowerOffEnable : BOOL;
@@ -117,6 +123,16 @@ VAR_GLOBAL
 	
 	//instrument max used record
 	g_InstruSeriesRecord:ARRAY [1..100] OF ULINT;
+	
+	//endoscope turn over enable
+	g_scopeTurnOverEnable : BOOL:=TRUE;
+	
+	//robot system operates sound 
+	g_systemVoice : INT;
+	
+	// instrument use duration
+	g_instruUseDuration :ARRAY[1..4] OF Vec4d;
+	g_masterCmdDuration :ARRAY[1..4] OF Vec4d;
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

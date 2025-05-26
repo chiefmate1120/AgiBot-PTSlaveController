@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_InfoUpdate" Id="{3888b310-418a-485e-b5b2-bc2e91a6a475}">
+    <Declaration><![CDATA[TYPE ST_InfoUpdate :
+STRUCT		
+	//slave arm joint information
+	m_slaveJntInfo:ARRAY[1..g_sArmNum,1..g_sJntNum] OF ST_JntInfo;
+	
+	//setup arm joint information
+	m_setupJntInfo:ARRAY[1..g_sArmNum,1..g_setupJntNum] OF ST_JntInfo;
+	
+	//cart joint information
+	m_cartJntInfo:ARRAY[1..g_cartJntNum] OF ST_JntInfo;
+	
+	//slave arm information
+	m_slaveInfo:ARRAY[1..g_sArmNum] OF ST_SlaveInfo;
+	
+	//setup arm information
+	m_setupInfo:ARRAY[1..g_sArmNum] OF ST_SetupInfo;
+	
+	//cart information
+	m_cartInfo:ST_CartInfo;
+END_STRUCT
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

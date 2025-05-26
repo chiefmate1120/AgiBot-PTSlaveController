@@ -65,7 +65,7 @@ vecSub(i_targetJntPos, i_startJntPos, m_moveDir);
 m_moveDistance := norm(m_moveDir);
 
 IF(m_moveDistance<g_smallNum) THEN
-	vecMultiNum(g_onesVec7d,1/8, m_moveDir);;
+	vecMultiNum(g_onesVec8d,1/8, m_moveDir);
 ELSE
 	vecMultiNum( m_moveDir,1/m_moveDistance, m_moveDir);
 END_IF
@@ -74,7 +74,7 @@ END_IF
 maxV:=g_largeNum;
 maxA:=g_largeNum;
 maxJ:=g_largeNum;
-FOR i :=1 TO 7 DO 
+FOR i :=1 TO 8 DO 
 	IF ABS(m_moveDir[i])>g_smallNum THEN
 		maxV := MIN (maxV, ABS(i_maxJntVel[i]/m_moveDir[i]));
 		maxA := MIN (maxA, ABS(i_maxJntAcc[i]/m_moveDir[i]));
