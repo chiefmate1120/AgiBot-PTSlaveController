@@ -6,7 +6,7 @@
     <Node>
       <Title>cart</Title>
       <Expanded>False</Expanded>
-      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\MassProductionVersion\AgiBot-MPSlaveController\Scope-SlaveController\cart.tcscopex</FileName>
+      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Repository\RobotMaintenanceSoftware\AgiBot-PTSlaveController\Scope-SlaveController\cart.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
@@ -284,7 +284,7 @@
     <Node>
       <Title>SetupGravityCaliData</Title>
       <Expanded>False</Expanded>
-      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\MassProductionVersion\AgiBot-MPSlaveController\Scope-SlaveController\SetupGravityCaliData.tcscopex</FileName>
+      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Repository\RobotMaintenanceSoftware\AgiBot-PTSlaveController\Scope-SlaveController\SetupGravityCaliData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
@@ -792,7 +792,7 @@
     <Node>
       <Title>SlaveGravityCaliData</Title>
       <Expanded>False</Expanded>
-      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\MassProductionVersion\AgiBot-MPSlaveController\Scope-SlaveController\SlaveGravityCaliData.tcscopex</FileName>
+      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Repository\RobotMaintenanceSoftware\AgiBot-PTSlaveController\Scope-SlaveController\SlaveGravityCaliData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
@@ -1348,7 +1348,7 @@
     <Node>
       <Title>SlaveJointData</Title>
       <Expanded>False</Expanded>
-      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\MassProductionVersion\AgiBot-MPSlaveController\Scope-SlaveController\SlaveJointData.tcscopex</FileName>
+      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Repository\RobotMaintenanceSoftware\AgiBot-PTSlaveController\Scope-SlaveController\SlaveJointData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
