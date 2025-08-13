@@ -1,10 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="runTimeLogger" Id="{ff07c5c5-2efa-494c-864e-8516ee691b8f}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM runTimeLogger
 VAR
+	m_dirCreate :FB_CreateDir;
+	
 	// info logger variables
-	m_infoInitStep :INT :=0;
+	m_infoInitStep :INT :=-2;
 	m_infoFileName :STRING;
 	m_infoFileOpen : FB_FileOpen;
     m_infoFileClose : FB_FileClose;
@@ -27,24 +29,23 @@ VAR
 	m_debugStream : ARRAY[1..128 *GVL_RunTimeLogger.g_debugLogBufferSize] OF BYTE;
 	m_debugStreamLen :DINT;
 	
-	m_stopLogStep :INT := 0;
+	m_stopInfoStep :INT := 0;
+	m_stopDebugStep :INT := 0;
 
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[GVL_RunTimeLogger.g_localSystemTime();
 
-// stop log
-IF GVL_RunTimeLogger.g_stopLogFlag THEN
-	stopLog();
-	RETURN;
-END_IF
-
 // info logger
-IF NOT(GVL_RunTimeLogger.g_infoLogReady) THEN
-	infoInit();
+IF GVL_RunTimeLogger.g_enableInfoFlag THEN
+	IF NOT(GVL_RunTimeLogger.g_infoLogReady) THEN
+		infoInit();
+	ELSE
+		infoLog();
+	END_IF
 ELSE
-	infoLog();
+	stopInfoLog();
 END_IF
 
 // debug logger
@@ -54,6 +55,8 @@ IF GVL_RunTimeLogger.g_enableDebugLog THEN
 	ELSE
 		debugLog();
 	END_IF
+ELSE
+	stopDebugLog();
 END_IF
 ]]></ST>
     </Implementation>
@@ -105,12 +108,12 @@ CASE i_data.m_dataType OF
 			END_FOR
 		// take data as vector
 		ELSE
-			dataEncode:='[';
+			dataEncode:=' ';
 			FOR i:=1 TO arraySize DO
 				dataEncode := CONCAT(dataEncode, LREAL_TO_STRING(i_data.m_data.m_array[i]));
 				dataEncode := CONCAT(dataEncode, ' ');
 			END_FOR
-			dataEncode := CONCAT(dataEncode, ']');
+//			dataEncode := CONCAT(dataEncode, ']');
 		END_IF
 	ELSE
 		RETURN;
@@ -150,16 +153,7 @@ CASE m_debugInitStep OF
 		m_debugErrId :=0;
 		m_debugFileHandle :=0;
 		// open debug file
-		m_debugFileName:= CONCAT ('C:\TwinCAT\Log\debug_' ,WORD_TO_STRING(GVL_RunTimeLogger.g_localSystemTime.systemTime.wYear));
-		m_debugFileName:= CONCAT(m_debugFileName,'-');
-		m_debugFileName:= CONCAT (m_debugFileName ,WORD_TO_STRING(GVL_RunTimeLogger.g_localSystemTime.systemTime.wMonth));
-		m_debugFileName:= CONCAT(m_debugFileName,'-');
-		m_debugFileName:= CONCAT (m_debugFileName ,WORD_TO_STRING(GVL_RunTimeLogger.g_localSystemTime.systemTime.wDay));
-		m_debugFileName:= CONCAT(m_debugFileName,'-');
-		m_debugFileName:= CONCAT (m_debugFileName ,WORD_TO_STRING(GVL_RunTimeLogger.g_localSystemTime.systemTime.wHour));
-		m_debugFileName:= CONCAT(m_debugFileName,'-');
-		m_debugFileName:= CONCAT (m_debugFileName ,WORD_TO_STRING(GVL_RunTimeLogger.g_localSystemTime.systemTime.wMinute));
-		m_debugFileName:= CONCAT(m_debugFileName,'.txt');
+		m_debugFileName:= CONCAT ('C:\Robot\Log\' ,GVL_RunTimeLogger.g_debugLogFileName);
 		
 		m_debugFileOpen( bExecute := FALSE ); 
 		m_debugFileOpen( sPathName := m_debugFileName,  nMode := FOPEN_MODEWRITE OR FOPEN_MODETEXT,  ePath := PATH_GENERIC, bExecute := TRUE ); 
@@ -243,6 +237,15 @@ IF NOT(GVL_RunTimeLogger.g_localSystemTime.bValid) THEN
 END_IF
 
 CASE m_infoInitStep OF
+	-2: // create log directory
+		m_dirCreate(bExecute := FALSE);
+		m_dirCreate( sPathName := 'C:\Robot\Log\', ePath := PATH_GENERIC, bExecute := TRUE );
+		m_infoInitStep := -1;
+	-1:
+		m_dirCreate(bExecute := FALSE);
+		IF NOT m_dirCreate.bBusy THEN
+			m_infoInitStep := 0;
+		END_IF
 	0: // init
 		GVL_RunTimeLogger.g_infoLogBufferInPtr := 1;
 		GVL_RunTimeLogger.g_infoLogBufferOutPtr := 1;
@@ -250,7 +253,7 @@ CASE m_infoInitStep OF
 		m_infoErrId :=0;
 		m_infoFileHandle :=0;
 		// open info file
-		m_infoFileName:= CONCAT ('C:\TwinCAT\Log\log_' ,WORD_TO_STRING(GVL_RunTimeLogger.g_localSystemTime.systemTime.wYear));
+		m_infoFileName:= CONCAT ('C:\Robot\Log\log_' ,WORD_TO_STRING(GVL_RunTimeLogger.g_localSystemTime.systemTime.wYear));
 		m_infoFileName:= CONCAT(m_infoFileName,'-');
 		m_infoFileName:= CONCAT (m_infoFileName ,WORD_TO_STRING(GVL_RunTimeLogger.g_localSystemTime.systemTime.wMonth));
 		m_infoFileName:= CONCAT(m_infoFileName,'-');
@@ -351,108 +354,98 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="stopLog" Id="{0a5bc530-ea93-4a5b-b0eb-03a2c3dff4a2}">
-      <Declaration><![CDATA[METHOD stopLog : BOOL
+    <Method Name="stopDebugLog" Id="{9a5e7435-f780-4efa-bb94-a0e60e4b33e9}">
+      <Declaration><![CDATA[METHOD stopDebugLog : BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[GVL_RunTimeLogger.g_infoLogReady :=FALSE;
-GVL_RunTimeLogger.g_debugLogReady :=FALSE;
-m_infoInitStep := 0;
+        <ST><![CDATA[GVL_RunTimeLogger.g_debugLogReady :=FALSE;
 m_debugInitStep := 0;
 
-CASE m_stopLogStep OF 
+CASE m_stopDebugStep OF 
  
 	0:  //Close file 
-	 	IF m_infoFileHandle <> 0 THEN
-			m_infoFileClose( bExecute := FALSE ); 
-          	m_infoFileClose( hFile:=m_infoFileHandle, bExecute:=TRUE ); 
-			m_stopLogStep:=1;
-		END_IF
 		IF m_debugFileHandle <> 0 THEN
 			m_debugFileClose( bExecute := FALSE ); 
           	m_debugFileClose( hFile:=m_debugFileHandle, bExecute:=TRUE );
-			m_stopLogStep:=1; 
+			m_stopDebugStep:=1; 
 		END_IF
 	1: 
-		m_infoFileClose( bExecute := FALSE );
-		m_debugFileClose( bExecute := FALSE );  
-          IF NOT m_infoFileClose.bBusy THEN 
-               IF m_infoFileClose.bError THEN 
-                    m_infoErrId := m_infoFileClose.nErrId; 
-                    m_infoErrFlag := TRUE; 
-               END_IF 
-               m_stopLogStep := 2; 
-          END_IF 
-	2: 
-		m_infoFileClose( bExecute := FALSE );
 		m_debugFileClose( bExecute := FALSE );  
           IF NOT m_debugFileClose.bBusy THEN 
                IF m_debugFileClose.bError THEN 
                     m_infoErrId := m_debugFileClose.nErrId; 
                     m_infoErrFlag := TRUE; 
                END_IF 
-               m_stopLogStep := 3; 
+               m_stopDebugStep := 2; 
           END_IF 
  
-	3:
-        m_infoFileHandle := 0; 
+	2:
 		m_debugFileHandle := 0;
-		m_stopLogStep := 0;
+		m_stopDebugStep := 0;
+ 
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="stopInfoLog" Id="{0a5bc530-ea93-4a5b-b0eb-03a2c3dff4a2}">
+      <Declaration><![CDATA[METHOD stopInfoLog : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[GVL_RunTimeLogger.g_infoLogReady :=FALSE;
+m_infoInitStep := 0;
+
+CASE m_stopInfoStep OF 
+ 
+	0:  //Close file 
+	 	IF m_infoFileHandle <> 0 THEN
+			m_infoFileClose( bExecute := FALSE ); 
+          	m_infoFileClose( hFile:=m_infoFileHandle, bExecute:=TRUE ); 
+			m_stopInfoStep:=1;
+		END_IF
+	1: 
+		m_infoFileClose( bExecute := FALSE ); 
+          IF NOT m_infoFileClose.bBusy THEN 
+               IF m_infoFileClose.bError THEN 
+                    m_infoErrId := m_infoFileClose.nErrId; 
+                    m_infoErrFlag := TRUE; 
+               END_IF 
+               m_stopInfoStep := 2; 
+          END_IF 
+ 
+	2:
+        m_infoFileHandle := 0; 
+		m_stopInfoStep := 0;
  
 END_CASE]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="runTimeLogger">
       <LineId Id="31" Count="0" />
-      <LineId Id="357" Count="0" />
-      <LineId Id="356" Count="0" />
-      <LineId Id="358" Count="1" />
-      <LineId Id="361" Count="0" />
-      <LineId Id="360" Count="0" />
       <LineId Id="234" Count="0" />
       <LineId Id="230" Count="0" />
+      <LineId Id="395" Count="0" />
       <LineId Id="229" Count="0" />
       <LineId Id="231" Count="0" />
       <LineId Id="237" Count="0" />
       <LineId Id="310" Count="0" />
       <LineId Id="232" Count="0" />
+      <LineId Id="398" Count="1" />
       <LineId Id="312" Count="0" />
+      <LineId Id="397" Count="0" />
       <LineId Id="311" Count="0" />
       <LineId Id="313" Count="0" />
       <LineId Id="316" Count="3" />
-      <LineId Id="314" Count="1" />
+      <LineId Id="314" Count="0" />
+      <LineId Id="401" Count="1" />
+      <LineId Id="315" Count="0" />
       <LineId Id="32" Count="0" />
     </LineIds>
     <LineIds Name="runTimeLogger.dataEncode">
-      <LineId Id="178" Count="0" />
-      <LineId Id="105" Count="1" />
-      <LineId Id="150" Count="0" />
-      <LineId Id="110" Count="1" />
-      <LineId Id="113" Count="1" />
-      <LineId Id="116" Count="1" />
-      <LineId Id="119" Count="1" />
-      <LineId Id="122" Count="1" />
-      <LineId Id="125" Count="1" />
-      <LineId Id="128" Count="0" />
-      <LineId Id="169" Count="0" />
-      <LineId Id="151" Count="1" />
-      <LineId Id="179" Count="0" />
-      <LineId Id="158" Count="4" />
-      <LineId Id="171" Count="1" />
-      <LineId Id="174" Count="1" />
-      <LineId Id="173" Count="0" />
-      <LineId Id="153" Count="0" />
-      <LineId Id="155" Count="1" />
-      <LineId Id="180" Count="0" />
-      <LineId Id="166" Count="2" />
-      <LineId Id="157" Count="0" />
-      <LineId Id="177" Count="0" />
-      <LineId Id="154" Count="0" />
-      <LineId Id="145" Count="1" />
-      <LineId Id="103" Count="0" />
-      <LineId Id="24" Count="13" />
+      <LineId Id="192" Count="56" />
+      <LineId Id="37" Count="0" />
     </LineIds>
     <LineIds Name="runTimeLogger.debugInit">
       <LineId Id="42" Count="0" />
@@ -460,7 +453,8 @@ END_CASE]]></ST>
       <LineId Id="43" Count="0" />
       <LineId Id="40" Count="0" />
       <LineId Id="44" Count="0" />
-      <LineId Id="47" Count="20" />
+      <LineId Id="47" Count="6" />
+      <LineId Id="63" Count="4" />
       <LineId Id="71" Count="6" />
       <LineId Id="80" Count="0" />
       <LineId Id="78" Count="1" />
@@ -485,6 +479,12 @@ END_CASE]]></ST>
       <LineId Id="30" Count="2" />
       <LineId Id="44" Count="0" />
       <LineId Id="40" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="114" Count="1" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="116" Count="2" />
       <LineId Id="45" Count="0" />
       <LineId Id="50" Count="17" />
       <LineId Id="49" Count="0" />
@@ -526,24 +526,32 @@ END_CASE]]></ST>
       <LineId Id="87" Count="3" />
       <LineId Id="5" Count="0" />
     </LineIds>
-    <LineIds Name="runTimeLogger.stopLog">
-      <LineId Id="5" Count="1" />
-      <LineId Id="43" Count="1" />
+    <LineIds Name="runTimeLogger.stopDebugLog">
+      <LineId Id="6" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="8" Count="3" />
+      <LineId Id="37" Count="2" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="47" Count="6" />
+      <LineId Id="25" Count="2" />
+      <LineId Id="56" Count="1" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="runTimeLogger.stopInfoLog">
+      <LineId Id="5" Count="0" />
+      <LineId Id="43" Count="0" />
       <LineId Id="8" Count="3" />
       <LineId Id="32" Count="1" />
       <LineId Id="35" Count="0" />
       <LineId Id="40" Count="0" />
       <LineId Id="34" Count="0" />
-      <LineId Id="37" Count="2" />
-      <LineId Id="41" Count="0" />
-      <LineId Id="36" Count="0" />
-      <LineId Id="15" Count="1" />
-      <LineId Id="54" Count="0" />
-      <LineId Id="17" Count="5" />
+      <LineId Id="15" Count="7" />
       <LineId Id="24" Count="0" />
-      <LineId Id="45" Count="8" />
-      <LineId Id="25" Count="3" />
-      <LineId Id="56" Count="1" />
+      <LineId Id="26" Count="2" />
+      <LineId Id="57" Count="0" />
       <LineId Id="31" Count="0" />
       <LineId Id="7" Count="0" />
     </LineIds>

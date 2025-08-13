@@ -56,193 +56,194 @@ END_VAR
       <Implementation>
         <ST><![CDATA[FOR i:= 1 TO 4 BY 1 DO
 	IF ErrWritingFalg[i] = FALSE THEN
-	j:=1;
-	//状态机
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_FMTSTR(i_setupStatus.m_armState[i],0, TRUE);  gCSV_Buffer[i].aBuffer[1][j]:='setupArmMachine';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_FMTSTR(i_slaveStatus.m_armState[i],0, TRUE);  gCSV_Buffer[i].aBuffer[1][j]:='slaveArmMachine';
+		j:=1;
+		//状态机
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_FMTSTR(i_setupStatus.m_armState[i],0, TRUE);  gCSV_Buffer[i].aBuffer[1][j]:='setupArmMachine';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_FMTSTR(i_slaveStatus.m_armState[i],0, TRUE);  gCSV_Buffer[i].aBuffer[1][j]:='slaveArmMachine';
+		
+		//link pos
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_curLinkPos[i][1]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ1';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_curLinkPos[i][2]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ2';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_curLinkPos[i][3]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ3';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_curLinkPos[i][4]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ4';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_curLinkPos[i][5]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ5';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curLinkPos[i][1]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ6';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curLinkPos[i][2]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ7';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curLinkPos[i][3]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ8';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curLinkPos[i][4]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ9';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curLinkPos[i][5]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ10';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curLinkPos[i][6]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ11';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curLinkPos[i][7]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ12';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curLinkPos[i][8]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ13';
+		
+		//motor pos / curJntPos
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_curJntPos[i][3]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ3';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_curJntPos[i][4]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ4';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_curJntPos[i][5]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ5';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntPos[i][1]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ6';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntPos[i][2]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ7';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntPos[i][3]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ8';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntPos[i][4]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ9';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntPos[i][5]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ10';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntPos[i][6]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ11';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntPos[i][7]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ12';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntPos[i][8]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ13';
+		
+		
+		//target joint position 
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_cmdJntPos[i][3]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ3';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_cmdJntPos[i][4]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ4';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_cmdJntPos[i][5]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ5';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_cmdJntPos[i][1]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ6';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_cmdJntPos[i][2]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ7';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_cmdJntPos[i][3]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ8';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_cmdJntPos[i][4]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ9';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_cmdJntPos[i][5]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ10';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_cmdJntPos[i][6]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ11';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_cmdJntPos[i][7]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ12';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_cmdJntPos[i][8]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ13';
+		
+		
+		//current joint velocity
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_curJntVel[i][3]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntVelJ3';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_curJntVel[i][4]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntVelJ4';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_curJntVel[i][5]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntVelJ5';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntVel[i][1]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntVelJ6';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntVel[i][2]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntVelJ7';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntVel[i][3]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntVelJ8';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntVel[i][4]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntVelJ9';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntVel[i][5]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntVelJ10';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntVel[i][6]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntVelJ11';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntVel[i][7]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntVelJ12';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntVel[i][8]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntVelJ13';
+		
+		//command arm pose
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveStatus.m_masterSlavePoseError[i][4]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdArmPose4';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveStatus.m_masterSlavePoseError[i][5]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdArmPose5';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveStatus.m_masterSlavePoseError[i][6]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdArmPose6';
+		
+		//drive error word
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[3].m_driverError);  gCSV_Buffer[i].aBuffer[1][j]:='driverErrorIOJ3'; 
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[4].m_driverError);  gCSV_Buffer[i].aBuffer[1][j]:='driverErrorIOJ4'; 
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[5].m_driverError);  gCSV_Buffer[i].aBuffer[1][j]:='driverErrorIOJ5'; 
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[1].m_driverError);  gCSV_Buffer[i].aBuffer[1][j]:='driverErrorIOJ6'; 
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[2].m_driverError); gCSV_Buffer[i].aBuffer[1][j]:='driverErrorIOJ7'; 
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[3].m_driverError); gCSV_Buffer[i].aBuffer[1][j]:='driverErrorIOJ8'; 
+		
+		//Electrical Angle deviation
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[1].m_electriAngleDev);  gCSV_Buffer[i].aBuffer[1][j]:='PhieErrIOJ6';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[2].m_electriAngleDev); gCSV_Buffer[i].aBuffer[1][j]:='PhieErrIOJ7';
+		
+		
+		//link encoder IO
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[1].m_linkEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ1';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[2].m_linkEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ2';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[3].m_linkEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ3';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[4].m_linkEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ4';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[5].m_linkEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ5';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[1].m_linkEncoder);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ6';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[2].m_linkEncoder); 	gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ7';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[3].m_linkEncoder); 	gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ8';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[4].m_linkEncoder);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ9';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[5].m_linkEncoder); 	gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ10';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[6].m_linkEncoder); 	gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ11';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[7].m_linkEncoder);     gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ12';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[8].m_linkEncoder); 	gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ13';
+		
+		//motor encoder  IO
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[3].m_motorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='curMotorEncIOJ3';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[4].m_motorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='curMotorEncIOJ4';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[5].m_motorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='curMotorEncIOJ5';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[1].m_motorEncoder);   gCSV_Buffer[i].aBuffer[1][j]:='curMotorEncIOJ6';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[2].m_motorEncoder); 	gCSV_Buffer[i].aBuffer[1][j]:='curMotorEncIOJ7';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[3].m_motorEncoder); 	gCSV_Buffer[i].aBuffer[1][j]:='curMotorEncIOJ8';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[4].m_motorEncoder);   gCSV_Buffer[i].aBuffer[1][j]:='curMotorEncIOJ9';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[5].m_motorEncoder); 	gCSV_Buffer[i].aBuffer[1][j]:='curMotorEncIOJ10';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[6].m_motorEncoder); 	gCSV_Buffer[i].aBuffer[1][j]:='curMotorEncIOJ11';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[7].m_motorEncoder);   gCSV_Buffer[i].aBuffer[1][j]:='curMotorEncIOJ12';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[8].m_motorEncoder); 	gCSV_Buffer[i].aBuffer[1][j]:='curMotorEncIOJ13';
+		
+		
+		//status word IO
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[3].m_statusWord);	gCSV_Buffer[i].aBuffer[1][j]:='statusWordIOJ3';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[4].m_statusWord);	gCSV_Buffer[i].aBuffer[1][j]:='statusWordIOJ4';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[5].m_statusWord);	gCSV_Buffer[i].aBuffer[1][j]:='statusWordIOJ5';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[1].m_statusWord);		gCSV_Buffer[i].aBuffer[1][j]:='statusWordIOJ6';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[2].m_statusWord);		gCSV_Buffer[i].aBuffer[1][j]:='statusWordIOJ7';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[3].m_statusWord);		gCSV_Buffer[i].aBuffer[1][j]:='statusWordIOJ8';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[4].m_statusWord);		gCSV_Buffer[i].aBuffer[1][j]:='statusWordIOJ9';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[6].m_statusWord);		gCSV_Buffer[i].aBuffer[1][j]:='statusWordIOJ11';
+		
+		//current torque IO
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[3].m_current);  gCSV_Buffer[i].aBuffer[1][j]:='curTorqueIOJ3';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[4].m_current);  gCSV_Buffer[i].aBuffer[1][j]:='curTorqueIOJ4';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[5].m_current);  gCSV_Buffer[i].aBuffer[1][j]:='curTorqueIOJ5';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[1].m_current);  gCSV_Buffer[i].aBuffer[1][j]:='curTorqueIOJ6';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[2].m_current);  gCSV_Buffer[i].aBuffer[1][j]:='curTorqueIOJ7';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[3].m_current);  gCSV_Buffer[i].aBuffer[1][j]:='curTorqueIOJ8';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[4].m_current);  gCSV_Buffer[i].aBuffer[1][j]:='curTorqueIOJ9';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[5].m_current);  gCSV_Buffer[i].aBuffer[1][j]:='curTorqueIOJ10';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[6].m_current);  gCSV_Buffer[i].aBuffer[1][j]:='curTorqueIOJ11';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[7].m_current);  gCSV_Buffer[i].aBuffer[1][j]:='curTorqueIOJ12';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[8].m_current);  gCSV_Buffer[i].aBuffer[1][j]:='curTorqueIOJ13';
+		
+		//target torque IO
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverOutput[3].m_cmdCurrent);  gCSV_Buffer[i].aBuffer[1][j]:='cmdTorqueIOJ3';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverOutput[4].m_cmdCurrent);  gCSV_Buffer[i].aBuffer[1][j]:='cmdTorqueIOJ4';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverOutput[5].m_cmdCurrent);  gCSV_Buffer[i].aBuffer[1][j]:='cmdTorqueIOJ5';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[1].m_cmdCurrent);  gCSV_Buffer[i].aBuffer[1][j]:='cmdTorqueIOJ6';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[2].m_cmdCurrent);  gCSV_Buffer[i].aBuffer[1][j]:='cmdTorqueIOJ7';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[3].m_cmdCurrent);  gCSV_Buffer[i].aBuffer[1][j]:='cmdTorqueIOJ8';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[4].m_cmdCurrent);  gCSV_Buffer[i].aBuffer[1][j]:='cmdTorqueIOJ9';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[5].m_cmdCurrent);  gCSV_Buffer[i].aBuffer[1][j]:='cmdTorqueIOJ10';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[6].m_cmdCurrent);  gCSV_Buffer[i].aBuffer[1][j]:='cmdTorqueIOJ11';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[7].m_cmdCurrent);  gCSV_Buffer[i].aBuffer[1][j]:='cmdTorqueIOJ12';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[8].m_cmdCurrent);  gCSV_Buffer[i].aBuffer[1][j]:='cmdTorqueIOJ13';
 	
-	//link pos
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_curLinkPos[i][1]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ1';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_curLinkPos[i][2]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ2';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_curLinkPos[i][3]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ3';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_curLinkPos[i][4]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ4';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_curLinkPos[i][5]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ5';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curLinkPos[i][1]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ6';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curLinkPos[i][2]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ7';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curLinkPos[i][3]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ8';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curLinkPos[i][4]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ9';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curLinkPos[i][5]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ10';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curLinkPos[i][6]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ11';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curLinkPos[i][7]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ12';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curLinkPos[i][8]);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkPosJ13';
-	
-	//motor pos / curJntPos
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_curJntPos[i][3]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ3';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_curJntPos[i][4]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ4';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_curJntPos[i][5]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ5';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntPos[i][1]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ6';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntPos[i][2]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ7';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntPos[i][3]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ8';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntPos[i][4]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ9';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntPos[i][5]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ10';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntPos[i][6]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ11';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntPos[i][7]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ12';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntPos[i][8]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ13';
+		//target motor encoder IO
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverOutput[3].m_cmdMotorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='cmdMotorEncIOJ3';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverOutput[4].m_cmdMotorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='cmdMotorEncIOJ4';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverOutput[5].m_cmdMotorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='cmdMotorEncIOJ5';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[1].m_cmdMotorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='cmdMotorEncIOJ6';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[2].m_cmdMotorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='cmdMotorEncIOJ7';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[3].m_cmdMotorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='cmdMotorEncIOJ8';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[4].m_cmdMotorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='cmdMotorEncIOJ9';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[5].m_cmdMotorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='cmdMotorEncIOJ10';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[6].m_cmdMotorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='cmdMotorEncIOJ11';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[7].m_cmdMotorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='cmdMotorEncIOJ12';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[8].m_cmdMotorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='cmdMotorEncIOJ13';
 	
 	
-	//target joint position 
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_cmdJntPos[i][3]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ3';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_cmdJntPos[i][4]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ4';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_cmdJntPos[i][5]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ5';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_cmdJntPos[i][1]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ6';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_cmdJntPos[i][2]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ7';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_cmdJntPos[i][3]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ8';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_cmdJntPos[i][4]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ9';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_cmdJntPos[i][5]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ10';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_cmdJntPos[i][6]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ11';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_cmdJntPos[i][7]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ12';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_cmdJntPos[i][8]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ13';
+		//output motor opMode IO
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverOutput[3].m_opMode);  gCSV_Buffer[i].aBuffer[1][j]:='opModeIOJ3';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverOutput[4].m_opMode);  gCSV_Buffer[i].aBuffer[1][j]:='opModeIOJ4';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverOutput[5].m_opMode);  gCSV_Buffer[i].aBuffer[1][j]:='opModeIOJ5';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[1].m_opMode);  gCSV_Buffer[i].aBuffer[1][j]:='opModeIOJ6';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[2].m_opMode);  gCSV_Buffer[i].aBuffer[1][j]:='opModeIOJ7';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[3].m_opMode);  gCSV_Buffer[i].aBuffer[1][j]:='opModeIOJ8';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[4].m_opMode);  gCSV_Buffer[i].aBuffer[1][j]:='opModeIOJ9';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[5].m_opMode);  gCSV_Buffer[i].aBuffer[1][j]:='opModeIOJ10';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[6].m_opMode);  gCSV_Buffer[i].aBuffer[1][j]:='opModeIOJ11';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[7].m_opMode);  gCSV_Buffer[i].aBuffer[1][j]:='opModeIOJ12';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[8].m_opMode);  gCSV_Buffer[i].aBuffer[1][j]:='opModeIOJ13';
 	
+		//hall and encoder angle
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_hallAndEncoderAngle[1] AND 16#0000FFFF);  gCSV_Buffer[i].aBuffer[1][j]:='HallAngleJ6';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_hallAndEncoderAngle[2] AND 16#0000FFFF);  gCSV_Buffer[i].aBuffer[1][j]:='HallAngleJ7';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(SHR(i_safetyCheckVar[i].m_hallAndEncoderAngle[1],16) AND 16#0000FFFF);  gCSV_Buffer[i].aBuffer[1][j]:='EncoderAngleJ6';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(SHR(i_safetyCheckVar[i].m_hallAndEncoderAngle[2],16) AND 16#0000FFFF);  gCSV_Buffer[i].aBuffer[1][j]:='EncoderAngleJ7';//139
 	
-	//current joint velocity
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_curJntVel[i][3]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntVelJ3';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_curJntVel[i][4]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntVelJ4';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_setupJointData.m_curJntVel[i][5]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntVelJ5';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntVel[i][1]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntVelJ6';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntVel[i][2]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntVelJ7';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntVel[i][3]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntVelJ8';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntVel[i][4]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntVelJ9';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntVel[i][5]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntVelJ10';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntVel[i][6]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntVelJ11';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntVel[i][7]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntVelJ12';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveJointData.m_curJntVel[i][8]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntVelJ13';
-	
-	//command arm pose
-	//gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveStatus.m_cmdArmPose[i].m_pos[1]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdArmPose1';
-	//gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveStatus.m_cmdArmPose[i].m_pos[2]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdArmPose2';
-	//gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveStatus.m_cmdArmPose[i].m_pos[3]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdArmPose3';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveStatus.m_masterSlavePoseError[i][4]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdArmPose4';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveStatus.m_masterSlavePoseError[i][5]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdArmPose5';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveStatus.m_masterSlavePoseError[i][6]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdArmPose6';
-
-	//current arm pose
-	//gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveStatus.m_curArmPose[i].m_pos[1]);  gCSV_Buffer[i].aBuffer[1][j]:='curArmPose1';
-	//gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveStatus.m_curArmPose[i].m_pos[2]);  gCSV_Buffer[i].aBuffer[1][j]:='curArmPose2';
-	//gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveStatus.m_curArmPose[i].m_pos[3]);  gCSV_Buffer[i].aBuffer[1][j]:='curArmPose3';
-	//gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveStatus.m_curArmPose[i].m_rot[1]);  gCSV_Buffer[i].aBuffer[1][j]:='curArmPose4';
-	//gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveStatus.m_curArmPose[i].m_rot[2]);  gCSV_Buffer[i].aBuffer[1][j]:='curArmPose5';
-	//gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(i_slaveStatus.m_curArmPose[i].m_rot[3]);  gCSV_Buffer[i].aBuffer[1][j]:='curArmPose6';
-	
-	//drive error word
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[3].m_driverError);  gCSV_Buffer[i].aBuffer[1][j]:='driverErrorIOJ3'; 
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[4].m_driverError);  gCSV_Buffer[i].aBuffer[1][j]:='driverErrorIOJ4'; 
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[5].m_driverError);  gCSV_Buffer[i].aBuffer[1][j]:='driverErrorIOJ5'; 
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[1].m_driverError);  gCSV_Buffer[i].aBuffer[1][j]:='driverErrorIOJ6'; 
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[2].m_driverError); gCSV_Buffer[i].aBuffer[1][j]:='driverErrorIOJ7'; 
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[3].m_driverError); gCSV_Buffer[i].aBuffer[1][j]:='driverErrorIOJ8'; 
-    
-	//Electrical Angle deviation
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[1].m_electriAngleDev);  gCSV_Buffer[i].aBuffer[1][j]:='PhieErrIOJ6';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[2].m_electriAngleDev); gCSV_Buffer[i].aBuffer[1][j]:='PhieErrIOJ7';
-	
-	
-	//link encoder IO
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[1].m_linkEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ1';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[2].m_linkEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ2';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[3].m_linkEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ3';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[4].m_linkEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ4';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[5].m_linkEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ5';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[1].m_linkEncoder);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ6';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[2].m_linkEncoder); 	gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ7';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[3].m_linkEncoder); 	gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ8';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[4].m_linkEncoder);   gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ9';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[5].m_linkEncoder); 	gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ10';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[6].m_linkEncoder); 	gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ11';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[7].m_linkEncoder);     gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ12';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[8].m_linkEncoder); 	gCSV_Buffer[i].aBuffer[1][j]:='curLinkIOJ13';
-	
-	//motor encoder  IO
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[3].m_motorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='curMotorEncIOJ3';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[4].m_motorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='curMotorEncIOJ4';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[5].m_motorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='curMotorEncIOJ5';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[1].m_motorEncoder);   gCSV_Buffer[i].aBuffer[1][j]:='curMotorEncIOJ6';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[2].m_motorEncoder); 	gCSV_Buffer[i].aBuffer[1][j]:='curMotorEncIOJ7';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[3].m_motorEncoder); 	gCSV_Buffer[i].aBuffer[1][j]:='curMotorEncIOJ8';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[4].m_motorEncoder);   gCSV_Buffer[i].aBuffer[1][j]:='curMotorEncIOJ9';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[5].m_motorEncoder); 	gCSV_Buffer[i].aBuffer[1][j]:='curMotorEncIOJ10';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[6].m_motorEncoder); 	gCSV_Buffer[i].aBuffer[1][j]:='curMotorEncIOJ11';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[7].m_motorEncoder);   gCSV_Buffer[i].aBuffer[1][j]:='curMotorEncIOJ12';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[8].m_motorEncoder); 	gCSV_Buffer[i].aBuffer[1][j]:='curMotorEncIOJ13';
-	
-	
-	//status word IO
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[3].m_statusWord);	gCSV_Buffer[i].aBuffer[1][j]:='statusWordIOJ3';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[4].m_statusWord);	gCSV_Buffer[i].aBuffer[1][j]:='statusWordIOJ4';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[5].m_statusWord);	gCSV_Buffer[i].aBuffer[1][j]:='statusWordIOJ5';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[1].m_statusWord);		gCSV_Buffer[i].aBuffer[1][j]:='statusWordIOJ6';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[2].m_statusWord);		gCSV_Buffer[i].aBuffer[1][j]:='statusWordIOJ7';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[3].m_statusWord);		gCSV_Buffer[i].aBuffer[1][j]:='statusWordIOJ8';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[4].m_statusWord);		gCSV_Buffer[i].aBuffer[1][j]:='statusWordIOJ9';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[6].m_statusWord);		gCSV_Buffer[i].aBuffer[1][j]:='statusWordIOJ11';
-	
-	//current torque IO
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[3].m_current);  gCSV_Buffer[i].aBuffer[1][j]:='curTorqueIOJ3';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[4].m_current);  gCSV_Buffer[i].aBuffer[1][j]:='curTorqueIOJ4';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverInput[5].m_current);  gCSV_Buffer[i].aBuffer[1][j]:='curTorqueIOJ5';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[1].m_current);  gCSV_Buffer[i].aBuffer[1][j]:='curTorqueIOJ6';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[2].m_current);  gCSV_Buffer[i].aBuffer[1][j]:='curTorqueIOJ7';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[3].m_current);  gCSV_Buffer[i].aBuffer[1][j]:='curTorqueIOJ8';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[4].m_current);  gCSV_Buffer[i].aBuffer[1][j]:='curTorqueIOJ9';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[5].m_current);  gCSV_Buffer[i].aBuffer[1][j]:='curTorqueIOJ10';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[6].m_current);  gCSV_Buffer[i].aBuffer[1][j]:='curTorqueIOJ11';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[7].m_current);  gCSV_Buffer[i].aBuffer[1][j]:='curTorqueIOJ12';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverInput[8].m_current);  gCSV_Buffer[i].aBuffer[1][j]:='curTorqueIOJ13';
-	
-	//target torque IO
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverOutput[3].m_cmdCurrent);  gCSV_Buffer[i].aBuffer[1][j]:='cmdTorqueIOJ3';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverOutput[4].m_cmdCurrent);  gCSV_Buffer[i].aBuffer[1][j]:='cmdTorqueIOJ4';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverOutput[5].m_cmdCurrent);  gCSV_Buffer[i].aBuffer[1][j]:='cmdTorqueIOJ5';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[1].m_cmdCurrent);  gCSV_Buffer[i].aBuffer[1][j]:='cmdTorqueIOJ6';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[2].m_cmdCurrent);  gCSV_Buffer[i].aBuffer[1][j]:='cmdTorqueIOJ7';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[3].m_cmdCurrent);  gCSV_Buffer[i].aBuffer[1][j]:='cmdTorqueIOJ8';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[4].m_cmdCurrent);  gCSV_Buffer[i].aBuffer[1][j]:='cmdTorqueIOJ9';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[5].m_cmdCurrent);  gCSV_Buffer[i].aBuffer[1][j]:='cmdTorqueIOJ10';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[6].m_cmdCurrent);  gCSV_Buffer[i].aBuffer[1][j]:='cmdTorqueIOJ11';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[7].m_cmdCurrent);  gCSV_Buffer[i].aBuffer[1][j]:='cmdTorqueIOJ12';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[8].m_cmdCurrent);  gCSV_Buffer[i].aBuffer[1][j]:='cmdTorqueIOJ13';
-
-	//target motor encoder IO
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverOutput[3].m_cmdMotorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='cmdMotorEncIOJ3';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverOutput[4].m_cmdMotorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='cmdMotorEncIOJ4';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverOutput[5].m_cmdMotorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='cmdMotorEncIOJ5';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[1].m_cmdMotorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='cmdMotorEncIOJ6';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[2].m_cmdMotorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='cmdMotorEncIOJ7';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[3].m_cmdMotorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='cmdMotorEncIOJ8';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[4].m_cmdMotorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='cmdMotorEncIOJ9';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[5].m_cmdMotorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='cmdMotorEncIOJ10';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[6].m_cmdMotorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='cmdMotorEncIOJ11';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[7].m_cmdMotorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='cmdMotorEncIOJ12';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[8].m_cmdMotorEncoder);  gCSV_Buffer[i].aBuffer[1][j]:='cmdMotorEncIOJ13';
-
-
-	//output motor opMode IO
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverOutput[3].m_opMode);  gCSV_Buffer[i].aBuffer[1][j]:='opModeIOJ3';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverOutput[4].m_opMode);  gCSV_Buffer[i].aBuffer[1][j]:='opModeIOJ4';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_setupDriverOutput[5].m_opMode);  gCSV_Buffer[i].aBuffer[1][j]:='opModeIOJ5';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[1].m_opMode);  gCSV_Buffer[i].aBuffer[1][j]:='opModeIOJ6';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[2].m_opMode);  gCSV_Buffer[i].aBuffer[1][j]:='opModeIOJ7';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[3].m_opMode);  gCSV_Buffer[i].aBuffer[1][j]:='opModeIOJ8';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[4].m_opMode);  gCSV_Buffer[i].aBuffer[1][j]:='opModeIOJ9';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[5].m_opMode);  gCSV_Buffer[i].aBuffer[1][j]:='opModeIOJ10';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[6].m_opMode);  gCSV_Buffer[i].aBuffer[1][j]:='opModeIOJ11';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[7].m_opMode);  gCSV_Buffer[i].aBuffer[1][j]:='opModeIOJ12';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(i_safetyCheckVar[i].m_slaveDriverOutput[8].m_opMode);  gCSV_Buffer[i].aBuffer[1][j]:='opModeIOJ13';
-
-	//hall and encoder angle
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_hallAndEncoderAngle[1] AND 16#0000FFFF);  gCSV_Buffer[i].aBuffer[1][j]:='HallAngleJ6';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_hallAndEncoderAngle[2] AND 16#0000FFFF);  gCSV_Buffer[i].aBuffer[1][j]:='HallAngleJ7';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(SHR(i_safetyCheckVar[i].m_hallAndEncoderAngle[1],16) AND 16#0000FFFF);  gCSV_Buffer[i].aBuffer[1][j]:='EncoderAngleJ6';
-	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(SHR(i_safetyCheckVar[i].m_hallAndEncoderAngle[2],16) AND 16#0000FFFF);  gCSV_Buffer[i].aBuffer[1][j]:='EncoderAngleJ7';
+		//EtherCAT state
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_EtherCATState[1].EtherCATDeviceState);  gCSV_Buffer[i].aBuffer[1][j]:='EtherCATStateJ1';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_EtherCATState[3].EtherCATDeviceState);  gCSV_Buffer[i].aBuffer[1][j]:='EtherCATStateJ3';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_EtherCATState[4].EtherCATDeviceState);  gCSV_Buffer[i].aBuffer[1][j]:='EtherCATStateJ4';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_EtherCATState[6].EtherCATDeviceState);  gCSV_Buffer[i].aBuffer[1][j]:='EtherCATStateJ6';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_EtherCATState[7].EtherCATDeviceState);  gCSV_Buffer[i].aBuffer[1][j]:='EtherCATStateJ7';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_EtherCATState[8].EtherCATDeviceState);  gCSV_Buffer[i].aBuffer[1][j]:='EtherCATStateJ8';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_EtherCATState[9].EtherCATDeviceState);  gCSV_Buffer[i].aBuffer[1][j]:='EtherCATStateJ9';
+		gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(i_safetyCheckVar[i].m_EtherCATState[11].EtherCATDeviceState);  gCSV_Buffer[i].aBuffer[1][j]:='EtherCATStateJ11';
+		
+		
 	END_IF
 END_FOR
 
@@ -259,9 +260,7 @@ VAR_IN_OUT CONSTANT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-
-IF ErrWritingFalg[5] = FALSE THEN
+        <ST><![CDATA[IF ErrWritingFalg[5] = FALSE THEN
 	c:=1;
 	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=LREAL_TO_FMTSTR(i_cartStatus.m_CartState,0, TRUE);  gCSV_Buffer[5].aBuffer[1][c]:='cartMachine';
 	
@@ -332,6 +331,17 @@ IF ErrWritingFalg[5] = FALSE THEN
 	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=DINT_TO_STRING(i_safetyCheckVar.m_cartDriverOutput[6].m_cmdMotorEncoder);  gCSV_Buffer[5].aBuffer[1][c]:='cartCmdMotorEncIOJ6';
 	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=DINT_TO_STRING(i_safetyCheckVar.m_cartDriverOutput[7].m_cmdMotorEncoder);  gCSV_Buffer[5].aBuffer[1][c]:='cartCmdMotorEncIOJ7';
 	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=DINT_TO_STRING(i_safetyCheckVar.m_cartDriverOutput[8].m_cmdMotorEncoder);  gCSV_Buffer[5].aBuffer[1][c]:='cartCmdMotorEncIOJ8';	
+
+	//EtherCAT state
+	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=UDINT_TO_STRING(i_safetyCheckVar.m_cartEtherCATState[1].EtherCATDeviceState);  gCSV_Buffer[5].aBuffer[1][c]:='EtherCATStateJ1';
+	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=UDINT_TO_STRING(i_safetyCheckVar.m_cartEtherCATState[2].EtherCATDeviceState);  gCSV_Buffer[5].aBuffer[1][c]:='EtherCATStateJ2';
+	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=UDINT_TO_STRING(i_safetyCheckVar.m_cartEtherCATState[3].EtherCATDeviceState);  gCSV_Buffer[5].aBuffer[1][c]:='EtherCATStateJ3';
+	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=UDINT_TO_STRING(i_safetyCheckVar.m_cartEtherCATState[4].EtherCATDeviceState);  gCSV_Buffer[5].aBuffer[1][c]:='EtherCATStateJ4';
+	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=UDINT_TO_STRING(i_safetyCheckVar.m_cartEtherCATState[5].EtherCATDeviceState);  gCSV_Buffer[5].aBuffer[1][c]:='EtherCATStateJ5';
+	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=UDINT_TO_STRING(i_safetyCheckVar.m_cartEtherCATState[6].EtherCATDeviceState);  gCSV_Buffer[5].aBuffer[1][c]:='EtherCATStateJ6';
+	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=UDINT_TO_STRING(i_safetyCheckVar.m_cartEtherCATState[7].EtherCATDeviceState);  gCSV_Buffer[5].aBuffer[1][c]:='EtherCATStateJ7';
+	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=UDINT_TO_STRING(i_safetyCheckVar.m_cartEtherCATState[8].EtherCATDeviceState);  gCSV_Buffer[5].aBuffer[1][c]:='EtherCATStateJ8';
+
 END_IF
 ]]></ST>
       </Implementation>
@@ -508,40 +518,24 @@ END_IF
       <LineId Id="662" Count="8" />
       <LineId Id="813" Count="3" />
       <LineId Id="812" Count="0" />
-      <LineId Id="671" Count="30" />
+      <LineId Id="671" Count="1" />
+      <LineId Id="676" Count="2" />
+      <LineId Id="687" Count="14" />
       <LineId Id="846" Count="1" />
       <LineId Id="702" Count="33" />
       <LineId Id="737" Count="0" />
-      <LineId Id="740" Count="62" />
+      <LineId Id="740" Count="58" />
+      <LineId Id="857" Count="1" />
+      <LineId Id="860" Count="0" />
+      <LineId Id="863" Count="1" />
+      <LineId Id="859" Count="0" />
+      <LineId Id="865" Count="5" />
+      <LineId Id="799" Count="3" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="Fb_dataRecord.cartDataCast">
-      <LineId Id="7" Count="5" />
-      <LineId Id="64" Count="0" />
-      <LineId Id="13" Count="0" />
-      <LineId Id="61" Count="2" />
-      <LineId Id="68" Count="0" />
-      <LineId Id="14" Count="1" />
-      <LineId Id="65" Count="2" />
-      <LineId Id="69" Count="0" />
-      <LineId Id="98" Count="0" />
-      <LineId Id="100" Count="2" />
-      <LineId Id="99" Count="0" />
-      <LineId Id="97" Count="0" />
-      <LineId Id="75" Count="0" />
-      <LineId Id="70" Count="4" />
-      <LineId Id="18" Count="0" />
-      <LineId Id="76" Count="11" />
-      <LineId Id="21" Count="0" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="89" Count="7" />
-      <LineId Id="88" Count="0" />
-      <LineId Id="103" Count="0" />
-      <LineId Id="105" Count="7" />
-      <LineId Id="104" Count="0" />
-      <LineId Id="113" Count="7" />
-      <LineId Id="34" Count="0" />
-      <LineId Id="36" Count="1" />
+      <LineId Id="154" Count="82" />
+      <LineId Id="37" Count="0" />
     </LineIds>
     <LineIds Name="Fb_dataRecord.errCodeAnalysis">
       <LineId Id="6" Count="2" />

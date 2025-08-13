@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="AGILOG_DEBUG" Id="{4d128e6a-b240-42fa-a96e-9a12f0ed4525}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION AGILOG_DEBUG : BOOL
 VAR_INPUT
 	i_logData : ANY;
 	i_printTime :BOOL :=TRUE;
-	i_lineBreak :INT :=0;
+	i_lineBreak :INT :=0;//add a byte at the line end. 0: nothing, 1: new line, 2: space
 
 END_VAR
 VAR
@@ -13,7 +13,7 @@ VAR
 	checkIdx:INT;
 END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[IF NOT(GVL_RunTimeLogger.g_enableDebugLog) OR NOT(GVL_RunTimeLogger.g_debugLogReady) THEN
+      <ST><![CDATA[IF NOT(GVL_RunTimeLogger.g_enableDebugLog) THEN
 	RETURN;
 END_IF
 

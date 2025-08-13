@@ -99,7 +99,7 @@ m_supportLegBreak[2] := 0;
 
 IF m_adjustStartTime > m_cartAdjustStartWaitTime THEN
 	FOR i:=1 TO 2 DO
-		m_cmdJntTrq[i] := -500;
+		m_cmdJntTrq[i] := 500;
 	END_FOR
 	
 	IF NOT (i_slaveCart.m_supportLegSensor[1] OR i_slaveCart.m_supportLegSensor[2]) THEN

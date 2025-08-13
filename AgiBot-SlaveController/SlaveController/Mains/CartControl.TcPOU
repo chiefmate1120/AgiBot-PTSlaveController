@@ -84,7 +84,7 @@ ELSIF  (GVL_interactUI.g_uiCtrl.m_heightLimitAdjustEnable=FALSE) AND GVL_interac
 ELSIF GVL_interactUI.g_heightLimitEnbale=FALSE THEN
 	m_cartDataPool.m_UIData.m_standColumnHightLimit := GVL_CartMotorParameters.g_maxJntPos[5];
 END_IF
-GVL_interactUI.g_heightLimit :=LREAL_TO_UINT (m_cartRobot.m_slaveCart.curJntPos[5] * 1000 + GVL_CartControlParameters.g_cartInitialHeight);
+GVL_interactUI.g_heightLimit :=LREAL_TO_UINT((m_cartRobot.m_slaveCart.curJntPos[5] * 1000 + GVL_CartControlParameters.g_cartInitialHeight));
 
 //Surgical orientation selection
 m_cartDataPool.m_UIData.m_surgicalSite := GVL_interactUI.g_surgicalSite;
@@ -176,7 +176,7 @@ END_IF
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="CartControl.UIInputProcess">
-      <LineId Id="110" Count="19" />
+      <LineId Id="164" Count="19" />
       <LineId Id="68" Count="0" />
     </LineIds>
     <LineIds Name="CartControl.UIOutputProcess">

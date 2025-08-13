@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCtrlMasterSlave_bak2" Id="{bf89541a-832d-43a4-ae83-c597339fc78d}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm MasterSlave controller
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMasterSlave_bak2 EXTENDS FB_SlaveArmCtrlBase

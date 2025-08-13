@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveJoint" Id="{13c09c14-ad6e-446d-ae84-5ae40081815a}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveJoint EXTENDS FB_JointBase
 VAR_INPUT
@@ -138,8 +138,8 @@ END_IF
 
 // write driver operation mode if it changs
 IF  m_jntIdx >=3 AND m_jntIdx <=8 THEN
-	m_opModeSDOWrite(sNetID:= GVL_SlaveJointEncoderCaliData.g_slaveArmNetID[m_armIdx],
-					nSlaveAddr := GVL_SlaveJointEncoderCaliData.g_slaveJointNetPort[m_armIdx,m_jntIdx],
+	m_opModeSDOWrite(sNetID:= GVL_SystemParameters.g_slaveArmNetID[m_armIdx],
+					nSlaveAddr := GVL_SystemParameters.g_slaveJointNetPort[m_armIdx,m_jntIdx],
 					nSubIndex:=0,nIndex:=SDOSubIndexMode,pSrcBuf:=ADR(m_motorOutputs.m_opMode),cbBufLen:=SIZEOF(m_motorOutputs.m_opMode),bExecute:=TRUE);
 	IF NOT m_opModeSDOWrite.bBusy THEN
 		m_opModeSDOWrite(bExecute:=FALSE);
@@ -148,8 +148,8 @@ END_IF
 
 // write max motor current if it changes and works in position mode
 IF m_jntIdx >=4 AND m_jntIdx <=8  THEN 
-	m_MotorCurrentSDOWrite(sNetID:= GVL_SlaveJointEncoderCaliData.g_slaveArmNetID[m_armIdx],
-					nSlaveAddr := GVL_SlaveJointEncoderCaliData.g_slaveJointNetPort[m_armIdx,m_jntIdx],
+	m_MotorCurrentSDOWrite(sNetID:= GVL_SystemParameters.g_slaveArmNetID[m_armIdx],
+					nSlaveAddr := GVL_SystemParameters.g_slaveJointNetPort[m_armIdx,m_jntIdx],
 					nSubIndex:=0,nIndex:=SDOSubIndexCur,pSrcBuf:=ADR(m_wristJntRatedCurrent),cbBufLen:=SIZEOF(m_wristJntRatedCurrent),bExecute:=TRUE);
 	IF NOT m_MotorCurrentSDOWrite.bBusy THEN
 		m_MotorCurrentSDOWrite(bExecute:=FALSE);
@@ -176,7 +176,7 @@ END_IF
       <LineId Id="62" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveJoint.writeSDOData">
-      <LineId Id="216" Count="39" />
+      <LineId Id="262" Count="39" />
       <LineId Id="5" Count="0" />
     </LineIds>
   </POU>

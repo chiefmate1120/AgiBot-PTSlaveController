@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="SetupArmControl" Id="{a6c9020b-9167-4968-90cd-3bec678d54ed}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM SetupArmControl
 VAR

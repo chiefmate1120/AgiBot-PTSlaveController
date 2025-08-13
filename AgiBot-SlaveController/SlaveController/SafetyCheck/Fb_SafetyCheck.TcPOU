@@ -224,21 +224,16 @@ VAR
 	armCheckOPStatus :ARRAY [1..g_sArmNum] OF UDINT ;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-FOR arm := 1 TO g_sArmNum DO
+        <ST><![CDATA[FOR arm := 1 TO g_sArmNum DO
 	IF NOT i_armEtherCATOPStatus[arm] THEN
-		armCheckOPStatus[arm]:=SHL(arm+3,24)+SHL(16#00FF,16)+16#103B;
+		checkOPStatus:=SHL(arm+3,24)+SHL(0,16)+16#2010;
+		EXIT;
 	END_IF
 END_FOR
 IF NOT i_cartEtherCATOPStatus THEN
 	arm := g_cartNum + 3;
-	checkOPStatus:=SHL(arm,24)+SHL(0,16)+16#103B;
-END_IF
-GVL_interactUI.g_popupErrorArm1[0] := armCheckOPStatus[1];
-GVL_interactUI.g_popupErrorArm2[0] := armCheckOPStatus[2];
-GVL_interactUI.g_popupErrorArm3[0] := armCheckOPStatus[3];
-GVL_interactUI.g_popupErrorArm4[0] := armCheckOPStatus[4];
-GVL_interactUI.g_errIdType0 := checkOPStatus;]]></ST>
+	checkOPStatus:=SHL(arm,24)+SHL(0,16)+16#2011;
+END_IF]]></ST>
       </Implementation>
     </Method>
     <Property Name="checkPermit" Id="{4ac5d9ef-e4e1-4258-a3b3-a263171adb15}" FolderPath="interface\">
@@ -580,9 +575,9 @@ END_FOR
 
 
 //驱动器内部通讯错误
-m_checkDelay[i_ArmId].T_springBreakageCheck(IN:= ((i_safetyCheckVar[i_ArmId].m_springBreakageCheck AND 16#01)=16#01 AND m_checkPermit[i_ArmId].m_springBreakageCheck), PT:=m_checkDelayTime.Ti_springBreakCheck , Q=> , ET=> );
+m_checkDelay[i_ArmId].T_springBreakageCheck(IN:= ((i_safetyCheckVar[i_ArmId].m_springBreakageCheck AND 10#08)=8 AND m_checkPermit[i_ArmId].m_springBreakageCheck), PT:=m_checkDelayTime.Ti_springBreakCheck , Q=> , ET=> );
 IF  m_checkDelay[i_ArmId].T_springBreakageCheck.Q THEN
-	errCodeAssign(i_ArmId, i_ArmId+3,  0, 0, 16#3009 ,m_unrcvLevel );
+	//errCodeAssign(i_ArmId, i_ArmId+3,  0, 0, 16#3009 ,m_unrcvLevel );
 END_IF
 
 
@@ -978,15 +973,8 @@ vecB[0]:=i_newData;]]></ST>
       <LineId Id="74" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.checkOPStatus">
-      <LineId Id="6" Count="0" />
-      <LineId Id="9" Count="0" />
-      <LineId Id="15" Count="2" />
-      <LineId Id="13" Count="0" />
-      <LineId Id="19" Count="0" />
-      <LineId Id="22" Count="0" />
-      <LineId Id="20" Count="1" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="31" Count="3" />
+      <LineId Id="48" Count="8" />
+      <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.checkPermit.Get">
       <LineId Id="2" Count="0" />
@@ -1099,11 +1087,7 @@ vecB[0]:=i_newData;]]></ST>
       <LineId Id="14" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.setupSafetyCheck">
-      <LineId Id="751" Count="116" />
-      <LineId Id="910" Count="0" />
-      <LineId Id="899" Count="1" />
-      <LineId Id="897" Count="0" />
-      <LineId Id="871" Count="15" />
+      <LineId Id="920" Count="136" />
       <LineId Id="145" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.slaveSafetyCheck">
@@ -1118,26 +1102,7 @@ vecB[0]:=i_newData;]]></ST>
       <LineId Id="145" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.systemSafetyCheck">
-      <LineId Id="474" Count="0" />
-      <LineId Id="480" Count="2" />
-      <LineId Id="477" Count="2" />
-      <LineId Id="475" Count="1" />
-      <LineId Id="459" Count="3" />
-      <LineId Id="458" Count="0" />
-      <LineId Id="495" Count="0" />
-      <LineId Id="385" Count="0" />
-      <LineId Id="498" Count="7" />
-      <LineId Id="496" Count="1" />
-      <LineId Id="387" Count="0" />
-      <LineId Id="432" Count="0" />
-      <LineId Id="429" Count="2" />
-      <LineId Id="210" Count="0" />
-      <LineId Id="291" Count="0" />
-      <LineId Id="444" Count="2" />
-      <LineId Id="380" Count="0" />
-      <LineId Id="288" Count="0" />
-      <LineId Id="279" Count="0" />
-      <LineId Id="275" Count="1" />
+      <LineId Id="494" Count="40" />
       <LineId Id="145" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.vecDeleteInput">

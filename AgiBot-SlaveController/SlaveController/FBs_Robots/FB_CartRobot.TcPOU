@@ -170,7 +170,7 @@ VAR
 	armAdjust : BOOL;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF (m_slaveCart.curJntPos[5] * 1000 + GVL_CartControlParameters.g_cartInitialHeight) < GVL_CartControlParameters.g_cartOpenHorizonLaserHeight OR m_slaveCart.m_trocarOnFlag >= 2  THEN
+        <ST><![CDATA[IF LREAL_TO_UINT(m_slaveCart.curJntPos[5] * 1000 + GVL_CartControlParameters.g_cartInitialHeight) <= GVL_CartControlParameters.g_cartOpenHorizonLaserHeight OR m_slaveCart.m_trocarOnFlag >= 2  THEN
 	m_openCrossLaser := 0;
 	m_openHorizonLaser :=  0;
 	RETURN;
@@ -206,12 +206,7 @@ IF m_closeCrossLaser.Q THEN
 	m_openCrossLaser := 0;
 END_IF
 
-//Horizontal laser IO output ,when adjusting the trolley or moving the trolley
-IF  (m_cartState >= CartJointState_Movement AND m_cartState <= CartJointState_StandColuAdjust) THEN
-	m_openHorizonLaser :=  1;
-ELSE
-	m_openHorizonLaser :=  0;
-END_IF]]></ST>
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="run" Id="{a2c569bc-04e6-4881-bf0d-89b31bc10fd5}">
@@ -258,7 +253,7 @@ END_VAR
         <ST><![CDATA[m_hangAdjustAllowed := m_slaveCart.m_trocarOnFlag=0 AND ( i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_joystickEnable OR i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_cameraJoystickEnable);
 m_asepticDeploymentAllowed := m_slaveCart.m_trocarOnFlag=0 AND ((i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_dockingEnable AND m_slaveCart.cartDockingState=0) 
 												OR (i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_drapingEnable AND m_slaveCart.cartDrapingState=0)) AND NOT ( i_cartDataPool.m_safetyData.m_cartAdjustErr OR i_cartDataPool.m_safetyData.m_cartStandColumnErr) ;
-m_cartMoveAllowed := m_slaveCart.m_trocarOnFlag=0 AND  (m_carHandChassisDriveUnlock[1] OR m_carHandChassisDriveUnlock[2])
+m_cartMoveAllowed := m_slaveCart.m_trocarOnFlag=0 AND  (m_carHandChassisDriveUnlock[1] OR m_carHandChassisDriveUnlock[2]) AND m_slaveCart.m_drivingLeverSensorManual
 						 AND NOT i_cartDataPool.m_safetyData.m_cartWheelErr AND NOT m_supportLegFinshed AND m_slaveCart.m_cartDriveForceCaliFinshed;
 m_rotaOverhangAllowed := m_slaveCart.m_trocarOnFlag=0 AND m_slaveCart.m_rotaOverhangOnFlag > 1 AND NOT i_cartDataPool.m_safetyData.m_cartOverhangErr;
 
@@ -300,18 +295,17 @@ CASE m_cartState OF
 		ELSIF m_slaveCart.m_trocarOnFlag=0 AND  m_slaveCart.m_columnAdjustEnable  THEN
 			m_nextCartState := CartJointState_StandColuAdjust;
 			
-		ELSIF (((m_slaveCart.m_trocarOnFlag>=3 AND NOT m_supportLegFinshed) OR (m_slaveCart.m_trocarOnFlag=0 AND m_supportLegFinshed))
-						AND NOT  i_cartDataPool.m_safetyData.m_cartSteadyFootErr AND m_slaveCart.m_drivingLeverSensorManual) AND m_supportLegErrID[1]<>2 AND m_supportLegErrID[2]<>2 THEN
-			m_nextCartState := CartJointState_SupportLeg;
-			
-		ELSIF  (m_supportLegFinshed AND NOT m_slaveCart.m_drivingLeverSensorManual) THEN
+		ELSIF ((m_slaveCart.m_trocarOnFlag>=3 AND NOT m_supportLegFinshed) AND NOT i_cartDataPool.m_safetyData.m_cartSteadyFootErr AND m_slaveCart.m_drivingLeverSensorManual) AND m_supportLegErrID[1]<>2 AND m_supportLegErrID[2]<>2 THEN
 			m_nextCartState := CartJointState_SupportLeg;
 		END_IF
 		
 	
 	CartJointState_InSurgery:
 		IF m_cartCtrl.isFinished  THEN
+			m_supportLegFinshed := FALSE;
 			m_nextCartState :=CartJointState_Ready;
+		ELSIF (m_slaveCart.m_trocarOnFlag=0 AND m_supportLegFinshed AND NOT i_cartDataPool.m_safetyData.m_cartSteadyFootErr AND m_slaveCart.m_drivingLeverSensorManual AND m_supportLegErrID[1]<>2 AND m_supportLegErrID[2]<>2) OR (m_supportLegFinshed AND NOT m_slaveCart.m_drivingLeverSensorManual) THEN
+			m_nextCartState := CartJointState_SupportLeg;
 		END_IF
 		
 		
@@ -366,13 +360,15 @@ CASE m_cartState OF
 		m_supportLegErrID := m_cartSupportLeg.m_errorID;
 		IF m_cartCtrl.isFinished  THEN
 			IF m_slaveCart.m_supportLegSensor[1]=0 AND m_slaveCart.m_supportLegSensor[2]=0 THEN
+				m_nextCartState :=CartJointState_Ready;
 				m_supportLegFinshed := FALSE;
 			ELSIF (m_supportLegErrID[1] <> 0 AND m_slaveCart.m_supportLegSensor[2]=0) OR (m_slaveCart.m_supportLegSensor[1]=0 AND m_supportLegErrID[2] <> 0 ) OR (m_supportLegErrID[1] <> 0  AND m_supportLegErrID[2] <> 0 ) THEN
+				m_nextCartState :=CartJointState_Ready;
 				m_supportLegFinshed := FALSE;
 			ELSE
+				m_nextCartState :=CartJointState_InSurgery;
 				m_supportLegFinshed := TRUE;
 			END_IF
-			m_nextCartState :=CartJointState_Ready;
 		END_IF
 		
 	CartJointState_PowerOff:
@@ -418,6 +414,8 @@ IF GVL_interactUI.g_uiPowerOffEnable THEN
 	m_nextCartState :=CartJointState_PowerOff;
 END_IF
 
+
+
 // Controller transit
 IF m_nextCartState<> m_cartState THEN
 	//reset current controller
@@ -450,7 +448,7 @@ END_IF
       <LineId Id="57" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.laserIO">
-      <LineId Id="81" Count="40" />
+      <LineId Id="171" Count="35" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.run">
@@ -459,10 +457,7 @@ END_IF
       <LineId Id="51" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.stateMachine">
-      <LineId Id="676" Count="127" />
-      <LineId Id="833" Count="27" />
-      <LineId Id="832" Count="0" />
-      <LineId Id="804" Count="20" />
+      <LineId Id="991" Count="180" />
       <LineId Id="22" Count="0" />
     </LineIds>
   </POU>

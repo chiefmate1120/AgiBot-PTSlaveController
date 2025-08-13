@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <DUT Name="ST_SetupJointData" Id="{14e5c752-fbf5-4c7b-bc0c-14e543ad721e}">
     <Declaration><![CDATA[TYPE ST_SetupJointData :
 STRUCT

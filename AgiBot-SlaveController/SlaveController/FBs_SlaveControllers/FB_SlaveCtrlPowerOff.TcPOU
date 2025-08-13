@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCtrlPowerOff" Id="{b0cad51b-1034-45d6-ad2f-1d015e8e9e88}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm PowerOff
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlPowerOff EXTENDS FB_SlaveArmCtrlBase

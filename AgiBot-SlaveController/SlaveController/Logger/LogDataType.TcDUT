@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <DUT Name="LogDataType" Id="{815cc196-e446-4cc1-88c8-1acb0a868587}">
     <Declaration><![CDATA[TYPE LogDataType : // total size 128 byte
 STRUCT

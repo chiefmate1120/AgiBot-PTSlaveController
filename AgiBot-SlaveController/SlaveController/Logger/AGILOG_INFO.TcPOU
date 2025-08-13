@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="AGILOG_INFO" Id="{d769d76e-905c-45d8-8351-63f42bd44cee}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION AGILOG_INFO : BOOL
 VAR_INPUT

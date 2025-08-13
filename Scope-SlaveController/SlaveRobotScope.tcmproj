@@ -7,12 +7,6 @@
     <RootNamespace>Slave Measurement Project</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="cart.tcscopex">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="SetupGravityCaliData.svdx">
-      <SubType>Content</SubType>
-    </Content>
     <Content Include="SetupGravityCaliData.tcscopex">
       <SubType>Content</SubType>
     </Content>
@@ -20,6 +14,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="SlaveJointData.tcscopex">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="test.tcscopex">
       <SubType>Content</SubType>
     </Content>
   </ItemGroup>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SetupJoint" Id="{6b084a85-8805-425b-acb2-a9c4952b134d}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SetupJoint EXTENDS FB_JointBase
 VAR_INPUT

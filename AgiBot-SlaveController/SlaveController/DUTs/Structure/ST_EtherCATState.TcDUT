@@ -7,6 +7,7 @@ STRUCT
 	CRCPortA :DINT;
 	CRCPortB :DINT;
 	CRCPortC :DINT;
+	EtherCATDeviceState:BYTE;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

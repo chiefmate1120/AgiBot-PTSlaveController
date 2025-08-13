@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_BasicInstruControl_DC" Id="{04a68fc4-0fe2-4b40-8381-3fd529f8ac62}" SpecialFunc="None">
     <Declaration><![CDATA[// instrument joints control
 FUNCTION_BLOCK FB_BasicInstruControl_DC

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <GVL Name="GVL_SlaveArmDynamics" Id="{b423595b-65ef-4a72-b56a-df34f138838a}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49992'}
 {attribute 'qualified_only'}
@@ -34,25 +34,30 @@ VAR_GLOBAL CONSTANT
 	//################ DO NOT modify parameters below ###########################
 	//################ dynamic reference model parameters below ###########################
 	// link mass [m1, m2, m3, m4, m5]
-	g_linkMass :ARRAY[1..5] OF LREAL :=[5.6565, 1.4613, 1.149, 1.5362, 0.6679] ;
+	g_linkMass :ARRAY[1..5] OF LREAL :=[7.9067,  2.19,   0.5745,  1.804,   1.23112] ;
 	
 	// lin center of amss
-	g_linkCOM :ARRAY[1..5,1..3] OF LREAL :=  [ 0.0566,    0.0302,   -0.4685,
-											   0.1191,   -0.0011,   -0.0588,
-											   0.1238,    0.0003,   -0.0120,
-											   0.0427,    0.0924,   -0.0004,
-											   -0.0262,        0,   -0.0292];
+	g_linkCOM :ARRAY[1..5,1..3] OF LREAL :=  [  0.031,	0.02106,   -0.378,
+												0.0826,    -0.00949,   -0.02022,
+												 0.1238,    0.0009,     -0.022,
+												0.0543,    0.118,   -0.0005,
+											   -0.01349,    0,		    -0.04337];
 	// link  inertial
     // [Ixx,Iyy,Izz, Ixy,Ixz, Iyz]
- 	g_linkInertia :ARRAY[1..5,1..6] OF LREAL :=[0.0735,    0.0738,    0.0144,    0.0016,   -0.0000,   -0.0079,
-												0.0016,    0.0190,    0.0185,         0,    0.0027,         0,
-											   0.0009,    0.0167,    0.0166,         0,    0.0012,         0,
-												0.0009,    0.0167,    0.0166,         0,    0.0012,         0,
-											  0.0009,    0.0167,    0.0166,         0,    0.0012,         0];
+ 	g_linkInertia :ARRAY[1..5,1..6] OF LREAL :=[ 
+		0.1339,      0.00754,      0.000102,       0.0191,       0.0000216,     0.0000397,
+        0.0044,      0.1203,       0.000102,       -0.02259,     -0.000069,     0.000288,
+        0.00129,      0.06977,      0.01794,        0.0091,       0.0029,        0.02129,
+        0.000605,     0.000244,     0.00012,        0.00023,      -0.0000389,    -0.000016,
+        0.00425,      0.0002,       0.0034,        -0.00352,      0.00364,      -0.00023];
 
 	
 	//  motor inertial at link size
 	g_motorInertia :ARRAY[1..3] OF LREAL := [0.00004487, 0.00004487, 0.0000002280];
+	
+	// joint coulomb and damping friction 
+	g_slaveJntCoulombFriciton :ARRAY[1..3] OF LREAL := [ 3.90968625696613,	5.62694631236779,	5.95797867711216];
+	g_slaveJntDamping :ARRAY[1..3] OF LREAL := [ 4.48,	8.11, 27.837];
 
 END_VAR]]></Declaration>
   </GVL>

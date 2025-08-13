@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_CartCtrlInSurgery" Id="{370f14c6-9840-4a91-9e20-703802e8b3c3}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CartCtrlInSurgery EXTENDS FB_CartCtrlBase
 VAR_INPUT
@@ -21,7 +21,12 @@ VAR_IN_OUT CONSTANT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[m_cmdJntPos := i_slaveCart.curJntPos;]]></ST>
+        <ST><![CDATA[m_cmdJntPos := i_slaveCart.curJntPos;
+IF SafetyCheck.m_safetyCheckData.m_cartSteadyFootErr AND NOT SafetyCheck.m_SafetyCheck.m_jntErrFlag[g_cartNum,0,2] THEN
+	m_isFinished := TRUE;
+	RETURN;
+END_IF
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{1b8a6a5f-9b04-4cc6-b433-0c731d080f40}">
@@ -40,6 +45,15 @@ END_VAR
 m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
 SUPER^.init(i_slaveCart,r_cartCtrlCmd);
 
+m_jntEnableFlag[1] :=1;
+m_jntEnableFlag[2] :=1;
+
+m_jntOPMode[1]:= DriverOPMode_Trq;
+m_jntOPMode[2]:= DriverOPMode_Trq;
+
+m_cmdJntTrq[1] := -1500;
+m_cmdJntTrq[2] := -1500;
+
 // update commands to arm
 copyCmds(r_cartCtrlCmd);]]></ST>
       </Implementation>
@@ -48,13 +62,11 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlInSurgery.calcCmdJntPos">
+      <LineId Id="15" Count="4" />
       <LineId Id="8" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlInSurgery.init">
-      <LineId Id="34" Count="0" />
-      <LineId Id="33" Count="0" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="22" Count="1" />
+      <LineId Id="44" Count="13" />
       <LineId Id="21" Count="0" />
     </LineIds>
   </POU>

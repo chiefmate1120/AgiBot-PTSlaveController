@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <GVL Name="GVL_RunTimeLogger" Id="{7ff50c6a-0345-4ddf-b78e-89577d0f9512}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'global_init_slot' := '49999'}
 VAR_GLOBAL CONSTANT
 	g_infoLogBufferSize :DINT := 10000;
 	g_debugLogBufferSize :DINT := 40000;
@@ -12,11 +13,10 @@ VAR_GLOBAL CONSTANT
 				'$N#######################################################################################$N'];
 END_VAR
 VAR_GLOBAL
-	g_stopLogFlag :BOOL :=FALSE; //signal may come from UI, false to stop current logger, true to start log with new file  
-	
 	g_localSystemTime : FB_LocalSystemTime:= (bEnable := TRUE, dwCycle := 1 );
 	
 	// info logger variables
+	g_enableInfoFlag :BOOL :=true; //signal may come from UI, false to stop current logger, true to start log with new file  
 	g_infoLogReady :BOOL :=FALSE;
 	g_infoLogBufferLock :BOOL :=FALSE;
 	g_infoLogBuffer :ARRAY[1..g_infoLogBufferSize] OF LogDataType;
@@ -30,6 +30,7 @@ VAR_GLOBAL
 	g_debugLogBuffer :ARRAY[1..g_debugLogBufferSize] OF LogDataType;
 	g_debugLogBufferInPtr :DINT:=1;
 	g_debugLogBufferOutPtr :DINT:=1;
+	g_debugLogFileName :STRING := 'defaultLogFileName.txt';
 END_VAR
 
 ]]></Declaration>

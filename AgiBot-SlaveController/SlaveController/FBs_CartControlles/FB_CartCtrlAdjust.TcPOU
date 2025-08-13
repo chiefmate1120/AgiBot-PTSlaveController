@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_CartCtrlAdjust" Id="{488d0bf1-786c-4b23-9fe3-c1a35b548c94}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CartCtrlAdjust EXTENDS FB_CartCtrlBase
 VAR_INPUT
@@ -62,7 +62,7 @@ m_veiwAngle := m_actJntPos[6] + m_actJntPos[8];
 IF m_adjustStartTime > m_cartAdjustStartWaitTime THEN
 	FOR i:= 1 TO 4 BY 1 DO
 		m_joystickSignal[i] := i_slaveCart.m_joystickSignal[i] - m_fiducialValue;
-		m_joystickVelInc[i+4] := m_joystickSignal[i]/m_joystickRange*m_joystickDir[i+4]*GVL_CartControlParameters.g_maxCartVel[i];
+		m_joystickVelInc[i+4] := LIMIT(-1,m_joystickSignal[i]/m_joystickRange,1)*m_joystickDir[i+4]*GVL_CartControlParameters.g_maxCartVel[i];
 		m_tarPosInc[i+4] := m_tarPosInc[i+4] + m_joystickVelInc[i+4] * g_cartCtrlCycleTime;
 	END_FOR
 	
@@ -214,11 +214,7 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlAdjust.calcCmdJntPos">
-      <LineId Id="123" Count="4" />
-      <LineId Id="129" Count="26" />
-      <LineId Id="181" Count="0" />
-      <LineId Id="170" Count="0" />
-      <LineId Id="157" Count="3" />
+      <LineId Id="191" Count="37" />
       <LineId Id="14" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlAdjust.calcCmdReachLimit">

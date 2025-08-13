@@ -1,0 +1,1057 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SlaveCtrlMasterSlave_bak" Id="{9a8c80ce-14d8-4fd9-854f-c348eb627b67}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Slave Arm MasterSlave controller
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMasterSlave_bak EXTENDS FB_SlaveArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// pose track control kp
+	m_posTrackKp :REAL := 0;
+	m_oriTrackKp :REAL := 100;
+	
+	// minimum distance between instrument tip and remote center
+	m_minInstruRCDis:LREAL := 0.05;
+	
+	// master-slave motion scale
+	m_MSMotionScale :LREAL;
+		
+	// gripper match angle threshold
+	m_gripperMatchAngThres :LREAL := 2*g_deg2Rad;
+	
+	// control error thershold from joint limit back to free space
+	m_jntLimitOriErr :LREAL :=g_deg2Rad * 5;
+	
+	// master-slave error thershold to halt control 
+	m_safetyOriErr :LREAL :=g_deg2Rad * 150;
+	
+	// filter cut-off frequency for master-slave control
+	m_macroCmdJntPosLpfCutoffFreq : LREAL :=5;
+	m_microCmdJntPosLpfCutoffFreq : LREAL :=15;
+	
+	// last command joint position
+	m_lastCmdJntPos :Vec8d;
+	
+	// simulated DH joint position
+	m_simDHJntPos : Vec6d;
+	
+	// simulated slave twist of DH joint
+	m_simDHJointVel :Vec6d;
+		
+	// enter master-slave control for the first time
+	m_firstIn :BOOL := TRUE;
+	
+	// flag if reach joint limit
+	m_reachMacroJntLimit :BOOL;
+	m_reachWristJntLimit :BOOL;
+	m_jntLimitFlag :Vec6b;
+	
+	// master/slave origin pose when first enter master-slave control
+	m_masterOriginPose : ST_Frame;
+	m_slaveOriginPose : ST_Frame;
+	
+	// orientation deviation(in master coordinate) between master and slave when first enter control
+	m_MSOriDeviation : Mat3d;
+	
+	// command joint position filter
+	m_cmdJntPosLpf:ARRAY[1..8] OF FB_LowPassFilter;
+	
+	// commmand yaw angle and velocity
+	m_cmdYawAngle :LREAL;
+	m_cmdYawVel :LREAL;
+	
+	// comand yaw angle and velocity filter
+	m_cmdYawAngLpf : FB_LowPassFilter;
+	m_cmdYawVelLpf : FB_LowPassFilter;
+	
+	// master pose/velocity in monitor coordinate
+	m_masterPose :ST_Frame;
+	m_masterTwist : Vec6d;
+	
+	// master grip angle
+	m_masterGripAngle : LREAL;
+	
+	// slave command/current pose in endoscope coordinate
+	m_slaveCmdPoseInScope :ST_Frame;
+	m_slavePoseInScope : ST_Frame;
+	
+	// slave command/current pose in cart
+	m_slaveCmdPoseInCart :ST_Frame;
+	m_slavePoseInCart : ST_Frame;
+	
+	// instrument controller
+	m_basicInstruController : FB_BasicInstruControl;
+	m_usKnifeController : FB_UltrosonicKnifeControl;
+	m_basicInstruControllerDC : FB_BasicInstruControl_DC;
+	m_usKnifeControllerDC : FB_UltrosonicKnifeControl_DC;
+
+	// slave command grip angle and grip force level
+	m_slaveCmdGripAngle :LREAL;
+	m_slaveCmdGripForceLevel:LREAL;
+	
+	// slave pose error
+	m_slavePosErr :Vec3d;
+	m_slaveRotErr :Mat3d;
+	m_errAngle : LREAL;
+	m_errAxisLocal, m_errAxis :Vec3d;
+	m_masterSlavePoseError :Vec6d;
+	
+	// master velocity in slave coordinate
+	m_masterFFVel, m_masterFFWVel :Vec3d;
+	
+	// velocity for slave to track master motion
+	m_slaveCmdVel, m_slaveCmdWVel : Vec3d;
+	
+	// flag to start gripper control
+	m_gripperCtrlFlag :BOOL;
+	
+	// instrument tyep
+	m_instruType : E_InstrumentType;
+	
+	//################# variable to interpolate master pose ##############
+	m_firstInterpolate :BOOL :=TRUE;
+	m_lastMasterPose : ST_Frame;
+	m_lastMasterGripAngle :LREAL;
+	m_masterInterpolateCycle :INT := 4;
+	m_curInterpolateCylce :INT := 1;
+	m_masterPosInterStep :Vec3d;
+	m_masterOriInterStep :Mat3d;
+	m_masterGripAngleInterStep :LREAL;
+	m_interplotedMasterPose :ST_Frame;
+	m_interplotedMasterGripAngle :LREAL;
+	
+	// code execute time measure
+	m_codeTime : Profiler;
+	
+	//init salve instrument angle
+	m_initInstruAngle : LREAL;
+	m_gripperMatchAngMin : LREAL:=g_largeNum;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="property" Id="{d708b714-7470-4620-ade1-b75b1f98f5a8}" />
+    <Method Name="calcCmdJntPos" Id="{7a9f60b0-524b-4ddd-bf13-e1a259f1225f}">
+      <Declaration><![CDATA[METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR 
+	i,j : INT;
+	tmpMat3d : Mat3d;
+	masterMotionRange : Vec3d;
+	
+	masterVelInScope, masterWVelInScope :Vec3d;
+	masterVelInCart, masterWVelInCart :Vec3d;
+
+	cmdVelScale :LREAL;
+	invJaco :Mat6d;
+	armJntJaco,armJntJacoInv, wristJntJaco :Mat3d;
+	velByWristJnt,velByArmJnt : Vec3d;
+	armDHJntVel, wristDHJntVel :Vec3d;
+	tmpFrame : ST_Frame;
+	jnt3Limit :LREAL;
+	jntDynaUB, jntDynaLB :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_codeTime(START:=TRUE, RESET:=TRUE);
+
+IF isFinished THEN
+	RETURN;
+END_IF
+
+// decide matched master arm index
+FOR i:=1 TO g_mArmNum DO 
+	IF i_masterStatus.m_teleSlaveArmIdx[i] = i_slaveArm.armIdx THEN
+		masterPoseInterploate(i_masterStatus.m_curArmPose[i],i_masterStatus.m_gripAngle[i]);
+		m_masterPose := m_interplotedMasterPose;
+		m_masterGripAngle := m_interplotedMasterGripAngle;
+		m_masterTwist := i_masterStatus.m_curArmTwist[i];
+	END_IF
+END_FOR
+
+// compute slave pose in endoscope coordinate
+m_slavePoseInCart := transform(i_setupStatus.m_curEndPose[i_slaveArm.armIdx], i_slaveArm.simCartPose);
+tmpFrame :=invFrame(i_endoscopePose);
+m_slavePoseInScope := transform(tmpFrame, m_slavePoseInCart);
+
+// handle for the first time in
+IF TRUE = m_firstIn THEN
+	m_firstIn := FALSE;
+	m_masterOriginPose :=m_masterPose;
+	m_slaveOriginPose := m_slavePoseInScope;
+	matTranspose(m_masterOriginPose.m_rot, tmpMat3d);
+	matMultiply(tmpMat3d, m_slavePoseInScope.m_rot,m_MSOriDeviation);
+	m_lastMasterGripAngle := m_masterGripAngle;
+	
+	// only update motion scale while entering teleControl 
+	m_MSMotionScale := 1.0/ MAX(1,  i_masterStatus.m_motionScale);
+END_IF
+
+// compute master twist in slave arm coordinate
+FOR i:=1 TO 3 DO
+	masterVelInScope[i] := m_masterTwist[i]*m_MSMotionScale;
+	masterWVelInScope[i] := m_masterTwist[i+3];
+END_FOR
+matMultiVec(i_endoScopePose.m_rot, masterVelInScope, masterVelInCart);
+matMultiVec(i_endoScopePose.m_rot, masterWVelInScope, masterWVelInCart);
+matTranspose(i_setupStatus.m_curEndPose[i_slaveArm.armIdx].m_rot, tmpMat3d);
+matMultiVec(tmpMat3d,masterVelInCart, m_masterFFVel);
+matMultiVec(tmpMat3d,masterWVelInCart, m_masterFFWVel);
+
+// compute slave command pose in scope
+vecSub(m_masterPose.m_pos, m_masterOriginPose.m_pos, masterMotionRange);
+vecSelfMultiNum(masterMotionRange, m_MSMotionScale);
+vecAdd(m_slaveOriginPose.m_pos, masterMotionRange, m_slaveCmdPoseInScope.m_pos);
+matMultiply(m_masterPose.m_rot, m_MSOriDeviation, m_slaveCmdPoseInScope.m_rot);
+
+// compute slave command pose in slave arm coordinate
+m_slaveCmdPoseInCart := transform(i_endoScopePose, m_slaveCmdPoseInScope);
+tmpFrame := invFrame(i_setupStatus.m_curEndPose[i_slaveArm.armIdx]);
+m_cmdCartPose := transform(tmpFrame, m_slaveCmdPoseInCart);
+
+// compute pose error
+vecSub(m_cmdCartPose.m_pos, i_slaveArm.simCartPose.m_pos, m_slavePosErr);
+matTranspose(i_slaveArm.simCartPose.m_rot, tmpMat3d);
+matMultiply(tmpMat3d, m_cmdCartPose.m_rot, m_slaveRotErr);
+rot2AngAxis(m_slaveRotErr, angle=>m_errAngle, axis=>m_errAxisLocal);
+matMultiVec(i_slaveArm.simCartPose.m_rot, m_errAxisLocal, m_errAxis);
+
+// calculate pose error in endoscope
+calcMSErrInScope(i_endoscopePose, i_setupStatus.m_curEndPose[i_slaveArm.armIdx], i_slaveArm);
+
+//safety check
+//IF ABS(m_errAngle)>m_safetyOriErr THEN
+//	m_isFinished := TRUE;
+//	RETURN;
+//END_IF
+
+// pose track control
+vecMultiNum(m_slavePosErr, m_posTrackKp, m_slaveCmdVel);
+vecMultiNum(m_errAxis, m_errAngle*m_oriTrackKp, m_slaveCmdWVel);
+// final command twist
+FOR i:=1 TO 3 DO 
+	m_cmdCartTwist[i] := m_slaveCmdVel[i] + m_masterFFVel[i];
+	m_cmdCartTwist[i+3] := m_slaveCmdWVel[i] + m_masterFFWVel[i];
+END_FOR
+
+// compute command velocity for DH joints
+invJaco := i_slaveArm.simJacoInv;
+matMultiVec(invJaco, m_cmdCartTwist, m_simDHJointVel);
+
+// limit instrument wrist dofs
+limitInstruDofs(i_slaveArm, m_simDHJointVel);
+
+// limit instrument wrist joint velocity
+wristLimitSolve(i_slaveArm);
+
+// limit DH joints velocity 
+FOR i:=4 TO 6 DO 
+	m_simDHJointVel[i] := LIMIT(-GVL_SlaveMotorParameters.g_maxJntVel[i], m_simDHJointVel[i], GVL_SlaveMotorParameters.g_maxJntVel[i]);
+END_FOR
+
+// modify arm joints velocity to compensate wrist joint motion
+FOR i:=1 TO 3 DO
+	FOR j:=1 TO 3 DO
+		armJntJaco[i,j]:=i_slaveArm.simJaco[i,j];
+		wristJntJaco[i,j]:=i_slaveArm.simJaco[i,j+3];
+	END_FOR
+	armDHJntVel[i]:=m_simDHJointVel[i];
+	wristDHJntVel[i]:=m_simDHJointVel[i+3];
+	m_slaveCmdVel[i] := m_cmdCartTwist[i];
+END_FOR
+invMat3(armJntJaco, armJntJacoInv);
+matMultiVec(wristJntJaco, wristDHJntVel, velByWristJnt);
+vecSub(m_slaveCmdVel, velByWristJnt, velByArmJnt);
+matMultiVec(armJntJacoInv, velByArmJnt, armDHJntVel);
+
+// limit arm joint position
+m_reachMacroJntLimit:=false;
+FOR i:=1 TO 3 DO
+	IF i=3 THEN
+		jnt3Limit := i_slaveArm.instrument.instruTypeInfo.m_rodLength+i_slaveArm.instrument.instruTypeInfo.m_headLength
+											+ i_slaveArm.instrument.instruTypeInfo.m_fingerLength - GVL_SlaveArmKinematic.g_minInstruRCDis;
+		jntDynaUB := MAX( 0, (jnt3Limit - i_slaveArm.simDHJntPos[i])/g_slaveArmCtrlCycleTime);
+	ELSE
+		jntDynaUB := MAX( 0, (GVL_SlaveMotorParameters.g_maxDHJntPos[i] - i_slaveArm.simDHJntPos[i])/g_slaveArmCtrlCycleTime);
+	END_IF
+	jntDynaLB := MIN( 0, (GVL_SlaveMotorParameters.g_minDHJntPos[i] - i_slaveArm.simDHJntPos[i])/g_slaveArmCtrlCycleTime);
+	
+	IF armDHJntVel[i] >= jntDynaUB OR armDHJntVel[i]<= jntDynaLB THEN
+		armDHJntVel[i]:=LIMIT(jntDynaLB, m_simDHJointVel[i], jntDynaUB);
+		m_reachMacroJntLimit:=TRUE;
+	END_IF
+END_FOR
+
+// limit DH joints velocity 
+FOR i:=1 TO 3 DO
+	m_simDHJointVel[i]:=armDHJntVel[i];
+	m_simDHJointVel[i+3]:=wristDHJntVel[i];
+END_FOR
+
+cmdVelScale := 1;
+FOR i:=1 TO g_cartDofs DO 
+	cmdVelScale:=MAX(cmdVelScale, ABS(m_simDHJointVel[i]/GVL_SlaveMotorParameters.g_maxJntVel[i]));
+END_FOR
+vecSelfMultiNum(m_simDHJointVel, 1.0/cmdVelScale);
+
+// integrate command DH joint position
+FOR i:=1 TO 6 DO
+	m_simDHJntPos[i] := i_slaveArm.simDHJntPos[i] + m_simDHJointVel[i]*g_slaveArmCtrlCycleTime;
+END_FOR
+
+// gripper angle/force control
+gripperControl(i_slaveArm);
+
+// calculate target motor joint position/velocity from DH joint position
+i_slaveArm.instrument.instruIK(m_simDHJntPos,m_slaveCmdGripAngle, o_jntPos=>m_simJntPos);
+
+// filt command joint position
+FOR i:=1 TO g_sJntNum DO 
+	m_cmdJntPos[i] := m_cmdJntPosLpf[i].run(m_simJntPos[i]);
+END_FOR
+
+// compute command joint velocity
+vecSub(m_cmdJntPos, m_lastCmdJntPos, m_cmdJntVel);
+vecSelfMultiNum(m_cmdJntVel, g_slaveArmCtrlFreq);
+m_lastCmdJntPos:=m_cmdJntPos;
+
+m_codeTime(START:=FALSE);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdJntTrq" Id="{3f254bda-d40b-446c-b042-441af7052598}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntTrq : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	i :INT ;
+	instruCmdGripAngle, instruCmdGripForceLevel :LREAL;
+	instruCmdJntPos, instruCmdJntVel : Vec5d;	
+	instruJntCtrlTrq :Vec5d;
+	
+	instruGripJntMaxCurrent :LREAL;
+	instruGripJntCurrent :LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF isFinished THEN
+	RETURN;
+END_IF
+
+// set joint torque to zero in default
+m_cmdJntTrq := g_zeroVec8d;
+
+// instrument joint control
+FOR i:=1 TO 5 DO 
+	instruCmdJntPos[i]:=m_cmdJntPos[i+3];
+	instruCmdJntVel[i]:=m_cmdJntVel[i+3];
+END_FOR
+m_cmdYawAngle := m_cmdYawAngLpf.run(m_simDHJntPos[6]);
+m_cmdYawVel := m_cmdYawVelLpf.run(m_simDHJointVel[6]);
+
+// check if to exert larger grip force
+setMaxGripTrq(i_masterStatus, i_slaveArm);
+
+IF i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeS OR i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeU THEN
+	m_usKnifeController.run(instruCmdJntPos,instruCmdJntVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
+ELSE
+	m_basicInstruController.run(instruCmdJntPos,instruCmdJntVel, m_cmdYawAngle, m_cmdYawVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
+END_IF
+
+FOR i:=1 TO 5 DO
+	m_cmdJntTrq[i+3]:=instruJntCtrlTrq[i];
+END_FOR
+
+// TODO:instrument test code, accumulate use duration
+IF m_armIdx = 1 OR m_armIdx = 3 THEN
+	instruGripJntMaxCurrent := 350;
+ELSE
+	instruGripJntMaxCurrent := 500;
+END_IF
+instruGripJntCurrent := MAX( ABS(i_slaveArm.filtJntCurrent[4]), ABS(i_slaveArm.filtJntCurrent[5]));
+IF instruGripJntCurrent > 0.75 * instruGripJntMaxCurrent THEN
+	GVL_interactUI.g_instruUseDuration[m_armIdx][4]:=GVL_interactUI.g_instruUseDuration[m_armIdx][4]+g_slaveArmCtrlCycleTime;
+ELSIF instruGripJntCurrent > 0.5 * instruGripJntMaxCurrent THEN
+	GVL_interactUI.g_instruUseDuration[m_armIdx][3]:=GVL_interactUI.g_instruUseDuration[m_armIdx][3]+g_slaveArmCtrlCycleTime;
+ELSIF instruGripJntCurrent > 0.25 * instruGripJntMaxCurrent THEN
+	GVL_interactUI.g_instruUseDuration[m_armIdx][2]:=GVL_interactUI.g_instruUseDuration[m_armIdx][2]+g_slaveArmCtrlCycleTime;
+ELSE
+	GVL_interactUI.g_instruUseDuration[m_armIdx][1]:=GVL_interactUI.g_instruUseDuration[m_armIdx][1]+g_slaveArmCtrlCycleTime;
+END_IF
+
+IF m_slaveCmdGripForceLevel > 75 THEN
+	GVL_interactUI.g_masterCmdDuration[m_armIdx][4]:=GVL_interactUI.g_masterCmdDuration[m_armIdx][4]+g_slaveArmCtrlCycleTime;
+ELSIF m_slaveCmdGripForceLevel > 50 THEN
+	GVL_interactUI.g_masterCmdDuration[m_armIdx][3]:=GVL_interactUI.g_masterCmdDuration[m_armIdx][3]+g_slaveArmCtrlCycleTime;
+ELSIF m_slaveCmdGripForceLevel > 25 THEN
+	GVL_interactUI.g_masterCmdDuration[m_armIdx][2]:=GVL_interactUI.g_masterCmdDuration[m_armIdx][2]+g_slaveArmCtrlCycleTime;
+ELSE
+	GVL_interactUI.g_masterCmdDuration[m_armIdx][1]:=GVL_interactUI.g_masterCmdDuration[m_armIdx][1]+g_slaveArmCtrlCycleTime;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcMSErrInScope" Id="{abb1499d-a155-4113-9e19-42bf79b660b8}">
+      <Declaration><![CDATA[METHOD calcMSErrInScope : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_setupPose :ST_Frame;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	posErrInCart,oriErrInCart :Vec3d;
+	invRot :Mat3d;
+	posErrInScope,oriErrInScope :Vec3d;
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_masterSlavePoseError := g_zeroVec6d;
+
+// pose error caused by joints limits
+IF m_reachMacroJntLimit OR m_reachWristJntLimit THEN
+	// pose error in cart coordinate
+	matMultiVec(i_setupPose.m_rot, m_slavePosErr, posErrInCart);
+	matMultiVec(i_setupPose.m_rot, m_errAxis, oriErrInCart);
+	vecSelfMultiNum(oriErrInCart, m_errAngle);
+	
+	// pose err in endoscope coordinate
+	matTranspose(i_endoscopePose.m_rot, invRot);
+	matMultiVec(invRot, posErrInCart, posErrInScope);
+	matMultiVec(invRot, oriErrInCart, oriErrInScope);
+	
+	FOR i:=1 TO 3 DO 
+		m_masterSlavePoseError[i]:=posErrInScope[i];
+		m_masterSlavePoseError[i+3]:=oriErrInScope[i];
+	END_FOR
+
+END_IF
+
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="clearBacklash" Id="{feac48ec-5658-4294-9b99-17134c7688dc}">
+      <Declaration><![CDATA[METHOD PUBLIC clearBacklash : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_basicInstruController.clearBacklash();
+m_usKnifeController.clearBacklash();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="gripperControl" Id="{fbf054dc-490b-4b21-8b0f-a3bfcd2a90f0}">
+      <Declaration><![CDATA[METHOD gripperControl : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR
+	//matchedSlaveGripAngle:LREAL;
+	matchedSlaveGripForce:LREAL;
+	matchedSlaveGripAngle:LREAL;
+	masterGripVelThres :LREAL := 5.0 *g_deg2Rad;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// compute matched slave grip angle and force
+i_slaveArm.instrument.gripAngleMap(m_masterGripAngle,o_instruGripAngle=>matchedSlaveGripAngle, o_instruGripForceLevel=>matchedSlaveGripForce);
+
+IF m_gripperCtrlFlag THEN
+	m_slaveCmdGripAngle := matchedSlaveGripAngle;
+	m_slaveCmdGripForceLevel := matchedSlaveGripForce;
+	RETURN;
+ELSE
+	//m_gripperCtrlFlag := (ABS(m_masterGripAngleVel) >masterGripVelThres) AND  (m_masterGripAngleVel * (matchedSlaveGripAngle-i_slaveArm.curGripAngle)>0);
+	m_gripperMatchAngMin := MIN(m_gripperMatchAngMin, ABS(matchedSlaveGripAngle-m_initInstruAngle));
+	m_gripperCtrlFlag := ABS(matchedSlaveGripAngle-i_slaveArm.curGripAngle)<m_gripperMatchAngThres OR 
+	     (matchedSlaveGripAngle>=i_SlaveArm.instrument.instruTypeInfo.m_maxGripAngle - m_gripperMatchAngThres AND i_slaveArm.curGripAngle>=matchedSlaveGripAngle) OR 
+		(matchedSlaveGripAngle<=g_minSlaveGripAngle + m_gripperMatchAngThres AND i_slaveArm.curGripAngle<=matchedSlaveGripAngle) OR
+		ABS(ABS(matchedSlaveGripAngle-m_initInstruAngle) - m_gripperMatchAngMin) > 10 * g_deg2Rad ;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="gripperCtrlFlag" Id="{ab9ec899-f792-4e44-a81a-08fa8d4b6095}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY PUBLIC gripperCtrlFlag : BOOL]]></Declaration>
+      <Get Name="Get" Id="{4764b97f-612f-4869-a2fe-d163772a04d1}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[gripperCtrlFlag:=m_gripperCtrlFlag;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{0fc9d94f-75fc-4919-91fa-f2d6d1db344e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_gripperCtrlFlag:=gripperCtrlFlag;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="init" Id="{8e699fff-055b-4342-b321-d3dea4e9e235}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+VAR 
+	i :INT ;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+m_simJntPos :=m_cmdJntPos;
+m_lastCmdJntPos :=m_cmdJntPos;
+m_jntOPMode[1] := DriverOPMode_PosTrq;
+m_jntOPMode[2] := DriverOPMode_PosTrq;
+m_jntOPMode[3] := DriverOPMode_PosTrq;
+m_jntOPMode[4] := DriverOPMode_Trq;
+m_jntOPMode[5] := DriverOPMode_Trq;
+m_jntOPMode[6] := DriverOPMode_Trq;
+m_jntOPMode[7] := DriverOPMode_Trq;
+m_jntOPMode[8] := DriverOPMode_Trq;
+m_firstIn :=TRUE;
+
+// init gripper angle
+m_slaveCmdGripAngle := i_slaveArm.curGripAngle;
+IF NOT i_slaveArm.instrument.forceBipolarMode THEN
+	m_slaveCmdGripForceLevel:=0;
+END_IF
+
+// init filter
+FOR i:=1 TO 3 DO
+	m_cmdJntPosLpf[i].init(1, m_macroCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+END_FOR
+FOR i:=4 TO g_sJntNum DO
+	m_cmdJntPosLpf[i].init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+END_FOR
+m_cmdYawAngLpf.init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+m_cmdYawVelLpf.init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+
+// init controller
+m_basicInstruController.init(i_slaveArm);
+m_usKnifeController.init(i_slaveArm);
+m_instruType := i_slaveArm.instrument.instruType;
+
+// init interpolation data
+m_firstInterpolate :=TRUE;
+m_curInterpolateCylce := 1;
+
+//init instrument angle 
+m_initInstruAngle := i_slaveArm.curGripAngle;
+m_gripperMatchAngMin := g_largeNum;
+
+// update commands to arm
+copyCmds(r_slaveArmCtrlCmd);
+
+// instrument test code, clear use duration
+FOR i:=1 TO 4 DO
+	GVL_interactUI.g_instruUseDuration[m_armIdx][i]:=0.0;
+	GVL_interactUI.g_masterCmdDuration[m_armIdx][i]:=0.0;
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="InstruBacklash" Id="{b7c3e41d-fa8c-4cbb-9800-670625b591da}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY InstruBacklash : Vec5d]]></Declaration>
+      <Get Name="Get" Id="{e210e66d-4624-402f-95a0-cc4584df27a4}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IF m_instruType = InstruType_UltrasoundKnifeS OR m_instruType = InstruType_UltrasoundKnifeU THEN
+	instruBacklash := m_usKnifeController.jntBacklash;
+ELSE
+	instruBacklash := m_basicInstruController.jntBacklash;
+END_IF]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="limitInstruDofs" Id="{7b26ee4a-55a3-4d15-8eae-cb25f789966a}">
+      <Declaration><![CDATA[// limit specific joint dofs based on instrument types
+METHOD PRIVATE limitInstruDofs : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR_IN_OUT
+	r_simDHJointVel :Vec6d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeS OR i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeU THEN
+	r_simDHJointVel[5] :=0;
+	r_simDHJointVel[6] :=0;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="masterPoseInterploate" Id="{4ecc1ef9-4f95-4626-a287-8e3128d5dc61}">
+      <Declaration><![CDATA[// every some cycles the data from master robots would be miss, so add this interpolation
+METHOD masterPoseInterploate : BOOL
+VAR_INPUT
+	i_masterPose :ST_FRAME;
+	i_masterGripAngle :LREAL;
+END_VAR
+
+VAR
+	rotT :Mat3d;
+	rotErr:Mat3d;
+	errAngle:LREAL;
+	errAxisLocal :Vec3d;
+	tmpMat :Mat3d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF m_firstInterpolate THEN
+	m_firstInterpolate :=FALSE;
+	m_lastMasterGripAngle :=i_masterGripAngle;
+	m_lastMasterPose := i_masterPose;
+	m_masterPosInterStep :=g_zeroVec3d;
+	m_masterOriInterStep :=g_eye3d;
+	m_masterGripAngleInterStep :=0.0;
+	m_interplotedMasterPose := i_masterPose;
+	m_interplotedMasterGripAngle := i_masterGripAngle;
+END_IF
+
+
+// update next interpolation
+IF m_curInterpolateCylce > m_masterInterpolateCycle THEN
+	vecSub(i_masterPose.m_pos, m_lastMasterPose.m_pos, m_masterPosInterStep);
+	vecSelfMultiNum( m_masterPosInterStep, 1.0/INT_TO_LREAL(m_masterInterpolateCycle));
+	
+	matTranspose(m_lastMasterPose.m_rot, rotT);
+	matMultiply(rotT, i_masterPose.m_rot, rotErr);
+	rot2AngAxis(rotErr, angle=>errAngle, axis=>errAxisLocal);
+	m_masterOriInterStep := angAxis2Rot(errAngle/INT_TO_LREAL(m_masterInterpolateCycle), errAxisLocal);
+	
+	m_masterGripAngleInterStep := (i_masterGripAngle- m_lastMasterGripAngle)/INT_TO_LREAL(m_masterInterpolateCycle);
+	
+	m_curInterpolateCylce :=1;
+	m_lastMasterPose:= i_masterPose;
+	m_lastMasterGripAngle := i_masterGripAngle;
+END_IF
+
+// control points
+IF m_curInterpolateCylce = m_masterInterpolateCycle THEN
+	m_interplotedMasterGripAngle := m_lastMasterGripAngle;
+	m_interplotedMasterPose := m_lastMasterPose;
+// interpolation
+ELSE
+	m_interplotedMasterGripAngle := m_interplotedMasterGripAngle + m_masterGripAngleInterStep;
+	vecSelfAdd(m_interplotedMasterPose.m_pos, m_masterPosInterStep);
+	tmpMat := m_interplotedMasterPose.m_rot;
+	matMultiply(tmpMat, m_masterOriInterStep, m_interplotedMasterPose.m_rot);
+END_IF
+
+m_curInterpolateCylce:= m_curInterpolateCylce+1;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="masterSlavePoseErr" Id="{f242ad86-394d-4b41-a84a-855fff9c9492}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY masterSlavePoseErr : REFERENCE to Vec6d]]></Declaration>
+      <Get Name="Get" Id="{5aa0b838-05cb-448f-a44e-7f60bee5d157}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[masterSlavePoseErr REF= m_masterSlavePoseError;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="setMaxGripTrq" Id="{b319fb0c-df6f-49cc-bb58-b5eed2375c62}">
+      <Declaration><![CDATA[METHOD setMaxGripTrq : BOOL
+VAR_IN_OUT CONSTANT
+	i_masterStatus :ST_MasterStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	i:INT;
+	 peakGripTrqScale :LREAL := 2;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// only valid for ForceBipolar
+IF i_slaveArm.instrument.instruType <> InstruType_ForceBipolar THEN
+	RETURN;
+END_IF
+
+// only trigger grip force switch when no grip force exerted currently
+IF m_slaveCmdGripForceLevel > g_smallNum  THEN
+	RETURN;
+END_IF; 
+
+// decide matched master arm index
+FOR i:=1 TO g_mArmNum DO 
+	IF i_masterStatus.m_teleSlaveArmIdx[i] = i_slaveArm.armIdx THEN
+		IF i_masterStatus.m_pedalHover[i] AND i_masterStatus.m_electricKnifePedalTrigger[i] =1 THEN
+			i_slaveArm.instrument.forceBipolarMode := TRUE;
+			m_basicInstruController.setMaxGripTrq(i_slaveArm.instrument.instruTypeInfo.m_normGripTrq * peakGripTrqScale);
+		ELSE
+			i_slaveArm.instrument.forceBipolarMode := FALSE;
+			m_basicInstruController.setMaxGripTrq(i_slaveArm.instrument.instruTypeInfo.m_normGripTrq * peakGripTrqScale);
+		END_IF
+	END_IF
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="simDHJntPos" Id="{35f0f777-3e16-4524-a72a-6ce4cc5714dd}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY simDHJntPos : Vec6d]]></Declaration>
+      <Get Name="Get" Id="{0cd5378b-37b7-4917-bd29-1eb1b03a9759}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[simDHJntPos := m_simDHJntPos;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="wristLimitSolve" Id="{446b20b5-26ba-4704-9476-8fa1b2d55ef0}">
+      <Declaration><![CDATA[// calculate optimized wrist joint velocity when joint limit is violated
+METHOD wristLimitSolve : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR
+	i,j:INT;
+	jntDynaUB, jntDynaLB :LREAL;
+	
+	dsrWVel:Vec3d;
+	wristJntVel :Vec3d;
+	wristJaco:Mat3d;
+	
+	optJntVel:Vec2d;
+	partJaco :Mat32;
+	partJacoT :Mat23;
+	JtJ,JtJInv :Mat2d;
+	partJacoPInv:Mat23;
+	
+	partJacoPinv2 :Vec3d;
+	jacoNorm :LREAL;
+	
+	wVelLocal,wVelWrd:Vec3d;
+	matT:Mat3d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_reachWristJntLimit := FALSE;
+
+// desire angular velocity from wrist joint
+FOR i:=1 TO 3 DO
+	wristJntVel[i] := m_simDHJointVel[i+3];
+	FOR j:=1 TO 3 DO
+		wristJaco[i,j]:= i_slaveArm.simJaco[i+3, j+3];
+	END_FOR 
+END_FOR
+matMultiVec(wristJaco, wristJntVel, dsrWVel);
+
+// check which joint reaches limit
+FOR i:=4 TO 6 DO
+	m_jntLimitFlag[i] := FALSE;
+	jntDynaUB := MAX( 0, (i_slaveArm.instrument.m_wristMaxDHJntPos[i-3] - i_slaveArm.simDHJntPos[i])/g_slaveArmCtrlCycleTime);
+	jntDynaLB := MIN( 0, (i_slaveArm.instrument.m_wristMinDHJntPos[i-3] - i_slaveArm.simDHJntPos[i])/g_slaveArmCtrlCycleTime);
+	IF m_simDHJointVel[i] >= jntDynaUB OR m_simDHJointVel[i]<=jntDynaLB THEN
+		m_simDHJointVel[i]:=LIMIT(jntDynaLB, m_simDHJointVel[i], jntDynaUB);
+		m_jntLimitFlag[i]:=TRUE;
+		m_reachWristJntLimit := TRUE;
+	END_IF
+END_FOR
+
+// no limit violated
+IF NOT( m_jntLimitFlag[4]) AND NOT(m_jntLimitFlag[5]) AND NOT(m_jntLimitFlag[6]) THEN
+	RETURN;
+END_IF; 
+
+// all joint reach limit
+IF m_jntLimitFlag[4] AND m_jntLimitFlag[5] AND m_jntLimitFlag[6] THEN
+	RETURN;
+END_IF;
+
+// joint 4 reach limit
+IF m_jntLimitFlag[4] AND NOT(m_jntLimitFlag[5]) AND NOT(m_jntLimitFlag[6]) THEN
+	// colume 2/3
+	partJaco[1,1]:= wristJaco[1,2];
+	partJaco[2,1]:= wristJaco[2,2];
+	partJaco[3,1]:= wristJaco[3,2];
+	
+	partJaco[1,2]:= wristJaco[1,3];
+	partJaco[2,2]:= wristJaco[2,3];
+	partJaco[3,2]:= wristJaco[3,3];
+	
+	// pinv partJaco
+	matTranspose(partJaco, partJacoT);
+	matMultiply(partJacoT, partJaco, JtJ);
+	IF NOT(invMat2(JtJ, JtJInv)) THEN
+		m_simDHJointVel[5] :=0;
+		m_simDHJointVel[6] := 0;
+		RETURN;
+	END_IF
+	matMultiply(JtJInv, partJacoT, partJacoPinv);
+	
+	// desire angular velocity exclusive limited joint motion
+	dsrWVel[1] := dsrWVel[1] - wristJaco[1,1] * m_simDHJointVel[4];
+	dsrWVel[2] := dsrWVel[2] - wristJaco[2,1] * m_simDHJointVel[4];
+	dsrWVel[3] := dsrWVel[3] - wristJaco[3,1] * m_simDHJointVel[4];
+	
+	//NOTE: special handle for roll limit. avoiding joint5/6 motion caused by roll limit
+	matTranspose(i_slaveArm.simCartPose.m_rot, matT);
+	matMultiVec(matT, dsrWVel, wVelLocal);
+	wVelLocal[3]:=0;
+	matMultiVec(i_slaveArm.simCartPose.m_rot, wVelLocal, dsrWVel);
+	
+	// solve
+	matMultiVec(partJacoPinv, dsrWVel, optJntVel);
+	m_simDHJointVel[5] :=optJntVel[1];
+	m_simDHJointVel[6] := optJntVel[2];
+END_IF
+
+// joint 5 reach limit
+IF m_jntLimitFlag[5] AND NOT(m_jntLimitFlag[4]) AND NOT(m_jntLimitFlag[6]) THEN
+	// colume 1/3
+	partJaco[1,1]:= wristJaco[1,1];
+	partJaco[2,1]:= wristJaco[2,1];
+	partJaco[3,1]:= wristJaco[3,1];
+	
+	partJaco[1,2]:= wristJaco[1,3];
+	partJaco[2,2]:= wristJaco[2,3];
+	partJaco[3,2]:= wristJaco[3,3];
+	
+	// pinv partJaco
+	matTranspose(partJaco, partJacoT);
+	matMultiply(partJacoT, partJaco, JtJ);
+	IF NOT(invMat2(JtJ, JtJInv)) THEN
+		m_simDHJointVel[4] :=0;
+		m_simDHJointVel[6] := 0;
+		RETURN;
+	END_IF
+	matMultiply(JtJInv, partJacoT, partJacoPinv);
+		
+	// desire angular velocity exclusive limited joint motion
+	dsrWVel[1] := dsrWVel[1] - wristJaco[1,2] * m_simDHJointVel[5];
+	dsrWVel[2] := dsrWVel[2] - wristJaco[2,2] * m_simDHJointVel[5];
+	dsrWVel[3] := dsrWVel[3] - wristJaco[3,2] * m_simDHJointVel[5];
+	
+	//NOTE: special handle for pitch limit. avoiding joint4/6 motion caused by pitch limit
+	matTranspose(i_slaveArm.simCartPose.m_rot, matT);
+	matMultiVec(matT, dsrWVel, wVelLocal);
+	wVelLocal[1]:=0;
+	matMultiVec(i_slaveArm.simCartPose.m_rot, wVelLocal, dsrWVel);
+	
+	// solve
+	matMultiVec(partJacoPinv, dsrWVel, optJntVel);
+	m_simDHJointVel[4] :=optJntVel[1];
+	m_simDHJointVel[6] := optJntVel[2];
+END_IF
+
+// joint 6 reach limit
+IF m_jntLimitFlag[6] AND NOT(m_jntLimitFlag[4]) AND NOT(m_jntLimitFlag[5]) THEN
+	// colume 1/2
+	partJaco[1,1]:= wristJaco[1,1];
+	partJaco[2,1]:= wristJaco[2,1];
+	partJaco[3,1]:= wristJaco[3,1];
+	
+	partJaco[1,2]:= wristJaco[1,2];
+	partJaco[2,2]:= wristJaco[2,2];
+	partJaco[3,2]:= wristJaco[3,2];
+	
+	// pinv partJaco
+	matTranspose(partJaco, partJacoT);
+	matMultiply(partJacoT, partJaco, JtJ);
+	IF NOT(invMat2(JtJ, JtJInv)) THEN
+		m_simDHJointVel[4] :=0;
+		m_simDHJointVel[5] := 0;
+		RETURN;
+	END_IF
+	matMultiply(JtJInv, partJacoT, partJacoPinv);
+		
+	// desire angular velocity exclusive limited joint motion
+	dsrWVel[1] := dsrWVel[1] - wristJaco[1,3] * m_simDHJointVel[6];
+	dsrWVel[2] := dsrWVel[2] - wristJaco[2,3] * m_simDHJointVel[6];
+	dsrWVel[3] := dsrWVel[3] - wristJaco[3,3] * m_simDHJointVel[6];
+	
+	// solve
+	matMultiVec(partJacoPinv, dsrWVel, optJntVel);
+	m_simDHJointVel[4] :=optJntVel[1];
+	m_simDHJointVel[5] := optJntVel[2];
+END_IF
+
+// joint 4/5 reach limit
+IF m_jntLimitFlag[4] AND m_jntLimitFlag[5] AND NOT(m_jntLimitFlag[6]) THEN
+	// pinv partJaco of column 3
+	partJacoPinv2[1] := wristJaco[1, 3];
+	partJacoPinv2[2] := wristJaco[2, 3];
+	partJacoPinv2[3] := wristJaco[3, 3];
+	jacoNorm := norm(partJacoPinv2);
+	vecSelfMultiNum(partJacoPinv2, 1.0/(jacoNorm*jacoNorm));
+		
+	// desire angular velocity exclusive limited joint motion
+	dsrWVel[1] := dsrWVel[1] - wristJaco[1,1] * m_simDHJointVel[4] - wristJaco[1,2] * m_simDHJointVel[5];
+	dsrWVel[2] := dsrWVel[2] - wristJaco[2,1] * m_simDHJointVel[4] - wristJaco[2,2] * m_simDHJointVel[5];
+	dsrWVel[3] := dsrWVel[3] - wristJaco[3,1] * m_simDHJointVel[4] - wristJaco[3,2] * m_simDHJointVel[5];
+	
+	// solve
+	m_simDHJointVel[6] := vecDot(partJacoPinv2, dsrWVel);
+END_IF
+
+// joint 4/6 reach limit
+IF m_jntLimitFlag[4] AND m_jntLimitFlag[6] AND NOT(m_jntLimitFlag[5]) THEN
+	// pinv partJaco of column 2
+	partJacoPinv2[1] := wristJaco[1, 2];
+	partJacoPinv2[2] := wristJaco[2, 2];
+	partJacoPinv2[3] := wristJaco[3, 2];
+	jacoNorm := norm(partJacoPinv2);
+	vecSelfMultiNum(partJacoPinv2, 1.0/(jacoNorm*jacoNorm));
+		
+	// desire angular velocity exclusive limited joint motion
+	dsrWVel[1] := dsrWVel[1] - wristJaco[1,1] * m_simDHJointVel[4] - wristJaco[1,3] * m_simDHJointVel[6];
+	dsrWVel[2] := dsrWVel[2] - wristJaco[2,1] * m_simDHJointVel[4] - wristJaco[2,3] * m_simDHJointVel[6];
+	dsrWVel[3] := dsrWVel[3] - wristJaco[3,1] * m_simDHJointVel[4] - wristJaco[3,3] * m_simDHJointVel[6];
+	
+	// solve
+	m_simDHJointVel[5] := vecDot(partJacoPinv2, dsrWVel);
+END_IF
+
+// joint 5/6 reach limit
+IF m_jntLimitFlag[5] AND m_jntLimitFlag[6] AND NOT(m_jntLimitFlag[4]) THEN
+	// pinv partJaco of column 4
+	partJacoPinv2[1] := wristJaco[1, 1];
+	partJacoPinv2[2] := wristJaco[2, 1];
+	partJacoPinv2[3] := wristJaco[3, 1];
+	jacoNorm := norm(partJacoPinv2);
+	vecSelfMultiNum(partJacoPinv2, 1.0/(jacoNorm*jacoNorm));
+		
+	// desire angular velocity exclusive limited joint motion
+	dsrWVel[1] := dsrWVel[1] - wristJaco[1,2] * m_simDHJointVel[5] - wristJaco[1,3] * m_simDHJointVel[6];
+	dsrWVel[2] := dsrWVel[2] - wristJaco[2,2] * m_simDHJointVel[5] - wristJaco[2,3] * m_simDHJointVel[6];
+	dsrWVel[3] := dsrWVel[3] - wristJaco[3,2] * m_simDHJointVel[5] - wristJaco[3,3] * m_simDHJointVel[6];
+	
+	// solve
+	m_simDHJointVel[4] := vecDot(partJacoPinv2, dsrWVel);
+END_IF
+
+
+// check which joint reaches limit
+FOR i:=4 TO 6 DO
+	jntDynaUB := MAX( 0, (i_slaveArm.instrument.m_wristMaxDHJntPos[i-3] - i_slaveArm.simDHJntPos[i])/g_slaveArmCtrlCycleTime);
+	jntDynaLB := MIN( 0, (i_slaveArm.instrument.m_wristMinDHJntPos[i-3] - i_slaveArm.simDHJntPos[i])/g_slaveArmCtrlCycleTime);
+	IF m_simDHJointVel[i] >= jntDynaUB OR m_simDHJointVel[i]<=jntDynaLB THEN
+		m_simDHJointVel[i]:=LIMIT(jntDynaLB, m_simDHJointVel[i], jntDynaUB);
+		m_jntLimitFlag[i]:=TRUE;
+		m_reachWristJntLimit := TRUE;
+	END_IF
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak.calcCmdJntPos">
+      <LineId Id="2591" Count="161" />
+      <LineId Id="206" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak.calcCmdJntTrq">
+      <LineId Id="416" Count="53" />
+      <LineId Id="55" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak.calcMSErrInScope">
+      <LineId Id="158" Count="23" />
+      <LineId Id="28" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak.clearBacklash">
+      <LineId Id="6" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak.gripperControl">
+      <LineId Id="64" Count="1" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="67" Count="5" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="73" Count="2" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak.gripperCtrlFlag.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak.gripperCtrlFlag.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak.init">
+      <LineId Id="571" Count="11" />
+      <LineId Id="584" Count="37" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak.InstruBacklash.Get">
+      <LineId Id="9" Count="3" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak.limitInstruDofs">
+      <LineId Id="5" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="13" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak.masterPoseInterploate">
+      <LineId Id="5" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="12" Count="2" />
+      <LineId Id="19" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="22" Count="1" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="38" Count="1" />
+      <LineId Id="28" Count="2" />
+      <LineId Id="40" Count="6" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="82" Count="2" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="49" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak.masterSlavePoseErr.Get">
+      <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak.setMaxGripTrq">
+      <LineId Id="87" Count="21" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak.simDHJntPos.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak.wristLimitSolve">
+      <LineId Id="503" Count="205" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

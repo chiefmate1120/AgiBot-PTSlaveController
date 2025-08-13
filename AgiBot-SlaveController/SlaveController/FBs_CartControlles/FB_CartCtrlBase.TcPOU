@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_CartCtrlBase" Id="{d6cf23e6-1ee8-4a24-a297-ce6d0439587b}" SpecialFunc="None">
     <Declaration><![CDATA[// Slave Arm Base Controller, Hold at Current Posture
 FUNCTION_BLOCK FB_CartCtrlBase IMPLEMENTS I_CartJointCtrl
@@ -227,21 +227,7 @@ m_timePeriod := m_timePeriod+g_cartCtrlCycleTime;
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlBase.init">
-      <LineId Id="49" Count="0" />
-      <LineId Id="61" Count="0" />
-      <LineId Id="60" Count="0" />
-      <LineId Id="72" Count="0" />
-      <LineId Id="114" Count="0" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="125" Count="1" />
-      <LineId Id="115" Count="0" />
-      <LineId Id="136" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="50" Count="0" />
-      <LineId Id="38" Count="0" />
-      <LineId Id="147" Count="0" />
-      <LineId Id="86" Count="0" />
-      <LineId Id="94" Count="0" />
+      <LineId Id="190" Count="15" />
       <LineId Id="83" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlBase.isFinished.Get">

@@ -99,8 +99,8 @@ VAR
 	m_masterSlavePoseError :Vec6d;
 	
 	// pose track control kp
-	m_posTrackKp :REAL := 100;
-	m_oriTrackKp :REAL := 100;
+	m_posTrackKp :REAL := 10;
+	m_oriTrackKp :REAL := 10;
 	
 	// velocity for slave to track motion
 	m_slaveCmdVel, m_slaveCmdWVel : Vec3d;
@@ -120,8 +120,8 @@ VAR
 	m_cmdJntPosLpf:ARRAY[1..8] OF FB_LowPassFilter;
 	
 	// filter cut-off frequency for control
-	m_macroCmdJntPosLpfCutoffFreq : LREAL :=5;
-	m_microCmdJntPosLpfCutoffFreq : LREAL :=15;
+	m_macroCmdJntPosLpfCutoffFreq : LREAL :=1;
+	m_microCmdJntPosLpfCutoffFreq : LREAL :=1;
 	
 	//position and posture error limit
 	m_distErrLimit:LREAL:=0.001*0.1;

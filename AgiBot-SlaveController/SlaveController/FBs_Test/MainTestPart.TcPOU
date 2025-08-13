@@ -377,7 +377,7 @@ g_systemInfo.m_setupInfo[k].m_curJntVelDegMM:=m_unitFun.setupArmUnit2User(i_data
 g_systemInfo.m_setupInfo[k].m_stateMachine:=SetupArmControl.m_setupRobot.m_setupArmState[k];
 
 //IP Address
-g_systemInfo.m_setupInfo[k].m_IPAddress:=GVL_SetupJointEncoderCaliData.g_setupArmNetID[k];
+g_systemInfo.m_setupInfo[k].m_IPAddress:=GVL_SystemParameters.g_slaveArmNetID[k];
 
 ]]></ST>
       </Implementation>
@@ -447,7 +447,7 @@ g_systemInfo.m_slaveInfo[k].m_jntMin:=GVL_SlaveMotorParameters.g_minJntPos;
 g_systemInfo.m_slaveInfo[k].m_stateMachine:=SlaveArmControl.m_slaveRobot.m_slaveArmState[k];
 
 //IP Address
-g_systemInfo.m_slaveInfo[k].m_IPAddress:=GVL_SlaveJointEncoderCaliData.g_slaveArmNetID[k];
+g_systemInfo.m_slaveInfo[k].m_IPAddress:=GVL_SystemParameters.g_slaveArmNetID[k];
 ]]></ST>
       </Implementation>
     </Method>

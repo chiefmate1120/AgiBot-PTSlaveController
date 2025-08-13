@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="AGILOG_DebugStart" Id="{8ea148c4-efe5-435b-958b-9929af76f822}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION AGILOG_DebugStart : BOOL
+VAR_INPUT
+	i_fileName :STRING;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF GVL_RunTimeLogger.g_enableDebugLog THEN
+	RETURN;
+END_IF
+
+GVL_RunTimeLogger.g_debugLogFileName  := i_fileName;
+
+GVL_RunTimeLogger.g_debugLogReady := FALSE;
+GVL_RunTimeLogger.g_debugLogBufferLock  :=FALSE;
+GVL_RunTimeLogger.g_debugLogBufferInPtr :=1;
+GVL_RunTimeLogger.g_debugLogBufferOutPtr :=1;
+
+
+GVL_RunTimeLogger.g_enableDebugLog := TRUE;
+
+
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="AGILOG_DebugStart">
+      <LineId Id="386" Count="15" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

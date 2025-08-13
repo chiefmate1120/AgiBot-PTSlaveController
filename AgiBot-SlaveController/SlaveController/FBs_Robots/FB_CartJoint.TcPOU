@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_CartJoint" Id="{28a097bf-9305-41bd-b49b-5cc15db4c0fc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CartJoint EXTENDS FB_JointBase
 VAR_INPUT
@@ -170,6 +170,7 @@ ELSIF i_opMode = DriverOPMode_Vel THEN
 	m_cartMotorOutput.m_cmdVelMzVelMode := cmd2motorMZ(m_cmdJntVel, g_cartCtrlCycleTime);
 	
 ELSIF i_opMode = DriverOPMode_Trq THEN   //Here the torque mode is equal to the contour position mode of the MingZhi driver
+	m_motorOutputs.m_cmdMotorEncoder := m_motorInputs.m_motorEncoder;
 	m_motorOutputs.m_cmdCurrent := LREAL_TO_DINT(i_cmdTrq);
 	
 ELSIF i_opMode = DriverOPMode_csvMZ THEN
@@ -247,7 +248,7 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="39" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartJoint.updateCmd">
-      <LineId Id="110" Count="18" />
+      <LineId Id="138" Count="19" />
       <LineId Id="44" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartJoint.updateStatus">

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <GVL Name="GVL_SetupJointEncoderCaliData" Id="{5517e73b-b8e6-4762-9cce-ad4bc8f947d8}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 // Robot8 --joints parameters of setup arms
@@ -16,12 +16,6 @@ VAR_GLOBAL
 	 // if absolute encoder value cross zeros within joint motion range
 	g_linkEncZeroCross :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF INT;
 		 
-	// joint SDO address				
-	g_setupArmNetID: ARRAY[1..4] OF T_AmsNetId:=['169.254.223.120.10.1','192.168.2.91.4.1','192.168.2.91.6.1','192.168.2.91.5.1'];
-	g_setupLEDNetPort:ARRAY[1..g_sArmNum] OF UINT :=[4(1003)];	
-END_VAR
-
-VAR_GLOBAL CONSTANT		 
 //################ DO NOT modify parameters below ###########################
 	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
     g_linkEncLimitBuffer : ARRAY [1..g_setupJntNum] OF DINT := [2(2000),100, 2(1000)];

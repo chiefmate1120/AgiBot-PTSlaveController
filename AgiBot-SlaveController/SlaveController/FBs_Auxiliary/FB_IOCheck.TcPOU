@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_IOCheck" Id="{6ce8e7bd-4d6b-4a88-8a6e-3da90f88b0bc}" SpecialFunc="None">
     <Declaration><![CDATA[// return true if IO is triggerd for a set time period
 FUNCTION_BLOCK FB_IOCheck

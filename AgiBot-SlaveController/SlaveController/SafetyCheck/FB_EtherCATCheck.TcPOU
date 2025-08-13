@@ -19,8 +19,6 @@ VAR
 	m_clearCRCError : FB_EcMasterFrameStatisticClearCRC;
 	m_setSlaveState : FB_EcSetSlaveState;
 	
-	m_stateStorage : ARRAY [1..10000] OF BYTE;
-	index:  INT;
 	m_clearCRCErrorTime : LREAL;
 END_VAR
 ]]></Declaration>
@@ -54,8 +52,7 @@ m_commuEtherCATState(sNetId:= armsNetID, nSlaveAddr:= jntAddr, bExecute:= TRUE, 
 
 IF NOT m_commuEtherCATState.bBusy THEN
 	m_commuEtherCATState(bExecute:=FALSE);
-	index :=LIMIT(1, index + 1,10000);
-	m_stateStorage[index] := m_EcSlaveState.deviceState;
+	m_EtherCATVerify.EtherCATDeviceState:= m_EcSlaveState.deviceState;
 	IF m_EcSlaveState.deviceState = EC_DEVICE_STATE_OP THEN
 		m_EtherCATVerify.EtherCATState := TRUE;
 	ELSE
@@ -114,7 +111,7 @@ END_VAR
       <LineId Id="11" Count="0" />
       <LineId Id="10" Count="0" />
       <LineId Id="12" Count="0" />
-      <LineId Id="57" Count="1" />
+      <LineId Id="58" Count="0" />
       <LineId Id="48" Count="3" />
       <LineId Id="47" Count="0" />
       <LineId Id="13" Count="0" />
