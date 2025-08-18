@@ -5,12 +5,12 @@
   <Children>
     <Node>
       <Title>SetupGravityCaliData</Title>
-      <Expanded>True</Expanded>
-      <FileName>C:\Robot\AgiBot-PTSlaveController new\Scope-SlaveController\SetupGravityCaliData.tcscopex</FileName>
+      <Expanded>False</Expanded>
+      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Repository\RobotMaintenanceSoftware\AgiBot-PTSlaveController\Scope-SlaveController\SetupGravityCaliData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
@@ -257,12 +257,12 @@
         </Node>
         <Node>
           <Title>Arm1</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -343,12 +343,12 @@
         </Node>
         <Node>
           <Title>Arm2</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group (1)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -411,12 +411,12 @@
         </Node>
         <Node>
           <Title>Arm3</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group (2)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -479,12 +479,12 @@
         </Node>
         <Node>
           <Title>Arm4</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group (3)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -547,12 +547,12 @@
         </Node>
         <Node>
           <Title>YT Chart</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group (4)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -575,12 +575,12 @@
     </Node>
     <Node>
       <Title>SlaveGravityCaliData</Title>
-      <Expanded>True</Expanded>
-      <FileName>C:\Robot\AgiBot-PTSlaveController new\Scope-SlaveController\SlaveGravityCaliData.tcscopex</FileName>
+      <Expanded>False</Expanded>
+      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Repository\RobotMaintenanceSoftware\AgiBot-PTSlaveController\Scope-SlaveController\SlaveGravityCaliData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
@@ -659,12 +659,12 @@
         </Node>
         <Node>
           <Title>Arm1</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -763,7 +763,7 @@
         </Node>
         <Node>
           <Title>Arm2</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
@@ -776,7 +776,7 @@
         </Node>
         <Node>
           <Title>Arm3</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
@@ -789,7 +789,7 @@
         </Node>
         <Node>
           <Title>Arm4</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
@@ -810,12 +810,12 @@
     </Node>
     <Node>
       <Title>SlaveJointData</Title>
-      <Expanded>True</Expanded>
-      <FileName>C:\Robot\AgiBot-PTSlaveController new\Scope-SlaveController\SlaveJointData.tcscopex</FileName>
+      <Expanded>False</Expanded>
+      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Repository\RobotMaintenanceSoftware\AgiBot-PTSlaveController\Scope-SlaveController\SlaveJointData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
@@ -840,7 +840,7 @@
         </Node>
         <Node>
           <Title>Arm1</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
@@ -865,12 +865,12 @@
         </Node>
         <Node>
           <Title>YT Chart</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>arm2</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -917,12 +917,12 @@
     </Node>
     <Node>
       <Title>test</Title>
-      <Expanded>True</Expanded>
-      <FileName>C:\Robot\AgiBot-PTSlaveController new\Scope-SlaveController\test.tcscopex</FileName>
+      <Expanded>False</Expanded>
+      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Repository\RobotMaintenanceSoftware\AgiBot-PTSlaveController\Scope-SlaveController\test.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
@@ -995,12 +995,12 @@
         </Node>
         <Node>
           <Title>YT Chart</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -1087,7 +1087,7 @@
         </Node>
         <Node>
           <Title>YT Chart (1)</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
@@ -1112,7 +1112,7 @@
         </Node>
         <Node>
           <Title>YT Chart (2)</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
