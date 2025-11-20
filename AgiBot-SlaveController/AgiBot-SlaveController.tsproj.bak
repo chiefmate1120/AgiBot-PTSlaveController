@@ -2,8 +2,8 @@
 <TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.53">
 	<DataTypes>
 		<DataType>
-			<Name GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}" AutoDeleteType="true">ST_MotorInputs</Name>
-			<BitSize>224</BitSize>
+			<Name GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}" AutoDeleteType="true">ST_MotorInputs</Name>
+			<BitSize>192</BitSize>
 			<SubItem>
 				<Name>m_driverError</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
@@ -40,18 +40,11 @@
 				<BitOffs>128</BitOffs>
 			</SubItem>
 			<SubItem>
-				<Name>m_electriAngleDev</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[motor electrical angle deviation]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>160</BitOffs>
-			</SubItem>
-			<SubItem>
 				<Name>m_heartBeat</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
 				<Comment><![CDATA[drive heart beat]]></Comment>
 				<BitSize>32</BitSize>
-				<BitOffs>192</BitOffs>
+				<BitOffs>160</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -381,7 +374,7 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{075D7E11-7C27-7C4A-8FD8-EE8898484FFB}" AutoDeleteType="true">E_SetupArmState</Name>
+			<Name GUID="{46E1EFFD-F9E4-52B4-BEBA-7CF60CEA7A57}" AutoDeleteType="true">E_SetupArmState</Name>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
 			<EnumInfo>
@@ -461,8 +454,21 @@
 				<Enum>54</Enum>
 			</EnumInfo>
 			<EnumInfo>
+				<Text><![CDATA[SetupArmState_HoldEndoscope]]></Text>
+				<Enum>55</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[SetupArmState_HoldInstru]]></Text>
+				<Enum>56</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[SetupArmState_SingleJntTest]]></Text>
+				<Enum>59</Enum>
+			</EnumInfo>
+			<EnumInfo>
 				<Text><![CDATA[SetupArmState_totalNum]]></Text>
-				<Enum>54</Enum>
+				<Enum>59</Enum>
+				<Comment><![CDATA[	SetupArmState_totalNum :=SetupArmState_DargFreeTest]]></Comment>
 			</EnumInfo>
 			<Properties>
 				<Property>
@@ -561,11 +567,20 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{634A7578-DAD4-F77C-EFB0-67E38221C089}" AutoDeleteType="true">ST_SetupStatus</Name>
-			<BitSize>4032</BitSize>
+			<Name GUID="{D3FC0E71-E966-7642-BFEE-4268915B4346}" AutoDeleteType="true">Vec4b</Name>
+			<BitSize>32</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000030}">BOOL</BaseType>
+			<ArrayInfo>
+				<LBound>1</LBound>
+				<Elements>4</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{7CCFF24F-B98B-94FF-C0CF-8F944197851F}" AutoDeleteType="true">ST_SetupStatus</Name>
+			<BitSize>4096</BitSize>
 			<SubItem>
 				<Name>m_armState</Name>
-				<Type GUID="{075D7E11-7C27-7C4A-8FD8-EE8898484FFB}">E_SetupArmState</Type>
+				<Type GUID="{46E1EFFD-F9E4-52B4-BEBA-7CF60CEA7A57}">E_SetupArmState</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
 					<Elements>4</Elements>
@@ -615,7 +630,7 @@
 				<BitOffs>3136</BitOffs>
 			</SubItem>
 			<SubItem>
-				<Name>m_asepticMegnetCheck</Name>
+				<Name>m_asepticMegnetSpringBreakCheck</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
@@ -624,6 +639,13 @@
 				<Comment><![CDATA[arm aseptic cover megnet check]]></Comment>
 				<BitSize>128</BitSize>
 				<BitOffs>3904</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_setupSelfCheckPass</Name>
+				<Type GUID="{D3FC0E71-E966-7642-BFEE-4268915B4346}">Vec4b</Type>
+				<Comment><![CDATA[setup robot selfcheck finshed]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>4032</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -673,16 +695,7 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{25064278-D686-DB73-C1A4-2DEAEDC17D4D}" IecBaseType="true" AutoDeleteType="true">ARRAY [1..2] OF UDINT</Name>
-			<BitSize>64</BitSize>
-			<BaseType GUID="{18071995-0000-0000-0000-000000000008}">UDINT</BaseType>
-			<ArrayInfo>
-				<LBound>1</LBound>
-				<Elements>2</Elements>
-			</ArrayInfo>
-		</DataType>
-		<DataType>
-			<Name GUID="{FF9E0400-3992-6444-A041-F42BE1A8B118}" AutoDeleteType="true">E_SlaveArmState</Name>
+			<Name GUID="{A23F74BD-F0AE-D71C-9646-92CB5B58D8BF}" AutoDeleteType="true">E_SlaveArmState</Name>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
 			<EnumInfo>
@@ -794,6 +807,10 @@
 				<Enum>27</Enum>
 			</EnumInfo>
 			<EnumInfo>
+				<Text><![CDATA[SlaveArmState_ScopeOrigin]]></Text>
+				<Enum>28</Enum>
+			</EnumInfo>
+			<EnumInfo>
 				<Text><![CDATA[SlaveArmState_MotionTest]]></Text>
 				<Enum>50</Enum>
 			</EnumInfo>
@@ -818,8 +835,14 @@
 				<Enum>55</Enum>
 			</EnumInfo>
 			<EnumInfo>
+				<Text><![CDATA[SlaveArmState_SingleJntTest]]></Text>
+				<Enum>60</Enum>
+				<Comment><![CDATA[hdk:single joint of each arm moves]]></Comment>
+			</EnumInfo>
+			<EnumInfo>
 				<Text><![CDATA[SlaveArmState_totalNum]]></Text>
-				<Enum>55</Enum>
+				<Enum>60</Enum>
+				<Comment><![CDATA[	SlaveArmState_totalNum :=SlaveArmState_DargFreeTest]]></Comment>
 			</EnumInfo>
 			<Properties>
 				<Property>
@@ -983,13 +1006,13 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{7DCB2BC3-C16F-CE87-F8B8-B870DE340DE6}" AutoDeleteType="true">ST_SlaveStatus</Name>
+			<Name GUID="{2E9B7A8A-96CB-EA47-DDF7-608B146D648F}" AutoDeleteType="true">ST_SlaveStatus</Name>
 			<Comment><![CDATA[ Output from slave arm control task, including arm status and cartesian data
  Input to safety task and Master controller]]></Comment>
 			<BitSize>14080</BitSize>
 			<SubItem>
 				<Name>m_armState</Name>
-				<Type GUID="{FF9E0400-3992-6444-A041-F42BE1A8B118}">E_SlaveArmState</Type>
+				<Type GUID="{A23F74BD-F0AE-D71C-9646-92CB5B58D8BF}">E_SlaveArmState</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
 					<Elements>4</Elements>
@@ -1560,11 +1583,11 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{6CBD9D16-6557-140B-D86F-8ABF5048CCCD}" AutoDeleteType="true">ST_SlaveMotorData</Name>
-			<BitSize>11520</BitSize>
+			<Name GUID="{B708B583-221D-2C4D-8EBE-3E397142633D}" AutoDeleteType="true">ST_SlaveMotorData</Name>
+			<BitSize>10240</BitSize>
 			<SubItem>
 				<Name>m_slaveMotorInput</Name>
-				<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+				<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
 					<Elements>4</Elements>
@@ -1573,7 +1596,7 @@
 					<LBound>1</LBound>
 					<Elements>8</Elements>
 				</ArrayInfo>
-				<BitSize>7168</BitSize>
+				<BitSize>6144</BitSize>
 				<BitOffs>0</BitOffs>
 			</SubItem>
 			<SubItem>
@@ -1588,7 +1611,7 @@
 					<Elements>8</Elements>
 				</ArrayInfo>
 				<BitSize>3072</BitSize>
-				<BitOffs>7168</BitOffs>
+				<BitOffs>6144</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_motorEncSalta</Name>
@@ -1599,21 +1622,7 @@
 				</ArrayInfo>
 				<Comment><![CDATA[motor encoder salta value]]></Comment>
 				<BitSize>1024</BitSize>
-				<BitOffs>10240</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_hallAngleAndEncoderAngle</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>4</Elements>
-				</ArrayInfo>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>2</Elements>
-				</ArrayInfo>
-				<BitSize>256</BitSize>
-				<BitOffs>11264</BitOffs>
+				<BitOffs>9216</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -1716,11 +1725,11 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{47C98B77-A83E-29C5-A473-291D5E63EC7C}" AutoDeleteType="true">ST_SetupMotorData</Name>
-			<BitSize>7168</BitSize>
+			<Name GUID="{AAC9A31D-5CE2-BBDF-C470-A4443B5F98C2}" AutoDeleteType="true">ST_SetupMotorData</Name>
+			<BitSize>6400</BitSize>
 			<SubItem>
 				<Name>m_setupMotorInput</Name>
-				<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+				<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
 					<Elements>4</Elements>
@@ -1729,7 +1738,7 @@
 					<LBound>1</LBound>
 					<Elements>5</Elements>
 				</ArrayInfo>
-				<BitSize>4480</BitSize>
+				<BitSize>3840</BitSize>
 				<BitOffs>0</BitOffs>
 			</SubItem>
 			<SubItem>
@@ -1744,7 +1753,7 @@
 					<Elements>5</Elements>
 				</ArrayInfo>
 				<BitSize>1920</BitSize>
-				<BitOffs>4480</BitOffs>
+				<BitOffs>3840</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_motorEncSalta</Name>
@@ -1755,18 +1764,7 @@
 				</ArrayInfo>
 				<Comment><![CDATA[motor encoder salta value]]></Comment>
 				<BitSize>640</BitSize>
-				<BitOffs>6400</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_springBreakageCheck</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>4</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[check spring breakage from joint 3]]></Comment>
-				<BitSize>128</BitSize>
-				<BitOffs>7040</BitOffs>
+				<BitOffs>5760</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -2280,7 +2278,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{477DADDC-1EE0-D793-C860-41D8CB4FD0D7}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{A9D83EEB-8F86-42C8-B31C-3FD74C447E39}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -2293,42 +2291,42 @@
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_masterRobotData</Name>
@@ -2343,7 +2341,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveInputDataPool.m_setupStatus</Name>
 							<Comment><![CDATA[ setup arms infromation;]]></Comment>
-							<Type GUID="{634A7578-DAD4-F77C-EFB0-67E38221C089}">ST_SetupStatus</Type>
+							<Type GUID="{7CCFF24F-B98B-94FF-C0CF-8F944197851F}">ST_SetupStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveInputDataPool.m_slaveDynaData</Name>
@@ -2353,42 +2351,42 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[1].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[2].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[3].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[4].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[5].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[6].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[7].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[8].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_panelInstrumentOnIO</Name>
@@ -2401,11 +2399,6 @@
 							<Type>UDINT</Type>
 						</Var>
 						<Var>
-							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_hallAngleAndEncoderAngle</Name>
-							<Comment><![CDATA[motor hall angle and encoder angle;   ]]></Comment>
-							<Type GUID="{25064278-D686-DB73-C1A4-2DEAEDC17D4D}">ARRAY [1..2] OF UDINT</Type>
-						</Var>
-						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_instrument.m_instruReadFlag</Name>
 							<Comment><![CDATA[instrument read information flag from the device]]></Comment>
 							<Type>UDINT</Type>
@@ -2413,42 +2406,42 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[1].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[2].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[3].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[4].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[5].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[6].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[7].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[8].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_panelInstrumentOnIO</Name>
@@ -2461,11 +2454,6 @@
 							<Type>UDINT</Type>
 						</Var>
 						<Var>
-							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_hallAngleAndEncoderAngle</Name>
-							<Comment><![CDATA[motor hall angle and encoder angle;   ]]></Comment>
-							<Type GUID="{25064278-D686-DB73-C1A4-2DEAEDC17D4D}">ARRAY [1..2] OF UDINT</Type>
-						</Var>
-						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_instrument.m_instruReadFlag</Name>
 							<Comment><![CDATA[instrument read information flag from the device]]></Comment>
 							<Type>UDINT</Type>
@@ -2473,42 +2461,42 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[1].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[2].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[3].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[4].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[5].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[6].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[7].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[8].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_panelInstrumentOnIO</Name>
@@ -2521,11 +2509,6 @@
 							<Type>UDINT</Type>
 						</Var>
 						<Var>
-							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_hallAngleAndEncoderAngle</Name>
-							<Comment><![CDATA[motor hall angle and encoder angle;   ]]></Comment>
-							<Type GUID="{25064278-D686-DB73-C1A4-2DEAEDC17D4D}">ARRAY [1..2] OF UDINT</Type>
-						</Var>
-						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_instrument.m_instruReadFlag</Name>
 							<Comment><![CDATA[instrument read information flag from the device]]></Comment>
 							<Type>UDINT</Type>
@@ -2533,42 +2516,42 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[1].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[2].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[3].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[4].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[5].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[6].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[7].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[8].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_panelInstrumentOnIO</Name>
@@ -2581,11 +2564,6 @@
 							<Type>UDINT</Type>
 						</Var>
 						<Var>
-							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_hallAngleAndEncoderAngle</Name>
-							<Comment><![CDATA[motor hall angle and encoder angle;   ]]></Comment>
-							<Type GUID="{25064278-D686-DB73-C1A4-2DEAEDC17D4D}">ARRAY [1..2] OF UDINT</Type>
-						</Var>
-						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_instrument.m_instruReadFlag</Name>
 							<Comment><![CDATA[instrument read information flag from the device]]></Comment>
 							<Type>UDINT</Type>
@@ -2593,27 +2571,27 @@
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[1].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[2].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[3].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[4].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[5].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_adjustIO</Name>
@@ -2621,39 +2599,34 @@
 							<Type>UDINT</Type>
 						</Var>
 						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_asepticMegnetCheck</Name>
-							<Comment><![CDATA[arm aseptic cover megnet check]]></Comment>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_asepticMegnetSpringBreakCheck</Name>
+							<Comment><![CDATA[arm aseptic cover megnet and  spring breakage from joint 3 check]]></Comment>
 							<Type>DINT</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_springBreakageCheck</Name>
-							<Comment><![CDATA[check spring breakage from joint 3]]></Comment>
-							<Type>UDINT</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[1].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[2].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[3].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[4].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[5].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_adjustIO</Name>
@@ -2661,39 +2634,34 @@
 							<Type>UDINT</Type>
 						</Var>
 						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_asepticMegnetCheck</Name>
-							<Comment><![CDATA[arm aseptic cover megnet check]]></Comment>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_asepticMegnetSpringBreakCheck</Name>
+							<Comment><![CDATA[arm aseptic cover megnet and  spring breakage from joint 3 check]]></Comment>
 							<Type>DINT</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_springBreakageCheck</Name>
-							<Comment><![CDATA[check spring breakage from joint 3]]></Comment>
-							<Type>UDINT</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[1].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[2].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[3].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[4].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[5].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_adjustIO</Name>
@@ -2701,39 +2669,34 @@
 							<Type>UDINT</Type>
 						</Var>
 						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_asepticMegnetCheck</Name>
-							<Comment><![CDATA[arm aseptic cover megnet check]]></Comment>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_asepticMegnetSpringBreakCheck</Name>
+							<Comment><![CDATA[arm aseptic cover megnet and  spring breakage from joint 3 check]]></Comment>
 							<Type>DINT</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_springBreakageCheck</Name>
-							<Comment><![CDATA[check spring breakage from joint 3]]></Comment>
-							<Type>UDINT</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[1].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[2].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[3].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[4].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[5].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{913FBB2A-B6C0-1E9F-F0D1-CF6CCCF518CA}">ST_MotorInputs</Type>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_adjustIO</Name>
@@ -2741,19 +2704,14 @@
 							<Type>UDINT</Type>
 						</Var>
 						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_asepticMegnetCheck</Name>
-							<Comment><![CDATA[arm aseptic cover megnet check]]></Comment>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_asepticMegnetSpringBreakCheck</Name>
+							<Comment><![CDATA[arm aseptic cover megnet and  spring breakage from joint 3 check]]></Comment>
 							<Type>DINT</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_springBreakageCheck</Name>
-							<Comment><![CDATA[check spring breakage from joint 3]]></Comment>
-							<Type>UDINT</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{7DCB2BC3-C16F-CE87-F8B8-B870DE340DE6}">ST_SlaveStatus</Type>
+							<Type GUID="{2E9B7A8A-96CB-EA47-DDF7-608B146D648F}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_safetyData</Name>
@@ -2812,7 +2770,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot status, including arm status and cartesian data, output to other tasks]]></Comment>
-							<Type GUID="{7DCB2BC3-C16F-CE87-F8B8-B870DE340DE6}">ST_SlaveStatus</Type>
+							<Type GUID="{2E9B7A8A-96CB-EA47-DDF7-608B146D648F}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveJointsData</Name>
@@ -2822,7 +2780,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveMotorData</Name>
 							<Comment><![CDATA[slave motor in_output to safety check]]></Comment>
-							<Type GUID="{6CBD9D16-6557-140B-D86F-8ABF5048CCCD}">ST_SlaveMotorData</Type>
+							<Type GUID="{B708B583-221D-2C4D-8EBE-3E397142633D}">ST_SlaveMotorData</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[1].m_motorOutputs</Name>
@@ -3055,7 +3013,7 @@
 						<Var>
 							<Name>SetupArmControl.m_setupStatus</Name>
 							<Comment><![CDATA[ setup robot information]]></Comment>
-							<Type GUID="{634A7578-DAD4-F77C-EFB0-67E38221C089}">ST_SetupStatus</Type>
+							<Type GUID="{7CCFF24F-B98B-94FF-C0CF-8F944197851F}">ST_SetupStatus</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupJointsData</Name>
@@ -3065,7 +3023,7 @@
 						<Var>
 							<Name>SetupArmControl.m_setupMotorData</Name>
 							<Comment><![CDATA[setup motor in_output to safety check]]></Comment>
-							<Type GUID="{47C98B77-A83E-29C5-A473-291D5E63EC7C}">ST_SetupMotorData</Type>
+							<Type GUID="{AAC9A31D-5CE2-BBDF-C470-A4443B5F98C2}">ST_SetupMotorData</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="1" ContextId="1" AreaNo="16">
@@ -3214,7 +3172,7 @@
 						<Var>
 							<Name>CartControl.m_cartDataPool.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{7DCB2BC3-C16F-CE87-F8B8-B870DE340DE6}">ST_SlaveStatus</Type>
+							<Type GUID="{2E9B7A8A-96CB-EA47-DDF7-608B146D648F}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_masterRobotData</Name>
@@ -3308,7 +3266,7 @@
 						<Var>
 							<Name>SafetyCheck.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot information, including arm status and cartesian data]]></Comment>
-							<Type GUID="{7DCB2BC3-C16F-CE87-F8B8-B870DE340DE6}">ST_SlaveStatus</Type>
+							<Type GUID="{2E9B7A8A-96CB-EA47-DDF7-608B146D648F}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_slaveJointData</Name>
@@ -3318,7 +3276,7 @@
 						<Var>
 							<Name>SafetyCheck.m_setupStatus</Name>
 							<Comment><![CDATA[ setup robot information]]></Comment>
-							<Type GUID="{634A7578-DAD4-F77C-EFB0-67E38221C089}">ST_SetupStatus</Type>
+							<Type GUID="{7CCFF24F-B98B-94FF-C0CF-8F944197851F}">ST_SetupStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_setupJointsData</Name>
@@ -3338,12 +3296,12 @@
 						<Var>
 							<Name>SafetyCheck.m_setupMotorData</Name>
 							<Comment><![CDATA[setup motor in_output to safety check]]></Comment>
-							<Type GUID="{47C98B77-A83E-29C5-A473-291D5E63EC7C}">ST_SetupMotorData</Type>
+							<Type GUID="{AAC9A31D-5CE2-BBDF-C470-A4443B5F98C2}">ST_SetupMotorData</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_slaveMotorData</Name>
 							<Comment><![CDATA[slave motor in_output to safety check]]></Comment>
-							<Type GUID="{6CBD9D16-6557-140B-D86F-8ABF5048CCCD}">ST_SlaveMotorData</Type>
+							<Type GUID="{B708B583-221D-2C4D-8EBE-3E397142633D}">ST_SlaveMotorData</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_joystickSignalIOSafetyCheck</Name>
@@ -3384,6 +3342,83 @@
 							<Type>UDINT</Type>
 						</Var>
 					</Vars>
+					<UnrestoredVarLinks ImportTime="2025-11-20T21:47:59">
+						<OwnerA Name="InputDst" Prefix="TIPC^SlaveController^SlaveController Instance" Type="1">
+							<OwnerB Name="TIID^SlaveArm1^SetupJoint3">
+								<Link VarA="SetupArmControl.m_setupRobot.m_setupArms[1].m_asepticMegnetCheck" TypeA="DINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="TxPdoMappingCspCsv^digital input" RestoreInfo="ANotFound"/>
+								<Link VarA="SetupArmControl.m_setupRobot.m_setupArms[1].m_springBreakageCheck" TypeA="UDINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000008}" VarB="TxPdoMappingCspCsv^analog input" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^SlaveArm1^SlaveJoint1">
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_hallAngleAndEncoderAngle[1]" TypeA="UDINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000008}" VarB="TxPdoMappingCspCsv^analog input" RestoreInfo="ANotFound"/>
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[1].m_motorInputs^m_electriAngleDev" TypeA="DINT" InOutA="0" ParentTypeA="ST_MotorInputs" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="TxPdoMappingCspCsv^Velocity actual value" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^SlaveArm1^SlaveJoint2">
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_hallAngleAndEncoderAngle[2]" TypeA="UDINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000008}" VarB="TxPdoMappingCspCsv^analog input" RestoreInfo="ANotFound"/>
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[2].m_motorInputs^m_electriAngleDev" TypeA="DINT" InOutA="0" ParentTypeA="ST_MotorInputs" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="TxPdoMappingCspCsv^Velocity actual value" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^SlaveArm1^SlaveJoint3">
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[3].m_motorInputs^m_electriAngleDev" TypeA="DINT" InOutA="0" ParentTypeA="ST_MotorInputs" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="TxPdoMappingCspCsv^analog input" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^SlaveArm2^SetupJoint3">
+								<Link VarA="SetupArmControl.m_setupRobot.m_setupArms[2].m_asepticMegnetCheck" TypeA="DINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="TxPdoMappingCspCsv^digital input" RestoreInfo="ANotFound"/>
+								<Link VarA="SetupArmControl.m_setupRobot.m_setupArms[2].m_springBreakageCheck" TypeA="UDINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000008}" VarB="TxPdoMappingCspCsv^analog input" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^SlaveArm2^SlaveJoint1">
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_hallAngleAndEncoderAngle[1]" TypeA="UDINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000008}" VarB="TxPdoMappingCspCsv^analog input" RestoreInfo="ANotFound"/>
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[1].m_motorInputs^m_electriAngleDev" TypeA="DINT" InOutA="0" ParentTypeA="ST_MotorInputs" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="TxPdoMappingCspCsv^Velocity actual value" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^SlaveArm2^SlaveJoint2">
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_hallAngleAndEncoderAngle[2]" TypeA="UDINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000008}" VarB="TxPdoMappingCspCsv^digital input" RestoreInfo="ANotFound"/>
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[2].m_motorInputs^m_electriAngleDev" TypeA="DINT" InOutA="0" ParentTypeA="ST_MotorInputs" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="TxPdoMappingCspCsv^Velocity actual value" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^SlaveArm2^SlaveJoint3">
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[3].m_motorInputs^m_electriAngleDev" TypeA="DINT" InOutA="0" ParentTypeA="ST_MotorInputs" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="TxPdoMappingCspCsv^analog input" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^SlaveArm3^SetupJoint3">
+								<Link VarA="SetupArmControl.m_setupRobot.m_setupArms[3].m_asepticMegnetCheck" TypeA="DINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="TxPdoMappingCspCsv^digital input" RestoreInfo="ANotFound"/>
+								<Link VarA="SetupArmControl.m_setupRobot.m_setupArms[3].m_springBreakageCheck" TypeA="UDINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000008}" VarB="TxPdoMappingCspCsv^analog input" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^SlaveArm3^SlaveJoint1">
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_hallAngleAndEncoderAngle[1]" TypeA="UDINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000008}" VarB="TxPdoMappingCspCsv^analog input" RestoreInfo="ANotFound"/>
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[1].m_motorInputs^m_electriAngleDev" TypeA="DINT" InOutA="0" ParentTypeA="ST_MotorInputs" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="TxPdoMappingCspCsv^Velocity actual value" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^SlaveArm3^SlaveJoint2">
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_hallAngleAndEncoderAngle[2]" TypeA="UDINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000008}" VarB="TxPdoMappingCspCsv^analog input" RestoreInfo="ANotFound"/>
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[2].m_motorInputs^m_electriAngleDev" TypeA="DINT" InOutA="0" ParentTypeA="ST_MotorInputs" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="TxPdoMappingCspCsv^Velocity actual value" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^SlaveArm3^SlaveJoint3">
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[3].m_motorInputs^m_electriAngleDev" TypeA="DINT" InOutA="0" ParentTypeA="ST_MotorInputs" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="TxPdoMappingCspCsv^analog input" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^SlaveArm4^SetupJoint3">
+								<Link VarA="SetupArmControl.m_setupRobot.m_setupArms[4].m_asepticMegnetCheck" TypeA="DINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="TxPdoMappingCspCsv^digital input" RestoreInfo="ANotFound"/>
+								<Link VarA="SetupArmControl.m_setupRobot.m_setupArms[4].m_springBreakageCheck" TypeA="UDINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000008}" VarB="TxPdoMappingCspCsv^analog input" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^SlaveArm4^SlaveJoint1">
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_hallAngleAndEncoderAngle[1]" TypeA="UDINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000008}" VarB="TxPdoMappingCspCsv^analog input" RestoreInfo="ANotFound"/>
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[1].m_motorInputs^m_electriAngleDev" TypeA="DINT" InOutA="0" ParentTypeA="ST_MotorInputs" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="TxPdoMappingCspCsv^Velocity actual value" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^SlaveArm4^SlaveJoint2">
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_hallAngleAndEncoderAngle[2]" TypeA="UDINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000008}" VarB="TxPdoMappingCspCsv^analog input" RestoreInfo="ANotFound"/>
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[2].m_motorInputs^m_electriAngleDev" TypeA="DINT" InOutA="0" ParentTypeA="ST_MotorInputs" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="TxPdoMappingCspCsv^Velocity actual value" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^SlaveArm4^SlaveJoint3">
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[3].m_motorInputs^m_electriAngleDev" TypeA="DINT" InOutA="0" ParentTypeA="ST_MotorInputs" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="TxPdoMappingCspCsv^analog input" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
+								<Link VarA="SetupArmControl.m_setupInputDataPool.m_slaveStatus" TypeA="ST_SlaveStatus" InOutA="0" GuidA="{7DCB2BC3-C16F-CE87-F8B8-B870DE340DE6}" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus" RestoreInfo="TypeChanged" IdA="7138"/>
+								<Link VarA="SlaveArmControl.m_slaveInputDataPool.m_setupStatus" TypeA="ST_SetupStatus" InOutA="0" GuidA="{634A7578-DAD4-F77C-EFB0-67E38221C089}" VarB="TaskSlaveArmControl Outputs^SetupArmControl.m_setupStatus" RestoreInfo="TypeMismatch" OldTypeA="ST_SetupStatus" OldGuidA="{634A7578-DAD4-F77C-EFB0-67E38221C089}" NewTypeA="ST_SetupStatus" NewGuidA="{7CCFF24F-B98B-94FF-C0CF-8F944197851F}"/>
+							</OwnerB>
+						</OwnerA>
+						<OwnerA Name="OutputSrc" Prefix="TIPC^SlaveController^SlaveController Instance" Type="2">
+							<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
+								<Link VarA="SetupArmControl.m_setupMotorData" TypeA="ST_SetupMotorData" InOutA="1" GuidA="{47C98B77-A83E-29C5-A473-291D5E63EC7C}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_setupMotorData" RestoreInfo="TypeMismatch" OldTypeA="ST_SetupMotorData" OldGuidA="{47C98B77-A83E-29C5-A473-291D5E63EC7C}" NewTypeA="ST_SetupMotorData" NewGuidA="{AAC9A31D-5CE2-BBDF-C470-A4443B5F98C2}"/>
+								<Link VarA="SetupArmControl.m_setupStatus" TypeA="ST_SetupStatus" InOutA="1" GuidA="{634A7578-DAD4-F77C-EFB0-67E38221C089}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_setupStatus" RestoreInfo="TypeMismatch" OldTypeA="ST_SetupStatus" OldGuidA="{634A7578-DAD4-F77C-EFB0-67E38221C089}" NewTypeA="ST_SetupStatus" NewGuidA="{7CCFF24F-B98B-94FF-C0CF-8F944197851F}"/>
+								<Link VarA="SlaveArmControl.m_slaveMotorData" TypeA="ST_SlaveMotorData" InOutA="1" GuidA="{6CBD9D16-6557-140B-D86F-8ABF5048CCCD}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_slaveMotorData" RestoreInfo="TypeMismatch" OldTypeA="ST_SlaveMotorData" OldGuidA="{6CBD9D16-6557-140B-D86F-8ABF5048CCCD}" NewTypeA="ST_SlaveMotorData" NewGuidA="{B708B583-221D-2C4D-8EBE-3E397142633D}"/>
+								<Link VarA="SlaveArmControl.m_slaveStatus" TypeA="ST_SlaveStatus" InOutA="1" GuidA="{7DCB2BC3-C16F-CE87-F8B8-B870DE340DE6}" VarB="TaskCartControl Inputs^CartControl.m_cartDataPool.m_slaveStatus" RestoreInfo="TypeChanged" IdA="7455"/>
+								<Link VarA="SlaveArmControl.m_slaveStatus" TypeA="ST_SlaveStatus" InOutA="1" GuidA="{7DCB2BC3-C16F-CE87-F8B8-B870DE340DE6}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_slaveStatus" RestoreInfo="TypeChanged" IdA="7455"/>
+							</OwnerB>
+						</OwnerA>
+					</UnrestoredVarLinks>
 					<Contexts>
 						<Context>
 							<Id>0</Id>
@@ -9450,7 +9485,6 @@
 		</Io>
 	</Project>
 	<Mappings>
-		<MappingInfo Identifier="{00000000-2001-0850-0020-500800205008}" Id="#x02030060"/>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500810000403}" Id="#x02030050"/>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500820000403}" Id="#x020300d0"/>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500850000403}" Id="#x02030170"/>
@@ -9617,14 +9651,12 @@
 				<Link VarA="TaskSlaveArmControl Outputs^SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[1].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm1^SetupJoint3">
-				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[1].m_asepticMegnetCheck" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[3].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[3].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[3].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[3].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[3].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[3].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[1].m_springBreakageCheck" VarB="TxPdoMappingCspCsv^analog input"/>
 				<Link VarA="TaskSlaveArmControl Outputs^SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[3].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
 				<Link VarA="TaskSlaveArmControl Outputs^SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[3].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
 				<Link VarA="TaskSlaveArmControl Outputs^SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[3].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
@@ -9653,10 +9685,8 @@
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm1^SlaveJoint1">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_carRotaOverhangIO[1]" VarB="TxPdoMappingCspCsv^digital input"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_hallAngleAndEncoderAngle[1]" VarB="TxPdoMappingCspCsv^analog input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[1].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[1].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[1].m_motorInputs^m_electriAngleDev" VarB="TxPdoMappingCspCsv^Velocity actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[1].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[1].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[1].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
@@ -9667,10 +9697,8 @@
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[1].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm1^SlaveJoint2">
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_hallAngleAndEncoderAngle[2]" VarB="TxPdoMappingCspCsv^analog input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[2].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[2].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[2].m_motorInputs^m_electriAngleDev" VarB="TxPdoMappingCspCsv^Velocity actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[2].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[2].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[2].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
@@ -9687,7 +9715,6 @@
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_adjustIO" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[3].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[3].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[3].m_motorInputs^m_electriAngleDev" VarB="TxPdoMappingCspCsv^analog input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[3].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[3].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[3].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
@@ -9758,14 +9785,12 @@
 				<Link VarA="TaskSlaveArmControl Outputs^SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[1].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm2^SetupJoint3">
-				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[2].m_asepticMegnetCheck" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[3].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[3].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[3].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[3].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[3].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[3].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[2].m_springBreakageCheck" VarB="TxPdoMappingCspCsv^analog input"/>
 				<Link VarA="TaskSlaveArmControl Outputs^SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[3].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
 				<Link VarA="TaskSlaveArmControl Outputs^SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[3].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
 				<Link VarA="TaskSlaveArmControl Outputs^SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[3].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
@@ -9794,10 +9819,8 @@
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm2^SlaveJoint1">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_carRotaOverhangIO[2]" VarB="TxPdoMappingCspCsv^digital input"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_hallAngleAndEncoderAngle[1]" VarB="TxPdoMappingCspCsv^analog input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[1].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[1].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[1].m_motorInputs^m_electriAngleDev" VarB="TxPdoMappingCspCsv^Velocity actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[1].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[1].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[1].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
@@ -9808,9 +9831,7 @@
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[1].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm2^SlaveJoint2">
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_hallAngleAndEncoderAngle[2]" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[2].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[2].m_motorInputs^m_electriAngleDev" VarB="TxPdoMappingCspCsv^Velocity actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[2].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[2].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[2].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
@@ -9827,7 +9848,6 @@
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_adjustIO" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[3].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[3].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[3].m_motorInputs^m_electriAngleDev" VarB="TxPdoMappingCspCsv^analog input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[3].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[3].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[3].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
@@ -9898,14 +9918,12 @@
 				<Link VarA="TaskSlaveArmControl Outputs^SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[1].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm3^SetupJoint3">
-				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[3].m_asepticMegnetCheck" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[3].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[3].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[3].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[3].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[3].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[3].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[3].m_springBreakageCheck" VarB="TxPdoMappingCspCsv^analog input"/>
 				<Link VarA="TaskSlaveArmControl Outputs^SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[3].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
 				<Link VarA="TaskSlaveArmControl Outputs^SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[3].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
 				<Link VarA="TaskSlaveArmControl Outputs^SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[3].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
@@ -9934,10 +9952,8 @@
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm3^SlaveJoint1">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_carRotaOverhangIO[3]" VarB="TxPdoMappingCspCsv^digital input"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_hallAngleAndEncoderAngle[1]" VarB="TxPdoMappingCspCsv^analog input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[1].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[1].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[1].m_motorInputs^m_electriAngleDev" VarB="TxPdoMappingCspCsv^Velocity actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[1].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[1].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[1].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
@@ -9948,10 +9964,8 @@
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[1].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm3^SlaveJoint2">
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_hallAngleAndEncoderAngle[2]" VarB="TxPdoMappingCspCsv^analog input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[2].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[2].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[2].m_motorInputs^m_electriAngleDev" VarB="TxPdoMappingCspCsv^Velocity actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[2].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[2].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[2].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
@@ -9969,7 +9983,6 @@
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_adjustIO" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[3].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[3].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[3].m_motorInputs^m_electriAngleDev" VarB="TxPdoMappingCspCsv^analog input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[3].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[3].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[3].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
@@ -10040,14 +10053,12 @@
 				<Link VarA="TaskSlaveArmControl Outputs^SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[1].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm4^SetupJoint3">
-				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[4].m_asepticMegnetCheck" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[3].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[3].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[3].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[3].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[3].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[3].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[4].m_springBreakageCheck" VarB="TxPdoMappingCspCsv^analog input"/>
 				<Link VarA="TaskSlaveArmControl Outputs^SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[3].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
 				<Link VarA="TaskSlaveArmControl Outputs^SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[3].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
 				<Link VarA="TaskSlaveArmControl Outputs^SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[3].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
@@ -10076,10 +10087,8 @@
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm4^SlaveJoint1">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_carRotaOverhangIO[4]" VarB="TxPdoMappingCspCsv^digital input"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_hallAngleAndEncoderAngle[1]" VarB="TxPdoMappingCspCsv^analog input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[1].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[1].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[1].m_motorInputs^m_electriAngleDev" VarB="TxPdoMappingCspCsv^Velocity actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[1].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[1].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[1].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
@@ -10090,10 +10099,8 @@
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[1].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm4^SlaveJoint2">
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_hallAngleAndEncoderAngle[2]" VarB="TxPdoMappingCspCsv^analog input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[2].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[2].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[2].m_motorInputs^m_electriAngleDev" VarB="TxPdoMappingCspCsv^Velocity actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[2].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[2].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[2].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
@@ -10110,7 +10117,6 @@
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_adjustIO" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[3].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[3].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[3].m_motorInputs^m_electriAngleDev" VarB="TxPdoMappingCspCsv^analog input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[3].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[3].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[3].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
@@ -10172,7 +10178,6 @@
 			</OwnerB>
 			<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartDataPool.m_safetyData" VarB="TaskCartControl Outputs^SafetyCheck.m_safetyCheckData"/>
-				<Link VarA="TaskCartControl Inputs^CartControl.m_cartDataPool.m_slaveStatus" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_instruInfo" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus^m_instruStauts"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_setupJointData" VarB="TaskSlaveArmControl Outputs^SetupArmControl.m_setupJointsData"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_slaveJointsData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveJointsData"/>
@@ -10182,7 +10187,6 @@
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupMotorData" VarB="TaskSlaveArmControl Outputs^SetupArmControl.m_setupMotorData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupStatus" VarB="TaskSlaveArmControl Outputs^SetupArmControl.m_setupStatus"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_slaveJointData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveJointsData"/>
-				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_slaveMotorData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveMotorData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_slaveStatus" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupInputDataPool.m_safetyData" VarB="TaskCartControl Outputs^SafetyCheck.m_safetyCheckData"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupInputDataPool.m_setupJnt3Gravity" VarB="TaskDynamic Outputs^RobotDynamics.m_setupJnt3Gravity"/>
