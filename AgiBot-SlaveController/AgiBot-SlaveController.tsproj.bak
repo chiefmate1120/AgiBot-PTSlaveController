@@ -2278,7 +2278,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{A9D83EEB-8F86-42C8-B31C-3FD74C447E39}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{FCD87FE8-9D25-94A4-9743-85B8A32A4CA7}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -3284,11 +3284,6 @@
 							<Type GUID="{3312EA40-469B-3080-213E-9B2F98E38E6C}">ST_SetupJointData</Type>
 						</Var>
 						<Var>
-							<Name>SafetyCheck.m_cartStatus</Name>
-							<Comment><![CDATA[ Output cart status]]></Comment>
-							<Type GUID="{2DD4D015-67CE-4921-26CF-E03757E9AEA6}">ST_CartStatus</Type>
-						</Var>
-						<Var>
 							<Name>SafetyCheck.m_cartJointsData</Name>
 							<Comment><![CDATA[ cart joint data]]></Comment>
 							<Type GUID="{F079E416-EB88-2AD4-306B-2196CCAAFF93}">ST_CartJointData</Type>
@@ -3307,6 +3302,11 @@
 							<Name>SafetyCheck.m_joystickSignalIOSafetyCheck</Name>
 							<Comment><![CDATA[joystick Signal safety check]]></Comment>
 							<Type GUID="{7EBDD008-A9A8-B259-6DF4-ACAC21313C21}">ARRAY [1..4] OF UDINT</Type>
+						</Var>
+						<Var>
+							<Name>SafetyCheck.m_cartStatus</Name>
+							<Comment><![CDATA[ Output cart status]]></Comment>
+							<Type GUID="{2DD4D015-67CE-4921-26CF-E03757E9AEA6}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>GVL_interactUI.g_powerSupplyModeUPS</Name>
@@ -3403,19 +3403,6 @@
 							</OwnerB>
 							<OwnerB Name="TIID^SlaveArm4^SlaveJoint3">
 								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[3].m_motorInputs^m_electriAngleDev" TypeA="DINT" InOutA="0" ParentTypeA="ST_MotorInputs" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="TxPdoMappingCspCsv^analog input" RestoreInfo="ANotFound"/>
-							</OwnerB>
-							<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
-								<Link VarA="SetupArmControl.m_setupInputDataPool.m_slaveStatus" TypeA="ST_SlaveStatus" InOutA="0" GuidA="{7DCB2BC3-C16F-CE87-F8B8-B870DE340DE6}" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus" RestoreInfo="TypeChanged" IdA="7138"/>
-								<Link VarA="SlaveArmControl.m_slaveInputDataPool.m_setupStatus" TypeA="ST_SetupStatus" InOutA="0" GuidA="{634A7578-DAD4-F77C-EFB0-67E38221C089}" VarB="TaskSlaveArmControl Outputs^SetupArmControl.m_setupStatus" RestoreInfo="TypeMismatch" OldTypeA="ST_SetupStatus" OldGuidA="{634A7578-DAD4-F77C-EFB0-67E38221C089}" NewTypeA="ST_SetupStatus" NewGuidA="{7CCFF24F-B98B-94FF-C0CF-8F944197851F}"/>
-							</OwnerB>
-						</OwnerA>
-						<OwnerA Name="OutputSrc" Prefix="TIPC^SlaveController^SlaveController Instance" Type="2">
-							<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
-								<Link VarA="SetupArmControl.m_setupMotorData" TypeA="ST_SetupMotorData" InOutA="1" GuidA="{47C98B77-A83E-29C5-A473-291D5E63EC7C}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_setupMotorData" RestoreInfo="TypeMismatch" OldTypeA="ST_SetupMotorData" OldGuidA="{47C98B77-A83E-29C5-A473-291D5E63EC7C}" NewTypeA="ST_SetupMotorData" NewGuidA="{AAC9A31D-5CE2-BBDF-C470-A4443B5F98C2}"/>
-								<Link VarA="SetupArmControl.m_setupStatus" TypeA="ST_SetupStatus" InOutA="1" GuidA="{634A7578-DAD4-F77C-EFB0-67E38221C089}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_setupStatus" RestoreInfo="TypeMismatch" OldTypeA="ST_SetupStatus" OldGuidA="{634A7578-DAD4-F77C-EFB0-67E38221C089}" NewTypeA="ST_SetupStatus" NewGuidA="{7CCFF24F-B98B-94FF-C0CF-8F944197851F}"/>
-								<Link VarA="SlaveArmControl.m_slaveMotorData" TypeA="ST_SlaveMotorData" InOutA="1" GuidA="{6CBD9D16-6557-140B-D86F-8ABF5048CCCD}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_slaveMotorData" RestoreInfo="TypeMismatch" OldTypeA="ST_SlaveMotorData" OldGuidA="{6CBD9D16-6557-140B-D86F-8ABF5048CCCD}" NewTypeA="ST_SlaveMotorData" NewGuidA="{B708B583-221D-2C4D-8EBE-3E397142633D}"/>
-								<Link VarA="SlaveArmControl.m_slaveStatus" TypeA="ST_SlaveStatus" InOutA="1" GuidA="{7DCB2BC3-C16F-CE87-F8B8-B870DE340DE6}" VarB="TaskCartControl Inputs^CartControl.m_cartDataPool.m_slaveStatus" RestoreInfo="TypeChanged" IdA="7455"/>
-								<Link VarA="SlaveArmControl.m_slaveStatus" TypeA="ST_SlaveStatus" InOutA="1" GuidA="{7DCB2BC3-C16F-CE87-F8B8-B870DE340DE6}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_slaveStatus" RestoreInfo="TypeChanged" IdA="7455"/>
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
@@ -9485,6 +9472,7 @@
 		</Io>
 	</Project>
 	<Mappings>
+		<MappingInfo Identifier="{00000000-2001-0850-0020-500800205008}" Id="#x02030060"/>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500810000403}" Id="#x02030050"/>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500820000403}" Id="#x020300d0"/>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500850000403}" Id="#x02030170"/>
@@ -10178,6 +10166,7 @@
 			</OwnerB>
 			<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartDataPool.m_safetyData" VarB="TaskCartControl Outputs^SafetyCheck.m_safetyCheckData"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartDataPool.m_slaveStatus" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_instruInfo" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus^m_instruStauts"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_setupJointData" VarB="TaskSlaveArmControl Outputs^SetupArmControl.m_setupJointsData"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_slaveJointsData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveJointsData"/>
@@ -10187,6 +10176,7 @@
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupMotorData" VarB="TaskSlaveArmControl Outputs^SetupArmControl.m_setupMotorData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupStatus" VarB="TaskSlaveArmControl Outputs^SetupArmControl.m_setupStatus"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_slaveJointData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveJointsData"/>
+				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_slaveMotorData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveMotorData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_slaveStatus" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupInputDataPool.m_safetyData" VarB="TaskCartControl Outputs^SafetyCheck.m_safetyCheckData"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupInputDataPool.m_setupJnt3Gravity" VarB="TaskDynamic Outputs^RobotDynamics.m_setupJnt3Gravity"/>

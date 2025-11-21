@@ -2278,7 +2278,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{FCD87FE8-9D25-94A4-9743-85B8A32A4CA7}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{AFAD1195-F5EA-7A9C-D423-015C1B2F997A}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -3284,6 +3284,11 @@
 							<Type GUID="{3312EA40-469B-3080-213E-9B2F98E38E6C}">ST_SetupJointData</Type>
 						</Var>
 						<Var>
+							<Name>SafetyCheck.m_cartStatus</Name>
+							<Comment><![CDATA[ Output cart status]]></Comment>
+							<Type GUID="{2DD4D015-67CE-4921-26CF-E03757E9AEA6}">ST_CartStatus</Type>
+						</Var>
+						<Var>
 							<Name>SafetyCheck.m_cartJointsData</Name>
 							<Comment><![CDATA[ cart joint data]]></Comment>
 							<Type GUID="{F079E416-EB88-2AD4-306B-2196CCAAFF93}">ST_CartJointData</Type>
@@ -3302,11 +3307,6 @@
 							<Name>SafetyCheck.m_joystickSignalIOSafetyCheck</Name>
 							<Comment><![CDATA[joystick Signal safety check]]></Comment>
 							<Type GUID="{7EBDD008-A9A8-B259-6DF4-ACAC21313C21}">ARRAY [1..4] OF UDINT</Type>
-						</Var>
-						<Var>
-							<Name>SafetyCheck.m_cartStatus</Name>
-							<Comment><![CDATA[ Output cart status]]></Comment>
-							<Type GUID="{2DD4D015-67CE-4921-26CF-E03757E9AEA6}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>GVL_interactUI.g_powerSupplyModeUPS</Name>
