@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_SlaveArmKinematic_12" Id="{ad2f999b-dbbc-482d-93df-1cd9866ae125}">
+    <Declaration><![CDATA[// use slot attribute larger than 49990, which is the default one, if it depends on variable in other file
+{attribute 'global_init_slot' := '49991'} 
+{attribute 'qualified_only'}
+VAR_GLOBAL 
+
+(* 
+% paramters definiton:
+% d1: distance from joint1 to remote center
+% L: instrument length
+% a: distance from joint5 to joint 6 on tool
+% b: distantce form joint 6 to tcp on tool
+% DH definition:
+% index    alpha   a   theta   d
+% 1        90      0   q1      d1
+% 2        -90     0   q2      0
+% 3        -90     0   0       q3
+% 4        0       0   q4      -L
+% 5        90      0   q5      0
+% 6        90      a   q6      0
+% 7      0       b   0       0
+*)
+g_d1:LREAL:=0.8046229;
+g_L :LREAL:= 0.3;// need to be replace by real instrument parameters;
+g_a : LREAL :=0.01;// need to be replace by real instrument parameters;
+g_b :LREAL :=0;// need to be replace by real instrument parameters;
+
+//alpha,a,d,theta	
+g_slaveArmDH:ARRAY[1..9,1..4] OF LREAL :=[PI/2,		0,		0,	g_d1,      
+											-pi/2,	0,		0,		0,
+											-PI/2,	0,		0,		0,
+									        0,		0,		0,		-g_L,       
+											pi/2,	0,		0,		0,
+								            pi/2,	g_a,	0,		0,
+							         		0,		g_b, 	0,		0];
+
+
+
+
+// include both setup and slave arm DH error
+g_slaveArm1DHErr:ARRAY[1..8,1..4] OF LREAL :=[               0,              0,  -0.013446393,               0,
+												     0.000192969,   0.0032083421,  0.0045096672,    -0.028854775,
+												   -0.0013398279,              0,     2.0810441,               0,
+												    0.0028913417,              0,     -2.072531,               0,
+												   -0.0010455737, -0.00034767921,   0.032466545,   0.00077501001,
+												    0.0033628312,  -0.0022688458, -0.0044587098,   0.00057326022,
+												 -0.000072813946, 0.000080716254,  0.0089639701,    0.0013609391,
+												     0.013077489,   0.0015063046,             0, -0.000039429412];
+g_slaveArm2DHErr:ARRAY[1..8,1..4] OF LREAL :=[              0,               0,   -0.011808403,              0,
+												  -0.0023488598,   -0.0059342521,   0.0042005885,   0.0093040185,
+												   0.0042595749,               0,      2.7660435,              0,
+												   0.0056405872,               0,     -2.7661213,              0,
+												 -0.00082290076,   -0.0017555651,   -0.003849404,  -0.0010859469,
+												 -0.00085246153,   -0.0024019372,    0.018275485,   0.0028940942,
+												    -0.01009565,  -0.00038779437, -0.00082952574,  0.00049858005,
+												  -0.0013625687, -0.000014009052,              0, -0.00026683964];
+g_slaveArm3DHErr:ARRAY[1..8,1..4] OF LREAL :=[             0,              0,  -0.021395621,              0,
+												 0.00089194356,  -0.0086652144,  0.0028866447,    0.010868572,
+												 0.00033165484,              0,    -2.8158404,              0,
+												  0.0062565069,              0,     2.8443943,              0,
+												 -0.0018300615, -0.00059991967,  0.0035302658, -0.00095159892,
+												  0.0022195289,  -0.0031377543,   0.021633127,   0.0019844221,
+												  -0.010681118,  0.00070860963, -0.0066115641,    -0.00124462,
+												  0.0010489537, -0.00054338076,             0,   -0.002028065];
+g_slaveArm4DHErr:ARRAY[1..8,1..4] OF LREAL :=[              0,              0,  0.0091850593,              0,
+												  -0.0002811694,  -0.0084233505, 0.00010837897,   -0.069973694,
+												  -0.0013553311,              0,    -1.1978482,              0,
+												   0.0045161494,              0,     1.1764169,              0,
+												 0.000039078817, -0.00026822245,  -0.023726254,  -0.0006462784,
+												 -0.00084654917,  -0.0020105585,   0.014678518,  0.00062434889,
+												  -0.0071159873,  0.00051410968,   0.049139013,   0.0018242283,
+												   0.0068153288,   0.0003638828,             0, -0.00073894784];
+
+						
+g_slaveArm1Base :ARRAY[1..4, 1..4] OF LREAL := [ 1.0,  0,  0.0,  0.0,
+											       0,  1.0, 0.0, 0.0,
+											    	0.0, 0.0,    1.0,  0.0,
+											               0,            0,             0,          1.0];
+g_slaveArm2Base :ARRAY[1..4, 1..4] OF LREAL := [        0.99999939, -0.00000087427303, -0.0011025024,   -0.14588371,
+													 -0.00000040830395,        0.99999932, -0.0011633318,  -0.084306635,
+													      0.0011025027,      0.0011633316,    0.99999872, -0.0023216823,
+													                 0,                 0,             0,           1.0];
+g_slaveArm3Base :ARRAY[1..4, 1..4] OF LREAL := [       0.99999909, -0.0000024810641, -0.0013475534,   -0.14588382,
+													 -0.0000019677263,       0.99999455,  -0.003301372,   -0.25474462,
+													     0.0013475543,     0.0033013716,    0.99999364, -0.0021695832,
+													                0,                0,             0,           1.0];
+g_slaveArm4Base :ARRAY[1..4, 1..4] OF LREAL := [       0.99999985, -0.0000037175974, -0.00055603005,  0.0021010248,
+													 0.00000096701713,       0.99998776,   -0.004946738,    -0.3378735,
+													    0.00055604163,     0.0049467367,     0.99998761, -0.0011248067,
+													                0,                0,              0,           1.0];
+																	
+//endoscoe extrinsic parameters,  tcp pose wrt true scope pose
+g_rotTcpWrtScope :ARRAY[1..3, 1..3] OF lreal:=[0.9985, 0.0326, -0.045, 
+					-0.0338, 0.9991, -0.0271,
+					0.0441, 0.0286, 0.9986];
+g_posTcpWrtScope :ARRAY[1..3] OF LREAL:= [0.003068, -0.00804, 0.01126];
+
+// endoscoe intrinsic parameters
+g_endoScopeFocalLength :LREAL :=3272;
+g_endoScopePrincipalBias :ARRAY[1..2] OF LREAL :=[150, 350];
+													
+
+// rotation from joint7 to tcp
+g_tcpRotation :Mat3d :=[0.0,	0.0,	1.0,
+					    -1.0,	0.0,	0.0,
+					    0.0,	-1.0,	0.0];
+
+// minimum distance between instrument/endoscope tip and remote center
+g_minInstruRCDis:LREAL := 0.03;
+g_minScopeRCDis:LREAL := 0.03;
+	
+// height of the panel
+g_panelHeight :LREAL := 0.009;
+
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

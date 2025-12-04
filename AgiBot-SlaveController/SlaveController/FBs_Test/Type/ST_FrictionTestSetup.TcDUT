@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_FrictionTestSetup" Id="{ada487d6-0a25-47ed-8bba-e0876a712a23}">
+    <Declaration><![CDATA[TYPE ST_FrictionTestSetup :
+STRUCT
+	//come to test mode
+	m_testMode:ARRAY[1..g_sArmNum] OF BOOL;
+	
+	//start motion
+	m_startMotion:ARRAY[1..g_sArmNum] OF BOOL;
+	
+	//output the arm joint position
+	m_armDHJntPos:ARRAY[1..g_sArmNum] OF Vec5d;
+	m_armActJntPos:ARRAY[1..g_sArmNum] OF Vec5d;
+	
+	//test joint id and trajectory id
+	m_jntId:ARRAY[1..g_sArmNum] OF INT;
+	m_trajId:ARRAY[1..g_sArmNum] OF INT;
+	
+	//test step
+	m_testStep:ARRAY[1..g_sArmNum] OF INT;
+	
+	//nest step
+	m_nextStep:ARRAY[1..g_sArmNum] OF BOOL;	
+	
+	//joint gap
+	m_jntGap:ARRAY[1..g_sArmNum] OF Vec5d;
+	
+	//friction average and ratio
+	m_CoulombFrictionAve:ARRAY[1..g_sArmNum,1..5] OF LREAL;
+	m_CoulombFrictionRatio:ARRAY[1..g_sArmNum,1..5] OF LREAL;
+	
+	//date wait to write to file
+	m_dataSum:INT:=13000;
+	m_cmdDHJntPosD2,m_jntPosD2,m_jntTrqD2:ARRAY[1..g_sArmNum,1..6,1..13000] OF LREAL;
+	m_cmdDHJntPosD3,m_jntPosD3,m_jntTrqD3:ARRAY[1..g_sArmNum,1..6,1..13000] OF LREAL;
+	
+	//write data
+	m_writeData:ARRAY[1..g_sArmNum] OF BOOL;
+	
+	//during data write
+	m_duringWriteData:ARRAY[1..g_sArmNum] OF BOOL;
+	
+	//max joint friction and it's joint position
+	m_CoulombFrictionMax,m_CoulombFrictionMax_JntPos:ARRAY[1..g_sArmNum] OF Vec5d;
+	
+	//joint id for start and end
+	m_jntIdStart:ARRAY[1..g_sArmNum] OF INT:=[4,4,4,4];
+	m_jntIdEnd:ARRAY[1..g_sArmNum] OF INT:=[5,5,5,5];	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

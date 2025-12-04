@@ -1,0 +1,260 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_SetupCtrlCycleTest" Id="{ef3f192c-1337-4520-8632-b2028c17db38}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SetupCtrlCycleTest EXTENDS FB_SetupArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR CONSTANT
+	m_setupCycleMotionNum :INT :=3;
+END_VAR
+VAR
+	//arm id
+	m_armId:INT;			
+	
+	//Trajectory planner
+	m_Planner: ARRAY [1..m_setupCycleMotionNum] OF FB_setupTrajMoveJ;	
+	m_setupCycleTrajIdx : INT;
+	m_curCycleNum : INT;
+	m_cycleMotionTime : LREAL;
+	test  : INT;
+	
+	//target joint position
+	m_targetJntPos:ARRAY[1..2] OF Vec5d;
+	
+	//trajectory velocity/acceleration/jerk
+	m_maxjntVel:Vec5d:=[2(1),0.01, 2(5*g_deg2Rad)];
+	m_maxjntAcc:Vec5d:=[2(1),0.5,2(0.5)];
+	m_maxjntJerk:Vec5d:=[2(1),1.0,2(2.0)];
+
+	//target cycle number
+	m_targetCycleNum:INT;
+	
+	//unit function
+	m_unitFun:FB_UnitTransform;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{eb13526c-7fb4-4208-91c1-7066bf7159db}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+VAR
+	curJntVel : Vec5d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check if planner is ready
+IF m_Planner[m_setupCycleTrajIdx].isGene = FALSE THEN
+	calcCmdJntPos:=FALSE;
+	RETURN;
+END_IF
+
+// traj plan
+calcCmdJntPos :=m_Planner[m_setupCycleTrajIdx].evaluate(m_timePeriod, jntPos=> m_cmdJntPos, jntVel=>m_cmdJntVel, jntAcc=> m_cmdJntAcc);
+
+// check if to transit to next segment
+curJntVel := i_setupArm.curJntVel;
+IF(m_timePeriod  > m_Planner[m_setupCycleTrajIdx].duration  AND norm(curJntVel) <GVL_SlaveControlParameters.g_jntStaticVelThres) THEN
+	IF NOT (SlaveArmControl.m_slaveRobot.m_slaveArmState[m_armId] = SlaveArmState_CycleTest)  THEN
+		m_setupCycleTrajIdx := m_setupCycleTrajIdx + 1;
+		m_timePeriod:=0;
+	ELSIF m_setupCycleTrajIdx = 1  THEN 
+		m_setupCycleTrajIdx := m_setupCycleTrajIdx + 1;
+		m_timePeriod:=0;
+	ELSIF  m_setupCycleTrajIdx = SlaveArmControl.m_slaveRobot.m_cycleTest[m_armId].slaveCycleTrajIdx THEN
+		m_setupCycleTrajIdx:=m_setupCycleTrajIdx + 1;
+		m_timePeriod:=0;
+	END_IF
+END_IF
+
+m_cycleMotionTime := m_cycleMotionTime + g_slaveArmCtrlCycleTime;
+IF m_setupCycleTrajIdx > m_setupCycleMotionNum THEN
+	m_curCycleNum := m_curCycleNum + 1;
+	m_setupCycleTrajIdx := 2;
+END_IF
+
+IF m_curCycleNum > m_targetCycleNum THEN
+	m_isFinished:=TRUE;
+END_IF
+
+//update the information
+updateInfo(i_setupArm);
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{b2fcb670-b276-44db-85af-35a53a706bd7}">
+      <Declaration><![CDATA[// override this function in each exact controller
+// NOTICE: set joint control mode here, and do some initialization if needed
+METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+VAR_IN_OUT 
+	r_setupArmCtrlCmd :ST_SetupArmCtrlCmds;
+END_VAR
+VAR
+	i , j:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_setupArm,r_setupArmCtrlCmd);
+
+//arm number
+m_armId:=i_setupArm.armIdx;
+
+//joint enable
+FOR i := 1 TO g_setupJntNum DO
+	m_jntEnableFlag[i] :=BOOL_TO_INT (NOT g_cycleTest.m_disableSetupJntMotion[m_armId][i]);
+END_FOR
+m_jntOPMode[3]:= DriverOPMode_PosTrq;
+m_jntOPMode[4]:= DriverOPMode_Pos;
+m_jntOPMode[5]:= DriverOPMode_Pos;
+
+//get commend joint position
+FOR i:=1 TO m_setupCycleMotionNum-1 DO
+	m_targetJntPos[i]:=m_unitFun.setupArmUnit2System(i_dataTest:= g_cycleTest.m_targetJntPosSetup[m_armId,i]);
+	FOR j := 1 TO g_setupJntNum DO
+		IF 0 = m_jntEnableFlag[j] THEN
+			m_targetJntPos[i][j] := i_setupArm.curJntPos[j];
+		END_IF
+	END_FOR
+END_FOR	
+
+//velocity limit
+m_maxjntVel := m_unitFun.setupArmUnit2System(g_cycleTest.m_targetJntVelSetup[m_armId]);
+FOR i := 1 TO g_setupJntNum DO
+	m_maxjntVel[i] := LIMIT(0, m_maxjntVel[i], GVL_SetupMotorParameters.g_maxJntVel[i]);
+END_FOR
+vecMultiNum(m_maxjntVel,2,m_maxjntAcc);
+vecMultiNum(m_maxjntAcc,2,m_maxjntJerk);
+
+
+//trajectory planner initialization
+//planner [1] controller is go to No.1 point
+m_Planner[1].init(i_setupArm.curJntPos , m_targetJntPos[1], i_maxJntVel:= m_maxjntVel, i_maxJntAcc:= m_maxjntAcc, i_maxJntJerk:= m_maxjntJerk);
+FOR i:=2 TO m_setupCycleMotionNum DO
+	IF i = m_setupCycleMotionNum THEN
+		m_Planner[i].init(m_targetJntPos[i-1] , m_targetJntPos[1], i_maxJntVel:= m_maxjntVel, i_maxJntAcc:= m_maxjntAcc, i_maxJntJerk:= m_maxjntJerk);
+	ELSE
+		m_Planner[i].init(m_targetJntPos[i-1] , m_targetJntPos[i], i_maxJntVel:= m_maxjntVel, i_maxJntAcc:= m_maxjntAcc, i_maxJntJerk:= m_maxjntJerk);
+	END_IF	
+END_FOR
+
+m_setupCycleTrajIdx := 1;
+m_curCycleNum := 0;
+m_cycleMotionTime := 0;
+m_targetCycleNum:=g_cycleTest.m_targetCycleNum[m_armId];
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="setupCycleTrajIdx" Id="{b05de6f1-7007-480d-a4af-86db3fa5333a}">
+      <Declaration><![CDATA[PROPERTY setupCycleTrajIdx : int]]></Declaration>
+      <Get Name="Get" Id="{a3d05ed3-85c9-4c3d-a0b4-f6e8326706b5}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[setupCycleTrajIdx:=m_setupCycleTrajIdx;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="updateInfo" Id="{2ab0d415-b055-43cc-9ef2-86a60f55d1b6}">
+      <Declaration><![CDATA[METHOD updateInfo : BOOL
+VAR_INPUT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//FOR i:=1 TO g_sJntNum BY 1 DO
+//	g_cycleTest.m_setupArmMotorEncoder[m_armId][i]:=i_setupArm.m_joints[i].m_motorInputs.m_motorEncoder;
+//	g_cycleTest.m_setupArmjntEncoder[m_armId][i]:=i_setupArm.m_joints[i].m_motorInputs.m_linkEncoder;
+//END_FOR
+//
+//
+////cover the target joint position
+//IF (g_cycleTest.m_coverCmdPos[m_armId]=TRUE) THEN
+//	i:=LIMIT(1,g_cycleTest.m_pntIdForCoverCmd[m_armId],m_setupCycleMotionNum);
+//	g_cycleTest.m_targetJntPosSetup[m_armId,i]:=m_unitFun.setupArmUnit2User(i_dataSystem:= i_setupArm.curJntPos);
+//END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SetupCtrlCycleTest">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlCycleTest.calcCmdJntPos">
+      <LineId Id="185" Count="4" />
+      <LineId Id="250" Count="0" />
+      <LineId Id="248" Count="1" />
+      <LineId Id="193" Count="0" />
+      <LineId Id="195" Count="2" />
+      <LineId Id="228" Count="1" />
+      <LineId Id="251" Count="0" />
+      <LineId Id="239" Count="1" />
+      <LineId Id="252" Count="0" />
+      <LineId Id="245" Count="1" />
+      <LineId Id="253" Count="0" />
+      <LineId Id="227" Count="0" />
+      <LineId Id="194" Count="0" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="204" Count="7" />
+      <LineId Id="203" Count="0" />
+      <LineId Id="135" Count="1" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlCycleTest.init">
+      <LineId Id="11" Count="0" />
+      <LineId Id="273" Count="0" />
+      <LineId Id="272" Count="0" />
+      <LineId Id="271" Count="0" />
+      <LineId Id="263" Count="3" />
+      <LineId Id="207" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="274" Count="1" />
+      <LineId Id="180" Count="0" />
+      <LineId Id="276" Count="7" />
+      <LineId Id="175" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="284" Count="5" />
+      <LineId Id="159" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="290" Count="0" />
+      <LineId Id="305" Count="0" />
+      <LineId Id="291" Count="1" />
+      <LineId Id="301" Count="3" />
+      <LineId Id="293" Count="0" />
+      <LineId Id="300" Count="0" />
+      <LineId Id="295" Count="4" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="98" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlCycleTest.setupCycleTrajIdx.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlCycleTest.updateInfo">
+      <LineId Id="7" Count="0" />
+      <LineId Id="9" Count="2" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="32" Count="2" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

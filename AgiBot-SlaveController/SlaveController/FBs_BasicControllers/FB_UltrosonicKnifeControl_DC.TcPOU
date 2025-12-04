@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_UltrosonicKnifeControl_DC" Id="{b46d9383-cb7c-49eb-b29e-6396316fb68f}" SpecialFunc="None">
+    <Declaration><![CDATA[// instrument joints control
+FUNCTION_BLOCK FB_UltrosonicKnifeControl_DC
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// instrument PID control paramters
+	m_instruKp:ARRAY[1..5] OF LREAL:=[5(5)];
+	m_instruKd:ARRAY[1..5] OF LREAL:=[5(0.25)];
+	m_instruKi:ARRAY[1..5] OF LREAL:=[5(10.0)];
+	m_instruKiLimit:ARRAY[1..5] OF LREAL:=[5(50.0)];
+	m_instruCtrlLimit:ARRAY[1..5] OF LREAL:=[4(150.0), 200.0];
+	
+	// max grip force/current(mA)
+	m_maxGripForce:LREAL;
+	m_maxGripCurrent:LREAL:=150.0;
+	
+	// PID for instrument joint position
+	m_instruJntCtrl:ARRAY[1..5] OF FB_PID;
+	
+	// ratio convert motor current to joint troque
+	m_currentRatioMotor2Jnt:LREAL;
+
+	// command instrument joint position and velocity
+	m_instruCmdJntPos:Vec5d;
+	m_instruLastCmdJntPos:Vec5d;
+	m_instruCmdJntVel:Vec5d;
+	
+	// backlash compensation variables
+	m_jntBacklash:ARRAY[1..5] OF LREAL:=[5(0)];
+	m_jntMoveStep:LREAL := 0.5*g_deg2Rad;
+	
+	// current instrument joint position and velocity
+	m_instruCurJntPos: Vec5d;
+	m_instruCurJntVel:Vec5d;
+	
+	// grasp force level
+	m_graspForceLevel:Lreal :=0;
+	
+	// instrument joint control torque(when gripper is open)
+	m_instruJntCtrlTrq:Vec5d:=[5(0.0)];
+	
+	// minimum grip angle to apply grip force; convert grasp force level to minus grip angle
+	m_minGripAngle :LREAL := -60*g_deg2Rad;
+	m_gripForceAngle:LREAL;
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+	]]></ST>
+    </Implementation>
+    <Method Name="calcBacklash" Id="{51eb4685-e59f-4978-a39a-309ec81d7bd9}">
+      <Declaration><![CDATA[METHOD calcBacklash : BOOL
+VAR_IN_OUT CONSTANT
+	// instrument joint command position
+	i_cmdInstruJntPos :Vec5d;
+	
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR
+	i:INT;
+	deltaAng:LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// backslash compensation
+FOR i:=3 TO 3 DO
+	// integral compensated backslash angle
+	deltaAng:=i_cmdInstruJntPos[i]-m_instruLastCmdJntPos[i];
+	IF ABS(deltaAng)>m_jntMoveStep THEN
+		m_jntBacklash [i] := m_jntBacklash [i] + m_jntMoveStep*sign(deltaAng);
+		m_instruLastCmdJntPos[i] := i_cmdInstruJntPos[i];
+	END_IF
+END_FOR
+
+
+// exert grip force 
+IF m_graspForceLevel >0  THEN
+	
+	// max grip finger backlash
+	m_jntBacklash [3]:=-i_slaveArm.instrument.instruTypeInfo.m_instruYawBacklash;
+	
+END_IF
+
+// limit compensated backslash angle
+FOR i:=3 TO 3 DO
+	IF g_instruBacklashDir[i] > 0 THEN
+		m_jntBacklash [i] := LIMIT(0, m_jntBacklash[i], i_slaveArm.instrument.instruTypeInfo.m_instruYawBacklash);
+	ELSE
+		m_jntBacklash [i] := LIMIT(-i_slaveArm.instrument.instruTypeInfo.m_instruYawBacklash, m_jntBacklash[i], 0);	
+	END_IF
+	
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="clearBacklash" Id="{9e23f81e-67ee-4c9c-a1f4-0d29f6cba8d4}">
+      <Declaration><![CDATA[METHOD PUBLIC clearBacklash : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_jntBacklash := g_zeroVec5d;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{90ec3aab-3cf5-4fbd-be39-9b7b8d947670}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm:FB_SlaveArm;
+END_VAR
+
+VAR
+	i,j:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_graspForceLevel:=0;
+
+// init controller
+m_currentRatioMotor2Jnt:=GVL_SlaveMotorParameters.g_motorTrqConst[i_slaveArm.armIdx,4]*GVL_SlaveMotorParameters.g_motorReduction[i_slaveArm.armIdx,4]/1000;
+m_maxGripForce := m_maxGripCurrent * m_currentRatioMotor2Jnt;
+FOR i:=1 TO 5 DO
+	m_instruCmdJntPos[i]:=i_slaveArm.curJntPos[i+3];
+	m_instruLastCmdJntPos[i]:=m_instruCmdJntPos[i];
+	m_instruCmdJntVel[i]:=0;
+	
+	m_instruJntCtrl[i].init(g_slaveArmCtrlCycleTime,m_instruKp[i],m_instruKd[i],m_instruKi[i],
+		m_instruKiLimit[i]* m_currentRatioMotor2Jnt,	m_instruCtrlLimit[i]*m_currentRatioMotor2Jnt);
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="jntBacklash" Id="{9a1f2eb5-e7c9-46ca-8b66-345ca43f7380}">
+      <Declaration><![CDATA[PROPERTY jntBacklash : Vec5d]]></Declaration>
+      <Get Name="Get" Id="{13b52a8f-2bd4-44b6-aa4a-5c7fcc970270}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[jntBacklash := m_jntBacklash;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="run" Id="{674c393c-7935-41c3-8116-22a57041244f}">
+      <Declaration><![CDATA[METHOD run : BOOL
+VAR_IN_OUT CONSTANT
+	// instrument joint command position
+	i_cmdInstruJntPos :Vec5d;
+	
+	// instrument joint command velocity
+	i_cmdInstruJntVel :Vec5d;
+	
+	// command grip force level
+	i_cmdGripForceLevel:LREAL;
+	
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR_OUTPUT
+	// joint control torque
+	o_cmdJntTrq:Vec5d;
+END_VAR
+
+VAR
+	i: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// calculate instrument backlash
+calcBacklash(i_cmdInstruJntPos, i_slaveArm);
+
+// convert force level to grip angle
+m_graspForceLevel:=LIMIT(0,i_cmdGripForceLevel , 100);
+m_gripForceAngle:=m_minGripAngle*m_graspForceLevel/100;
+
+// joint position control
+FOR i:=1 TO 5 DO	
+	m_instruCmdJntPos[i]:=i_cmdInstruJntPos[i];
+	m_instruCmdJntVel[i]:=i_cmdInstruJntVel[i];
+	m_instruCurJntPos[i]:=i_slaveArm.curJntPos[i+3];
+	m_instruCurJntVel[i]:= i_slaveArm.curJntVel[i+3];
+	IF i=3 THEN
+		m_instruCmdJntPos[i]:=i_cmdInstruJntPos[i]+m_gripForceAngle;
+	END_IF
+	m_instruJntCtrlTrq[i]:=m_instruJntCtrl[i].run(m_instruCmdJntPos[i],m_instruCurJntPos[i], m_instruCmdJntVel[i], m_instruCurJntVel[i]);
+END_FOR
+m_instruJntCtrlTrq[1]:=0;
+m_instruJntCtrlTrq[2]:=0;
+m_instruJntCtrlTrq[4]:=0.5*m_instruJntCtrlTrq[5];
+
+// exert grip force 
+//IF m_graspForceLevel >0  THEN
+//	m_instruJntCtrlTrq[3]:= -m_maxGripForce*m_graspForceLevel/100.0;	
+//END_IF
+
+o_cmdJntTrq := m_instruJntCtrlTrq;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_UltrosonicKnifeControl_DC">
+      <LineId Id="53" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_UltrosonicKnifeControl_DC.calcBacklash">
+      <LineId Id="3" Count="26" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_UltrosonicKnifeControl_DC.clearBacklash">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_UltrosonicKnifeControl_DC.init">
+      <LineId Id="102" Count="2" />
+      <LineId Id="114" Count="1" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="107" Count="5" />
+      <LineId Id="101" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_UltrosonicKnifeControl_DC.jntBacklash.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_UltrosonicKnifeControl_DC.run">
+      <LineId Id="503" Count="0" />
+      <LineId Id="502" Count="0" />
+      <LineId Id="504" Count="0" />
+      <LineId Id="430" Count="2" />
+      <LineId Id="434" Count="6" />
+      <LineId Id="476" Count="2" />
+      <LineId Id="441" Count="11" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,424 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_SlaveCtrlSingleJntTest" Id="{59358c86-a712-482a-a608-43dfffd82e42}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveCtrlSingleJntTest EXTENDS FB_SlaveArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// sample joint position 
+	m_sampleSetupJntPos : Vec5d;
+	m_sampleSlaveJntPos :Vec6d;
+	
+	// sample signal
+	m_sampleSignal : FB_AdjustLongPress;
+	
+	// current sample number
+	m_curSampleNum :INT :=1;
+	
+	// 1 for setup joint1, 6 for slave joint1
+	m_kineCaliJntIdx,g_kineCaliJntIdx:INT;
+	
+	// sample mode 0 : arm sample; 1; scope sampel
+	m_sampleMode :INT := 0;	
+
+	m_CubicPlan:ARRAY[1..8] OF Cubic_Polynomial_Interpolation;
+	m_TargetAngle,m_CurrentAngle:Vec8d :=[8(0)];
+	m_InitAngle:Vec8d :=[8(0)];
+	m_cmdAngle,m_cmdVel,m_cmdAcc,m_dA :Vec8d :=[8(0)];
+	m_T:REAL:=0;
+	m_dt:REAL:=0.00025;
+	m_EndT:REAL:=10;
+	m_jntPlanFinishFlag:BOOL:=TRUE;
+	m_jntPlanInitFlag: BOOL := FALSE;
+	m_slaveIdx:INT:=0;
+	m_instruStauts:ST_InstruStatus;
+	m_slaveStatus:ST_SlaveStatus;
+	m_TargetSign:INT:=0;
+
+	m_jntStep:LREAL:=0;
+	m_limitStep:LREAL:=0;
+	m_jntDirection:INT:=1;
+	m_startJnt:INT:=1;
+	m_endJnt:INT:=3;
+	m_lastCount,m_nowCount:INT;
+	
+	m_kineCaliState:E_KineCaliState:=KineCaliState_Idel;
+	m_return2AllOriginFlag:BOOL:=FALSE;
+	m_initT:LREAL:=0.0;
+//	m_fileName:STRING;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{1e85ac3d-3ee3-4814-b071-5c75c541222c}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	i:DINT;
+	count:INT;
+	number :INT:=1;
+	armIdx:INT:=1;
+	
+	TON1 : TON; (* TON 功能块实例 *)
+    delayTime : TIME := T#5s; (* 延时时间，单位为时间 *)
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_CurrentAngle:=i_slaveArm.curJntPos;
+armIdx:=i_slaveArm.armIdx;
+g_kineCaliJntIdx := g_singleJntTest.m_kineCaliJntIdx;;
+IF g_singleJntTest.m_kineCaliJntIdx>=9 THEN
+	m_kineCaliState := KineCaliState_Idel;
+END_IF
+
+CASE m_kineCaliState OF
+	KineCaliState_Idel:
+		m_kineCaliState := KineCaliState_Idel;
+	KineCaliState_Ready:
+		//control joint enable (m_jntEnableFlag is declared in the base class and will affect other subclasses)
+		IF m_sampleMode=0 AND  g_kineCaliJntIdx>5 AND g_kineCaliJntIdx<9 THEN
+			m_kineCaliJntIdx := g_kineCaliJntIdx - 5;
+			m_jntEnableFlag := g_zeroVec8i;
+			m_jntEnableFlag[m_kineCaliJntIdx] := 1;
+			
+			IF g_singleJntTest.m_manualAdjustFlag THEN
+				m_jntOPMode[m_kineCaliJntIdx] := DriverOPMode_Trq;//cmd pos
+			ELSE
+				m_jntOPMode[m_kineCaliJntIdx] := DriverOPMode_Pos;//cmd pos
+			END_IF
+			
+			m_jntStep := (g_singleJntTest.m_endPosArr[g_kineCaliJntIdx] - g_singleJntTest.m_startPosArr[g_kineCaliJntIdx]) / 7.0;
+			IF g_kineCaliJntIdx=8 THEN //Single-joint step length
+				g_singleJntTest.m_jntStepArr[g_kineCaliJntIdx] := m_jntStep * 1000;//System:m->UI:mm
+			ELSE
+				g_singleJntTest.m_jntStepArr[g_kineCaliJntIdx] := m_jntStep * g_rad2deg;//System:rad->UI:deg
+			END_IF
+
+		ELSIF m_sampleMode=0 AND g_kineCaliJntIdx=0 THEN
+			m_kineCaliJntIdx := 0;
+			m_jntEnableFlag := g_onesVec8i;
+			m_jntOPMode := g_slaveAllPosMode;//cmd pos
+		ELSIF m_sampleMode=1 THEN
+			m_jntEnableFlag :=g_onesVec8i;
+			m_jntOPMode:=g_slaveAllTrqMode;
+			m_cmdJntPos:=i_slaveArm.curJntPos;
+			m_cmdJntTrq := g_zeroVec8d;
+		ELSE
+			m_kineCaliJntIdx := -1;
+			m_jntEnableFlag := g_zeroVec8i;
+		END_IF		
+		
+		IF g_kineCaliJntIdx=0 AND NOT m_return2AllOriginFlag THEN //未开始全部回原点
+			m_kineCaliState := KineCaliState_Return2Origin;
+		ELSIF g_kineCaliJntIdx>5 AND g_kineCaliJntIdx<9 THEN //每个关节回原点
+			m_kineCaliState := KineCaliState_Move2Start;
+		ELSE
+			m_kineCaliState := KineCaliState_RecordData;
+		END_IF
+		
+	KineCaliState_Return2Origin:
+		g_singleJntTest.m_return2OriginFlag:=TRUE;
+		IF m_return2AllOriginFlag THEN
+			g_singleJntTest.m_EndT := g_singleJntTest.m_return2OriginTime;
+		ELSE
+			g_singleJntTest.m_EndT := g_singleJntTest.m_return2AllOriginTime;
+		END_IF
+		IF m_kineCaliJntIdx>0 THEN
+			m_jntEnableFlag[m_kineCaliJntIdx] := 1;
+		END_IF
+		JntMotion(armIdx);
+		
+		IF m_jntPlanFinishFlag THEN
+			g_singleJntTest.m_return2OriginFlag:=FALSE;	
+			IF g_kineCaliJntIdx=0 THEN	
+				m_return2AllOriginFlag := TRUE;
+				m_kineCaliState := KineCaliState_Manual124;
+			ELSIF g_kineCaliJntIdx<9 AND m_nowCount = 8 * g_kineCaliJntIdx THEN
+				m_kineCaliState := KineCaliState_End;
+			END_IF
+		END_IF
+
+	KineCaliState_Move2Start:
+		g_singleJntTest.m_move2StartFlag:=TRUE;
+		g_singleJntTest.m_EndT := g_singleJntTest.m_move2StartTime;
+		m_jntEnableFlag[m_kineCaliJntIdx] := 1;
+		JntMotion(armIdx);
+		
+		IF m_jntPlanFinishFlag THEN
+			g_singleJntTest.m_move2StartFlag:=FALSE;
+			g_singleJntTest.m_singleMotionEndFlag := TRUE;
+			m_lastCount := g_singleJntTest.m_dataRecordCount[armIdx];
+			m_kineCaliState := KineCaliState_RecordData;
+		END_IF
+		
+	KineCaliState_SingleJnt:
+		g_singleJntTest.m_singleJntFlag := TRUE;
+		g_singleJntTest.m_EndT := g_singleJntTest.m_singleJntTimeArr[g_kineCaliJntIdx];
+		m_jntEnableFlag[m_kineCaliJntIdx] := 1;
+		JntMotion(armIdx);
+		
+		IF m_jntPlanFinishFlag THEN
+			g_singleJntTest.m_SingleJntFlag := FALSE;
+			g_singleJntTest.m_singleMotionEndFlag := TRUE;
+			m_lastCount := g_singleJntTest.m_dataRecordCount[armIdx];
+			m_kineCaliState := KineCaliState_RecordData;
+		END_IF
+		
+	KineCaliState_RecordData:
+		m_nowCount := g_singleJntTest.m_dataRecordCount[armIdx];		
+		IF g_kineCaliJntIdx>5 AND g_kineCaliJntIdx<9 THEN //slave
+			m_jntEnableFlag[m_kineCaliJntIdx] := 0;
+		END_IF
+		IF ((g_kineCaliJntIdx<3 AND g_singleJntTest.m_manualAdjustFlag) OR (g_kineCaliJntIdx>5 AND g_kineCaliJntIdx<9)) AND m_nowCount<8*g_kineCaliJntIdx THEN
+			g_singleJntTest.m_dataRecordText := 'Record';
+		END_IF
+		
+		IF g_kineCaliJntIdx>5 AND g_kineCaliJntIdx <9 THEN
+			IF i_slaveArm.adjustOn THEN //After pressing the button, the joint is enabled.
+				g_singleJntTest.m_dataRecordText := 'No record';		
+				g_singleJntTest.m_manualAdjustFlag := TRUE;	
+				m_jntEnableFlag[m_kineCaliJntIdx] := 1;
+				m_jntOPMode[m_kineCaliJntIdx] := DriverOPMode_Trq;//current joint enter adjust mode
+				m_cmdJntPos[m_kineCaliJntIdx] := m_CurrentAngle[m_kineCaliJntIdx];
+			ELSE
+				g_singleJntTest.m_manualAdjustFlag := FALSE;	
+				m_jntEnableFlag[m_kineCaliJntIdx] := 0;
+				m_jntOPMode[m_kineCaliJntIdx] := DriverOPMode_Pos;
+			END_IF	
+		END_IF
+		
+		IF g_singleJntTest.m_dataRecordFlag[armIdx] AND m_nowCount<8*g_kineCaliJntIdx THEN // Press the button to start recording once
+			IF (g_singleJntTest.m_singleMotionEndFlag AND g_kineCaliJntIdx>=3 AND g_kineCaliJntIdx<9) OR g_kineCaliJntIdx<3 THEN
+				g_singleJntTest.m_singleMotionEndFlag := FALSE;
+				IF m_sampleMode = 0 THEN
+					AGILOG_DEBUG(SetupArmControl.m_setupRobot.m_setupArms[i_slaveArm.armIdx].curJntPos, FALSE, 2);
+					AGILOG_DEBUG(i_slaveArm.curDHJntPos, FALSE, 1);
+				ELSIF m_sampleMode=1 THEN
+					AGILOG_DEBUG(RobotDynamics.m_instruViewCheck.m_instruPoseInScope[i_slaveArm.armIdx].m_pos, FALSE, 1);
+				END_IF
+				g_singleJntTest.m_dataRecordFlag[armIdx] := FALSE;
+				g_singleJntTest.m_dataRecordCount[armIdx] := g_singleJntTest.m_dataRecordCount[armIdx] + 1;
+				g_singleJntTest.m_dataSingleCount := g_singleJntTest.m_dataSingleCount + 1;
+				g_singleJntTest.m_dataShowCount := CONCAT(INT_TO_STRING(g_singleJntTest.m_dataSingleCount),INT_TO_STRING(g_singleJntTest.m_dataRecordCount[armIdx]));
+			END_IF
+		END_IF
+		
+		IF m_nowCount=8*g_kineCaliJntIdx THEN
+			g_singleJntTest.m_dataRecordText := 'No record';
+			IF g_kineCaliJntIdx<=5 AND g_singleJntTest.m_manualEndFlag THEN
+				m_kineCaliState := KineCaliState_End;
+			ELSIF g_kineCaliJntIdx>5 THEN
+				m_kineCaliState := KineCaliState_return2Origin;
+			END_IF	
+		ELSIF g_kineCaliJntIdx>5 AND m_nowCount=m_lastCount+1 THEN
+			g_singleJntTest.m_dataRecordText := 'No record';
+			m_kineCaliState := KineCaliState_SingleJnt;
+		END_IF
+		
+	KineCaliState_Manual124:
+		IF g_singleJntTest.m_manual124DoneFlag THEN
+			m_kineCaliState := KineCaliState_End;
+		END_IF
+		
+	KineCaliState_End:
+		m_jntEnableFlag :=g_zeroVec8i;
+		
+		IF g_kineCaliJntIdx>8 THEN
+			m_kineCaliState := KineCaliState_Idel;
+		ELSIF g_singleJntTest.m_manualEndFlag THEN
+			g_singleJntTest.m_manualEndFlag:=FALSE;
+			g_singleJntTest.m_dataSingleCount := 0;
+			g_singleJntTest.m_dataShowCount := CONCAT(INT_TO_STRING(g_singleJntTest.m_dataSingleCount),INT_TO_STRING(g_singleJntTest.m_dataRecordCount[armIdx]));
+			
+			IF m_nowCount=8*g_kineCaliJntIdx THEN
+				g_kineCaliJntIdx:=g_kineCaliJntIdx + 1;
+				IF g_kineCaliJntIdx=3 THEN
+					g_singleJntTest.m_manualAdjustFlag:=FALSE;
+				END_IF
+				g_singleJntTest.m_kineCaliJntIdx := g_kineCaliJntIdx;
+			END_IF	
+				m_kineCaliState := KineCaliState_Ready;
+		END_IF	
+		
+END_CASE
+
+IF NOT g_singleJntTest.m_enterSingleJntTestMode[i_slaveArm.armIdx] THEN
+	m_isFinished := TRUE;//End the current state
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{e86653e4-d8b5-4f7e-9b72-bb7b3cf865ee}">
+      <Declaration><![CDATA[METHOD PUBLIC Init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+
+VAR
+	fileName:STRING;
+	i:INT;
+	idx:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//init
+SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+
+fileName := CONCAT('kineCaliSample_arm', INT_TO_STRING(i_slaveArm.armIdx));
+fileName := CONCAT(fileName, '.txt');
+g_singleJntTest.m_fileName := fileName;
+AGILOG_DebugStart(fileName);
+
+idx:=i_slaveArm.armIdx;
+g_singleJntTest.m_dataRecordCount[idx] := 0;
+g_singleJntTest.m_kineCaliJntIdx := 0;
+m_kineCaliState := KineCaliState_Ready;
+g_singleJntTest.m_manual124DoneFlag := FALSE;
+m_return2AllOriginFlag:=FALSE;
+
+FOR i:=1 TO 4 DO
+	g_singleJntTest.m_dataRecordCount[1] := 0;
+END_FOR
+
+FOR i:=6 TO 8 DO
+	m_jntOPMode[i] := DriverOPMode_Pos;
+END_FOR
+
+m_T:=0;
+m_EndT:=10;
+m_jntPlanInitFlag:=FALSE;
+m_jntPlanFinishFlag:=TRUE;
+m_isFinished := FALSE;
+
+m_lastCount:=0;
+m_nowCount:=0;
+
+// update commands to arm
+copyCmds(r_slaveArmCtrlCmd);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="JntMotion" Id="{b9b6e290-856e-4c8d-a510-31407de41c95}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED JntMotion : BOOL
+VAR_INPUT
+	armIdx:INT:=1;
+END_VAR
+VAR
+	i:INT:=1;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//g_singleJntTest.m_moveEnableFlag:= (g_singleJntTest.m_singleJntFlag XOR g_singleJntTest.m_return2OriginFlag) XOR g_singleJntTest.m_move2StartFlag;	
+IF NOT m_jntPlanInitFlag THEN  //Trajectory planning has not yet started.
+	m_startJnt:=m_kineCaliJntIdx;
+	m_endJnt:=m_kineCaliJntIdx;
+	
+	m_InitAngle:=m_CurrentAngle;
+	m_TargetAngle := m_CurrentAngle;
+		
+	CASE m_kineCaliState OF
+		KineCaliState_Return2Origin:
+			IF m_kineCaliJntIdx=0 THEN
+				m_startJnt:=1;
+				m_endJnt:=3;
+				FOR i:=m_startJnt TO m_endJnt DO
+					m_TargetAngle[i] := g_singleJntTest.m_slaveJntOrigin[armIdx,i];
+					m_TargetAngle[i]:=LIMIT(GVL_SlaveMotorParameters.g_minJntPos[i], m_TargetAngle[i], GVL_SlaveMotorParameters.g_maxJntPos[i]);
+				END_FOR
+			ELSE
+				m_TargetAngle[m_kineCaliJntIdx] := g_singleJntTest.m_slaveJntOrigin[armIdx,m_kineCaliJntIdx];
+				m_TargetAngle[m_kineCaliJntIdx]:=LIMIT(GVL_SlaveMotorParameters.g_minJntPos[m_kineCaliJntIdx], m_TargetAngle[m_kineCaliJntIdx], GVL_SlaveMotorParameters.g_maxJntPos[m_kineCaliJntIdx]);
+			END_IF
+		KineCaliState_move2Start:
+			m_TargetAngle[m_kineCaliJntIdx] := g_singleJntTest.m_startPosArr[g_kineCaliJntIdx];
+			m_TargetAngle[m_kineCaliJntIdx]:=LIMIT(GVL_SlaveMotorParameters.g_minJntPos[m_kineCaliJntIdx], m_TargetAngle[m_kineCaliJntIdx], GVL_SlaveMotorParameters.g_maxJntPos[m_kineCaliJntIdx]);
+		KineCaliState_SingleJnt:
+			m_TargetAngle[m_kineCaliJntIdx] := m_CurrentAngle[m_kineCaliJntIdx] + m_jntDirection * m_jntStep;
+			m_TargetAngle[m_kineCaliJntIdx]:=LIMIT(GVL_SlaveMotorParameters.g_minJntPos[m_kineCaliJntIdx], m_TargetAngle[m_kineCaliJntIdx], GVL_SlaveMotorParameters.g_maxJntPos[m_kineCaliJntIdx]);
+	END_CASE
+
+	m_EndT := g_singleJntTest.m_EndT;
+	//get traj para
+	FOR i:=m_startJnt TO m_endJnt DO //Trajectory planning initialization
+		m_CubicPlan[i].init(0,m_EndT, m_InitAngle[i],m_TargetAngle[i], 0,0, 0,0);
+	END_FOR
+	m_initT := m_timePeriod;
+	m_T:=0;//Reset the planning duration to zero
+	m_jntPlanInitFlag:=TRUE; //Complete initialization
+	m_jntPlanFinishFlag:=FALSE; //The trajectory has not been completed
+END_IF
+	
+	//IF NOT finishFlag AND norm(jntVel)>0.1 THEN
+IF NOT m_jntPlanFinishFlag THEN
+	FOR i:=m_startJnt TO m_endJnt DO //In trajectory planning
+		m_T := m_timePeriod - m_initT;
+		m_CubicPlan[i].run(m_T,m_cmdAngle[i],m_cmdVel[i],m_cmdAcc[i],m_jntPlanFinishFlag);//cmdPos
+		m_cmdJntVel[i]:=m_cmdVel[i];
+		m_cmdJntPos[i]:=m_cmdAngle[i];
+	END_FOR
+	IF m_jntPlanFinishFlag THEN	
+		m_jntPlanInitFlag := FALSE; //Prepare to reinitialize
+	END_IF
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="reset" Id="{3ac70d81-b296-4d5a-b16d-a0bee96ecfb6}">
+      <Declaration><![CDATA[{warning '添加方法实现'}
+METHOD reset : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_isFinished:=FALSE;
+m_timePeriod:=0;
+m_isFinished :=TRUE;
+AGILOG_DebugStop();]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveCtrlSingleJntTest">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlSingleJntTest.calcCmdJntPos">
+      <LineId Id="1293" Count="57" />
+      <LineId Id="1457" Count="0" />
+      <LineId Id="1459" Count="0" />
+      <LineId Id="1458" Count="0" />
+      <LineId Id="1460" Count="0" />
+      <LineId Id="1353" Count="46" />
+      <LineId Id="1488" Count="2" />
+      <LineId Id="1498" Count="0" />
+      <LineId Id="1491" Count="3" />
+      <LineId Id="1499" Count="0" />
+      <LineId Id="1495" Count="0" />
+      <LineId Id="1497" Count="0" />
+      <LineId Id="1496" Count="0" />
+      <LineId Id="1478" Count="1" />
+      <LineId Id="1400" Count="56" />
+      <LineId Id="627" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlSingleJntTest.Init">
+      <LineId Id="618" Count="33" />
+      <LineId Id="274" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlSingleJntTest.JntMotion">
+      <LineId Id="963" Count="50" />
+      <LineId Id="627" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlSingleJntTest.reset">
+      <LineId Id="7" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="10" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="E_KineCaliState" Id="{bbc88632-6cd2-43e1-a675-20cd659c9652}">
+    <Declaration><![CDATA[TYPE E_KineCaliState :
+(
+	KineCaliState_Idel := 0,
+	KineCaliState_Ready := 1,
+	KineCaliState_Return2Origin := 2,
+	KineCaliState_Move2Start := 3,
+	KineCaliState_SingleJnt := 4,
+	KineCaliState_RecordData :=5,
+	KineCaliState_End := 6,
+	KineCaliState_Manual124:=7,
+	KineCaliState_ManualSingleJnt:=8
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

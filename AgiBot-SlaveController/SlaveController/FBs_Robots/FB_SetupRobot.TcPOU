@@ -1,0 +1,680 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_SetupRobot" Id="{41d3f45b-28bf-4672-9f4d-c2ea05b7f776}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SetupRobot
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// 	flag if robot self-check passed
+	m_armPackageFinished :ARRAY[1..g_sArmNum] OF BOOL :=[4(FALSE)];	
+
+	// setup arms, responsible for arm kinematic and control
+	m_setupArms :ARRAY[1..g_sArmNum] OF FB_SetupArm;
+	
+	// arm light control word
+	m_lightCrlWord :ARRAY [1..g_sArmNum] OF UDINT;
+	
+	// flag if robot self-check passed
+	m_setupSelfCheckPass :ARRAY[1..g_sArmNum] OF BOOL :=[4(false)];
+	
+	m_LEDTestCount :ARRAY [1..g_sArmNum] OF UDINT;
+	m_LEDTestTime :ARRAY [1..g_sArmNum] OF LREAL;
+	
+	// arm state
+	m_setupArmState:ARRAY[1..g_sArmNum] OF E_setupArmState:=[4(E_setupArmState.SetupArmState_Error)];
+	m_lastSetupArmState:ARRAY[1..g_sArmNum] OF E_setupArmState:=[4(E_setupArmState.SetupArmState_Error)];
+	m_nextSetupArmState:ARRAY[1..g_sArmNum] OF E_setupArmState:=[4(E_setupArmState.SetupArmState_Error)];
+	
+	// all arm controller instance 
+	m_armCtrlFactory :ARRAY[1..g_sArmNum,1..SetupArmState_totalNum] OF I_SetupArmCtrl;
+	m_armInit :ARRAY[1..g_sArmNum] OF FB_SetupCtrlInit;
+	m_armError :ARRAY[1..g_sArmNum] OF FB_SetupCtrlError;
+	m_armSelfCheck :ARRAY[1..g_sArmNum] OF FB_SetupCtrlSelfCheck;
+	m_armHold :ARRAY[1..g_sArmNum] OF FB_SetupCtrlHold;
+	m_armManualAdjust :ARRAY[1..g_sArmNum] OF FB_SetupCtrlManualAdjust;
+	m_armAutoAdjust :ARRAY[1..g_sArmNum] OF FB_SetupCtrlAutoAdjust;
+	m_armPackage :ARRAY[1..g_sArmNum] OF FB_SetupCtrlPackage;
+	m_armCart :ARRAY[1..g_sArmNum] OF FB_SetupCtrlCart;
+	m_armJnt3GraCali :ARRAY[1..g_sArmNum] OF FB_SetupCtrlJnt3GraCali;
+	m_armJnt5GraCali :ARRAY[1..g_sArmNum] OF FB_SetupCtrlJnt5GraCali;
+	m_armDisable :ARRAY[1..g_sArmNum] OF FB_SetupCtrlDisable;
+	m_Performance :ARRAY[1..g_sArmNum] OF FB_SetupCtrlPerformance;
+	m_armStop :ARRAY[1..g_sArmNum] OF FB_SetupCtrlStop;
+	m_selfCheckTransport :ARRAY[1..g_sArmNum] OF FB_SetupCtrlSelfCheckTransport;
+	
+	//add code for test
+	//m_Performance :ARRAY[1..g_sArmNum] OF FB_SetupCtrlPerformance;
+	m_setupStateCycleTest :ARRAY[1..g_sArmNum] OF FB_SetupCtrlCycleTest;
+	m_setupStateFrictionTest :ARRAY[1..g_sArmNum] OF FB_SetupCtrlFrictionTest;
+	m_setupStateMotionTest :ARRAY[1..g_sArmNum] OF FB_SetupCtrlMotionTest;
+	m_armCali :ARRAY[1..g_sArmNum] OF FB_SetupCtrlArmCali;
+	m_dragFreeTest :ARRAY[1..g_sArmNum] OF FB_SetupCtrlDragFreeTest;
+	m_singleJntTest :ARRAY[1..g_sArmNum] OF FB_SetupCtrlSingleJntTest;
+	
+	m_armHoldEndoscope :ARRAY[1..g_sArmNum] OF FB_SetupCtrlHoldEndoscope;
+	m_armHoldInstru :ARRAY[1..g_sArmNum] OF FB_SetupCtrlHoldInstru;
+	
+	// arm controller interface
+	m_armCtrl :ARRAY[1..g_sArmNum] OF I_SetupArmCtrl;
+	m_armCtrlCmds :ARRAY[1..g_sArmNum] OF ST_SetupArmCtrlCmds;
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+
+]]></ST>
+    </Implementation>
+    <Method Name="controllerTransit" Id="{3577cb7c-f285-4439-ba82-81bb9ae9fd01}">
+      <Declaration><![CDATA[METHOD PROTECTED controllerTransit : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:INT;
+	logStr :STRING;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO g_sArmNum DO 
+	// Controller transit
+	IF m_nextSetupArmState[i]<> m_setupArmState[i] THEN
+		// reset current controller
+		m_armCtrl[i].reset();
+		
+		// transit to new controller
+		m_lastSetupArmState[i]:=m_setupArmState[i];
+		m_setupArmState[i]:=m_nextSetupArmState[i];
+		m_armCtrl[i]:=m_armCtrlFactory[i,m_setupArmState[i]];
+		
+		// init next controller
+		m_armCtrl[i].Init(m_setupArms[i],m_armCtrlCmds[i]);
+		m_setupArms[i].updateCmds(m_armCtrlCmds[i]);
+		
+		// log
+		logStr := 'SlaveArm ';
+		AGILOG_INFO(logStr, i_printTime:=TRUE, i_lineBreak:=0);
+		AGILOG_INFO(i, i_printTime:=FALSE, i_lineBreak:=0);
+		logStr := ' Transit To :';
+		AGILOG_INFO(logStr, i_printTime:=FALSE, i_lineBreak:=0);
+		AGILOG_INFO(m_setupArmState[i], i_printTime:=FALSE, i_lineBreak:=1);
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="getStatus" Id="{87cb863f-d525-453d-a0db-af97bcb1e34e}">
+      <Declaration><![CDATA[METHOD PUBLIC getStatus : BOOL
+VAR_IN_OUT
+	// slave robot information, including arm status and cartesian data
+	r_setupStatus :ST_SetupStatus;
+	
+	//setup motor in_output to safety check
+	r_setupMotorData : ST_SetupMotorData;
+	
+	// slave robot joint data
+	r_setupJointsData :ST_SetupJointData;
+	
+END_VAR
+
+VAR
+	i,j:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[r_setupStatus.m_armState:=m_setupArmState;
+
+// TODO: project cartesion data to monitor coordinate
+FOR i:=1 TO g_sArmNum DO
+	
+	// cartesion
+	r_setupStatus.m_curEndPose[i]:=m_setupArms[i].curCartPose;
+	r_setupStatus.m_rcPos[i]:=m_setupArms[i].rcPos;
+	
+	r_setupStatus.m_setupSelfCheckPass[i] := m_setupSelfCheckPass[i];
+	r_setupStatus.m_asepticMegnetSpringBreakCheck[i] := m_setupArms[i].m_asepticMegnetSpringBreakCheck;
+	// joint
+	r_setupJointsData.m_curMotorPos[i]:=m_setupArms[i].curMotorPos;
+	r_setupJointsData.m_curLinkPos[i]:=m_setupArms[i].curLinkPos;
+	r_setupJointsData.m_curJntPos[i]:=m_setupArms[i].curJntPos;
+	r_setupJointsData.m_curJntVel[i]:=m_setupArms[i].curJntVel;
+	r_setupJointsData.m_rawJntCurrent[i]:=m_setupArms[i].rawJntCurrent;
+	r_setupJointsData.m_cmdJntCurrent[i] := m_setupArms[i].cmdJntCurrent;
+	
+	// command info
+	// joint info
+	r_setupJointsData.m_cmdJntPos[i]:=m_armCtrlCmds[i].m_cmdJntPos;
+	
+	//motor info
+	r_setupMotorData.m_motorEncSalta[i]:=m_setupArms[i].motorEncSalta;
+	FOR j:= 1 TO g_setupJntNum DO
+		r_setupMotorData.m_setupMotorInput[i,j]:=m_setupArms[i].m_joints[j].m_motorInputs;
+		r_setupMotorData.m_setupMotorOutput[i,j] := m_setupArms[i].m_joints[j].m_motorOutputs;
+		r_setupMotorData.m_jnt3MoveDistance[i] := m_setupArms[i].m_jnt3MoveDistance;
+		r_setupMotorData.m_jnt3MoveDistanceRecord[i] := m_setupArms[i].m_jnt3MoveDistanceRecord;
+	END_FOR
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{0db3a443-112b-48f7-898b-6b92ed428f2d}">
+      <Declaration><![CDATA[METHOD PUBLIC Init : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:INT;	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO g_sArmNum DO
+	// arm init
+	m_setupArms[i].Init(i);
+	m_setupArmState[i]:=SlaveArmState_Init;
+	m_lastSetupArmState[i]:=SlaveArmState_Init;
+	m_nextSetupArmState[i]:=SlaveArmState_Init;
+	
+	// command init
+	m_armCtrlCmds[i].m_jntEnableFlag := g_zeroVec5i;
+	m_armCtrlCmds[i].m_jntOPMode := g_setupAllPosMode;
+	m_armCtrlCmds[i].m_cmdJntPos := m_setupArms[i].curJntPos;
+	m_armCtrlCmds[i].m_cmdJntVel := g_zeroVec5d;
+	m_armCtrlCmds[i].m_cmdJntAcc := g_zeroVec5d;
+	m_armCtrlCmds[i].m_cmdJntTrq := g_zeroVec5d;
+	
+	// generate controller factory
+	m_armCtrlFactory[i,SetupArmState_Error] := m_armError[i];
+	m_armCtrlFactory[i,SetupArmState_Init] := m_armInit[i];
+	m_armCtrlFactory[i,SetupArmState_SelfCheck] := m_armSelfCheck[i];
+	m_armCtrlFactory[i,SetupArmState_Hold] := m_armHold[i];
+	m_armCtrlFactory[i,SetupArmState_ManualAdjust] := m_armManualAdjust[i];
+	m_armCtrlFactory[i,SetupArmState_AutoAdjust] := m_armAutoAdjust[i];
+	m_armCtrlFactory[i,SetupArmState_Package] := m_armPackage[i];
+	m_armCtrlFactory[i,SetupArmState_Cart] := m_armCart[i];
+	m_armCtrlFactory[i,SetupArmState_jnt3GravityCali] := m_armJnt3GraCali[i];
+	m_armCtrlFactory[i,SetupArmState_jnt5GravityCali] := m_armJnt5GraCali[i];
+	m_armCtrlFactory[i,SetupArmState_Disable] := m_armDisable[i];
+	m_armCtrlFactory[i,SetupArmState_Performance] := m_Performance[i];
+	m_armCtrlFactory[i,SetupArmState_Sotp] := m_armStop[i];
+	m_armCtrlFactory[i,SetupArmState_SelfCheckTransport] := m_selfCheckTransport[i];
+	
+	//add code for test
+	m_armCtrlFactory[i,SetupArmState_Performance] := m_Performance[i];
+	m_armCtrlFactory[i,SetupArmState_CycleTest] := m_setupStateCycleTest[i];
+	m_armCtrlFactory[i,SetupArmState_FrictionTest] := m_setupStateFrictionTest[i];
+	m_armCtrlFactory[i,SetupArmState_MotionTest] :=m_setupStateMotionTest[i];
+	m_armCtrlFactory[i,SetupArmState_armCali] :=m_armCali[i];
+	m_armCtrlFactory[i,SetupArmState_DargFreeTest] :=m_dragFreeTest[i];
+	m_armCtrlFactory[i,SetupArmState_SingleJntTest] :=m_singleJntTest[i];
+	
+	m_armCtrlFactory[i,SetupArmState_HoldEndoscope] := m_armHoldEndoscope[i];
+	m_armCtrlFactory[i,SetupArmState_HoldInstru] := m_armHoldInstru[i];
+	
+	// assign controller
+	m_armCtrl[i]:=m_armCtrlFactory[i,m_setupArmState[i]];
+	m_armCtrl[i].Init(m_setupArms[i],m_armCtrlCmds[i]);
+END_FOR
+	]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{00eef043-1869-4f40-8399-c0641788ce23}">
+      <Declaration><![CDATA[METHOD PUBLIC run : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupInputDataPool:ST_SetupInputDataPool;
+END_VAR
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// update arm status
+FOR i:=1 TO g_sArmNum DO
+	// update dynamic data
+	m_setupArms[i].updateDyna(i_setupInputDataPool.m_setupJnt3Gravity[i], i_setupInputDataPool.m_setupJnt5Gravity[i]);
+								
+	// update slave arm kinematics
+	m_setupArms[i].updateStatus();
+END_FOR
+
+// state machine transition
+stateMachine(i_setupInputDataPool);
+
+//update arm light
+updateArmLight(i_setupInputDataPool);
+
+// controller transition
+controllerTransit();
+
+FOR i:=1 TO g_sArmNum DO
+	// null ptr check
+	ASSERT(0 <> m_armCtrl[i]);
+	
+	// run controller
+	m_armCtrl[i].run(m_setupArms[i],m_armCtrlCmds[i]);
+
+	// update commands to drivers
+	m_setupArms[i].updateCmds(m_armCtrlCmds[i]);
+END_FOR
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="stateMachine" Id="{ec1b7cf8-3c23-4752-ad51-56e56c84a99b}">
+      <Declaration><![CDATA[// state machine check and transit 
+METHOD PROTECTED stateMachine : BOOL
+VAR_IN_OUT CONSTANT
+		i_setupInputDataPool:ST_SetupInputDataPool;
+END_VAR
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check package state
+GVL_interactUI.g_cartOperation.m_armStorageCompleted := BOOL_TO_UINT(m_armPackageFinished[1] OR SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[1]);
+FOR  i:=2 TO g_sArmNum DO
+	GVL_interactUI.g_cartOperation.m_armStorageCompleted := GVL_interactUI.g_cartOperation.m_armStorageCompleted AND BOOL_TO_UINT(m_armPackageFinished[i] OR SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i]);
+END_FOR
+GVL_interactUI.g_cartOperation.m_armStorageCompleted :=GVL_interactUI.g_cartOperation.m_armStorageCompleted AND BOOL_TO_UINT(SlaveArmControl.m_slaveRobot.m_slavePackageFinished) ;
+
+FOR i:=1 TO g_sArmNum DO
+	// State machine transit 
+	CASE m_setupArmState[i] OF
+		// error
+		SetupArmState_Error:
+			IF FALSE = i_setupInputDataPool.m_safetyData.m_setupErrFlag[i]  THEN
+				// to hold
+				IF i_setupInputDataPool.m_slaveStatus.m_selfCheckPass[i] THEN
+					m_nextSetupArmState[i]:=SetupArmState_Hold;
+				// to init
+				ELSE
+					m_nextSetupArmState[i] :=SetupArmState_Init;
+				END_IF
+			END_IF
+			// to manual adjust
+			IF m_setupArms[i].manualAdjustOn THEN
+				m_nextSetupArmState[i]:=SetupArmState_ManualAdjust;
+			// to auto adjust
+			ELSIF m_setupArms[i].m_jnt5AdjustDir<>0 AND NOT(i_setupInputDataPool.m_slaveStatus.m_instruInstallStatus[i]) THEN
+				m_nextSetupArmState[i]:=SetupArmState_AutoAdjust;
+			END_IF
+			
+		// init
+		SetupArmState_Init:
+			IF m_armCtrl[i].isFinished THEN
+				//  to self check
+				IF SlaveArmState_selfCheck = i_setupInputDataPool.m_slaveStatus.m_armState[i]  THEN
+					m_nextSetupArmState[i]:=SetupArmState_SelfCheck;
+				// to manual adjust
+				ELSIF m_setupArms[i].manualAdjustOn THEN
+					m_nextSetupArmState[i]:=SetupArmState_ManualAdjust;
+				// to auto adjust
+				ELSIF m_setupArms[i].m_jnt5AdjustDir<>0 AND NOT(i_setupInputDataPool.m_slaveStatus.m_instruInstallStatus[i]) THEN
+					m_nextSetupArmState[i]:=SetupArmState_AutoAdjust;
+				// to hold
+				ELSIF i_setupInputDataPool.m_slaveStatus.m_selfCheckPass[i] THEN
+					m_nextSetupArmState[i]:=SetupArmState_Hold;
+				END_IF		
+			END_IF
+
+		//self check
+		SetupArmState_SelfCheck:
+			IF m_armCtrl[i].isFinished  THEN
+				m_setupSelfCheckPass[i] := TRUE;
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
+				m_setupArms[i].jntGravityBias[3]:=m_armSelfCheck[i].m_jnt3GravityBias;
+			END_IF
+		
+		//hold
+		SetupArmState_Hold:
+			IF g_motionTest.m_enterPrecisionTestMode[i] THEN
+				IF g_motionTest.m_uiFixedEndoFlag AND g_motionTest.m_endoArmIdx = i THEN
+					m_nextSetupArmState[i]:=SetupArmState_HoldEndoscope;
+				ELSIF g_motionTest.m_uiArmModeL[i,6] THEN
+					m_nextSetupArmState[i]:=SetupArmState_HoldInstru;			
+				END_IF
+			END_IF
+			// to manual adjust
+			IF m_setupArms[i].manualAdjustOn  THEN
+				m_nextSetupArmState[i]:=SetupArmState_ManualAdjust;
+			// to auto adjust
+			ELSIF m_setupArms[i].m_jnt5AdjustDir<>0 AND NOT(i_setupInputDataPool.m_slaveStatus.m_instruInstallStatus[i]) THEN
+				m_nextSetupArmState[i]:=SetupArmState_AutoAdjust;
+			// to package	
+			ELSIF  GVL_interactUI.g_uiCtrl.m_packageEnable AND SlaveArmControl.m_slaveRobot.m_slavePackageFinished 
+						AND NOT m_armPackageFinished[i] THEN
+				m_nextSetupArmState[i]:= SetupArmState_Package;
+			// to selfcheck
+			ELSIF GVL_interactUI.g_salveSelfCheckTransportEnable THEN
+					m_nextSetupArmState[i] := SetupArmState_SelfCheckTransport;	
+			//to cycle test
+			ELSIF (g_cycleTest.m_enterCycleTestModeSetup[i] ) THEN
+				m_nextSetupArmState[i] := SetupArmState_CycleTest;
+			END_IF
+		
+		SetupArmState_HoldEndoscope:
+			IF NOT g_motionTest.m_enterPrecisionTestMode[i] OR NOT g_motionTest.m_uiFixedEndoFlag OR g_motionTest.m_endoArmIdx<>i THEN
+				m_nextSetupArmState[i] := SetupArmState_Hold;
+			END_IF
+			// to manual adjust
+			IF m_setupArms[i].manualAdjustOn  THEN
+				m_nextSetupArmState[i]:=SetupArmState_ManualAdjust;
+			// to auto adjust
+			ELSIF m_setupArms[i].m_jnt5AdjustDir<>0 AND NOT(i_setupInputDataPool.m_slaveStatus.m_instruInstallStatus[i]) THEN
+				m_nextSetupArmState[i]:=SetupArmState_AutoAdjust;
+			// to package	
+			ELSIF  GVL_interactUI.g_uiCtrl.m_packageEnable AND SlaveArmControl.m_slaveRobot.m_slavePackageFinished 
+						AND NOT m_armPackageFinished[i] THEN
+				m_nextSetupArmState[i]:= SetupArmState_Package;
+			// to selfcheck
+			ELSIF GVL_interactUI.g_salveSelfCheckTransportEnable THEN
+					m_nextSetupArmState[i] := SetupArmState_SelfCheckTransport;	
+			END_IF
+			
+		SetupArmState_HoldInstru:
+			IF NOT g_motionTest.m_enterPrecisionTestMode[i] OR NOT g_motionTest.m_uiArmModeL[i,6] THEN
+				m_nextSetupArmState[i] := SetupArmState_Hold;
+			END_IF
+			// to manual adjust
+			IF m_setupArms[i].manualAdjustOn  THEN
+				m_nextSetupArmState[i]:=SetupArmState_ManualAdjust;
+			// to auto adjust
+			ELSIF m_setupArms[i].m_jnt5AdjustDir<>0 AND NOT(i_setupInputDataPool.m_slaveStatus.m_instruInstallStatus[i]) THEN
+				m_nextSetupArmState[i]:=SetupArmState_AutoAdjust;
+			// to package	
+			ELSIF  GVL_interactUI.g_uiCtrl.m_packageEnable AND SlaveArmControl.m_slaveRobot.m_slavePackageFinished 
+						AND NOT m_armPackageFinished[i] THEN
+				m_nextSetupArmState[i]:= SetupArmState_Package;
+			// to selfcheck
+			ELSIF GVL_interactUI.g_salveSelfCheckTransportEnable THEN
+					m_nextSetupArmState[i] := SetupArmState_SelfCheckTransport;	
+			END_IF
+		
+		
+		// manual adjust
+		SetupArmState_ManualAdjust:
+			m_armPackageFinished[i] := FALSE;
+			// to hold
+			IF NOT(m_setupArms[i].manualAdjustOn) AND m_setupArms[i].jnt5AdjustDir=0 THEN
+				m_nextSetupArmState[i] := SetupArmState_Sotp;
+			END_IF
+			
+		// auto adjust
+		SetupArmState_AutoAdjust:
+			m_armPackageFinished[i] := FALSE;
+			// to hold
+			IF m_setupArms[i].jnt5AdjustDir=0 THEN
+				m_nextSetupArmState[i] := SetupArmState_Sotp;
+			END_IF
+				
+		//package
+		SetupArmState_Package:
+			IF m_armCtrl[i].isFinished  THEN
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
+				m_armPackageFinished[i]  := TRUE;
+			ELSIF  NOT GVL_interactUI.g_uiCtrl.m_packageEnable THEN
+				m_nextSetupArmState[i]:=SetupArmState_Sotp;
+			END_IF
+		
+		//cart
+		SetupArmState_Cart:
+		
+		//joint 5 gravity calibration
+		SetupArmState_jnt5GravityCali:
+			IF m_armCtrl[i].isFinished  THEN
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
+			END_IF 
+			
+		//joint 3 gravity calibration
+		SetupArmState_jnt3GravityCali:
+			IF m_armCtrl[i].isFinished  THEN
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
+			END_IF 
+		
+		// arm disable
+		SetupArmState_Disable:
+			IF NOT(SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i]) THEN
+				// to hold
+				IF i_setupInputDataPool.m_slaveStatus.m_selfCheckPass[i] THEN
+					m_nextSetupArmState[i]:=SetupArmState_Hold;
+				// to init
+				ELSE
+					m_nextSetupArmState[i] :=SetupArmState_Init;
+				END_IF
+			END_IF
+			
+		//arm Performance
+		SetupArmState_Performance:
+			// to hold
+			IF  m_armCtrl[i].isFinished THEN
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
+			END_IF	
+
+		//arm Stop
+		SetupArmState_Sotp:
+			IF  m_armCtrl[i].isFinished THEN
+				// to hold
+				IF i_setupInputDataPool.m_slaveStatus.m_selfCheckPass[i] THEN
+					m_nextSetupArmState[i]:=SetupArmState_Hold;
+				// to init
+				ELSE
+					m_nextSetupArmState[i] :=SetupArmState_Init;
+				END_IF
+			END_IF
+			
+		SetupArmState_SelfCheckTransport:
+			// to hold
+			IF  m_armCtrl[i].isFinished THEN
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
+			END_IF		
+
+		SetupArmState_SingleJntTest:
+			// to hold
+			IF  m_armCtrl[i].isFinished THEN
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
+			END_IF			
+
+		SetupArmState_CycleTest :
+			// to hold
+			IF  m_armCtrl[i].isFinished OR NOT g_cycleTest.m_enterCycleTestModeSetup[i] THEN
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
+			END_IF
+			
+	END_CASE
+	
+	
+	
+	//*****************add code for test************************//
+	// to SetupArmState_TestFriction
+	IF (g_frictionTestSetup.m_testMode[i]=TRUE) AND NOT(m_setupArmState[i]=SetupArmState_FrictionTest) THEN
+		m_nextSetupArmState[i] := SetupArmState_FrictionTest;
+	END_IF
+
+	//SetupArmState_TestFriction exit
+	IF (g_frictionTestSetup.m_testMode[i]=FALSE) AND (m_setupArmState[i]=SetupArmState_FrictionTest) THEN
+		m_nextSetupArmState[i] := SetupArmState_Hold;
+	END_IF
+			
+	// to SetupArmState_TestJnt
+	IF (g_motionTest.m_singleMotorControl[i]=TRUE) AND NOT(m_setupArmState[i]=SetupArmState_MotionTest) THEN
+		m_nextSetupArmState[i] := SetupArmState_MotionTest;
+	END_IF
+	
+	//SetupArmState_TestJnt exit
+	IF (g_motionTest.m_singleMotorControl[i]=FALSE) AND (m_setupArmState[i]=SetupArmState_MotionTest) THEN
+		m_nextSetupArmState[i] := SetupArmState_Hold;
+	END_IF
+
+	//robot calibration 
+	IF GVL_armCali.g_armEnterCaliMode[i] AND (m_setupArmState[i]<=SetupArmState_Hold) THEN
+		m_nextSetupArmState[i] := SetupArmState_armCali;
+	ELSIF NOT GVL_armCali.g_armEnterCaliMode[i] AND (m_setupArmState[i]=SetupArmState_armCali) THEN
+		m_nextSetupArmState[i] := SetupArmState_Init;
+	END_IF	
+	
+	// to SetupArmState_DargFreeTest
+	IF (g_motionRangeTest.m_testMode[i]=TRUE) AND NOT(m_setupArmState[i]=SetupArmState_DargFreeTest) THEN
+		m_nextSetupArmState[i] := SetupArmState_DargFreeTest;
+	END_IF
+	
+	//SetupArmState_DargFreeTest exit
+	IF (g_motionRangeTest.m_testMode[i]=FALSE) AND (m_setupArmState[i]=SetupArmState_DargFreeTest) THEN
+		m_nextSetupArmState[i] := SetupArmState_Hold;
+	END_IF
+	
+	//fault mask
+	IF (g_specialSignal.m_faultMask[i]) THEN
+		CONTINUE;
+	END_IF
+
+	//to SetupArmState_SingleJntTest
+	IF (g_singleJntTest.m_enterSingleJntTestMode[i]=TRUE) AND NOT(m_nextSetupArmState[i] = SetupArmState_ManualAdjust) THEN
+		m_nextSetupArmState[i] := SetupArmState_SingleJntTest;
+	END_IF
+	
+	//SetupArmState_SingleJntTest exit
+	IF (g_singleJntTest.m_enterSingleJntTestMode[i]=FALSE) AND (m_setupArmState[i]=SetupArmState_SingleJntTest) THEN
+		m_nextSetupArmState[i] := SetupArmState_Hold;
+	END_IF
+	
+	// arm disable
+	IF SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i] THEN
+		m_nextSetupArmState[i] := SetupArmState_Disable;
+	// error check
+	ELSIF i_setupInputDataPool.m_safetyData.m_setupErrFlag[i] AND NOT (m_setupArms[i].manualAdjustOn OR m_setupArms[i].m_jnt5AdjustDir<>0) THEN
+		m_nextSetupArmState[i]:=SetupArmState_Error;
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="updateArmLight" Id="{d08e58f5-1983-4668-aa13-ca360de1aae1}">
+      <Declaration><![CDATA[METHOD updateArmLight : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupInputDataPool:ST_SetupInputDataPool;
+END_VAR
+
+VAR
+	i : INT;
+	slaveArmState :E_SlaveArmState;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//*******************机械臂与动力盒上的灯光写入********************
+//不可恢复性故障-----红色常亮
+//可恢复故障----琥珀色-先闪烁5s、再进行常亮
+//正处于器械控制或者端口控制状态-----蓝色闪烁
+//该手术臂正在执行一项需要用户短时间等待的活动、例如器械卡接----蓝色-脉动闪烁
+//工具更换引导正在进行中-----绿色闪烁
+//未通电、已禁用、已收起----------关
+//系统正常运行-----蓝色常亮
+//灯光颜色--0-灯灭、1蓝灯常亮、2蓝灯闪烁、3琥珀色闪烁、4红灯闪烁、5绿灯常亮、6绿灯闪烁、7红灯常亮、8琥珀色常亮、9蓝灯脉动式闪烁  20关机灯灭
+FOR i := 1 TO g_sArmNum BY 1 DO
+	slaveArmState := i_setupInputDataPool.m_slaveStatus.m_armState[i];
+	IF NOT GVL_IO.g_lightTest[i] THEN
+		IF slaveArmState = SlaveArmState_PowerOff OR slaveArmState = SlaveArmState_Disable THEN
+			m_lightCrlWord[i] := ArmLight_PowerOff;
+		ELSIF i_setupInputDataPool.m_safetyData.m_slaveErrFlag[i] OR i_setupInputDataPool.m_safetyData.m_setupErrFlag[i] THEN
+			IF SafetyCheck.m_SafetyCheck.m_armErrFlag[i,3] THEN
+				m_lightCrlWord[i] := ArmLight_RedBlink;
+			ELSIF SafetyCheck.m_SafetyCheck.m_armErrFlag[i,2] THEN
+				m_lightCrlWord[i] := ArmLight_AmberBlink;
+			END_IF
+		ELSIF slaveArmState = SlaveArmState_MountPanel OR slaveArmState = SlaveArmState_MountInstru THEN
+			m_lightCrlWord[i] := ArmLight_BluePulse;
+		ELSIF slaveArmState = SlaveArmState_InstruRetract OR slaveArmState = SlaveArmState_Adjust OR slaveArmState = SlaveArmState_SelfCheck 
+			OR slaveArmState = SlaveArmState_Package OR m_setupArmState[i] = SetupArmState_Package OR m_setupArmState[i] = SetupArmState_ManualAdjust  THEN
+			m_lightCrlWord[i] := ArmLight_BlueBlink;
+		ELSIF slaveArmState = SlaveArmState_InstruInvasion THEN
+			m_lightCrlWord[i] := ArmLight_GreenBlink;
+		ELSE
+			m_lightCrlWord[i] := ArmLight_BlueOn;
+		END_IF
+	ELSE
+		IF GVL_IO.g_armLight_PowerOff[i] THEN
+			m_lightCrlWord[i] := ArmLight_PowerOff;
+		ELSIF GVL_IO.g_armLight_BlueOn[i] THEN
+			m_lightCrlWord[i] := ArmLight_BlueOn;
+		ELSIF GVL_IO.g_armLight_BlueBlink[i] THEN
+			m_lightCrlWord[i] := ArmLight_BlueBlink;
+		ELSIF GVL_IO.g_armLight_AmberBlink[i] THEN
+			m_lightCrlWord[i] := ArmLight_AmberBlink;
+		ELSIF GVL_IO.g_armLight_RedBlink[i] THEN
+			m_lightCrlWord[i] := ArmLight_RedBlink;
+		ELSIF GVL_IO.g_armLight_GreenOn[i] THEN
+			m_lightCrlWord[i] := ArmLight_GreenOn;
+		ELSIF GVL_IO.g_armLight_GreenBlink[i] THEN
+			m_lightCrlWord[i] := ArmLight_GreenBlink;
+		ELSIF GVL_IO.g_armLight_redOn[i] THEN
+			m_lightCrlWord[i] := ArmLight_redOn;
+		ELSIF GVL_IO.g_armLight_AmberOn[i] THEN
+			m_lightCrlWord[i] := ArmLight_AmberOn;
+		ELSIF GVL_IO.g_armLight_BluePulse[i] THEN
+			m_lightCrlWord[i] := ArmLight_BluePulse;
+		ELSE
+			m_lightCrlWord[i] := ArmLight_BlueOn;
+		END_IF
+	END_IF
+
+	m_setupArms[i].checkLight(m_lightCrlWord[i]);
+	
+	IF GVL_IO.g_LEDValueDisplay[i] THEN
+		m_LEDTestTime[i] := m_LEDTestTime[i] + GVL_SystemParameters.g_setupArmCtrlCycleTime;
+		IF m_LEDTestTime[i] > 1 THEN
+			m_LEDTestCount[i] := m_LEDTestCount[i] + 1;
+			//IF m_setupArms[i].checkDisplayLED(m_LEDTestCount[i]) THEN
+			m_LEDTestTime[i] := 0;
+			//END_IF
+		END_IF
+	ELSE
+		m_LEDTestCount[i] := 0;
+	END_IF
+	IF m_LEDTestCount[i] >= 99 THEN
+		GVL_IO.g_LEDValueDisplay[i] := FALSE;
+	END_IF
+	m_setupArms[i].checkDisplayLED(m_LEDTestCount[i]);
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SetupRobot">
+      <LineId Id="60" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="33" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupRobot.controllerTransit">
+      <LineId Id="48" Count="13" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="70" Count="5" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="29" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupRobot.getStatus">
+      <LineId Id="348" Count="27" />
+      <LineId Id="393" Count="1" />
+      <LineId Id="376" Count="0" />
+      <LineId Id="21" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupRobot.Init">
+      <LineId Id="235" Count="46" />
+      <LineId Id="61" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupRobot.run">
+      <LineId Id="259" Count="28" />
+      <LineId Id="22" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupRobot.stateMachine">
+      <LineId Id="1333" Count="76" />
+      <LineId Id="1614" Count="2" />
+      <LineId Id="1410" Count="118" />
+      <LineId Id="1620" Count="2" />
+      <LineId Id="1532" Count="0" />
+      <LineId Id="1618" Count="0" />
+      <LineId Id="1617" Count="0" />
+      <LineId Id="1623" Count="2" />
+      <LineId Id="1619" Count="0" />
+      <LineId Id="1626" Count="0" />
+      <LineId Id="1533" Count="4" />
+      <LineId Id="1548" Count="58" />
+      <LineId Id="16" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupRobot.updateArmLight">
+      <LineId Id="244" Count="73" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <GVL Name="GVL_Monitor" Id="{ab0f5606-0e98-44c8-8761-7d14d6dbc19c}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	g_stateMachine:ARRAY[1..g_sArmNum] OF E_SlaveArmState;
+	g_step:ARRAY[1..g_sArmNum] OF INT;
+	g_time:ARRAY[1..g_sArmNum] OF LREAL;
+	
+	g_jntPos:ARRAY[1..g_sArmNum] OF Vec6d;
+	g_targetPos:ARRAY[1..g_sArmNum] OF Vec6d;
+	g_posErr:ARRAY[1..g_sArmNum] OF Vec6d;
+	
+	g_pointNum:ARRAY[1..g_sArmNum] OF INT;
+	g_motStart:ARRAY[1..g_sArmNum] OF BOOL;
+	g_motMode:ARRAY[1..g_sArmNum] OF INT;
+	
+	//setup arm
+	g_tgtJntPosSA:ARRAY[1..g_sArmNum] OF Vec5d;
+	g_actJntPosSA:ARRAY[1..g_sArmNum] OF Vec5d;
+	
+	//car
+	g_carActJntPos,m_carTargetJntPos:Vec8d;
+	g_carTestStep:INT;
+	g_cartime:LREAL;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

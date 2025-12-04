@@ -1,0 +1,316 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_CartCtrlCycleTest" Id="{99854da5-3f45-4be2-9a18-7634fd1e0491}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_CartCtrlCycleTest EXTENDS FB_CartCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR CONSTANT
+	m_cartCycleMotionNum :INT :=3;
+END_VAR
+VAR
+	
+	//planner
+	m_Planner:ARRAY [1..m_cartCycleMotionNum] OF FB_TrajMoveJ;
+	m_cartCycleTrajIdx : INT;
+	m_curCycleNum : INT;
+	
+	//trajectory velocity/acceleration/jerk
+	m_maxjntVel:Vec8d := [4(0.0), 0.030, 5*g_deg2Rad, 0.030, 5*g_deg2Rad];
+	m_maxjntAcc:Vec8d := [4(0.0), 0.030*2, 5*g_deg2Rad*2, 0.030*2, 5*g_deg2Rad*2];
+	m_maxjntJerk:Vec8d := [4(0.0), 0.030*4, 5*g_deg2Rad*4, 0.030*4, 5*g_deg2Rad*4];
+
+	m_waitBreakOpenTime : LREAL := 0.5;
+	m_cycleMotionTime : LREAL;
+
+	//target cycle number
+	m_targetCycleNum:INT;
+	
+	//target joint position
+	m_targetJntPos:ARRAY[1..2] OF Vec8d;
+	
+	//unit function
+	m_unitFun:FB_UnitTransform;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{c0afa16c-ada2-4295-bd74-c6bdc944908b}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	// slave cart joint data
+	i_slaveCart :FB_SlaveCart;
+END_VAR
+
+VAR
+	i:INT;
+	curJntVel : Vec8d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check if planner is ready
+IF m_Planner[m_cartCycleTrajIdx].isGene = FALSE THEN
+	calcCmdJntPos:=FALSE;
+	RETURN;
+END_IF
+
+//wait break open
+IF m_timePeriod < m_waitBreakOpenTime THEN
+	//RETURN;
+END_IF
+
+// traj plan
+calcCmdJntPos :=m_Planner[m_cartCycleTrajIdx].evaluate(m_timePeriod , jntPos=> m_cmdJntPos, jntVel=>m_cmdJntVel, jntAcc=> m_cmdJntAcc);
+
+// check if to transit to next segment
+curJntVel := i_slaveCart.curJntVel;
+IF((m_timePeriod ) > m_Planner[m_cartCycleTrajIdx].duration  AND norm(curJntVel) <GVL_SlaveControlParameters.g_jntStaticVelThres) THEN
+	m_cartCycleTrajIdx:=m_cartCycleTrajIdx+1;
+	m_timePeriod:=0;
+END_IF
+
+
+m_cycleMotionTime := m_cycleMotionTime + g_cartCtrlCycleTime;
+IF m_cartCycleTrajIdx > m_cartCycleMotionNum THEN
+	m_curCycleNum := m_curCycleNum + 1;
+	m_cartCycleTrajIdx := 2;
+END_IF
+
+IF m_curCycleNum > m_targetCycleNum THEN
+	m_isFinished:=TRUE;
+END_IF
+
+
+//update the information
+updateInfo(i_slaveCart);
+
+//safety check 
+faultDetect();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="faultDetect" Id="{6fd18f4f-ffea-46ec-ab4e-4127f77ebc13}">
+      <Declaration><![CDATA[METHOD faultDetect : vec8i
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[faultDetect[5] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartStandColumnErr);
+faultDetect[6] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr);
+faultDetect[7] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr);
+faultDetect[8] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr);
+
+IF SafetyCheck.m_safetyCheckData.m_cartStandColumnErr THEN
+	m_jntEnableFlag[5] := 0;
+END_IF
+
+IF SafetyCheck.m_safetyCheckData.m_cartAdjustErr THEN
+	m_jntEnableFlag[6] := 0;
+	m_jntEnableFlag[7] := 0;
+	m_jntEnableFlag[8] := 0;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{ed6c333b-7154-4610-a992-b6c9412a831b}">
+      <Declaration><![CDATA[// override this function in each exact controller
+// NOTICE: set joint control mode here, and do some initialization if needed
+METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveCart	:FB_SlaveCart;
+END_VAR
+VAR_IN_OUT 
+	r_cartCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+VAR
+	i, j:INT;
+	startJntPos , endJntPos : Vec8d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check if to hold the command joint position unchanged
+m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
+SUPER^.init(i_slaveCart,r_cartCtrlCmd);
+
+//operation mode
+m_jntOPMode:=g_slaveAllPosMode;
+m_jntOPMode[5]:= DriverOPMode_cspMZ;
+m_jntOPMode[6]:= DriverOPMode_Pos;
+m_jntOPMode[7]:= DriverOPMode_Pos;
+m_jntOPMode[8]:= DriverOPMode_Pos;
+
+//check joint whether disable
+FOR i := 1 TO 8 DO
+	m_jntEnableFlag[i] := BOOL_TO_INT(NOT g_cycleTest.m_disableCartJntMotion[i]);
+END_FOR
+
+//get commend joint position
+FOR i:=1 TO m_cartCycleMotionNum-1 DO
+	m_targetJntPos[i]:=m_unitFun.carUnit2System( g_cycleTest.m_targetJntPosCar[i]);
+	FOR j := 1 TO 8 DO
+		IF g_cycleTest.m_disableCartJntMotion[j] THEN
+			m_targetJntPos[i][j] := i_slaveCart.curJntPos[j];
+		END_IF
+	END_FOR
+END_FOR	
+
+//velocity limit
+m_maxjntVel := m_unitFun.carUnit2System(g_cycleTest.m_targetJntVelCar);
+FOR i := 1 TO 8 DO
+	m_maxjntVel[i] := LIMIT(0, m_maxjntVel[i], GVL_CartControlParameters.g_maxJntVel[i]);
+END_FOR
+vecMultiNum(m_maxjntVel,2,m_maxjntAcc);
+vecMultiNum(m_maxjntAcc,2,m_maxjntJerk);
+
+//trajectory planner initialization
+//planner [1] controller is go to No.1 point.
+m_Planner[1].init(i_slaveCart.curJntPos , m_targetJntPos[1], i_maxJntVel:= m_maxjntVel, i_maxJntAcc:= m_maxjntAcc, i_maxJntJerk:= m_maxjntJerk);
+FOR i:=2 TO m_cartCycleMotionNum DO
+	IF i = m_cartCycleMotionNum THEN
+		m_Planner[i].init(m_targetJntPos[i-1] , m_targetJntPos[1], i_maxJntVel:= m_maxjntVel, i_maxJntAcc:= m_maxjntAcc, i_maxJntJerk:= m_maxjntJerk);
+	ELSE
+		m_Planner[i].init(m_targetJntPos[i-1] , m_targetJntPos[i], i_maxJntVel:= m_maxjntVel, i_maxJntAcc:= m_maxjntAcc, i_maxJntJerk:= m_maxjntJerk);
+	END_IF	
+END_FOR
+
+m_cartCycleTrajIdx := 1;
+m_cycleMotionTime := 0;
+m_curCycleNum := 0;
+m_targetCycleNum:=g_cycleTest.m_targetCycleNumCar;
+// update commands to arm
+copyCmds(r_cartCtrlCmd);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="updateInfo" Id="{90874ae2-ed01-460f-a393-888f892e546a}">
+      <Declaration><![CDATA[METHOD updateInfo : BOOL
+VAR_INPUT
+	// slave cart joint data
+	i_slaveCart :FB_SlaveCart;
+END_VAR
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//FOR i:=1 TO g_cartJntNum DO
+//	g_cycleTest.m_cartMotorEncoder[i]:=i_slaveCart.m_cartJoints[i].m_motorInputs.m_motorEncoder;
+//	g_cycleTest.m_cartjntEncoder[i]:=i_slaveCart.m_cartJoints[i].m_motorInputs.m_linkEncoder;
+//END_FOR
+
+//current joint position
+//g_cycleTest.m_actJntPosCar:=m_unitFun.carArmUnit2User(i_dataSystem:= i_slaveCart.curJntPos);
+
+//cover the target joint position
+//IF (g_cycleTest.m_coverCmdPosCar=TRUE) THEN
+//	i:=LIMIT(1,g_cycleTest.m_pntIdForCoverCmdCar,m_cartCycleMotionNum);
+//	g_cycleTest.m_targetJntPosCar[i]:=m_unitFun.carArmUnit2User(i_dataSystem:= i_slaveCart.curJntPos);
+//END_IF
+
+//update the information
+GVL_Monitor.m_carTargetJntPos:=m_cmdJntPos;
+GVL_Monitor.g_carActJntPos:=i_slaveCart.curJntPos;
+GVL_Monitor.g_cartime:=m_cycleMotionTime;
+g_cycleTest.m_curCycleNumCar:=m_curCycleNum;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_CartCtrlCycleTest">
+      <LineId Id="52" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlCycleTest.calcCmdJntPos">
+      <LineId Id="231" Count="3" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="194" Count="0" />
+      <LineId Id="225" Count="0" />
+      <LineId Id="237" Count="2" />
+      <LineId Id="227" Count="0" />
+      <LineId Id="235" Count="1" />
+      <LineId Id="228" Count="0" />
+      <LineId Id="240" Count="0" />
+      <LineId Id="251" Count="0" />
+      <LineId Id="241" Count="2" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="248" Count="0" />
+      <LineId Id="230" Count="0" />
+      <LineId Id="245" Count="0" />
+      <LineId Id="253" Count="0" />
+      <LineId Id="246" Count="1" />
+      <LineId Id="256" Count="0" />
+      <LineId Id="255" Count="0" />
+      <LineId Id="257" Count="1" />
+      <LineId Id="254" Count="0" />
+      <LineId Id="223" Count="1" />
+      <LineId Id="140" Count="0" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="205" Count="0" />
+      <LineId Id="173" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlCycleTest.faultDetect">
+      <LineId Id="3" Count="2" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="39" Count="1" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="45" Count="1" />
+      <LineId Id="44" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlCycleTest.init">
+      <LineId Id="372" Count="0" />
+      <LineId Id="251" Count="1" />
+      <LineId Id="391" Count="0" />
+      <LineId Id="386" Count="4" />
+      <LineId Id="385" Count="0" />
+      <LineId Id="411" Count="0" />
+      <LineId Id="380" Count="0" />
+      <LineId Id="379" Count="0" />
+      <LineId Id="381" Count="1" />
+      <LineId Id="412" Count="0" />
+      <LineId Id="375" Count="0" />
+      <LineId Id="373" Count="0" />
+      <LineId Id="404" Count="0" />
+      <LineId Id="392" Count="0" />
+      <LineId Id="395" Count="2" />
+      <LineId Id="394" Count="0" />
+      <LineId Id="264" Count="0" />
+      <LineId Id="421" Count="0" />
+      <LineId Id="420" Count="0" />
+      <LineId Id="429" Count="0" />
+      <LineId Id="426" Count="2" />
+      <LineId Id="425" Count="0" />
+      <LineId Id="422" Count="0" />
+      <LineId Id="413" Count="0" />
+      <LineId Id="410" Count="0" />
+      <LineId Id="435" Count="0" />
+      <LineId Id="408" Count="0" />
+      <LineId Id="414" Count="0" />
+      <LineId Id="431" Count="3" />
+      <LineId Id="415" Count="2" />
+      <LineId Id="398" Count="0" />
+      <LineId Id="418" Count="1" />
+      <LineId Id="254" Count="0" />
+      <LineId Id="384" Count="0" />
+      <LineId Id="328" Count="0" />
+      <LineId Id="430" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlCycleTest.updateInfo">
+      <LineId Id="7" Count="0" />
+      <LineId Id="9" Count="2" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="22" Count="1" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="32" Count="2" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="48" Count="4" />
+      <LineId Id="47" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

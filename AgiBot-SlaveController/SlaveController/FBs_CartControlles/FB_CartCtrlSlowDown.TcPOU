@@ -1,0 +1,190 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_CartCtrlSlowDown" Id="{0c77f5f0-20e1-4fb9-8be8-91bb56c7cc44}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_CartCtrlSlowDown EXTENDS FB_CartCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+
+	m_tarPosInc: Vec8d;
+	m_trajVel : Vec8d;
+	m_initVel : Vec8d;
+	m_initPos : Vec8d;
+	m_initDec : Vec8d;
+	
+	//slow down and stop time
+	m_incSlowStopTime :LREAL;
+	m_slowStopTime :LREAL :=0.5;
+	
+	// filter cut-off frequency for cart drive force 
+	m_cmdJoystickLpfCutoffFreq : LREAL :=8;
+	m_cartCtrlFreq :LREAL:=8000;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{630fb5ab-8a03-4b8b-9301-f4144cd8fed1}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	// slave cart joint data
+	i_slaveCart :FB_SlaveCart;
+END_VAR
+
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//In this method, 5 represents the pillar postion , 6 represents the beam rotation angle ,7 represents the beam stretch position ,8 represents the overhang angle
+m_incSlowStopTime :=LIMIT(0, m_incSlowStopTime + g_cartCtrlCycleTime, 1);
+
+FOR i := 5 TO 8 BY 1 DO
+	m_trajVel[i] := m_initVel[i] - m_initDec[i] * m_incSlowStopTime;
+	IF sign(m_trajVel[i]) <> sign(m_initVel[i]) THEN
+		m_trajVel[i]:=0;
+	END_IF
+	m_tarPosInc[i] := m_tarPosInc[i] + m_trajVel[i] * g_cartCtrlCycleTime;
+	m_cmdJntPos[i] := m_initPos[i] + m_tarPosInc[i];
+END_FOR
+
+IF m_incSlowStopTime >= m_slowStopTime AND (m_jntEnableFlag[5] = 1 OR m_jntEnableFlag[6]=1 OR m_jntEnableFlag[7] = 1 OR m_jntEnableFlag[8] =1) THEN//m_slowStopTime THEN
+	m_isFinished := TRUE;
+ELSIF m_incSlowStopTime >= 1THEN
+	m_isFinished := TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdJntVel" Id="{572631d4-c048-4ae0-abd3-20f862854535}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntVel : BOOL
+VAR_IN_OUT CONSTANT
+	// slave cart joint data
+	i_slaveCart :FB_SlaveCart;
+END_VAR
+
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//In this method, 5 represents the pillar postion , 6 represents the beam rotation angle ,7 represents the beam stretch position ,8 represents the overhang angle
+m_incSlowStopTime :=LIMIT(0, m_incSlowStopTime + g_cartCtrlCycleTime, 1);
+
+FOR i := 3 TO 4 BY 1 DO
+	m_trajVel[i] := m_initVel[i] - m_initDec[i] * m_incSlowStopTime;
+	IF sign(m_trajVel[i]) <> sign(m_initVel[i]) THEN
+		m_trajVel[i]:=0;
+	END_IF
+	m_cmdJntVel[i] := LIMIT(-GVL_CartControlParameters.g_maxJntVel[i], m_trajVel[i]  , GVL_CartControlParameters.g_maxJntVel[i]);
+END_FOR
+
+IF m_incSlowStopTime >= 1.0 AND (m_jntEnableFlag[3] = 1 OR m_jntEnableFlag[4]=1) THEN//m_slowStopTime THEN
+	m_isFinished := TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{1889fc8b-7615-4a73-af47-9f6b2589ad8d}">
+      <Declaration><![CDATA[// override this function in each exact controller
+// NOTICE: set joint control mode here, and do some initialization if needed
+METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveCart	:FB_SlaveCart;
+END_VAR
+VAR_IN_OUT 
+	r_cartCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_cmdJntPos:=r_cartCtrlCmd.m_cmdJntPos;
+m_initPos := m_cmdJntPos;
+
+m_jntEnableFlag :=r_cartCtrlCmd.m_jntEnableFlag;
+
+m_jntOPMode[3]:= DriverOPMode_csvMZ;
+m_jntOPMode[4]:= DriverOPMode_csvMZ;
+m_jntOPMode[5]:= DriverOPMode_cspMZ;
+m_jntOPMode[6]:= DriverOPMode_Pos;
+m_jntOPMode[7]:= DriverOPMode_Pos;
+m_jntOPMode[8]:= DriverOPMode_Pos;
+
+m_trajVel[3] := 0;
+m_trajVel[4] := 0;
+m_trajVel[5] := 0;
+m_trajVel[6] := 0;
+m_trajVel[7] := 0;
+m_trajVel[8] := 0;
+
+m_tarPosInc[3] := 0;
+m_tarPosInc[4] := 0;
+m_tarPosInc[5] := 0;
+m_tarPosInc[6] := 0;
+m_tarPosInc[7] := 0;
+m_tarPosInc[8] := 0;
+
+
+m_incSlowStopTime := 0;
+
+m_initVel[3] := LIMIT(-GVL_CartControlParameters.g_maxJntVel[3], i_slaveCart.curJntVel[3], GVL_CartControlParameters.g_maxJntVel[3]);
+m_initVel[4] := LIMIT(-GVL_CartControlParameters.g_maxJntVel[4], i_slaveCart.curJntVel[4], GVL_CartControlParameters.g_maxJntVel[4]);
+m_initVel[5] := LIMIT(-GVL_CartControlParameters.g_maxJntVel[5], i_slaveCart.curJntVel[5], GVL_CartControlParameters.g_maxJntVel[5]);
+m_initVel[6] := LIMIT(-GVL_CartControlParameters.g_maxJntVel[6], i_slaveCart.curJntVel[6], GVL_CartControlParameters.g_maxJntVel[6]);
+m_initVel[7] := LIMIT(-GVL_CartControlParameters.g_maxJntVel[7], i_slaveCart.curJntVel[7], GVL_CartControlParameters.g_maxJntVel[7]);
+m_initVel[8] := LIMIT(-GVL_CartControlParameters.g_maxJntVel[8], i_slaveCart.curJntVel[8], GVL_CartControlParameters.g_maxJntVel[8]);
+
+m_initDec[3] := m_initVel[3];
+m_initDec[4] := m_initVel[4];
+m_initDec[5] := sign(m_initVel[5])*GVL_CartControlParameters.g_maxJntVel[5]*2;
+m_initDec[6] := sign(m_initVel[6])*GVL_CartControlParameters.g_maxJntVel[6]*2;
+m_initDec[7] := sign(m_initVel[7])*GVL_CartControlParameters.g_maxJntVel[7]*2;
+m_initDec[8] := sign(m_initVel[8])*GVL_CartControlParameters.g_maxJntVel[8]*2;
+
+m_slowStopTime := 0.5;
+// update commands to arm
+copyCmds(r_cartCtrlCmd);]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_CartCtrlSlowDown">
+      <LineId Id="52" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlSlowDown.calcCmdJntPos">
+      <LineId Id="12" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="102" Count="2" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="76" Count="1" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="114" Count="2" />
+      <LineId Id="71" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlSlowDown.calcCmdJntVel">
+      <LineId Id="12" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="89" Count="2" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="71" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlSlowDown.init">
+      <LineId Id="157" Count="1" />
+      <LineId Id="241" Count="0" />
+      <LineId Id="240" Count="0" />
+      <LineId Id="203" Count="36" />
+      <LineId Id="190" Count="3" />
+      <LineId Id="21" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="AGILOG_DebugStop" Id="{ba7aeb2d-6599-472f-838a-f2d60329c612}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION AGILOG_DebugStop : BOOL]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[GVL_RunTimeLogger.g_debugLogFileName  := 'defaultLogFileName.txt';
+
+GVL_RunTimeLogger.g_enableDebugLog := FALSE;
+
+
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="AGILOG_DebugStop">
+      <LineId Id="377" Count="0" />
+      <LineId Id="364" Count="0" />
+      <LineId Id="363" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

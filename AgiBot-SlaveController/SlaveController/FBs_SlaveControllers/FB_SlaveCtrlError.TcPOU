@@ -1,0 +1,205 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_SlaveCtrlError" Id="{78b2e60d-537e-446e-8b3b-6db63d5ab02c}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Slave Arm Error Hold
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlError EXTENDS FB_SlaveArmCtrlBase
+VAR
+	m_driveErrorF :ARRAY [1..g_sJntNum] OF F_TRIG;
+	m_driveDelayF :ARRAY [1..g_sJntNum] OF TON;
+	m_driveResetR :ARRAY [1..g_sJntNum] OF R_TRIG;
+	m_driveReset :Vec8b;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{c2b94d3d-dd32-4b7a-a379-1afc098a58f1}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	// endoscope pose in cart coordinate
+	i_endoscopePose : ST_Frame;
+	
+	// master arm data
+	i_masterStatus :ST_MasterStatus;
+	
+	// setup arm data
+	i_setupStatus: ST_SetupStatus;
+	
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	i :INT;
+	jntEnableFlag : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//m_cmdJntPos := i_slaveArm.curJntPos;
+// disable instrument joints which is in error 
+FOR i:=4 TO g_sJntNum DO
+	IF SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_slaveArm.armIdx,i+g_setupJntNum,2] OR  SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_slaveArm.armIdx,i+g_setupJntNum,3] 
+		OR SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_slaveArm.armIdx,0,3] OR NOT SlaveArmControl.m_slaveRobot.m_selfCheckPass[i_slaveArm.armIdx]  THEN
+		m_jntEnableFlag[i] := 0;
+	ELSE
+		m_jntEnableFlag[i] := 1;
+	END_IF
+	IF SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_slaveArm.armIdx, 0, 2] AND (i =4 OR  i= 5) THEN
+		m_jntEnableFlag[i] := 0;
+	END_IF
+
+	m_driveErrorF[i](CLK:= driveErrorCheck(i,i_slaveArm.m_joints[i].m_motorInputs.m_driverError) = 1, Q=> );
+	IF m_driveErrorF[i].Q THEN
+		m_driveReset[i] := TRUE;
+	END_IF
+	m_driveDelayF[i](IN:=m_driveReset[i] , PT:= T#30MS, Q=> , ET=> );
+	m_driveResetR[i](CLK:= m_driveDelayF[i].Q, Q=> );
+	IF m_driveResetR[i].Q THEN
+		i_slaveArm.m_joints[i].initJntPosOfErr();
+		m_driveReset[i] := FALSE;
+	END_IF
+		
+END_FOR
+
+jntEnableFlag := m_jntEnableFlag[4] AND m_jntEnableFlag[5];
+m_jntEnableFlag[4] :=jntEnableFlag ;
+m_jntEnableFlag[5] := jntEnableFlag;
+jntEnableFlag := m_jntEnableFlag[6] AND m_jntEnableFlag[7] AND m_jntEnableFlag[8];
+m_jntEnableFlag[6] :=jntEnableFlag;
+m_jntEnableFlag[7] :=jntEnableFlag;
+m_jntEnableFlag[8] :=jntEnableFlag;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="driveErrorCheck" Id="{91a66da3-97cf-41e5-a7eb-48d8410eee27}">
+      <Declaration><![CDATA[METHOD driveErrorCheck : UDINT
+VAR_INPUT
+	i_jntId : INT;
+	i_driverError :UDINT;
+END_VAR
+VAR
+	driveErrMassage : UDINT;
+	encErrorJnt : ARRAY [1..3] OF UDINT;
+	driveErrorJnt : ARRAY [1..3] OF UDINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[driveErrMassage := i_driverError;
+encErrorJnt[1] := SHR(driveErrMassage,0) AND 16#01;
+encErrorJnt[2] := SHR(driveErrMassage,1) AND 16#01;
+encErrorJnt[3] := SHR(driveErrMassage,2) AND 16#01;
+driveErrorJnt[1] := SHR(driveErrMassage,3) AND 16#01;
+driveErrorJnt[2] := SHR(driveErrMassage,4) AND 16#01;
+driveErrorJnt[3] := SHR(driveErrMassage,5) AND 16#01;
+
+IF i_jntId = 4 OR i_jntId = 8 THEN
+	driveErrorCheck :=encErrorJnt[1] OR driveErrorJnt[1];
+ELSIF i_jntId = 5 OR i_jntId = 6 THEN
+	driveErrorCheck :=encErrorJnt[2] OR driveErrorJnt[2];
+ELSIF i_jntId = 7 THEN
+	driveErrorCheck :=encErrorJnt[3] OR driveErrorJnt[3];
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{e6a6f329-eae4-4e64-b8ba-0dd027b37a8e}">
+      <Declaration><![CDATA[// override this function in each exact controller
+// NOTICE: set joint control mode here, and do some initialization if needed
+METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+
+
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+
+// disable first three joints
+m_jntEnableFlag[1]:= 0;
+m_jntEnableFlag[2]:= 0;
+m_jntEnableFlag[3]:= 0;
+m_jntOPMode[1] := DriverOPMode_Pos;
+m_jntOPMode[2] := DriverOPMode_Pos;
+m_jntOPMode[3] := DriverOPMode_Pos;
+
+// disable instrument joints which is in error 
+FOR i:=4 TO g_sJntNum DO
+	IF SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_slaveArm.armIdx,i+g_setupJntNum,2] OR  SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_slaveArm.armIdx,i+g_setupJntNum,3] 
+		OR SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_slaveArm.armIdx,0,3] OR NOT SlaveArmControl.m_slaveRobot.m_selfCheckPass[i_slaveArm.armIdx]  THEN
+		m_jntEnableFlag[i] := 0;
+	ELSE
+		m_jntEnableFlag[i] := 1;
+	END_IF
+	IF SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_slaveArm.armIdx, 0, 2] AND (i =4 OR  i= 5) THEN
+		m_jntEnableFlag[i] := 0;
+	END_IF
+END_FOR
+m_driveReset := g_zeroVec8b;
+m_jntEnableFlag[4] :=m_jntEnableFlag[4] AND m_jntEnableFlag[5];
+m_jntEnableFlag[6] :=m_jntEnableFlag[6] AND m_jntEnableFlag[7] AND m_jntEnableFlag[8];
+
+ // update commands to arm
+copyCmds(r_slaveArmCtrlCmd);
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveCtrlError">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlError.calcCmdJntPos">
+      <LineId Id="89" Count="11" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="165" Count="2" />
+      <LineId Id="163" Count="1" />
+      <LineId Id="161" Count="1" />
+      <LineId Id="168" Count="0" />
+      <LineId Id="142" Count="0" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="210" Count="0" />
+      <LineId Id="119" Count="1" />
+      <LineId Id="188" Count="1" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="190" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlError.driveErrorCheck">
+      <LineId Id="3" Count="3" />
+      <LineId Id="61" Count="1" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="12" Count="2" />
+      <LineId Id="48" Count="1" />
+      <LineId Id="17" Count="1" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlError.init">
+      <LineId Id="67" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="99" Count="2" />
+      <LineId Id="144" Count="2" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="108" Count="2" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="127" Count="2" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="163" Count="0" />
+      <LineId Id="162" Count="0" />
+      <LineId Id="83" Count="1" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

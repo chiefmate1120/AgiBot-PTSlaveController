@@ -1,0 +1,809 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_BasicInstruControl" Id="{2cc54694-5109-4339-b599-ede4b8dcd0f6}" SpecialFunc="None">
+    <Declaration><![CDATA[// instrument joints control
+FUNCTION_BLOCK FB_BasicInstruControl
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// instrument PID control paramters
+//	m_instruKp:ARRAY[1..5] OF LREAL:=[5(3)];
+//	m_instruKd:ARRAY[1..5] OF LREAL:=[5(0.04)];
+//	m_instruKi:ARRAY[1..5] OF LREAL:=[5(10.0)];
+//	m_instruKp:ARRAY[1..5] OF LREAL:=[5(2)];
+//	m_instruKd:ARRAY[1..5] OF LREAL:=[5(0.02)];
+//	m_instruKi:ARRAY[1..5] OF LREAL:=[5(5.0)];
+	m_instruKp:ARRAY[1..5] OF LREAL:=[5(2)];
+	m_instruKd:ARRAY[1..5] OF LREAL:=[5(0.04)];
+	m_instruKi:ARRAY[1..5] OF LREAL:=[5(5.0)];
+	m_instruKiLimit:ARRAY[1..5] OF LREAL:=[5(250.0)];
+	m_instruCtrlLimit:ARRAY[1..5] OF LREAL:=[5(540.0)];
+	
+	// gripper force level threshold for variable PID parameter
+	m_forceLevelThres : ARRAY[1..3] OF LREAL := [40, 70, 101];
+	
+	m_yawKiLimit:LREAL:=250.0;
+	m_yawCtrlLimit:LREAL:=540.0;
+	
+	// max grip force/current(mA)
+	m_maxGripForce:LREAL;
+	m_maxGripCurrent:LREAL:=350.0;
+	
+	// max gripper finger control force/current(mA)
+	m_maxGripCtrlForce:LREAL;
+	m_maxGripCtrlCurrent:LREAL:=540.0;
+	
+	// PID for instrument joint position
+	m_instruJntCtrl:ARRAY[1..5] OF FB_PID;
+	
+	// ratio convert motor current to joint troque
+	m_currentRatioMotor2Jnt:LREAL;
+	
+	// command instrument joint position and velocity
+	m_instruCmdJntPos:Vec5d;
+	m_instruCmdJntVel:Vec5d;
+	
+	// current instrument joint position and velocity
+	m_instruCurJntPos: Vec5d;
+	m_instruCurJntVel:Vec5d;
+	
+	// grasp force level
+	m_graspForceLevel:Lreal :=0;
+	
+	// instrument joint control torque(when gripper is open)
+	m_instruJntCtrlTrq:Vec5d:=[5(0.0)];
+
+	// instrument yaw control torque(when gripper is closed)
+	m_instruYawCtrlTrq:LREAL;
+		
+	// backlash compensation variables
+	m_jntBacklash:ARRAY[1..5] OF LREAL:=[5(0)];
+	m_instruLastCmdJntPos:Vec5d;
+	
+	//pitch back lash on account of  Yaw
+	m_pitchBackLash : ARRAY [1..5] OF LREAL := [5(0)];
+	m_pitchBackLashLpf :FB_LowPassFilter;
+	 
+
+	m_jntMoveStep:LREAL := 0.5*g_deg2Rad;
+	
+	m_maxPitchCompAngle : LREAL := 5*g_deg2Rad;
+	m_maxRollCompAngle : LREAL := 5*g_deg2Rad;
+	
+	// filter cut-off frequency for pitch back lash
+	m_cmdJntPosLpfCutoffFreq : LREAL :=3;
+	
+	// yaw compensation 
+	test1 : LREAL;
+	m_posGrowThre : LREAL := 0.0001;	// positive growth compensation direction change threshold 
+	m_negGrowThre : LREAL := -0.0001;	// negative growth compensation direction change threshold 
+	m_compStage : (COMP_INIT,COMP_PREPARE, COMP_POS, COMP_NEG);
+	m_yawCompensation : LREAL;
+	m_curYawComp 	: LREAL;
+	m_nextYawComp	: LREAL;
+	m_gripVariationLpf : FB_LowPassFilter;
+	m_yamAngLpf		: FB_LowPassFilter;
+	m_yamAngMean	: FB_MeanFilters;
+	m_yamCompMean	: FB_MeanFilters;
+	
+	m_dynamicClampFactor : LREAL := 1.4424208694168012E-05;
+	m_clampAdjustMax : LREAL := 10;
+	m_currentAdjustMin : LREAL := 420;
+	
+	m_gripVariation : LREAL;
+	
+	// pitch compensation 
+	m_pitchCompMean : FB_MeanFilters;
+	m_yawCompMean: FB_MeanFilters;
+	
+	m_posGrowThrePitch : LREAL := 0.002;	// positive growth compensation direction change threshold 
+	m_negGrowThrePitch : LREAL := -0.002;	// negative growth compensation direction change threshold 
+	m_compStagePitch : (COMP_INIT,COMP_PREPARE, COMP_POS, COMP_NEG);
+	m_pitchCompensation : LREAL;
+	m_curPitchComp 	: LREAL;
+	
+	
+	m_clampPitchComp : LREAL;
+	m_clampYawComp : LREAL;
+	
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[	
+	]]></ST>
+    </Implementation>
+    <Folder Name="Property" Id="{945a0b6f-846f-47f9-bd06-8d5668b0c62b}" />
+    <Method Name="calcBacklash" Id="{aeb9718b-c6f1-4086-a1bf-d28986f24f69}">
+      <Declaration><![CDATA[METHOD calcBacklash : BOOL
+VAR_IN_OUT CONSTANT
+	// instrument joint command position
+	i_cmdInstruJntPos :Vec5d;
+	
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR
+	i:INT;
+	deltaAng:LREAL;
+	maxBacklash: LREAL;
+	pitchBackLash : LREAL;
+	maxCurrent : LREAL;
+	difference : LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// backslash compensation
+FOR i:=1 TO 4 DO
+	// integral compensated backslash angle
+	deltaAng:=i_cmdInstruJntPos[i]-m_instruLastCmdJntPos[i];
+	IF ABS(deltaAng)>m_jntMoveStep THEN
+		m_jntBacklash [i] := m_jntBacklash [i] + m_jntMoveStep*sign(deltaAng);
+		m_instruLastCmdJntPos[i] := i_cmdInstruJntPos[i];
+	END_IF
+END_FOR
+
+// exert pitch force 
+IF m_graspForceLevel >0  THEN
+	// compensate yaw joint angle in case it's driven by force difference between two fingers
+	pitchBackLash := ((i_slaveArm.filtJntCurrent[5] - i_slaveArm.filtJntCurrent[4])/m_maxGripCtrlCurrent)*m_maxPitchCompAngle;
+	m_pitchBackLash[3] := m_pitchBackLashLpf.run(i_rawData:=pitchBackLash );
+ELSE
+	m_pitchBackLash[3] := 0;
+END_IF
+
+// exert grip force 
+IF m_graspForceLevel >0  THEN
+
+	maxCurrent := MAX(i_slaveArm.filtJntCurrent[4], i_slaveArm.filtJntCurrent[5]);
+	IF maxCurrent > m_currentAdjustMin THEN
+		difference := maxCurrent - m_currentAdjustMin;
+		m_gripVariation := m_dynamicClampFactor * difference * difference;
+	ELSE
+		m_gripVariation := 0;
+	END_IF
+	compensationIK(	i_DHJntPos:= i_slaveArm.simDHJntPos, 
+					i_pitchComp:= 0, 
+					i_yawComp:= m_clampYawComp, 
+					i_gripVariation:= m_gripVariation, 
+					i_instruTypeInfo:= i_slaveArm.instrument.instruTypeInfo, 
+					jntBacklash=> m_jntBacklash);
+	// compensate yaw joint angle in case it's driven by force difference between two fingers
+	pitchBackLash := ((i_slaveArm.filtJntCurrent[5] - i_slaveArm.filtJntCurrent[4])/m_maxGripCtrlCurrent)*m_maxPitchCompAngle;
+	m_pitchBackLash[3] := m_pitchBackLashLpf.run(i_rawData:=pitchBackLash );
+ELSE
+	m_pitchBackLash[3] := 0;
+END_IF
+
+// limit compensated backslash angle
+FOR i:=1 TO 4 DO
+	IF m_graspForceLevel > 0 AND (i = 1 OR i = 2) THEN
+		CONTINUE;
+	END_IF
+	IF i<3 THEN 
+		maxBacklash:=i_slaveArm.instrument.instruTypeInfo.m_instruYawBacklash;
+	ELSIF i=3 THEN
+		maxBacklash:=i_slaveArm.instrument.instruTypeInfo.m_instruPitchBachlash;
+	ELSIF i=4 THEN
+		maxBacklash:=m_maxRollCompAngle;
+	ELSE
+		maxBacklash:=0;
+	END_IF
+
+	IF g_instruBacklashDir[i] > 0 THEN
+		m_jntBacklash [i] := LIMIT(0, m_jntBacklash[i], maxBacklash);
+	ELSE
+		m_jntBacklash [i] := LIMIT(-maxBacklash, m_jntBacklash[i], 0);	
+	END_IF
+	
+END_FOR
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="clearBacklash" Id="{be952804-e2b5-49e4-ae4f-cb40af1d0d31}">
+      <Declaration><![CDATA[METHOD PUBLIC clearBacklash : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_jntBacklash := g_zeroVec5d;
+m_pitchBackLash := g_zeroVec5d;
+m_compStage := COMP_INIT;
+m_curYawComp := 0;
+m_nextYawComp := 0;
+m_yawCompensation := 0;
+compensationPitch(
+	reset:= TRUE, 
+	i_DHPos:= 0, 
+	i_compFactor:= 0, 
+	i_compCoeff:= 0, 
+	i_posGrowThre:= 0, 
+	i_negGrowThre:= 0);
+compensationYaw(
+	reset:= TRUE, 
+	i_DHPos:= 0, 
+	i_compFactor:= 0, 
+	i_compCoeff:= 0, 
+	i_posGrowThre:= 0, 
+	i_negGrowThre:= 0);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="compensationIK" Id="{70c25ebe-063e-42a2-a9ca-c3879247be21}">
+      <Declaration><![CDATA[METHOD PUBLIC compensationIK : BOOL
+VAR_INPUT
+	/// DH  joint positon
+	i_DHJntPos: Vec6d;
+	i_pitchComp: LREAL;
+	i_yawComp : LREAL;
+	i_gripVariation: LREAL;
+	/// instrument type info
+	i_instruTypeInfo: ST_InstruTypeInfo;
+END_VAR
+VAR_OUTPUT
+	jntBacklash:ARRAY[1..5] OF LREAL;
+END_VAR
+VAR
+	i : INT;
+	rot_y: LREAL;
+	rot_z: LREAL;
+	ky : LREAL;
+	kz: LREAL;
+	k13: LREAL;
+	k23: LREAL;
+	d: LREAL;
+	ra: LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE i_instruTypeInfo.m_InstruID OF
+	InstruType_endoscope,
+	InstruType_ProGraspForceps,
+	InstruType_ForceBipolar,
+	InstruType_CauteryHook,
+	InstruType_CauterySpatula,
+	InstruType_UltrasoundKnifeS,
+	InstruType_UltrasoundKnifeU:
+	FOR i := 1 TO 5 DO 
+		jntBacklash[i] := 0;
+	END_FOR
+	RETURN;
+	
+END_CASE
+
+// kinematic variables
+d:=-1;
+ky:=i_instruTypeInfo.m_k2;
+kz:=i_instruTypeInfo.m_k1;
+k13:=i_instruTypeInfo.m_k3;
+k23:=i_instruTypeInfo.m_k3;
+
+ra:=i_gripVariation;
+
+// ################# instrument inverse kinematic ##############
+// convert arm DH joint position to  instrument rotation
+rot_y:=-i_pitchComp;
+rot_z:=-i_yawComp;
+
+jntBacklash[1] := rot_y*k13*kz+rot_y*k13*kz+d*rot_z*kz+d*ra*kz/2;
+jntBacklash[2] := -rot_y*k23*kz-rot_y*k23*kz-d*rot_z*kz+d*ra*kz/2;
+jntBacklash[3] := rot_y*ky;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="compensationPitch" Id="{0df5012d-a2ba-4d90-b67d-0bc569bc626d}">
+      <Declaration><![CDATA[METHOD compensationPitch : LREAL  // yaw compensation
+VAR_INPUT
+	reset : BOOL;
+	i_DHPos : LREAL;
+	i_compFactor : LREAL;
+	i_compCoeff : LREAL;
+	i_posGrowThre : LREAL;
+	i_negGrowThre : LREAL;
+END_VAR
+
+
+VAR_INST
+	compStage : INT;
+	
+	buffer : ARRAY[0..100] OF LREAL;
+	bufferTail : INT;
+	filterRes : LREAL;
+	lastPos : LREAL;
+	sum : LREAL;
+	average : LREAL;
+	
+	scaleFactor : LREAL ;
+	exponentCoeff : LREAL ;
+	posGrowThre : LREAL;
+	negGrowThre : LREAL;
+	
+	symbol : INT := 0;
+	
+	diff : LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF reset THEN
+	compStage :=0;
+	compensationPitch := 0;
+	RETURN;
+END_IF
+
+filterRes := i_DHPos;
+
+CASE compStage OF
+	0:
+		bufferTail := 0;
+		lastPos := filterRes;
+		sum := 0;
+		m_pitchCompMean.init(windowSize:=800);
+		average := 0;
+		scaleFactor := i_compFactor;
+		exponentCoeff := i_compCoeff;
+		posGrowThre := i_posGrowThre;
+		negGrowThre := i_negGrowThre;
+		
+		symbol := 0;
+		compensationPitch := 0;
+		compStage := 5;
+		
+	5:
+		buffer[bufferTail] := filterRes;
+		sum := sum + filterRes;
+		bufferTail := (bufferTail + 1) MOD 100;
+		IF bufferTail = 0 THEN
+			compStage := 10;
+		END_IF
+		compensationPitch := 0;
+		
+	10:
+		sum := sum - buffer[bufferTail] + filterRes;
+		buffer[bufferTail] := filterRes;
+		bufferTail := (bufferTail + 1) MOD 100;
+		average := sum/100;
+		
+		IF filterRes - average < negGrowThre THEN
+			symbol := -1;
+		ELSIF filterRes - average > posGrowThre THEN
+			symbol := 1;
+		END_IF
+		compensationPitch := symbol * scaleFactor * EXP(exponentCoeff * m_graspForceLevel);
+END_CASE
+
+diff :=  filterRes - average;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="compensationYaw" Id="{b1dd966f-9b15-40dd-9163-c300888fd4db}">
+      <Declaration><![CDATA[METHOD compensationYaw : LREAL  // yaw compensation
+VAR_INPUT
+	reset : BOOL;
+	i_DHPos : LREAL;
+	i_compFactor : LREAL;
+	i_compCoeff : LREAL;
+	i_posGrowThre : LREAL;
+	i_negGrowThre : LREAL;
+END_VAR
+
+
+VAR_INST
+	compStage : INT;
+	
+	buffer : ARRAY[0..100] OF LREAL;
+	bufferTail : INT;
+	filterRes : LREAL;
+	filterRes2 : LREAL;
+	lastPos : LREAL;
+	sum : LREAL;
+	average : LREAL;
+	
+	scaleFactor : LREAL ;
+	exponentCoeff : LREAL ;
+	posGrowThre : LREAL;
+	negGrowThre : LREAL;
+	
+	symbol : INT := 0;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF reset THEN
+	compStage :=0;
+	compensationYaw := 0;
+	RETURN;
+END_IF
+
+IF m_compStage <> COMP_INIT THEN
+	filterRes2 := m_yamAngLpf.run(i_rawData:= i_DHPos);
+	filterRes :=  m_yamAngMean.run(newValue := filterRes2);
+END_IF
+
+filterRes := i_DHPos;
+
+CASE compStage OF
+	0:
+		bufferTail := 0;
+		lastPos := filterRes;
+		sum := 0;
+		m_yawCompMean.init(windowSize:=800);
+		average := 0;
+		scaleFactor := i_compFactor;
+		exponentCoeff := i_compCoeff;
+		posGrowThre := i_posGrowThre;
+		negGrowThre := i_negGrowThre;
+		
+		symbol := 0;
+		compensationYaw := 0;
+		compStage := 5;
+		
+	5:
+		buffer[bufferTail] := filterRes;
+		sum := sum + filterRes;
+		bufferTail := (bufferTail + 1) MOD 100;
+		IF bufferTail = 0 THEN
+			compStage := 10;
+		END_IF
+		compensationYaw := 0;
+		
+	10:
+		sum := sum - buffer[bufferTail] + filterRes;
+		buffer[bufferTail] := filterRes;
+		bufferTail := (bufferTail + 1) MOD 100;
+		average := sum/100;
+		
+		IF filterRes - average < negGrowThre THEN
+			symbol := -1;
+		ELSIF filterRes - average > posGrowThre THEN
+			symbol := 1;
+		END_IF
+		compensationYaw := symbol * scaleFactor * EXP(exponentCoeff * m_graspForceLevel);
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{65c72158-b7f0-4f81-9e17-42eb8752ec5c}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm:FB_SlaveArm;
+END_VAR
+
+VAR
+	i,j:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_graspForceLevel:=0;
+
+// init controller
+m_maxGripCurrent:= i_slaveArm.instrument.instruTypeInfo.m_normGripTrq; 
+m_currentRatioMotor2Jnt:=GVL_SlaveMotorParameters.g_motorTrqConst[i_slaveArm.armIdx, 4]*GVL_SlaveMotorParameters.g_motorReduction[i_slaveArm.armIdx,4]/1000;
+m_maxGripForce := m_maxGripCurrent * m_currentRatioMotor2Jnt;
+m_maxGripCtrlForce := m_maxGripCtrlCurrent * m_currentRatioMotor2Jnt;
+FOR i:=1 TO 5 DO
+	m_instruCmdJntPos[i]:=i_slaveArm.curJntPos[i+3];
+	
+	m_instruCmdJntVel[i]:=0;
+	
+	m_instruJntCtrl[i].init(g_slaveArmCtrlCycleTime,m_instruKp[i],m_instruKd[i],m_instruKi[i],
+		m_instruKiLimit[i]* m_currentRatioMotor2Jnt,	m_instruCtrlLimit[i]*m_currentRatioMotor2Jnt);
+	
+	m_instruLastCmdJntPos[i]:=m_instruCmdJntPos[i];
+END_FOR
+m_pitchBackLashLpf.init(1, m_cmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+IF ABS (530 - m_currentAdjustMin) > 0.1 THEN
+	m_dynamicClampFactor := m_clampAdjustMax * g_deg2Rad / (530 - m_currentAdjustMin) / (530 - m_currentAdjustMin);
+END_IF
+m_gripVariationLpf.init(1, 10,g_slaveArmCtrlFreq);
+	
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="jntBacklash" Id="{4f966e86-9b9f-40d8-a8c3-c699d91dc16e}" FolderPath="Property\">
+      <Declaration><![CDATA[PROPERTY jntBacklash : Vec5d]]></Declaration>
+      <Get Name="Get" Id="{4e370ed1-19af-4768-ba31-8461395c96af}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[vecAdd(m_jntBacklash, m_pitchBacklash, jntBacklash);]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="run" Id="{91885246-8ac4-4aa6-9fed-10291849b120}">
+      <Declaration><![CDATA[METHOD run : BOOL
+VAR_IN_OUT CONSTANT
+	// instrument joint command position
+	i_cmdInstruJntPos :Vec5d;
+	
+	// instrument joint command velocity
+	i_cmdInstruJntVel :Vec5d;
+	
+	// command yaw position
+	i_cmdYawPos : LREAL;
+	
+	// command yaw velocity
+	i_cmdYawVel :LREAL;
+		
+	// command grip force level
+	i_cmdGripForceLevel:LREAL;
+	
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+	
+END_VAR
+
+VAR_OUTPUT
+	// joint control torque
+	o_cmdJntTrq:Vec5d;
+END_VAR
+
+VAR
+	i: INT;
+	deltaAng:LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_graspForceLevel:=LIMIT(0,i_cmdGripForceLevel ,  100)	;
+
+// calculate instrument backlash
+calcBacklash(i_cmdInstruJntPos, i_slaveArm);
+
+m_clampPitchComp := m_pitchCompMean.run(compensationPitch(	reset:= FALSE, 
+															i_DHPos:= i_slaveArm.simDHJntPos[6], 
+															i_compFactor:= i_slaveArm.instrument.instruTypeInfo.m_pitchCompFactor, 
+															i_compCoeff:= i_slaveArm.instrument.instruTypeInfo.m_pitchCompCoeff, 
+															i_posGrowThre:= g_pitchPosGrowThre, 
+															i_negGrowThre:= g_pitchNegGrowThre));
+
+	
+m_clampYawComp := m_yawCompMean.run(compensationYaw(	reset:= FALSE, 
+														i_DHPos:= i_slaveArm.simDHJntPos[5], 
+														i_compFactor:= i_slaveArm.instrument.instruTypeInfo.m_yawCompFactor, 
+														i_compCoeff:= i_slaveArm.instrument.instruTypeInfo.m_yawCompCoeff, 
+														i_posGrowThre:= g_yawPosGrowThre, 
+														i_negGrowThre:= g_yawNegGrowThre));
+// joint position control
+FOR i:=1 TO 5 DO	
+	m_instruCmdJntPos[i]:=i_cmdInstruJntPos[i];
+	m_instruCmdJntVel[i]:=i_cmdInstruJntVel[i];
+	m_instruCurJntPos[i]:=i_slaveArm.curJntPos[i+3];
+	m_instruCurJntVel[i]:= i_slaveArm.curJntVel[i+3];
+	m_instruJntCtrlTrq[i]:=m_instruJntCtrl[i].run(m_instruCmdJntPos[i],m_instruCurJntPos[i], m_instruCmdJntVel[i], m_instruCurJntVel[i]);
+END_FOR
+
+o_cmdJntTrq := m_instruJntCtrlTrq;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="setMaxGripTrq" Id="{bb3c440d-4ac6-4283-81ed-1c22dc0afb05}">
+      <Declaration><![CDATA[METHOD setMaxGripTrq : BOOL
+VAR_INPUT
+	i_maxGripTrq:LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_maxGripCurrent := i_maxGripTrq;
+m_maxGripForce := m_maxGripCurrent * m_currentRatioMotor2Jnt;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="yawCompensation" Id="{16921554-f97d-400e-9ced-d10c06888f31}">
+      <Declaration><![CDATA[METHOD yawCompensation : BOOL  // yaw compensation
+VAR_INPUT
+	yawPos  : LREAL;
+	yawCompFactor : LREAL;
+	yawCompCoeff : LREAL;
+END_VAR
+
+VAR
+	filterRes : LREAL;
+	filterRes2 : LREAL;
+	yawAverage : LREAL;
+END_VAR
+
+VAR_INST
+	
+	ready : BOOL;
+	yawBuffer : ARRAY[0..100] OF LREAL;
+	bufferTail : INT;
+	yawSum : LREAL;
+	scaleFactor : LREAL ;
+	exponentCoeff : LREAL ;
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF m_compStage <> COMP_INIT THEN
+	filterRes2 := m_yamAngLpf.run(i_rawData:= yawPos);
+	filterRes :=  m_yamAngMean.run(newValue := filterRes2);
+END_IF
+
+CASE m_compStage OF
+	COMP_INIT:
+		ready := FALSE; 
+		bufferTail := 0;
+		yawSum := 0;
+		yawAverage := 0;
+		m_yawCompensation := 0;
+		m_curYawComp := 0;
+		m_nextYawComp := 0;
+		scaleFactor := yawCompFactor;
+		exponentCoeff := yawCompCoeff;
+		m_yamAngLpf.init(1, 3, g_slaveArmCtrlFreq);
+		m_yamAngMean.init(windowSize := 400);
+		m_yamCompMean.init(windowSize := 800);
+		m_compStage := COMP_PREPARE;
+		
+	COMP_PREPARE:
+		IF ready THEN
+			yawSum := yawSum - yawBuffer[bufferTail] + filterRes;
+			yawBuffer[bufferTail] := filterRes;
+			bufferTail := (bufferTail + 1) MOD 100;
+			yawAverage := yawSum/100;
+			m_yawCompensation := 0;
+			IF filterRes - yawAverage> m_posGrowThre THEN
+				m_compStage := COMP_POS;
+			ELSIF filterRes - yawAverage < m_negGrowThre THEN
+				m_compStage := COMP_NEG;
+			END_IF 
+		ELSE
+			yawBuffer[bufferTail] := filterRes;
+			yawSum := yawSum + filterRes;
+			bufferTail := (bufferTail + 1) MOD 100;
+			IF bufferTail = 0 THEN
+				ready := TRUE;
+			END_IF
+		END_IF
+		
+	COMP_POS:
+		yawSum := yawSum - yawBuffer[bufferTail] + filterRes;
+		yawBuffer[bufferTail] := filterRes;
+		bufferTail := (bufferTail + 1) MOD 100;
+		yawAverage := yawSum/100;
+		m_yawCompensation := scaleFactor * EXP(exponentCoeff * m_graspForceLevel);
+		
+		IF filterRes - yawAverage < m_negGrowThre THEN
+			m_compStage := COMP_NEG;
+		END_IF
+	
+	COMP_NEG:
+		yawSum := yawSum - yawBuffer[bufferTail] + filterRes;
+		yawBuffer[bufferTail] := filterRes;
+		bufferTail := (bufferTail + 1) MOD 100;
+		yawAverage := yawSum/100;
+		m_yawCompensation := -scaleFactor * EXP(exponentCoeff * m_graspForceLevel);
+		
+		IF filterRes - yawAverage> m_posGrowThre THEN
+			m_compStage := COMP_POS;
+		END_IF 
+		
+END_CASE
+test1 := filterRes - yawAverage;
+m_curYawComp := m_nextYawComp;
+m_nextYawComp := m_yamCompMean.run(m_yawCompensation);
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_BasicInstruControl">
+      <LineId Id="53" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BasicInstruControl.calcBacklash">
+      <LineId Id="572" Count="8" />
+      <LineId Id="735" Count="0" />
+      <LineId Id="737" Count="1" />
+      <LineId Id="749" Count="4" />
+      <LineId Id="736" Count="0" />
+      <LineId Id="582" Count="2" />
+      <LineId Id="777" Count="0" />
+      <LineId Id="585" Count="0" />
+      <LineId Id="705" Count="0" />
+      <LineId Id="713" Count="0" />
+      <LineId Id="707" Count="0" />
+      <LineId Id="710" Count="1" />
+      <LineId Id="708" Count="0" />
+      <LineId Id="779" Count="0" />
+      <LineId Id="781" Count="3" />
+      <LineId Id="778" Count="0" />
+      <LineId Id="801" Count="1" />
+      <LineId Id="714" Count="0" />
+      <LineId Id="803" Count="0" />
+      <LineId Id="805" Count="0" />
+      <LineId Id="618" Count="0" />
+      <LineId Id="807" Count="3" />
+      <LineId Id="827" Count="1" />
+      <LineId Id="811" Count="15" />
+      <LineId Id="806" Count="0" />
+      <LineId Id="619" Count="0" />
+      <LineId Id="60" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BasicInstruControl.clearBacklash">
+      <LineId Id="5" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="13" Count="3" />
+      <LineId Id="21" Count="12" />
+      <LineId Id="20" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BasicInstruControl.compensationIK">
+      <LineId Id="828" Count="25" />
+      <LineId Id="855" Count="4" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BasicInstruControl.compensationPitch">
+      <LineId Id="550" Count="12" />
+      <LineId Id="598" Count="0" />
+      <LineId Id="563" Count="30" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="597" Count="0" />
+      <LineId Id="596" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BasicInstruControl.compensationYaw">
+      <LineId Id="622" Count="4" />
+      <LineId Id="667" Count="0" />
+      <LineId Id="669" Count="2" />
+      <LineId Id="668" Count="0" />
+      <LineId Id="627" Count="39" />
+      <LineId Id="77" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BasicInstruControl.init">
+      <LineId Id="291" Count="16" />
+      <LineId Id="254" Count="0" />
+      <LineId Id="317" Count="0" />
+      <LineId Id="319" Count="2" />
+      <LineId Id="316" Count="0" />
+      <LineId Id="318" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BasicInstruControl.jntBacklash.Get">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BasicInstruControl.run">
+      <LineId Id="1258" Count="3" />
+      <LineId Id="1333" Count="0" />
+      <LineId Id="1360" Count="12" />
+      <LineId Id="1334" Count="0" />
+      <LineId Id="1264" Count="7" />
+      <LineId Id="1302" Count="0" />
+      <LineId Id="70" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BasicInstruControl.setMaxGripTrq">
+      <LineId Id="5" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BasicInstruControl.yawCompensation">
+      <LineId Id="442" Count="1" />
+      <LineId Id="445" Count="0" />
+      <LineId Id="444" Count="0" />
+      <LineId Id="359" Count="0" />
+      <LineId Id="173" Count="1" />
+      <LineId Id="401" Count="0" />
+      <LineId Id="176" Count="4" />
+      <LineId Id="271" Count="0" />
+      <LineId Id="181" Count="1" />
+      <LineId Id="315" Count="0" />
+      <LineId Id="446" Count="0" />
+      <LineId Id="441" Count="0" />
+      <LineId Id="384" Count="1" />
+      <LineId Id="186" Count="0" />
+      <LineId Id="392" Count="0" />
+      <LineId Id="417" Count="2" />
+      <LineId Id="393" Count="0" />
+      <LineId Id="421" Count="4" />
+      <LineId Id="420" Count="0" />
+      <LineId Id="396" Count="0" />
+      <LineId Id="407" Count="1" />
+      <LineId Id="397" Count="0" />
+      <LineId Id="406" Count="0" />
+      <LineId Id="415" Count="1" />
+      <LineId Id="394" Count="0" />
+      <LineId Id="210" Count="1" />
+      <LineId Id="429" Count="2" />
+      <LineId Id="426" Count="1" />
+      <LineId Id="432" Count="0" />
+      <LineId Id="212" Count="3" />
+      <LineId Id="222" Count="0" />
+      <LineId Id="434" Count="2" />
+      <LineId Id="433" Count="0" />
+      <LineId Id="437" Count="1" />
+      <LineId Id="223" Count="2" />
+      <LineId Id="232" Count="1" />
+      <LineId Id="470" Count="0" />
+      <LineId Id="239" Count="0" />
+      <LineId Id="272" Count="0" />
+      <LineId Id="77" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

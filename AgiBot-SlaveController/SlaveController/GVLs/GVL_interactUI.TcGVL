@@ -1,0 +1,150 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <GVL Name="GVL_interactUI" Id="{b6fc928c-802a-4bca-a5ad-5de470837f32}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	//read from UI
+	//surgical status: true surgical start   false surgical finshed
+	g_surgicalStatus : BOOL;
+
+	//surgical site selection
+	g_surgicalSite : UINT;
+
+	//surgical location selection
+	g_surgicalLocation : UINT;
+
+	//stand column height limit : design 1805mm - 2495mm 
+	g_heightLimit : UINT;
+	g_heightLimitFromUI : UINT;
+	g_heightLimitEnbale : BOOL;
+	
+	//ui control button enable
+	g_uiCtrl : ST_uiControl;
+
+	//ui send reset fault
+	g_uiFaultReset : UINT;
+
+	//write UI 
+	//error code ID
+	g_errIdType3 : UDINT;
+	g_errIdType2 : UDINT;
+	g_errIdType1 : UDINT;
+	g_errIdType0 : UDINT;
+	
+	//instrument information
+	g_instruInformatiom :ARRAY[1..4] OF  ST_instruInfomation;
+	
+	//UPS power supply mode : line voltage supply : 0 , battery powered : 1
+	g_powerSupplyModeUPS AT %I*: UDINT;
+	
+	//UPS dump energy
+	g_dumpEnergyUPS  AT %I*: UDINT;
+	
+	//communation check for UPS
+	g_upsComStatus  AT %I*: UDINT;
+	
+	//turnoff ups
+	g_upsTurnOff AT %Q*:  UDINT;
+	
+	//ui shutdown button enable
+	g_uiPowerOffEnable : BOOL;
+	
+	//plc confirm shutdown
+	g_plcPowerOffEnable : BOOL:=FALSE;
+	
+	//joystick enable tip : true trigger
+	g_joystickEnableTip : BOOL;
+	
+	//stop button signal : 0 press  , 1 No press
+	g_stopButtonFormUI : UINT:=1;
+
+	//PLC  version
+	g_plcVersion : STRING := g_SWVersion;
+
+	//Surgical guidance
+	g_cartOperation : ST_cartOperation;
+	
+	//robot state  machine
+	g_armStateMachine : ST_robotStateMachine;
+	
+	//scope gravity angle
+	g_scopeGravityAngle : REAL;
+	
+	//scope type
+	g_uiReadScopeType : INT := 30;
+	g_uiWriteScopeType : INT := 30;
+
+	//fault tone current error type : 0 No fault , 1 low-level , 2 medium-level , 3 height-level
+	g_curErrType : UINT;
+	
+	//30° endoscope face up or face down
+	g_uiReadScopeUpDown :UINT:=1;
+	g_uiWriteScopeUpDown :UINT:=1;
+	
+	//joystick signal  read RS232 data from UI
+	g_joystickSignalArray : ARRAY[0..21] OF USINT;
+	
+	//joystick trigger
+	g_joysticksTrigger : BOOL;
+	
+	//0: init status 1: checking 2:check succeed 3: check failed
+	g_slaveSelfCheckStatus : UINT; 
+	g_salveSelfCheckEnable : BOOL;
+	g_salveSelfCheckTransportEnable : BOOL := FALSE;
+	
+	//arm in disable status : 0 No disable , 1-4 number  corresponds to arms 1-4
+	g_armIsDisable : UINT:=0;
+	
+	//the patient side has recover error flag
+	g_slaveRecoverErrFlag : INT;
+
+	//the patient side runs separately
+	g_slaveRunAlone : BOOL;
+
+	//trocar status : 0 No trocar , 1 have trocar
+	g_trocarStatus : BOOL;
+
+	//heartbeat signal
+	g_heartBeat : INT;
+	
+	//left-right eye switch、0Left eye , 1 right eye
+	g_switchLeftRightEye : INT;
+	
+	//the pop-up fault code is displayed
+	g_popupErrorArm1 : ARRAY [0..2] OF UDINT;
+	g_popupErrorArm2 : ARRAY [0..2] OF UDINT;
+	g_popupErrorArm3 : ARRAY [0..2] OF UDINT;
+	g_popupErrorArm4 : ARRAY [0..2] OF UDINT;
+	g_popupRefresh : ARRAY [1..4] OF UINT;
+	
+	//instrument out of sight
+	g_instruOutScope : ARRAY [1..4] OF BOOL;
+	
+	//arm is adjustment
+	g_armIsAdjustment : ARRAY [1..4] OF UINT;
+		
+	//clear instrument record
+	g_clearInstruRecord : BOOL;
+	
+	//endoscope turn over enable
+	g_scopeTurnOverEnable : BOOL:=TRUE;
+	
+	//robot system operates sound 
+	g_systemVoice : INT;
+	
+	// instrument use duration
+	g_instruUseDuration :ARRAY[1..4] OF Vec4d;
+	g_masterCmdDuration :ARRAY[1..4] OF Vec4d;
+	g_instruPitchCurrentDuration :ARRAY[1..4] OF Vec8d;
+	g_instruPitchAngDuration :ARRAY[1..4] OF Vec6d;
+	g_instruYawAngDuration :ARRAY[1..4] OF Vec6d;
+	g_instruReverseCount :ARRAY[1..4] OF Vec3i;//yaw pitch grip reverse count
+END_VAR
+
+VAR_GLOBAL PERSISTENT
+	//instrument max used record
+	g_InstruSeriesRecord:ARRAY [1..100] OF ULINT;
+END_VAR
+]]></Declaration>
+  </GVL>
+</TcPlcObject>

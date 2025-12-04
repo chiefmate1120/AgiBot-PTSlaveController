@@ -1,0 +1,382 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_SlaveCtrlEndoscope" Id="{6b490525-446d-48f2-ab19-237faca074bd}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Slave Arm Endoscope Control
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlEndoscope EXTENDS FB_SlaveArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// scope motion master-salve scale
+	m_MSMotionScale :LREAL :=-0.3;
+	
+	// scope motion singularity scale
+	m_singMotionScale :LREAL :=1;
+	m_minSingMotionScale :LREAL := 0.4;
+	
+	// distance threshold between scope and remote center without sigularity scale 
+	m_RCDisThres :LREAL :=0.1;
+	
+	// filter cut-off frequency for master-slave control
+	m_cmdJntPosLpfCutoffFreq : LREAL :=5;
+	
+	// last command joint position
+	m_lastCmdJntPos :Vec8d;
+	
+	// command velocity filter
+	m_cmdVelLpf:ARRAY[1..4] OF FB_LowPassFilter;
+	
+	// scope command linear/rotate velocity in local/view coordinate
+	m_cmdVelLocal :Vec3d;
+	m_cmdWVelLocal :LREAL;
+	
+	// scope command linear velocity in base coordinate
+	m_cmdVel:Vec3d;
+	
+	// rotate compensation velocity 
+	m_rotCompVel :LREAL;
+	
+	m_InitAngle,m_TargetAngle:Vec3d;
+	m_Planner:ARRAY[1..3] OF Cubic_Polynomial_Interpolation;
+	m_jntPlanInitFlag:BOOL:=FALSE;
+	m_jntPlanFinishFlag:BOOL:=TRUE;
+	m_T:REAL:=0;
+	m_EndT:REAL:=10;
+	m_initT:REAL:=0.0;
+	m_cmdAngle,m_cmdAcc :Vec3d :=[3(0)];
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{87ce9b58-87b9-4be1-8d6a-40a3604816ed}">
+      <Declaration><![CDATA[METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR 
+	i,j : INT;
+	posJaco, posJacoInv:Mat3d;
+	armDHJntVel :Vec3d;
+
+	cmdVelScale :LREAL;
+	jnt3Limit :LREAL;
+	scopeRotJntIdx:INT:=8;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF isFinished AND NOT g_motionTest.m_uiFixedEndoFlag THEN
+	RETURN;
+END_IF
+
+IF g_motionTest.m_uiFixedEndoFlag THEN
+	IF NOT m_jntPlanInitFlag THEN
+		FOR i:=1 TO 3 DO
+			m_Planner[i].init(0,m_EndT, m_InitAngle[i],m_TargetAngle[i], 0,0, 0,0);
+		END_FOR
+		m_initT := m_timePeriod;
+		m_T:=0;//Reset the planning duration to zero
+		m_jntPlanInitFlag:=TRUE; //Complete initialization
+		m_jntPlanFinishFlag:=FALSE; //The trajectory has not been completed
+	END_IF
+
+	IF NOT m_jntPlanFinishFlag THEN
+		m_T := m_timePeriod - m_initT;
+		FOR i:=1 TO 3 DO 
+			m_Planner[i].run(m_T,m_cmdJntPos[i],m_cmdJntVel[i],m_cmdJntAcc[i],m_jntPlanFinishFlag);//cmdPos
+//			m_cmdJntAcc[i]:=m_cmdAcc[i];
+//			m_cmdJntVel[i]:=m_cmdVel[i];
+//			m_cmdJntPos[i]:=m_cmdAngle[i];
+		END_FOR
+	ELSE
+		g_motionTest.m_uiFixedEndoSlaveFlag := FALSE;
+	END_IF
+ELSE
+// compute desired view velocity
+cmdVelCalc(i_masterStatus, i_slaveArm);
+
+// filt command velocity
+m_cmdVelLocal[1] := m_cmdVelLpf[1].run(m_cmdVelLocal[1]);
+m_cmdVelLocal[2] := m_cmdVelLpf[2].run(m_cmdVelLocal[2]);
+m_cmdVelLocal[3] := m_cmdVelLpf[3].run(m_cmdVelLocal[3]);
+m_cmdWVelLocal := -m_cmdVelLpf[4].run(m_cmdWVelLocal);
+
+// get linear velocity in base
+matMultiVec(i_slaveArm.simCartPose.m_rot, m_cmdVelLocal, m_cmdVel);
+
+// position jacobian and its inverse
+FOR i:=1 TO 3 DO
+	FOR j:=1 TO 3 DO
+		posJaco[i,j]:=i_slaveArm.simJaco[i,j];
+	END_FOR 
+END_FOR
+invMat3(posJaco, posJacoInv);
+
+// command joint velocity of joint 1-3
+matMultiVec(posJacoInv, m_cmdVel, armDHJntVel);
+
+// limit DH joints velocity 
+cmdVelScale := 1;
+FOR i:=1 TO 3 DO 
+	cmdVelScale:=MAX(cmdVelScale, ABS(armDHJntVel[i]/GVL_SlaveMotorParameters.g_maxJntVel[i]));
+END_FOR
+vecSelfMultiNum(armDHJntVel, 1.0/cmdVelScale);
+
+// limit arm joint position
+FOR i:=1 TO 3 DO
+	IF (armDHJntVel[i] > 0 AND  i_slaveArm.simDHJntPos[i] + armDHJntVel[i]*g_slaveArmCtrlCycleTime> GVL_SlaveMotorParameters.g_maxDHJntPos[i]) OR 
+		(armDHJntVel[i] <0 AND	i_slaveArm.simDHJntPos[i] + armDHJntVel[i]*g_slaveArmCtrlCycleTime< GVL_SlaveMotorParameters.g_minDHJntPos[i]) THEN
+		armDHJntVel[i]:=0;
+	END_IF
+END_FOR
+
+// joint 3 up limit to remote center
+jnt3Limit := i_slaveArm.instrument.instruTypeInfo.m_rodLength -GVL_SlaveArmKinematic.g_minScopeRCDis;
+IF (armDHJntVel[3] > 0 AND  i_slaveArm.simDHJntPos[3] + armDHJntVel[3]*g_slaveArmCtrlCycleTime> jnt3Limit) THEN
+	armDHJntVel[3]:=0;
+END_IF
+
+// final arm joint command velocity
+m_cmdJntVel[1]:= armDHJntVel[1];
+m_cmdJntVel[2]:= armDHJntVel[2];
+m_cmdJntVel[3]:= armDHJntVel[3];
+
+// limit rotate joint veloicyt
+m_cmdWVelLocal := LIMIT (-GVL_SlaveMotorParameters.g_maxJntVel[8],  m_cmdWVelLocal, GVL_SlaveMotorParameters.g_maxJntVel[8]);
+
+// as there are two types scope holder, need to determin the rotate joint index
+IF i_slaveArm.instrument.onChipData.m_InstruID = InstruType_NewEndoscope THEN
+	scopeRotJntIdx :=7;
+	m_jntOPMode[6] := DriverOPMode_Trq;
+ELSE
+	scopeRotJntIdx:=8;
+END_IF
+
+// compensate view rotation cause by joint6 
+m_rotCompVel := rotateCompensate(i_slaveArm);
+
+m_cmdJntVel[scopeRotJntIdx]:= (m_rotCompVel-m_cmdWVelLocal)/i_slaveArm.instrument.m_endoscopeRotateReduction;
+
+// integral to command joint position
+m_cmdJntPos[1]:=m_simJntPos[1]+m_cmdJntVel[1]*g_slaveArmCtrlCycleTime;
+m_cmdJntPos[2]:=m_simJntPos[2]+m_cmdJntVel[2]*g_slaveArmCtrlCycleTime;
+m_cmdJntPos[3]:=m_simJntPos[3]+m_cmdJntVel[3]*g_slaveArmCtrlCycleTime;
+m_cmdJntPos[scopeRotJntIdx]:=m_simJntPos[scopeRotJntIdx]+m_cmdJntVel[scopeRotJntIdx]*g_slaveArmCtrlCycleTime;
+
+// joint6 output torque to help rotation motion
+IF m_jntOPMode[6] = DriverOPMode_Trq THEN
+	m_cmdJntTrq[6] := -0.5*i_slaveArm.cmdJntTrq[7];
+END_IF
+
+m_simJntPos := m_cmdJntPos;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="cmdVelCalc" Id="{8dff4bd5-a9d3-4558-a30c-87d4912e2ece}">
+      <Declaration><![CDATA[METHOD PROTECTED cmdVelCalc : BOOL
+VAR_IN_OUT CONSTANT
+	i_masterStatus :ST_MasterStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR
+	leftVel, rightVel :Vec3d;
+	i:INT;
+	radiusVec :Vec3d;
+	radiusLength :LREAL;
+	leftWVel, rightWVel :Vec3d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i :=1 TO 3 DO 
+	leftVel[i] := i_masterStatus.m_curArmTwist[1][i];
+	rightVel[i] := i_masterStatus.m_curArmTwist[2][i];
+END_FOR
+
+// master linear velocity
+vecAdd(leftVel, rightVel , m_cmdVelLocal);
+vecSelfMultiNum(m_cmdVelLocal, 0.5);
+
+// motion scale
+//m_singMotionScale := motionScale(i_slaveArm); // NOTE: velocity scale near singularity is disable current
+vecSelfMultiNum(m_cmdVelLocal, m_MSMotionScale);
+
+// radius vector from right arm to left arm
+vecSub(i_masterStatus.m_curArmPose[1].m_pos, i_masterStatus.m_curArmPose[2].m_pos, radiusVec);
+vecSelfMultiNum(radiusVec, 0.5);
+radiusVec[3]:=0;
+radiusLength := norm(radiusVec);
+normalize(radiusVec);
+
+// left rotate velocity
+leftVel[3]:= 0;
+leftWVel := cross(radiusVec, leftVel);
+
+// right rotate velocity
+// radius vector from left arm to right arm
+vecSelfMultiNum(radiusVec, -1.0);
+rightVel[3]:= 0;
+rightWVel := cross(radiusVec, rightVel);
+
+m_cmdWVelLocal:= (leftWVel[3] + rightWVel[3])/(2.0*radiusLength);
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{1a1ae9a3-2ece-47df-b70b-10ebc4e0a4e2}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+VAR 
+	i :INT ;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+m_simJntPos :=m_cmdJntPos;
+m_lastCmdJntPos :=m_cmdJntPos;
+m_jntOPMode := g_slaveAllPosTrqMode;
+
+// init filter
+FOR i:=1 TO 4 DO
+	m_cmdVelLpf[i].init(1, m_cmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+	m_cmdVelLpf[i].run(0.0);
+END_FOR
+
+m_targetAngle:=GVL_Const.g_endoJntPos;
+// update commands to arm
+copyCmds(r_slaveArmCtrlCmd);
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="motionScale" Id="{57c57b39-44ad-430e-93ea-c178c23fdca0}">
+      <Declaration><![CDATA[METHOD PROTECTED motionScale : LREAL
+VAR_IN_OUT CONSTANT
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	RCDis :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[RCDis := ABS(i_slaveArm.curJntPos[3] - i_slaveArm.instrument.instruTypeInfo.m_rodLength);
+
+IF RCDis < GVL_SlaveArmKinematic.g_minScopeRCDis THEN
+	motionScale := m_minSingMotionScale;
+ELSIF RCDis > m_RCDisThres THEN
+	motionScale :=1 ;
+ELSE
+	motionScale := m_minSingMotionScale + (1- m_minSingMotionScale) * (RCDis - GVL_SlaveArmKinematic.g_minScopeRCDis)/(m_RCDisThres - GVL_SlaveArmKinematic.g_minScopeRCDis);
+	motionScale := LIMIT(0, motionScale, 1.0);
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="rotateCompensate" Id="{12aa838c-6da2-4e79-9090-dd1b1185923e}">
+      <Declaration><![CDATA[METHOD rotateCompensate : LREAL
+VAR_IN_OUT CONSTANT
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	rotJaco:Mat3d;
+	armJntVel:Vec3d;
+	i,j:INT;
+	wVelWrd :Vec3d;
+	jnt4JacoInv :Vec3d;
+	jnt4JacoNorm:LREAL;
+	rotT:Mat3d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO 3 DO 
+	FOR j:=1 TO 3 DO 
+		rotJaco[i,j] := i_slaveArm.jaco[i+3, j];
+	END_FOR
+	armJntVel[i] := m_cmdJntVel[i];
+	jnt4JacoInv[i] := i_slaveArm.jaco[i+3,4];
+END_FOR
+
+// get rotate velocity 
+MatMultiVec(rotJaco, armJntVel, wVelWrd);
+
+jnt4JacoNorm := norm(jnt4JacoInv);
+vecSelfMultiNum(jnt4JacoInv, 1.0/(jnt4JacoNorm*jnt4JacoNorm));
+
+rotateCompensate := -vecDot(jnt4JacoInv, wVelWrd);]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveCtrlEndoscope">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlEndoscope.calcCmdJntPos">
+      <LineId Id="1608" Count="2" />
+      <LineId Id="1708" Count="0" />
+      <LineId Id="1710" Count="8" />
+      <LineId Id="1720" Count="4" />
+      <LineId Id="1749" Count="2" />
+      <LineId Id="1728" Count="3" />
+      <LineId Id="1709" Count="0" />
+      <LineId Id="1611" Count="78" />
+      <LineId Id="206" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlEndoscope.cmdVelCalc">
+      <LineId Id="5" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="40" Count="2" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="46" Count="1" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="19" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlEndoscope.init">
+      <LineId Id="176" Count="9" />
+      <LineId Id="200" Count="0" />
+      <LineId Id="186" Count="3" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlEndoscope.motionScale">
+      <LineId Id="39" Count="8" />
+      <LineId Id="18" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlEndoscope.rotateCompensate">
+      <LineId Id="3" Count="13" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

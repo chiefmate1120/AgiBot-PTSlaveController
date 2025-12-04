@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_MeanFilters" Id="{a0402b55-69aa-4a05-ba1a-36b4bb51a055}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_MeanFilters
+VAR 
+	m_windowSize : INT:= MAX_WINDOW_SIZE;
+	m_buffer: ARRAY[0..MAX_WINDOW_SIZE-1] OF REAL;
+	m_tail : INT;      
+    m_count: INT := 0; 
+	m_sum : LREAL :=0;
+END_VAR
+VAR CONSTANT
+    MAX_WINDOW_SIZE: INT := 1000;  
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="init" Id="{1df21118-f241-421e-a6c7-9da0bacbe212}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+	windowSize : INT:= MAX_WINDOW_SIZE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_windowSize := LIMIT(10, windowSize, MAX_WINDOW_SIZE);
+m_sum := 0;
+m_count := 0;
+m_tail := 0;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{5b5dcfd1-d55c-46ed-8825-10c09ee74e40}">
+      <Declaration><![CDATA[METHOD run : LREAL
+VAR_INPUT
+    newValue: REAL;        
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF m_count <= m_windowSize THEN
+	m_count := m_count + 1;
+	m_sum := (m_sum + newValue);
+ELSE
+	m_sum := m_sum - m_buffer[m_tail] + newValue;
+END_IF
+run := m_sum / m_windowSize;
+m_buffer[m_tail] := newValue;
+m_tail := (m_tail + 1) MOD m_windowSize;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_MeanFilters">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MeanFilters.init">
+      <LineId Id="5" Count="0" />
+      <LineId Id="7" Count="2" />
+    </LineIds>
+    <LineIds Name="FB_MeanFilters.run">
+      <LineId Id="18" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="23" Count="1" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="15" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

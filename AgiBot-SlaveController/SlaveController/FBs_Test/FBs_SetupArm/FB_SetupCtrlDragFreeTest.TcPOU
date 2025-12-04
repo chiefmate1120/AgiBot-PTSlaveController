@@ -1,0 +1,326 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_SetupCtrlDragFreeTest" Id="{4f777335-e551-4bae-b7ef-dd76b33f7cca}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Setup Arm Adjust
+FUNCTION_BLOCK PUBLIC FB_SetupCtrlDragFreeTest EXTENDS FB_SetupArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// friction compensation scale
+	m_frictionScale :LREAL :=0.5;
+	
+	// velocity threshold for friction compensation 
+	m_jnt3FrictionCompVelLow :LREAL := 0.0005;
+	m_frictionScaleLow :LREAL :=0.1;
+	m_jnt3FrictionCompVelMiddle :LREAL := 0.005;
+	m_frictionScaleMiddle :LREAL :=0.2;
+	m_jnt3FrictionCompVelHigh :LREAL := 0.05;
+	m_frictionScaleHigh :LREAL :=0.3;
+	
+	// jnt5 adjust velocity
+	m_jnt5MaxAdjustVel :LREAL:=2.5*g_deg2Rad;
+	m_jnt5MaxAdjustAcc :LREAL:=10*g_deg2Rad;
+	
+	// jnt5 enabled time period
+	m_jnt5EnableTime :LREAL :=0;
+	
+	// time threshold to drive jnt5 after it's enabled
+	m_jnt5AdjustWaitTime :LREAL := 0.25;
+
+	// distance buffer from joint limit to start damp
+	m_limitBufferForDamp :LREAL :=0.05;
+	
+	// max damp
+	m_maxDamp :LREAL := 1000;
+	
+	m_limitBufferForCtrl : LREAL := 0.01;
+	
+	//joint limit position
+	m_DHjntPos:Vec5d;
+	m_jntPosMin:Vec5d;
+	m_jntPosMax:Vec5d;
+	m_jntMotRange:Vec5d;
+	
+	//unit transform
+	m_unitTransform:FB_UnitTransform;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{826edb8f-64b2-4c14-ade8-f4e718ec4aeb}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+
+
+VAR 
+	i :INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+(*
+// enable/disenable joint5
+IF i_setupArm.jnt5AdjustDir = 0 THEN
+	m_jntEnableFlag[5] := 0;
+	m_cmdJntPos[5]:=i_setupArm.curJntPos[5];
+	m_cmdJntTrq[5]:=0;
+	m_jnt5EnableTime:=0;
+	m_cmdJntVel[5]:=0;
+	RETURN;
+ELSE
+	// disable joints if this joint is an unrecoverable failure
+	m_jntEnableFlag[5] :=  BOOL_TO_INT( NOT (SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_setupArm.armIdx, 0, 3] OR  SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_setupArm.armIdx, 5, 3]));
+	m_jnt5EnableTime := m_jnt5EnableTime + g_setupArmCtrlCycleTime;
+END_IF
+
+// update command position
+IF m_jnt5EnableTime>m_jnt5AdjustWaitTime THEN
+	m_cmdJntVel[5]:=m_cmdJntVel[5] + i_setupArm.jnt5AdjustDir * m_jnt5MaxAdjustAcc * g_setupArmCtrlCycleTime;
+	m_cmdJntVel[5]:=LIMIT(-m_jnt5MaxAdjustVel, m_cmdJntVel[5], m_jnt5MaxAdjustVel);
+	
+	// joint limit
+	IF (m_cmdJntPos[5] > GVL_SetupMotorParameters.g_maxJntPos[i_setupArm.armIdx, 5] - g_setupJntPosLimitBuffer[5] AND m_cmdJntVel[5]>0) OR 
+		(m_cmdJntPos[5] < GVL_SetupMotorParameters.g_minJntPos[i_setupArm.armIdx, 5] + g_setupJntPosLimitBuffer[5] AND m_cmdJntVel[5]<0)  THEN
+		m_cmdJntVel[5] := 0;
+	END_IF
+	
+	m_cmdJntPos[5]:= m_cmdJntPos[5] + m_cmdJntVel[5] * g_setupArmCtrlCycleTime;
+END_IF
+*)
+
+//add code for test
+FOR i:=1 TO 5 BY 1 DO
+	IF (g_motionRangeTest.m_setupJntEnable[i]=TRUE) THEN
+		m_jntEnableFlag[i]:=1;
+	ELSE
+		m_jntEnableFlag[i]:=0;
+	END_IF
+END_FOR
+
+//copy the current joint position to command joint position
+m_cmdJntPos:=i_setupArm.curJntPos;
+//m_cmdCartPose:=i_slaveArm.curCartPose;
+
+//Calculate the LIMIT value
+m_DHjntPos:=i_setupArm.curJntPos;
+FOR i:=1 TO 5 BY 1 DO
+	IF (m_DHjntPos[i]>m_jntPosMax[i]) THEN
+		m_jntPosMax[i]:=m_DHjntPos[i];
+	ELSIF (m_DHjntPos[i]<m_jntPosMin[i]) THEN
+		m_jntPosMin[i]:=m_DHjntPos[i];
+	END_IF
+END_FOR
+vecSub(m_jntPosMax,m_jntPosMin,m_jntMotRange);
+
+//feedback the information
+i:=i_setupArm.armIdx;
+g_motionRangeTest.m_setupJntPos[i]:=m_unitTransform.setupArmUnit2User(m_DHjntPos);
+g_motionRangeTest.m_setupJntPosMin[i]:=m_unitTransform.setupArmUnit2User(m_jntPosMin);
+g_motionRangeTest.m_setupJntPosMax[i]:=m_unitTransform.setupArmUnit2User(m_jntPosMax);
+g_motionRangeTest.m_setupJntPosRange[i]:=m_unitTransform.setupArmUnit2User(m_jntMotRange);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdJntTrq" Id="{49a13056-590b-4cdf-9a91-33c19cadb9eb}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntTrq : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+VAR
+	i:INT;
+	vel :LREAL;
+	scale:LREAL;
+	ratio:LREAL;
+	dampScale :LREAL;
+	limitDis:LREAL;
+	dampOffset : LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+(*
+// set joint torque to zero in default
+m_cmdJntTrq := g_zeroVec5d;
+
+//enable/diable  joint1-4
+IF NOT(i_setupArm.manualAdjustOn) THEN
+	FOR i:=1 TO 4 DO
+		m_jntEnableFlag[i] := 0;
+		m_jntOPMode[i]:=DriverOPMode_Pos;
+	END_FOR
+	
+	// TODO: setup joint3 would "jump" a bit when transit from torque mode to position mode
+	m_jntOPMode[3] := DriverOPMode_Trq;
+	RETURN;
+ELSE
+	FOR i:=1 TO 4 DO
+		// disable joints if this joint is an unrecoverable failure
+		m_jntEnableFlag[i] := BOOL_TO_INT( NOT (SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_setupArm.armIdx, 0, 3] OR  SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_setupArm.armIdx, i, 3]));
+		m_jntOPMode[i]:=DriverOPMode_Trq;
+		m_cmdJntPos[i] := i_setupArm.curJntPos[i];
+	END_FOR
+END_IF
+
+// friction scale
+vel:=ABS(i_setupArm.curJntVel[3]);
+IF vel < m_jnt3FrictionCompVelLow THEN
+	m_frictionScale := m_frictionScaleLow * vel/m_jnt3FrictionCompVelLow ;
+ELSIF  vel > m_jnt3FrictionCompVelLow AND vel  < m_jnt3FrictionCompVelMiddle THEN
+	ratio:= (vel-m_jnt3FrictionCompVelLow)/(m_jnt3FrictionCompVelMiddle-m_jnt3FrictionCompVelLow);
+	m_frictionScale :=m_frictionScaleLow+ratio * (m_frictionScaleMiddle-m_frictionScaleLow);
+ELSIF  vel > m_jnt3FrictionCompVelMiddle AND vel  < m_jnt3FrictionCompVelHigh THEN
+	ratio:= (vel-m_jnt3FrictionCompVelMiddle)/(m_jnt3FrictionCompVelHigh-m_jnt3FrictionCompVelMiddle);
+	m_frictionScale :=m_frictionScaleMiddle+ratio * (m_frictionScaleHigh-m_frictionScaleMiddle);
+ELSIF  vel > m_jnt3FrictionCompVelHigh THEN
+	m_frictionScale := m_frictionScaleHigh;
+END_IF
+
+// add damp near joint limit 
+IF (i_setupArm.curJntPos[3] > GVL_SetupMotorParameters.g_maxJntPos[1,3] - m_limitBufferForCtrl ) 
+	OR (i_setupArm.curJntPos[3] < GVL_SetupMotorParameters.g_minJntPos[1,3] + m_limitBufferForCtrl) OR CartControl.m_cartRobot.m_slaveCart.m_columnAdjustEnable  THEN
+	dampOffset:= 0;
+ELSIF (i_setupArm.curJntPos[3] > GVL_SetupMotorParameters.g_maxJntPos[1,3] - m_limitBufferForDamp AND  i_setupArm.curJntVel[3]> 0 ) 
+	OR (i_setupArm.curJntPos[3] < GVL_SetupMotorParameters.g_minJntPos[1,3] + m_limitBufferForDamp AND  i_setupArm.curJntVel[3]<0 )  THEN
+	limitDis := MIN(GVL_SetupMotorParameters.g_maxJntPos[1,3] - i_setupArm.curJntPos[3], i_setupArm.curJntPos[3]-GVL_SetupMotorParameters.g_minJntPos[1,3]);
+	dampScale  :=LIMIT(0, 1-limitDis/(m_limitBufferForDamp-m_limitBufferForCtrl),1);
+	dampOffset:= -dampScale * m_maxDamp * i_setupArm.curJntVel[3];
+END_IF
+
+
+// add friction compensation
+m_frictionScale := LIMIT(0, m_frictionScale, 1);
+m_cmdJntTrq[3]:=m_frictionScale * sign(i_setupArm.curJntVel[3])*jnt3Friction(i_setupArm.armIdx, i_setupArm.curJntPos[3])+ dampOffset;
+*)
+
+
+// set joint torque to zero in default
+m_cmdJntTrq := g_zeroVec5d;
+
+// add damp near joint limit 
+IF (i_setupArm.curJntPos[3] > GVL_SetupMotorParameters.g_maxJntPos[1,3] - m_limitBufferForCtrl ) 
+	OR (i_setupArm.curJntPos[3] < GVL_SetupMotorParameters.g_minJntPos[1,3] + m_limitBufferForCtrl) OR CartControl.m_cartRobot.m_slaveCart.m_columnAdjustEnable  THEN
+	dampOffset:= 0;
+ELSIF (i_setupArm.curJntPos[3] > GVL_SetupMotorParameters.g_maxJntPos[1,3] - m_limitBufferForDamp AND  i_setupArm.curJntVel[3]> 0 ) 
+	OR (i_setupArm.curJntPos[3] < GVL_SetupMotorParameters.g_minJntPos[1,3] + m_limitBufferForDamp AND  i_setupArm.curJntVel[3]<0 )  THEN
+	limitDis := MIN(GVL_SetupMotorParameters.g_maxJntPos[1,3] - i_setupArm.curJntPos[3], i_setupArm.curJntPos[3]-GVL_SetupMotorParameters.g_minJntPos[1,3]);
+	dampScale  :=LIMIT(0, 1-limitDis/(m_limitBufferForDamp-m_limitBufferForCtrl),1);
+	dampOffset:= -dampScale * m_maxDamp * i_setupArm.curJntVel[3];
+END_IF
+
+// add friction compensation
+m_frictionScale := LIMIT(0, m_frictionScale, 1);
+m_cmdJntTrq[3]:=m_frictionScale * sign(i_setupArm.curJntVel[3])*jnt3Friction(i_setupArm.armIdx, i_setupArm.curJntPos[3])+ dampOffset;
+
+//joint 5 torque
+m_cmdJntTrq[5]:=-i_setupArm.jntGravity[5];
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{4773314e-f25d-46bc-943e-e805279801b2}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+VAR_IN_OUT 
+	r_setupArmCtrlCmd :ST_SetupArmCtrlCmds;
+END_VAR
+VAR
+	i:INT;
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_setupArm,r_setupArmCtrlCmd);
+m_jnt5EnableTime :=0;
+
+
+//add code for test
+FOR i:=1 TO 5 BY 1 DO
+	IF (g_motionRangeTest.m_setupJntEnable[i]=TRUE) THEN
+		m_jntEnableFlag[i]:=1;
+	ELSE
+		m_jntEnableFlag[i]:=0;
+	END_IF
+END_FOR
+
+m_jntOPMode:=g_setupAllTrqMode;
+m_DHjntPos:=i_setupArm.curJntPos;
+m_jntPosMin:=m_DHjntPos;
+m_jntPosMax:=m_DHjntPos;
+vecSub(m_jntPosMax,m_jntPosMin,m_jntMotRange);
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="jnt3Friction" Id="{e09d90d0-d2cd-4c60-acd5-6d7a9c99c802}">
+      <Declaration><![CDATA[METHOD PROTECTED jnt3Friction : Lreal
+VAR_INPUT
+	i_armIdx:INT;
+	i_jnt3Pos :LREAL;
+END_VAR
+
+VAR
+	q:LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[q := LIMIT(GVL_SetupArmDynamics.g_setupJnt3GravityPosRange[i_armIdx,1], i_jnt3Pos, GVL_SetupArmDynamics.g_setupJnt3GravityPosRange[i_armIdx,2]);
+jnt3Friction:=GVL_SetupArmDynamics.g_setupJnt3FrictionParams[i_armIdx,1]*EXPT(q,3)+GVL_SetupArmDynamics.g_setupJnt3FrictionParams[i_armIdx,2]*EXPT(q,2)+
+				GVL_SetupArmDynamics.g_setupJnt3FrictionParams[i_armIdx,3]*q+GVL_SetupArmDynamics.g_setupJnt3FrictionParams[i_armIdx,4];]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SetupCtrlDragFreeTest">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlDragFreeTest.calcCmdJntPos">
+      <LineId Id="288" Count="1" />
+      <LineId Id="245" Count="10" />
+      <LineId Id="258" Count="15" />
+      <LineId Id="283" Count="0" />
+      <LineId Id="321" Count="0" />
+      <LineId Id="323" Count="6" />
+      <LineId Id="322" Count="0" />
+      <LineId Id="285" Count="0" />
+      <LineId Id="290" Count="20" />
+      <LineId Id="115" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlDragFreeTest.calcCmdJntTrq">
+      <LineId Id="383" Count="1" />
+      <LineId Id="295" Count="50" />
+      <LineId Id="359" Count="1" />
+      <LineId Id="362" Count="0" />
+      <LineId Id="367" Count="0" />
+      <LineId Id="363" Count="1" />
+      <LineId Id="368" Count="9" />
+      <LineId Id="379" Count="3" />
+      <LineId Id="401" Count="0" />
+      <LineId Id="398" Count="0" />
+      <LineId Id="366" Count="0" />
+      <LineId Id="399" Count="1" />
+      <LineId Id="123" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlDragFreeTest.init">
+      <LineId Id="57" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="105" Count="6" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="80" Count="3" />
+      <LineId Id="77" Count="1" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlDragFreeTest.jnt3Friction">
+      <LineId Id="6" Count="1" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

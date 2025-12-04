@@ -1,0 +1,395 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_CSV_TextMode_ReadWrite" Id="{b882834c-a8a1-4678-95a9-c85be668a115}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_CSV_TextMode_ReadWrite
+VAR_INPUT
+	sNetId			: T_AmsNetId := '';	
+	sFileName		: T_MaxString := 'C:\Test.csv';
+END_VAR
+VAR_OUTPUT
+	bBusy:BOOL;
+	bError:BOOL;
+	nErrorID:UDINT;
+	nErrorState:INT;
+END_VAR
+VAR
+	sCSVLine		: T_MaxString := '';
+	sCSVField		: T_MaxString := '';
+	nActRow	 		: UINT 	:= 0;
+	nActColumn		: UINT ;
+	hFile			: UINT		:= 0;
+	fbFileOpen	: FB_FileOpen;
+	fbWriter		: FB_CSVMemBufferWriter;
+	fbReader		: FB_CSVMemBufferReader;
+	fbFileGets:FB_FileGets ;
+	fbFilePuts		: FB_FilePuts;
+	fbFileClose	: FB_FileClose;
+	
+	bEOF			:BOOL;
+	ptPointerToData:POINTER TO LREAL;
+	lrDataRW:LREAL;
+	
+	
+	caseWrite:INT;
+	caseRead:INT;
+	rTrigWrite:R_Trig;
+	rTrigRead:R_Trig;
+
+	m_read : BOOL;
+	m_working : STRING;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+(*以文本的方式写入或者读取Csv文件，写入或者读取的数据类型是lreal，可以指定二维数组进行读写*)
+(*由于中间用到了t_MaxString,所以每行写入的数据最大为255个字符*)]]></ST>
+    </Implementation>
+    <Method Name="M_ReadCsv" Id="{7e987811-1ada-4885-a767-8c8c166cc020}">
+      <Declaration><![CDATA[METHOD M_ReadCsv : BOOL
+VAR_INPUT
+	bExecute:BOOL;
+	ptPointer:PVOID;
+	nRows:UINT;
+	nColumns:UINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+rTrigRead(CLK:=bExecute);
+
+IF rTrigRead.Q AND NOT bBusy THEN
+	caseRead:=5;
+END_IF
+
+CASE caseRead OF
+0:
+;
+5:
+
+	bError:=FALSE;
+	bBusy:=TRUE;
+	nErrorID:=0;
+	hFile:=0;
+	nActRow:=0;
+	nActColumn:=0;
+	m_read := FALSE;
+	ptPointerToData:=ptPointer;
+	caseRead:=10;
+	
+10:
+//get handle of File
+fbFileOpen(
+	sNetId:= sNetId, 
+	sPathName:=sFileName , 
+	nMode:=FOPEN_MODEREAD OR FOPEN_MODETEXT , 
+	ePath:=PATH_GENERIC , 
+	bExecute:= TRUE, 
+	tTimeout:=T#1S ,
+	hFile=>hFile);
+IF NOT fbFileOpen.bBusy THEN
+	IF NOT fbFileOpen.bError THEN
+		caseRead:=20;
+	ELSE
+		bError:=TRUE;
+		nErrorId:=fbFileOpen.nErrId;
+		nErrorState:=1;
+		caseRead:=100;
+	END_IF
+	fbFileOpen(bExecute:= FALSE);
+END_IF
+
+20:
+//Gets a Row of Data
+IF RIGHT( fbFileGets.sLine, 1 ) <> '$L' AND  RIGHT( fbFileGets.sLine, 1 ) <> ';' AND nActRow >=2 AND NOT fbFileGets.bBusy THEN
+	m_read := TRUE;
+END_IF
+fbFileGets(
+	sNetId:=sNetId , 
+	hFile:= hFile, 
+	bExecute:=TRUE , 
+	tTimeout:= T#5S, 
+	sLine=> sCSVLine, 
+	bEOF=> bEOF);
+	
+	IF NOT fbFileGets.bBusy THEN
+		IF NOT fbFileGets.bError THEN
+			IF bEOF THEN
+				caseRead:=40;
+			ELSE
+				IF RIGHT( sCSVLine, 1 ) = '$L' THEN
+					sCSVLine := REPLACE( sCSVLine, '$R$L', 2, LEN( sCSVLine ) );
+				ELSIF RIGHT( sCSVLine, 1 ) <> ';' THEN
+					sCSVLine := REPLACE( sCSVLine, ';', 1, LEN( sCSVLine )+1 );
+				END_IF
+				caseRead:=30;
+			END_IF
+		ELSE
+			bError:=TRUE;
+			nErrorID:=fbFileGets.nErrId;
+			nErrorState:=2;
+			caseRead:=100;
+		END_IF
+		fbFileGets(bExecute:=FALSE);
+	END_IF
+30:
+	fbReader.eCmd := eEnumCmd_First;
+	REPEAT
+		fbReader( pBuffer := ADR( sCSVLine ), cbBuffer := SIZEOF( sCSVLine ), getValue =>sCSVField );
+		IF fbReader.bOk THEN
+			IF fbReader.eCmd = eEnumCmd_First AND m_read THEN
+				nActColumn := nActColumn - 1;
+				lrDataRW :=STRING_TO_LREAL(CSVFIELD_TO_string( m_working, FALSE ));
+				ptPointerToData^:=lrDataRW;
+				ptPointerToData:=ptPointerToData-SIZEOF(lrDataRW);
+				sCSVField := CONCAT(m_working,sCSVField);
+				m_read := FALSE;
+			END_IF
+			fbReader.eCmd := eEnumCmd_Next;(* 读取下一个字段值 *)
+			
+			IF ( nActRow <= nRows ) THEN
+				IF ( nActColumn <= nColumns ) THEN
+					lrDataRW :=STRING_TO_LREAL(CSVFIELD_TO_string( sCSVField, FALSE ));//LREAL
+					ptPointerToData^:=lrDataRW;
+					ptPointerToData:=ptPointerToData+SIZEOF(lrDataRW);
+				END_IF
+			END_IF
+			nActColumn := nActColumn + 1;(* 增加读取列的数目 *)
+			m_working := sCSVField;
+			IF fbReader.bCRLF THEN(* CRLF == TRUE =>到达reacord结束 *)
+				nActRow 		:= nActRow + 1;(* 增加读取记录的数量 *)
+				nActColumn 	:= 0;(* 列数重置 *)
+			END_IF
+		ELSE(* 错误:到达记录结束或读取所有字段 *)
+			caseRead := 20;(* 试着读下一行 *)
+		END_IF
+	UNTIL NOT fbReader.bOk
+	END_REPEAT
+40:
+fbFileClose(
+		sNetId:=sNetId , 
+		hFile:=hFile , 
+		bExecute:=TRUE , 
+		tTimeout:=T#3S , 
+		);
+	IF NOT fbFileClose.bBusy THEN
+		IF fbFileClose.bError THEN
+			bError:=TRUE;
+			nErrorID:=fbFileClose.nErrId;
+			nErrorState:=3;
+		END_IF
+		fbFileClose(bExecute:=FALSE );
+		hFile:=0;
+		caseRead:=100;
+	END_IF
+100:
+//End
+	IF hFile<>0 THEN
+		caseRead:=40;
+	ELSE
+		
+		bBusy:=FALSE;
+		caseRead:=0;
+	END_IF	
+
+
+ELSE
+	caseRead:=0;
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_WriteCsv" Id="{42eaa480-e3f4-4580-9bdc-dbc9e2d91b5a}">
+      <Declaration><![CDATA[METHOD M_WriteCsv : BOOL
+VAR_INPUT
+	bExecute:BOOL;
+	nMode:Dword;//写入文件的格式，覆盖还是添加
+	ptPointer:PVOID;
+	nRows:UINT;
+	nColumns:UINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+rTrigWrite(CLK:=bExecute);
+
+IF rTrigWrite.Q AND NOT bBusy THEN
+	caseWrite:=5;
+END_IF
+
+
+CASE caseWrite OF 
+0:
+;
+5:
+	bError:=FALSE;
+	bBusy:=TRUE;
+	nErrorId:=0;
+	nActRow:=0;
+	nActColumn:=0;
+	nErrorState:=0;
+	lrDataRW:=0;
+	ptPointerToData:=ptPointer;
+	caseWrite:=10;
+10:
+//get handle of File
+fbFileOpen(
+	sNetId:= sNetId, 
+	sPathName:=sFileName , 
+	nMode:=nMode , 
+	ePath:=PATH_GENERIC , 
+	bExecute:= TRUE, 
+	tTimeout:=T#1S ,
+	hFile=>hFile);
+IF NOT fbFileOpen.bBusy THEN
+	IF NOT fbFileOpen.bError THEN
+		caseWrite:=20;
+	ELSE
+		bError:=TRUE;
+		nErrorId:=fbFileOpen.nErrId;
+		nErrorState:=1;
+		caseWrite:=100;
+	END_IF
+	fbFileOpen(bExecute:= FALSE);
+END_IF
+
+20:
+	sCSVLine:='';
+	fbWriter.eCmd := eEnumCmd_First;
+	IF nActRow <= nRows  THEN
+		FOR nActColumn := 0 TO nColumns  DO
+			lrDataRW:=ptPointerToData^;
+			sCSVField := string_TO_CSVFIELD(LREAL_TO_STRING(lrDataRW), FALSE );
+			fbWriter(
+					eCmd:= fbWriter.eCmd, 
+					putValue:=sCSVField , 
+					bCRLF:= ( nActColumn = nColumns ), 
+					pBuffer:= ADR( sCSVLine ), 
+					cbBuffer:= SIZEOF( sCSVLine ) - 1);
+			IF fbWriter.bOk THEN
+				fbWriter.eCmd := eEnumCmd_Next;
+			END_IF
+			ptPointerToData:=ptPointerToData+SIZEOF(lrDataRW);
+		END_FOR
+	
+		IF RIGHT( sCSVLine, 2 ) = '$R$L' THEN
+			sCSVLine := REPLACE( sCSVLine, '$L', 2, LEN( sCSVLine ) - 1 );
+		END_IF
+		nActRow := nActRow + 1;
+		caseWrite := 30;
+	ELSE	
+		caseWrite := 40;
+	END_IF
+
+30:
+fbFilePuts(
+	sNetId:=sNetId , 
+	hFile:=hFile , 
+	sLine:= sCSVLine, 
+	bExecute:=TRUE, 
+	tTimeout:= T#5S);
+
+	IF NOT fbFilePuts.bBusy THEN
+		IF NOT fbFilePuts.bError THEN
+			caseWrite:=20;
+		ELSE
+			bError:=TRUE;
+			nErrorID:=fbFilePuts.nErrId;
+			nErrorState:=2;
+			caseWrite:=100;
+		END_IF
+		fbFilePuts(bExecute:=FALSE );
+	END_IF
+40:
+	fbFileClose(
+		sNetId:=sNetId , 
+		hFile:=hFile , 
+		bExecute:=TRUE , 
+		tTimeout:=T#3S , 
+		);
+	IF NOT fbFileClose.bBusy THEN
+		IF fbFileClose.bError THEN
+			bError:=TRUE;
+			nErrorID:=fbFileClose.nErrId;
+			nErrorState:=3;
+		END_IF
+		fbFileClose(bExecute:=FALSE );
+		hFile:=0;
+		caseWrite:=100;
+	END_IF
+100:
+//End
+	IF hFile<>0 THEN
+		caseWrite:=40;
+	ELSE
+		bBusy:=FALSE;
+		caseWrite:=0;
+	END_IF
+ELSE
+	caseWrite:=0;
+
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_CSV_TextMode_ReadWrite">
+      <LineId Id="48" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="85" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CSV_TextMode_ReadWrite.M_ReadCsv">
+      <LineId Id="10" Count="0" />
+      <LineId Id="131" Count="3" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="12" Count="2" />
+      <LineId Id="125" Count="1" />
+      <LineId Id="15" Count="5" />
+      <LineId Id="151" Count="0" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="23" Count="24" />
+      <LineId Id="158" Count="2" />
+      <LineId Id="48" Count="14" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="155" Count="0" />
+      <LineId Id="63" Count="15" />
+      <LineId Id="152" Count="0" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="165" Count="1" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="153" Count="0" />
+      <LineId Id="163" Count="0" />
+      <LineId Id="154" Count="0" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="80" Count="1" />
+      <LineId Id="128" Count="1" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="83" Count="2" />
+      <LineId Id="162" Count="0" />
+      <LineId Id="86" Count="38" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CSV_TextMode_ReadWrite.M_WriteCsv">
+      <LineId Id="128" Count="0" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="130" Count="1" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="10" Count="1" />
+      <LineId Id="122" Count="1" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="14" Count="5" />
+      <LineId Id="132" Count="0" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="24" Count="26" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="51" Count="9" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="61" Count="51" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="117" Count="4" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

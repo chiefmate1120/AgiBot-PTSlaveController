@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="Cubic_Polynomial_Interpolation" Id="{d05795ca-46ae-45d1-a565-0dbdff11dcfb}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK Cubic_Polynomial_Interpolation
+//VAR_INPUT
+//	t0,t1,q0,q1,v0,v1,acc0,acc1:LREAL;	
+//	t:LREAL;
+//END_VAR
+VAR
+	h,Tp:LREAL;
+	a0,a1,a2,a3:LREAL;
+	targetPos,targetVel,targetAcc:LREAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+
+//IF (t<=t1) THEN
+//	pos:=a0+a1*t+a2*EXPT(t,2)+a3*EXPT(t,3);
+//	vel:=a1+2*a2*t+3*a3*EXPT(t,2);
+//	acc:=2*a2+6*a3*t;
+//END_IF
+
+//IF (t>t1) THEN
+//	finished:=TRUE;
+//	pos:=q1;
+//	vel:=0;
+//	acc:=0;
+//ELSE
+//	finished:=FALSE;
+//END_IF
+]]></ST>
+    </Implementation>
+    <Method Name="init" Id="{b4cf89e5-ebd6-4df0-a5ad-dfbeaf283d1e}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+	t0,t1,q0,q1,v0,v1,acc0,acc1:LREAL;	
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[targetPos:=0;
+targetVel:=0;
+targetAcc:=0;
+a0:=0;
+a1:=0;
+a2:=0;
+a3:=0;
+h:=q1-q0;
+Tp:=t1-t0;
+
+a0:=q0;
+a1:=v0;
+a2:=3/EXPT(Tp,2)*h-2/Tp*v0-1/Tp*v1;
+a3:=-2/EXPT(Tp,3)*h+1/EXPT(Tp,2)*(v1+v0);
+
+targetPos:=q1;
+targetVel:=v1;
+targetAcc:=a1;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{e7ad38c3-c494-4655-ac55-f8398a62ab10}">
+      <Declaration><![CDATA[METHOD run : BOOL
+VAR_INPUT
+	t:LREAL;
+END_VAR
+VAR_IN_OUT
+	pos:lreal;
+	vel:lreal;
+	acc:LREAL;
+	finishFlag:BOOL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF t>Tp THEN
+	pos:=targetPos;
+//	vel:=targetVel;
+//	acc:=targetAcc;
+	vel:=(a1+2*a2*(Tp-0.00025)+3*a3*EXPT((Tp-0.00025),2))/2;
+	acc:=(2*a2+6*a3*(Tp-0.00025))/2;
+	finishFlag:=True;
+ELSE	
+	pos:=a0+a1*t+a2*EXPT(t,2)+a3*EXPT(t,3);
+	vel:=a1+2*a2*t+3*a3*EXPT(t,2);
+	acc:=2*a2+6*a3*t;
+	finishFlag:=FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="Cubic_Polynomial_Interpolation">
+      <LineId Id="33" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="57" Count="12" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="Cubic_Polynomial_Interpolation.init">
+      <LineId Id="26" Count="2" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="6" Count="5" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="20" Count="0" />
+    </LineIds>
+    <LineIds Name="Cubic_Polynomial_Interpolation.run">
+      <LineId Id="39" Count="0" />
+      <LineId Id="48" Count="2" />
+      <LineId Id="63" Count="1" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="46" Count="1" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="43" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

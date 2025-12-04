@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_SetupInfo" Id="{d9ae27f2-444f-4b7f-acc3-2745d92f405b}">
+    <Declaration><![CDATA[TYPE ST_SetupInfo :
+STRUCT
+	//joint position-unit:rad/m
+	m_curJntPos:Vec5d;
+	
+	//joint position-unit:deg/mm
+	m_curJntPosDegMM:Vec5d;
+	
+	//current joint velocity
+	m_curJntVelDegMM:Vec5d;
+	
+	//link position
+	m_curLinkPos:Vec5d;
+	
+	//Encoder deviation
+	m_encErr:Vec5d;
+	
+	//joint maxmum
+	m_jntMax:Vec5d;
+	
+	//joint minimum
+	m_jntMin:Vec5d;
+	
+	//motor input signal
+	m_motorInput:ARRAY[1..5] OF ST_MotorInputs;
+	
+	//motor output signal
+	m_motorOutput:ARRAY[1..5] OF ST_MotorOutputs;	
+	
+	//state machine
+	m_stateMachine:INT;
+	
+	//IP Address
+	m_IPAddress:T_AmsNetId;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

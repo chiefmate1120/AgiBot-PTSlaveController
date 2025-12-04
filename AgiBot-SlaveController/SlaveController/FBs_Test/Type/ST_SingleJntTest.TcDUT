@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_SingleJntTest" Id="{fb4c8685-e35b-4d98-ab29-8009c223b88a}">
+    <Declaration><![CDATA[TYPE ST_SingleJntTest :
+STRUCT	
+	//enter Single Joint test mode
+	m_enterSingleJntTestMode:ARRAY[1..g_sArmNum] OF BOOL;
+	m_singleJntFlag,m_return2OriginFlag,m_move2StartFlag:BOOL;
+	m_kineCaliJntIdx:INT:=0;
+	
+//	m_setupJntOrigin:ARRAY [1..g_sArmNum,1..5] OF LREAL:=[
+//	-2.535,0.433,0.037,0.074,1.07,
+//	-2.535,0.433,0.037,0.074,1.07,
+//	-2.535,0.433,0.037,0.074,1.07,
+//	-2.535,0.433,0.037,0.074,1.07];
+	
+//	m_slaveJntOrigin:ARRAY [1..g_sArmNum,1..8] OF LREAL:=[
+//	0.142,-1.515,0.535,-6.302,-0.006,-0.001,-0.018,-6.289,
+//	0.142,-1.515,0.535,-6.302,-0.006,-0.001,-0.018,-6.289,
+//	0.142,-1.515,0.535,-6.302,-0.006,-0.001,-0.018,-6.289,
+//	0.142,-1.515,0.535,-6.302,-0.006,-0.001,-0.018,-6.289];
+
+	m_setupJntOrigin:ARRAY [1..g_sArmNum,1..5] OF LREAL:=[
+	-2.535,0.433,0.06,0.5,1.35,
+	-2.535,0.433,0.06,0.5,1.35,
+	-2.535,0.433,0.06,0.5,1.35,
+	-2.535,0.433,0.06,0.5,1.35];
+	
+	m_slaveJntOrigin:ARRAY [1..g_sArmNum,1..8] OF LREAL:=[
+	0,-1,0.417,-6.302,-0.006,-0.001,-0.018,-6.289,
+	0,-1,0.41,-6.302,-0.006,-0.001,-0.018,-6.289,
+	0,-1,0.41,-6.302,-0.006,-0.001,-0.018,-6.289,
+	0,-1,0.41,-6.302,-0.006,-0.001,-0.018,-6.289];
+	
+	m_startPosArr:Vec8d:=[0,0,0.01,-0.2,1.15,-1,-1.4,0.24];
+	m_endPosArr:Vec8d := [0,0,0.21, 1.2,1.45, 1,-0.6,0.42];
+	
+	m_limitFlag:BOOL:=FALSE;
+	m_limitFlagArr:ARRAY[1..8] OF BOOL:=[8(TRUE)];
+//	m_limitFlagArr:ARRAY[1..8] OF BOOL:=[TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE];
+		
+	m_limitStep:LREAL:=20;
+	m_limitStepArr:Vec8d:=[8(0)];
+//	m_limitStepArr:Vec8d:=[20.1,20.2,4.3,114,5.5,120.6,50.7,20.8];
+	
+	m_reverseDir:INT:=1;
+	m_reverseDirArr:ARRAY[1..8] OF INT:=[8(1)];
+//	m_reverseDirArr:ARRAY[1..8] OF INT:=[1,1,1,-1,-1,-1,-1,-1];
+	
+	m_jntStep:LREAL:=10.0;
+	m_jntStepArr:Vec8d:=[8(0)];
+//	m_jntStepArr:Vec8d:=[5.1,5.2,15.3,5.4,2.5,5.6,5.7,18.8];
+	
+	m_dataRecordFlag:ARRAY[1..g_sArmNum] OF BOOL:=[4(FALSE)];
+	m_dataRecordCount:ARRAY[1..g_sArmNum] OF INT:=[4(0)];
+	m_dataSingleCount:INT:=0;
+	m_dataShowCount:STRING:='0';
+	m_dataRecordText:STRING := 'No record';
+	
+	m_manualAdjustFlag:BOOL:=FALSE;
+	m_fileSetFlag:BOOL:=FALSE;
+	m_fileName:STRING;
+	
+	m_EndT:LREAL:=10.0;
+	m_return2OriginTime:LREAL:=7.1;
+	m_return2ALLOriginTime:LREAL:=10.1;
+	m_move2StartTime:LREAL:=5.2;
+	m_singleJntTimeArr:Vec8d:=[3.01,3.02,5.03,3.04,3.05,3.06,3.07,3.08];
+	
+	m_manualEndFlag:BOOL:=FALSE;
+	m_manual124StartFlag:BOOL:=FALSE;
+	m_manual124DoneFlag:BOOL:=FALSE;
+	
+	m_singleMotionEndFlag:BOOL:=FALSE;
+	
+	
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

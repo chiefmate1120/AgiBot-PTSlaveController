@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_MasterStopButtonDetect" Id="{da48c96e-49d1-4e6f-b5a6-e0b72d199525}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterStopButtonDetect
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	m_masterStopCounts :INT :=0;
+	m_masterStopThres :INT :=10;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="run" Id="{51455f82-59d6-47b6-af89-afe9be9d3e7c}">
+      <Declaration><![CDATA[// check if instrument is on
+METHOD run : BOOL
+VAR_INPUT
+	IOValue :BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+IF IOValue = TRUE  THEN
+	m_masterStopCounts := MIN( m_masterStopCounts +1,m_masterStopThres);
+ELSIF IOValue = FALSE  THEN
+	m_masterStopCounts :=0;
+END_IF
+run := m_masterStopCounts >= m_masterStopThres;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_MasterStopButtonDetect">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterStopButtonDetect.run">
+      <LineId Id="81" Count="5" />
+      <LineId Id="66" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

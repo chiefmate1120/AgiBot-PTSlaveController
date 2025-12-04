@@ -1,0 +1,237 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_InstruTestDataRecord" Id="{469b9646-19b2-449c-98ab-96fe7d38ab70}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_InstruTestDataRecord
+VAR
+	m_armIdx:INT;
+	m_instruGripJntMaxCurrent:LREAL:=540;
+	
+	m_instruMaxPithCurrent :LREAL:=540;;
+	
+	m_reverseThres :LREAL :=40*g_deg2Rad;
+	m_yawDir :INT:=1;
+	m_lastYawAng:LREAL;
+	
+	m_pitchDir :INT:=1;
+	m_lastPitchAng:LREAL;
+	
+	m_gripDir :INT:=1;
+	m_lastGripAng:LREAL;
+	
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="init" Id="{bb459a06-113c-47ea-a0c0-6cd525a4591d}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_armIdx:= i_slaveArm.armIdx;
+GVL_interactUI.g_instruUseDuration[m_armIdx]:=g_zeroVec4d;
+GVL_interactUI.g_masterCmdDuration[m_armIdx]:=g_zeroVec4d;
+GVL_interactUI.g_instruPitchCurrentDuration[m_armIdx]:=g_zeroVec8d;
+GVL_interactUI.g_instruPitchAngDuration[m_armIdx]:=g_zeroVec6d;
+GVL_interactUI.g_instruYawAngDuration[m_armIdx]:=g_zeroVec6d;
+GVL_interactUI.g_instruReverseCount[m_armIdx]:=g_zeroVec3i;
+
+m_yawDir:=1;
+m_lastYawAng := i_slaveArm.curDHJntPos[6];
+m_pitchDir:=1;
+m_lastPitchAng := i_slaveArm.curDHJntPos[5];
+m_gripDir:=1;
+m_lastGripAng := i_slaveArm.curGripAngle;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{9a6f96bf-02f8-414e-b80f-763d6dbe6a38}">
+      <Declaration><![CDATA[METHOD run : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm :FB_SlaveArm;
+	i_slaveCmdGripForceLevel:LREAL;
+END_VAR
+VAR
+	instruGripJntCurrent:LREAL;
+	instruPitchCurrent:LREAL;
+	instruPitchAng, instruYawAng:LREAL;
+	curGripAng:LREAL;
+	
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// instrument test code, accumulate use duration
+// instrument grip force
+instruGripJntCurrent := MAX( ABS(i_slaveArm.filtJntCurrent[4]), ABS(i_slaveArm.filtJntCurrent[5]));
+IF instruGripJntCurrent > 0.75 * m_instruGripJntMaxCurrent THEN
+	GVL_interactUI.g_instruUseDuration[m_armIdx][1]:=GVL_interactUI.g_instruUseDuration[m_armIdx][1]+g_slaveArmCtrlCycleTime;
+ELSIF instruGripJntCurrent > 0.5 * m_instruGripJntMaxCurrent THEN
+	GVL_interactUI.g_instruUseDuration[m_armIdx][2]:=GVL_interactUI.g_instruUseDuration[m_armIdx][2]+g_slaveArmCtrlCycleTime;
+ELSIF instruGripJntCurrent > 0.25 * m_instruGripJntMaxCurrent THEN
+	GVL_interactUI.g_instruUseDuration[m_armIdx][3]:=GVL_interactUI.g_instruUseDuration[m_armIdx][3]+g_slaveArmCtrlCycleTime;
+ELSE
+	GVL_interactUI.g_instruUseDuration[m_armIdx][4]:=GVL_interactUI.g_instruUseDuration[m_armIdx][4]+g_slaveArmCtrlCycleTime;
+END_IF
+
+// master command grip force
+IF i_slaveCmdGripForceLevel > 75 THEN
+	GVL_interactUI.g_masterCmdDuration[m_armIdx][1]:=GVL_interactUI.g_masterCmdDuration[m_armIdx][1]+g_slaveArmCtrlCycleTime;
+ELSIF i_slaveCmdGripForceLevel > 50 THEN
+	GVL_interactUI.g_masterCmdDuration[m_armIdx][2]:=GVL_interactUI.g_masterCmdDuration[m_armIdx][2]+g_slaveArmCtrlCycleTime;
+ELSIF i_slaveCmdGripForceLevel > 25 THEN
+	GVL_interactUI.g_masterCmdDuration[m_armIdx][3]:=GVL_interactUI.g_masterCmdDuration[m_armIdx][3]+g_slaveArmCtrlCycleTime;
+ELSE
+	GVL_interactUI.g_masterCmdDuration[m_armIdx][4]:=GVL_interactUI.g_masterCmdDuration[m_armIdx][4]+g_slaveArmCtrlCycleTime;
+END_IF
+
+// instrument pitch force
+instruPitchCurrent := i_slaveArm.filtJntCurrent[6];
+IF instruPitchCurrent > 0.75 * m_instruMaxPithCurrent THEN
+	GVL_interactUI.g_instruPitchCurrentDuration[m_armIdx][1]:=GVL_interactUI.g_instruPitchCurrentDuration[m_armIdx][1]+g_slaveArmCtrlCycleTime;
+ELSIF instruPitchCurrent > 0.5 * m_instruMaxPithCurrent THEN
+	GVL_interactUI.g_instruPitchCurrentDuration[m_armIdx][2]:=GVL_interactUI.g_instruPitchCurrentDuration[m_armIdx][2]+g_slaveArmCtrlCycleTime;
+ELSIF instruPitchCurrent > 0.25 * m_instruMaxPithCurrent THEN
+	GVL_interactUI.g_instruPitchCurrentDuration[m_armIdx][3]:=GVL_interactUI.g_instruPitchCurrentDuration[m_armIdx][3]+g_slaveArmCtrlCycleTime;
+ELSIF instruPitchCurrent > 0 * m_instruMaxPithCurrent THEN
+	GVL_interactUI.g_instruPitchCurrentDuration[m_armIdx][4]:=GVL_interactUI.g_instruPitchCurrentDuration[m_armIdx][4]+g_slaveArmCtrlCycleTime;
+ELSIF instruPitchCurrent > -0.25 * m_instruMaxPithCurrent THEN
+	GVL_interactUI.g_instruPitchCurrentDuration[m_armIdx][5]:=GVL_interactUI.g_instruPitchCurrentDuration[m_armIdx][5]+g_slaveArmCtrlCycleTime;
+ELSIF instruPitchCurrent > -0.5 * m_instruMaxPithCurrent THEN
+	GVL_interactUI.g_instruPitchCurrentDuration[m_armIdx][6]:=GVL_interactUI.g_instruPitchCurrentDuration[m_armIdx][6]+g_slaveArmCtrlCycleTime;
+ELSIF instruPitchCurrent > -0.75 * m_instruMaxPithCurrent THEN
+	GVL_interactUI.g_instruPitchCurrentDuration[m_armIdx][7]:=GVL_interactUI.g_instruPitchCurrentDuration[m_armIdx][7]+g_slaveArmCtrlCycleTime;
+ELSE 
+	GVL_interactUI.g_instruPitchCurrentDuration[m_armIdx][8]:=GVL_interactUI.g_instruPitchCurrentDuration[m_armIdx][8]+g_slaveArmCtrlCycleTime;
+END_IF
+
+// instrument pitch angle
+instruPitchAng := i_slaveArm.curDHJntPos[5];
+IF instruPitchAng > 60*g_deg2Rad -pi/2 THEN
+	GVL_interactUI.g_instruPitchAngDuration[m_armIdx][1]:=GVL_interactUI.g_instruPitchAngDuration[m_armIdx][1]+g_slaveArmCtrlCycleTime;
+ELSIF instruPitchAng > 30*g_deg2Rad - pi/2 THEN
+	GVL_interactUI.g_instruPitchAngDuration[m_armIdx][2]:=GVL_interactUI.g_instruPitchAngDuration[m_armIdx][2]+g_slaveArmCtrlCycleTime;
+ELSIF instruPitchAng > 0*g_deg2Rad -pi/2 THEN
+	GVL_interactUI.g_instruPitchAngDuration[m_armIdx][3]:=GVL_interactUI.g_instruPitchAngDuration[m_armIdx][3]+g_slaveArmCtrlCycleTime;
+ELSIF instruPitchAng > -30*g_deg2Rad -pi/2 THEN
+	GVL_interactUI.g_instruPitchAngDuration[m_armIdx][4]:=GVL_interactUI.g_instruPitchAngDuration[m_armIdx][4]+g_slaveArmCtrlCycleTime;
+ELSIF instruPitchAng > -60*g_deg2Rad -pi/2 THEN
+	GVL_interactUI.g_instruPitchAngDuration[m_armIdx][5]:=GVL_interactUI.g_instruPitchAngDuration[m_armIdx][5]+g_slaveArmCtrlCycleTime;
+ELSE 
+	GVL_interactUI.g_instruPitchAngDuration[m_armIdx][6]:=GVL_interactUI.g_instruPitchAngDuration[m_armIdx][6]+g_slaveArmCtrlCycleTime;
+END_IF
+
+// instrument yaw angle
+instruYawAng := i_slaveArm.curDHJntPos[6];
+IF instruYawAng > 60*g_deg2Rad THEN
+	GVL_interactUI.g_instruYawAngDuration[m_armIdx][1]:=GVL_interactUI.g_instruYawAngDuration[m_armIdx][1]+g_slaveArmCtrlCycleTime;
+ELSIF instruYawAng > 30*g_deg2Rad THEN
+	GVL_interactUI.g_instruYawAngDuration[m_armIdx][2]:=GVL_interactUI.g_instruYawAngDuration[m_armIdx][2]+g_slaveArmCtrlCycleTime;
+ELSIF instruYawAng > 0*g_deg2Rad THEN
+	GVL_interactUI.g_instruYawAngDuration[m_armIdx][3]:=GVL_interactUI.g_instruYawAngDuration[m_armIdx][3]+g_slaveArmCtrlCycleTime;
+ELSIF instruYawAng > -30*g_deg2Rad THEN
+	GVL_interactUI.g_instruYawAngDuration[m_armIdx][4]:=GVL_interactUI.g_instruYawAngDuration[m_armIdx][4]+g_slaveArmCtrlCycleTime;
+ELSIF instruYawAng > -60*g_deg2Rad THEN
+	GVL_interactUI.g_instruYawAngDuration[m_armIdx][5]:=GVL_interactUI.g_instruYawAngDuration[m_armIdx][5]+g_slaveArmCtrlCycleTime;
+ELSE 
+	GVL_interactUI.g_instruYawAngDuration[m_armIdx][6]:=GVL_interactUI.g_instruYawAngDuration[m_armIdx][6]+g_slaveArmCtrlCycleTime;
+END_IF
+
+// yaw reverse 
+IF m_yawDir =1 THEN
+	m_lastYawAng := MAX(i_slaveArm.curDHJntPos[6], m_lastYawAng);
+	IF m_lastYawAng - i_slaveArm.curDHJntPos[6] > m_reverseThres THEN
+		m_yawDir := -1;
+		m_lastYawAng:=i_slaveArm.curDHJntPos[6];
+		GVL_interactUI.g_instruReverseCount[m_armIdx][1]:=GVL_interactUI.g_instruReverseCount[m_armIdx][1]+1;
+	END_IF
+ELSIF m_yawDir =-1 THEN
+	m_lastYawAng := MIN(i_slaveArm.curDHJntPos[6], m_lastYawAng);
+	IF i_slaveArm.curDHJntPos[6] - m_lastYawAng > m_reverseThres THEN
+		m_yawDir := 1;
+		m_lastYawAng:=i_slaveArm.curDHJntPos[6];
+		GVL_interactUI.g_instruReverseCount[m_armIdx][1]:=GVL_interactUI.g_instruReverseCount[m_armIdx][1]+1;
+	END_IF
+END_IF
+
+// pitch reverse 
+IF m_pitchDir =1 THEN
+	m_lastPitchAng := MAX(i_slaveArm.curDHJntPos[5], m_lastPitchAng);
+	IF m_lastPitchAng - i_slaveArm.curDHJntPos[5] > m_reverseThres THEN
+		m_pitchDir := -1;
+		m_lastPitchAng:=i_slaveArm.curDHJntPos[5];
+		GVL_interactUI.g_instruReverseCount[m_armIdx][2]:=GVL_interactUI.g_instruReverseCount[m_armIdx][2]+1;
+	END_IF
+ELSIF m_pitchDir =-1 THEN
+	m_lastPitchAng := MIN(i_slaveArm.curDHJntPos[5], m_lastPitchAng);
+	IF i_slaveArm.curDHJntPos[5] - m_lastPitchAng > m_reverseThres THEN
+		m_pitchDir := 1;
+		m_lastPitchAng:=i_slaveArm.curDHJntPos[5];
+		GVL_interactUI.g_instruReverseCount[m_armIdx][2]:=GVL_interactUI.g_instruReverseCount[m_armIdx][2]+1;
+	END_IF
+END_IF
+
+// grip reverse 
+IF i_slaveCmdGripForceLevel > 0 THEN
+	curGripAng :=0;
+ELSE
+	curGripAng :=i_slaveArm.curGripAngle;
+END_IF
+IF m_gripDir =1 THEN
+	m_lastGripAng := MAX(curGripAng, m_lastGripAng);
+	IF m_lastGripAng - curGripAng > m_reverseThres THEN
+		m_gripDir := -1;
+		m_lastGripAng:=curGripAng;
+		GVL_interactUI.g_instruReverseCount[m_armIdx][3]:=GVL_interactUI.g_instruReverseCount[m_armIdx][3]+1;
+	END_IF
+ELSIF m_gripDir =-1 THEN
+	m_lastGripAng := MIN(curGripAng, m_lastGripAng);
+	IF curGripAng - m_lastGripAng > m_reverseThres THEN
+		m_gripDir := 1;
+		m_lastGripAng:=curGripAng;
+		GVL_interactUI.g_instruReverseCount[m_armIdx][3]:=GVL_interactUI.g_instruReverseCount[m_armIdx][3]+1;
+	END_IF
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_InstruTestDataRecord">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_InstruTestDataRecord.init">
+      <LineId Id="5" Count="0" />
+      <LineId Id="9" Count="3" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="24" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_InstruTestDataRecord.run">
+      <LineId Id="6" Count="1" />
+      <LineId Id="9" Count="22" />
+      <LineId Id="33" Count="48" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="98" Count="1" />
+      <LineId Id="101" Count="1" />
+      <LineId Id="104" Count="1" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="107" Count="5" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="114" Count="15" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="131" Count="1" />
+      <LineId Id="177" Count="1" />
+      <LineId Id="180" Count="1" />
+      <LineId Id="179" Count="0" />
+      <LineId Id="161" Count="13" />
+      <LineId Id="160" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
