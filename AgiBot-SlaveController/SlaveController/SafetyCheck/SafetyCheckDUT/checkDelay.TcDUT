@@ -6,8 +6,12 @@ STRUCT
 	T_armJntEncErr:ARRAY [1..13] OF FB_TON;
 	T_driveErr:ARRAY [1..13] OF FB_TON;
 	T_linkEncErr:ARRAY [1..13] OF FB_TON;
+	T_linkEncErrCode:ARRAY [1..13] OF FB_TON;
 	T_jntStatusErr:ARRAY [1..13] OF FB_TON;
 	T_springBreakageCheck: FB_TON;
+	T_motorHallCheck : ARRAY [1..13] OF FB_TON;
+	T_motorDriveError : ARRAY [1..13] OF FB_TON;
+	T_motorPhaseCheck : ARRAY [1..13] OF FB_TON;
 	T_outOfLimit:ARRAY [1..13] OF FB_TON;
 	T_armJntFollowErr:ARRAY [1..13] OF FB_TON;
 	T_jntVelErr:ARRAY [1..13] OF FB_TON;
@@ -21,8 +25,12 @@ STRUCT
 	T_cartJntEncErr:ARRAY [1..8] OF FB_TON;
 	T_cartDriveErr:ARRAY [1..8] OF FB_TON;
 	T_cartLinkEncErr:ARRAY [1..8] OF FB_TON;
+	T_cartLinkEncErrCode:ARRAY [1..8] OF FB_TON;
 	T_cartJntStatusErr:ARRAY [1..8] OF FB_TON;
 	T_cartCurrentIsNotUpdate:ARRAY [1..8] OF FB_TON;
+	T_cartmotorHallCheck : ARRAY [1..8] OF FB_TON;
+	T_cartmotorDriveError : ARRAY [1..8] OF FB_TON;
+	T_cartmotorPhaseCheck : ARRAY [1..8] OF FB_TON;
 	T_cartOutOfLimit:ARRAY [1..8] OF FB_TON;
 	T_cartJntFollowErr:ARRAY [1..8] OF FB_TON;
 	T_cartJntVelErr:ARRAY [1..8] OF FB_TON;

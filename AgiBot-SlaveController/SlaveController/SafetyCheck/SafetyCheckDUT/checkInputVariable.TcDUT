@@ -10,7 +10,6 @@ STRUCT
 	m_slaveDriverOutput :ARRAY[1..g_sJntNum] OF ST_MotorOutputs;
 	m_setupDriverInput :ARRAY[1..g_setupJntNum] OF  ST_MotorInputs; 
 	m_setupDriverOutput :ARRAY[1..g_setupJntNum] OF  ST_MotorOutputs;
-	m_hallAndEncoderAngle :ARRAY[1..g_sJntNum] OF UDINT;
 	m_springBreakageCheck : UDINT;
 	
 	m_motorEncoderSaltaValue : vec13di;  

@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="E_InstrumentUsage" Id="{d2832e37-0a58-42c1-a092-df9e94583ca0}">
+    <Declaration><![CDATA[TYPE E_InstrumentUsage :
+(
+	InstruUsage_UNKNOWM := 0,
+	InstruUsage_ClinicalUsed := 1,
+	InstruUsage_TestUsed := 2,
+	InstruUsage_InstruSell := 3,
+	InstruUsage_Training := 4
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

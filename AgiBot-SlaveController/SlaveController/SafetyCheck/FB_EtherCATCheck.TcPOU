@@ -17,9 +17,10 @@ VAR
 	m_EtherCATVerify : ST_EtherCATState;
 
 	m_clearCRCError : FB_EcMasterFrameStatisticClearCRC;
-	m_setSlaveState : FB_EcSetSlaveState;
-	
 	m_clearCRCErrorTime : LREAL;
+	
+	m_setMasterDeviceState :FB_EcSetMasterState;
+	m_setMasterStateStep : INT;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -92,11 +93,12 @@ EtherCATVerify := m_EtherCATVerify;]]></ST>
       <Declaration><![CDATA[METHOD setSlaveStatus : BOOL
 VAR_INPUT
 	armsNetID:T_AmsNetID;
-	jntAddr:UINT;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[m_setSlaveState(sNetId:=armsNetID , nSlaveAddr:= jntAddr, bExecute:= TRUE, tTimeout:= T#5S, reqState:= EC_DEVICE_STATE_OP, currState=> );]]></ST>
+        <ST><![CDATA[m_setMasterDeviceState(sNetId:= armsNetID, bExecute:= true, tTimeout:= T#5S, reqState:= EC_DEVICE_STATE_OP, bBusy=> , bError=> , nErrId=> , currState=> );
+
+]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_EtherCATCheck">
@@ -136,7 +138,9 @@ END_VAR
       <LineId Id="22" Count="0" />
     </LineIds>
     <LineIds Name="FB_EtherCATCheck.setSlaveStatus">
-      <LineId Id="5" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="13" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

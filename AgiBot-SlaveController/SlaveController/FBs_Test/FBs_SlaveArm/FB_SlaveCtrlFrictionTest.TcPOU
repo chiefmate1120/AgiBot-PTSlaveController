@@ -430,16 +430,6 @@ END_VAR
       <Implementation>
         <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
 
-(*
-m_jntOPMode[1] := DriverOPMode_PosTrq;
-m_jntOPMode[2] := DriverOPMode_PosTrq;
-m_jntOPMode[3] := DriverOPMode_PosTrq;
-m_jntOPMode[4] := DriverOPMode_Trq;
-m_jntOPMode[5] := DriverOPMode_Trq;
-m_jntOPMode[6] := DriverOPMode_Trq;
-m_jntOPMode[7] := DriverOPMode_Trq;
-m_jntOPMode[8] := DriverOPMode_Trq;
-*)
 
 // update commands to arm
 copyCmds(r_slaveArmCtrlCmd);
@@ -552,10 +542,6 @@ vecMultiNum(m_maxjntAcc,3,m_maxjntJerk);
     </LineIds>
     <LineIds Name="FB_SlaveCtrlFrictionTest.init">
       <LineId Id="13" Count="0" />
-      <LineId Id="138" Count="0" />
-      <LineId Id="137" Count="0" />
-      <LineId Id="86" Count="6" />
-      <LineId Id="19" Count="0" />
       <LineId Id="68" Count="0" />
       <LineId Id="110" Count="1" />
       <LineId Id="109" Count="0" />

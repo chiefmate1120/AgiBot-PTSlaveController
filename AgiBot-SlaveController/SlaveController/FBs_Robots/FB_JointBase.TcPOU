@@ -162,6 +162,20 @@ m_cmdJntPos :=m_curJntPos;
 m_lastJntPos :=m_curJntPos;]]></ST>
       </Implementation>
     </Method>
+    <Method Name="initJntPosOfErr" Id="{33ab8cb9-fdb0-4d76-a251-bcc01939e117}">
+      <Declaration><![CDATA[METHOD PUBLIC initJntPosOfErr : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_initLinkPos:=m_curLinkPos;
+m_initMotorEnc :=m_motorInputs.m_motorEncoder;
+m_curMotorPos:=motorEnc2Pos();
+m_curJntPos := m_curMotorPos;
+m_cmdJntPos :=m_curJntPos;	
+m_lastJntPos :=m_curJntPos;]]></ST>
+      </Implementation>
+    </Method>
     <Property Name="initLinkPos" Id="{d7776925-1122-4a68-9f90-f18c7af4e629}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY initLinkPos : lreal]]></Declaration>
       <Get Name="Get" Id="{d7e38c99-fc3b-4588-a2f6-017421dc91a7}">

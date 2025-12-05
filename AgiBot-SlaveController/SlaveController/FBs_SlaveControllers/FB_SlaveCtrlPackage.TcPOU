@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlPackage" Id="{f1b722f8-ced5-4c88-9461-cc1a45d6acc0}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm move to Package posture
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlPackage EXTENDS FB_SlaveArmCtrlBase
@@ -55,10 +55,7 @@ calcCmdJntPos := m_packagePlanner.evaluate(m_timePeriod, jntPos=> m_cmdJntPos, j
 // check IF TO terminate
 curJntVel :=i_slaveArm.curJntVel;
 m_isFinished :=m_timePeriod > m_packagePlanner.duration  AND norm(curJntVel)<7*g_jntStaticVelThres;
-
-//IF m_isFinished THEN
-//	GVL_interactUI.
-//END_IF]]></ST>
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{b23724e4-deb7-4c43-8ea2-717cb3ca8f89}">
@@ -102,9 +99,7 @@ copyCmds(r_slaveArmCtrlCmd);]]></ST>
       <LineId Id="27" Count="0" />
       <LineId Id="65" Count="5" />
       <LineId Id="64" Count="0" />
-      <LineId Id="92" Count="0" />
-      <LineId Id="91" Count="0" />
-      <LineId Id="93" Count="1" />
+      <LineId Id="94" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlPackage.init">
       <LineId Id="67" Count="3" />

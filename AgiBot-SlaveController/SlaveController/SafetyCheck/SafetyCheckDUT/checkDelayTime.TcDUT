@@ -9,10 +9,17 @@ STRUCT
 	Ti_driveErr:TIME:=T#0.2S;
 	//joint encoder ununuited delay time
 	Ti_linkEncErr:TIME:=T#5S;
+	Ti_linkEncErrCode:TIME:=T#10MS;
 	//joint status error delay time 
 	Ti_jntStatusErr:TIME:=T#1S;
 	//spring breakage check time
 	Ti_springBreakCheck:TIME:=T#0.3S;
+	//motor hall check 
+	Ti_motorHallCheck : TIME:=T#10MS;
+	//motor phase check
+	Ti_motorPhaseCheck : TIME:=T#10MS;
+	//motor drive check
+	Ti_motorDriveCheck : TIME:=T#10MS;
 	//joint postion out of limit
 	Ti_outOfLimit:TIME:=T#0.25S;
 	//joint follow error delay time
@@ -34,7 +41,8 @@ STRUCT
 	
 	Ti_CarDualEncDev:TIME:=T#0.02S;
 	Ti_CarDriveErr:TIME:=T#1S;
-	Ti_CarActSec:TIME:=T#10S;
+	Ti_CarActSec:TIME:=T#5S;
+	Ti_CarActSecCode:TIME:=T#10mS;
 	Ti_CarJntStatus:TIME:=T#1S;
 	Ti_CarTorMotor:TIME:=T#20S;
 	Ti_CaroutofLimit:TIME:=T#0.1S;

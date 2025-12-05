@@ -98,6 +98,8 @@ r_cartStatus.m_trocarOnFlag := m_slaveCart.m_trocarOnFlag;
 r_cartStatus.m_joystickValue := m_slaveCart.m_joystickSignal;
 r_cartStatus.m_jntPosReachLimit := m_cartCtrl.jntPosReachLimit;
 r_cartStatus.m_supportLegErrID := m_supportLegErrID;
+r_cartStatus.m_cartDriveForceOffset := m_slaveCart.m_cartDriveForceOffset;
+r_cartStatus.m_cartDriveForceRecord := m_slaveCart.m_cartDriveForceRecord;
 
 r_cartJointsData.m_cmdJntPos := m_slaveCart.cmdJntPos;
 r_cartJointsData.m_cmdJntVel := m_slaveCart.cmdJntVel;
@@ -105,7 +107,8 @@ r_cartJointsData.m_curJntPos := m_slaveCart.curJntPos;
 r_cartJointsData.m_curJntTrq := m_slaveCart.curJntCurrent;
 r_cartJointsData.m_curJntVel := m_slaveCart.curJntVel;
 r_cartJointsData.m_curLinkPos := m_slaveCart.curLinkPos;
-r_cartJointsData.m_curMotorPos := m_slaveCart.curMotorPos;]]></ST>
+r_cartJointsData.m_curMotorPos := m_slaveCart.curMotorPos;
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{dac0d65c-106c-4eed-932d-303e798c1acc}">
@@ -170,7 +173,13 @@ VAR
 	armAdjust : BOOL;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF LREAL_TO_UINT(m_slaveCart.curJntPos[5] * 1000 + GVL_CartControlParameters.g_cartInitialHeight) <= GVL_CartControlParameters.g_cartOpenHorizonLaserHeight OR m_slaveCart.m_trocarOnFlag >= 2  THEN
+        <ST><![CDATA[IF GVL_IO.g_openCrossLaser OR GVL_IO.g_openHorizonLaser  THEN
+	m_openCrossLaser :=BOOL_TO_DINT(GVL_IO.g_openCrossLaser);
+	m_openHorizonLaser := BOOL_TO_DINT(GVL_IO.g_openHorizonLaser);
+	RETURN;
+END_IF
+
+IF LREAL_TO_UINT(FLOOR(m_slaveCart.curJntPos[5] * 1000 + GVL_CartControlParameters.g_cartInitialHeight)) <= GVL_CartControlParameters.g_cartOpenHorizonLaserHeight OR m_slaveCart.m_trocarOnFlag >= 2  THEN
 	m_openCrossLaser := 0;
 	m_openHorizonLaser :=  0;
 	RETURN;
@@ -383,13 +392,13 @@ END_CASE
 
 //****************************add for test******************************//
 // to CartJointState_CycleTest
-IF (g_cycleTest.m_carEnterCycleTest OR g_cycleTest.m_carEnterESDTest) AND NOT(m_cartState=CartJointState_CycleTest) THEN
+IF g_cycleTest.m_carEnterCycleTest AND NOT(m_cartState=CartJointState_CycleTest) THEN
 	m_nextCartState := CartJointState_CycleTest;
 END_IF
 
 //CartJointState_CycleTest exit
-IF (m_cartState=CartJointState_CycleTest) AND (g_cycleTest.m_carEnterCycleTest=FALSE) AND (g_cycleTest.m_carEnterESDTest=FALSE) THEN
-	m_nextCartState :=CartJointState_Ready;
+IF (m_cartState=CartJointState_CycleTest) AND (g_cycleTest.m_carEnterCycleTest=FALSE) THEN
+	m_nextCartState :=CartJointState_SlowStop;
 END_IF
 
 // to CartJointState_MotionTest
@@ -440,15 +449,23 @@ END_IF
     <LineIds Name="FB_CartRobot.getStatus">
       <LineId Id="69" Count="7" />
       <LineId Id="95" Count="0" />
-      <LineId Id="77" Count="6" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="78" Count="5" />
       <LineId Id="15" Count="0" />
+      <LineId Id="107" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.init">
       <LineId Id="198" Count="37" />
       <LineId Id="57" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.laserIO">
-      <LineId Id="171" Count="35" />
+      <LineId Id="172" Count="1" />
+      <LineId Id="175" Count="1" />
+      <LineId Id="174" Count="0" />
+      <LineId Id="171" Count="0" />
+      <LineId Id="126" Count="35" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.run">

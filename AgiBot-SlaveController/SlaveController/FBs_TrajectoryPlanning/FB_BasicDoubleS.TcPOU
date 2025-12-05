@@ -106,7 +106,7 @@ END_IF
 
 q:=m_sign*q;
 q_dot:=m_sign*q_dot;
-q_ddot:=m_sign*q_dot;
+q_ddot:=m_sign*q_ddot;
 evaluate := TRUE;]]></ST>
       </Implementation>
     </Method>

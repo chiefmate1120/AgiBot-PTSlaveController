@@ -96,6 +96,8 @@ VAR
 	
 	//unit transform
 	m_unitTransform:FB_UnitTransform;	
+	
+	m_jntLimitOffset : Vec5d := [2(0),0.002,2(15*g_deg2Rad)];
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -178,7 +180,7 @@ CASE m_testStep OF
 		
 		//keep the other joint position
 		FOR i:=1 TO 5 BY 1 DO
-			IF (i=5) OR (i=4) THEN
+			IF (i=5) OR (i=4) OR (i=3) THEN
 				//
 			ELSE
 				m_cmdJntPos[i]:=i_setupArm.curJntPos[i];
@@ -390,9 +392,9 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[SUPER^.Init(i_setupArm,r_setupArmCtrlCmd);
-m_jntEnableFlag:=g_onesVec5i; m_jntEnableFlag[1]:=0; m_jntEnableFlag[2]:=0; m_jntEnableFlag[3]:=0;
+m_jntEnableFlag:=g_onesVec5i; m_jntEnableFlag[1]:=0; m_jntEnableFlag[2]:=0; 
 m_jntOPMode:= g_setupAllPosMode;
-
+m_jntOPMode[3] := DriverOPMode_PosTrq;
 
 //basic parameter init
 m_armId:=i_setupArm.armIdx;
@@ -402,8 +404,8 @@ m_startMotionLast:=FALSE;
 //target DH joint position
 FOR i:=1 TO 5 BY 1 DO
 	m_homeDHJntPos[i]:=(GVL_SetupMotorParameters.g_minJntPos[m_armId,i]+GVL_SetupMotorParameters.g_maxJntPos[m_armId,i])/2;
-	m_startDHJntPos[i]:=GVL_SetupMotorParameters.g_minJntPos[m_armId,i];
-	m_endDHJntPos[i]:=GVL_SetupMotorParameters.g_maxJntPos[m_armId,i];
+	m_startDHJntPos[i]:=GVL_SetupMotorParameters.g_minJntPos[m_armId,i] + m_jntLimitOffset[i];
+	m_endDHJntPos[i]:=GVL_SetupMotorParameters.g_maxJntPos[m_armId,i] - m_jntLimitOffset[i];
 END_FOR
 
 

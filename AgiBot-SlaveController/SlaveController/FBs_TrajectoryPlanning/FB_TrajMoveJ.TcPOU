@@ -32,7 +32,7 @@ VAR
 	moveRange :Vec8d;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[evaluate:=m_doubleS.evaluate(t,q=>q,q_dot=>q_dot, q_ddot=>q_dot);
+        <ST><![CDATA[evaluate:=m_doubleS.evaluate(t,q=>q,q_dot=>q_dot, q_ddot=>q_ddot);
 IF evaluate =FALSE THEN
 	RETURN;
 END_IF
