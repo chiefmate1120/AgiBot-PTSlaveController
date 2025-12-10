@@ -6342,5 +6342,95 @@
         </TypeList>
       </XmlArchive>
     </RecipeDefinition>
+    <RecipeDefinition Name="SlaveMotorParaVersion" Id="{e9d705d5-2b0c-42d2-8f3c-a56cc7a90d9f}">
+      <XmlArchive>
+        <Data>
+          <o xml:space="preserve" t="RecipeDefinitionObject">
+            <v n="UniqueIdGenerator">"59"</v>
+            <o n="Recipes" t="RecipeList">
+              <l n="Recipes" t="ArrayList" />
+            </o>
+            <o n="RecipeVariables" t="RecipeVariableList">
+              <l n="Variables" t="ArrayList" cet="RecipeVariable">
+                <o>
+                  <v n="VarName">"g_cartJointParametersVer"</v>
+                  <v n="VarType" t="TypeClass">String</v>
+                  <v n="VarTypeAsString">"STRING"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">35</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"Invalid Type"</v>
+                </o>
+                <o>
+                  <v n="VarName">"g_setupArmJointParametersVer"</v>
+                  <v n="VarType" t="TypeClass">String</v>
+                  <v n="VarTypeAsString">"STRING"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">String</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">45</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"Invalid Type"</v>
+                </o>
+                <o>
+                  <v n="VarName">"g_slaveArmJointParametersVer"</v>
+                  <v n="VarType" t="TypeClass">String</v>
+                  <v n="VarTypeAsString">"STRING"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">String</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">53</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"Invalid Type"</v>
+                </o>
+              </l>
+            </o>
+            <o n="LMGuids" t="LanguageModelGuidHelper">
+              <d n="NamesAndGuids" t="Hashtable" ckt="String" cvt="Guid">
+                <v>VALUESINIT</v>
+                <v>4f2d0087-b6ef-4c30-b2a7-cdd5408c575d</v>
+                <v>FILLDESCRIPTION</v>
+                <v>3f65887c-d320-42c7-876a-92c6db8359e8</v>
+                <v>NAMESET</v>
+                <v>3d7f5c21-37a4-4cc5-becc-ef0e87faf5f4</v>
+                <v>PRVFILLDATASERVERSTRUCTURES</v>
+                <v>cccdaefe-3488-42af-a94f-284b62d32425</v>
+                <v>NAME</v>
+                <v>8b457728-7717-4349-84d1-01b892a407ff</v>
+                <v>REC_DS_PRG__5FCAB85F173C4B85A325A147B06A7344</v>
+                <v>7373c873-297b-4d7d-916e-0eb330c18533</v>
+                <v>UPDATEFROMDESCRIPTION</v>
+                <v>0b6f8f39-8237-4d0f-9aec-7f6b53316d40</v>
+                <v>WRITE</v>
+                <v>e5063488-3e94-4bc1-80e9-f3a61ecdc213</v>
+                <v>READ</v>
+                <v>c434d9ef-84dd-4633-9aab-95bd95a8739f</v>
+              </d>
+            </o>
+          </o>
+        </Data>
+        <TypeList>
+          <Type n="ArrayList">System.Collections.ArrayList</Type>
+          <Type n="Guid">System.Guid</Type>
+          <Type n="Hashtable">System.Collections.Hashtable</Type>
+          <Type n="Int32">System.Int32</Type>
+          <Type n="LanguageModelGuidHelper">{3bce4913-f2c1-4b54-84e8-6d7ec1809176}</Type>
+          <Type n="RecipeDefinitionObject">{6b3dfb6a-1865-4356-a39b-1fe0ef89651c}</Type>
+          <Type n="RecipeList">{361612e3-b6f9-4397-98a8-756875b9e479}</Type>
+          <Type n="RecipeVariable">{53eb36d9-3360-453b-901e-ca88bd8f0cba}</Type>
+          <Type n="RecipeVariableBoundaries">{27f9af88-23e7-4a13-82aa-c97c4e06a71a}</Type>
+          <Type n="RecipeVariableList">{97841042-ff4f-47b5-923e-538f1387df5a}</Type>
+          <Type n="String">System.String</Type>
+          <Type n="TypeClass">{16f7aa24-038f-444e-9d81-b001bc091d35}</Type>
+        </TypeList>
+      </XmlArchive>
+    </RecipeDefinition>
   </RecipeManager>
 </TcPlcObject>

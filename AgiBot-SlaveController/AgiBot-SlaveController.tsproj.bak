@@ -584,8 +584,8 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{7CCFF24F-B98B-94FF-C0CF-8F944197851F}" AutoDeleteType="true">ST_SetupStatus</Name>
-			<BitSize>4096</BitSize>
+			<Name GUID="{807ADCB3-CC57-8613-5249-03C44106750F}" AutoDeleteType="true">ST_SetupStatus</Name>
+			<BitSize>3968</BitSize>
 			<SubItem>
 				<Name>m_armState</Name>
 				<Type GUID="{46E1EFFD-F9E4-52B4-BEBA-7CF60CEA7A57}">E_SetupArmState</Type>
@@ -638,22 +638,11 @@
 				<BitOffs>3136</BitOffs>
 			</SubItem>
 			<SubItem>
-				<Name>m_asepticMegnetSpringBreakCheck</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>4</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[arm aseptic cover megnet check]]></Comment>
-				<BitSize>128</BitSize>
-				<BitOffs>3904</BitOffs>
-			</SubItem>
-			<SubItem>
 				<Name>m_setupSelfCheckPass</Name>
 				<Type GUID="{D3FC0E71-E966-7642-BFEE-4268915B4346}">Vec4b</Type>
 				<Comment><![CDATA[setup robot selfcheck finshed]]></Comment>
 				<BitSize>32</BitSize>
-				<BitOffs>4032</BitOffs>
+				<BitOffs>3904</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -666,8 +655,17 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{B32D39E7-E972-BF67-BDCB-3DB7B11C4C7A}" AutoDeleteType="true">ST_SlaveDynaData</Name>
-			<BitSize>3264</BitSize>
+			<Name GUID="{652F03AC-D6CE-8F15-9B59-76904C581E70}" AutoDeleteType="true">Vec2d</Name>
+			<BitSize>128</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+			<ArrayInfo>
+				<LBound>1</LBound>
+				<Elements>2</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{BDE41F1F-D750-986F-8152-A6097BD7454F}" AutoDeleteType="true">ST_SlaveDynaData</Name>
+			<BitSize>3776</BitSize>
 			<SubItem>
 				<Name>m_massMat</Name>
 				<Type GUID="{82407ADD-AF7C-C511-3D2B-13966734510B}">Mat3d</Type>
@@ -700,6 +698,17 @@
 				<Comment><![CDATA[ instrument out-of-view data]]></Comment>
 				<BitSize>192</BitSize>
 				<BitOffs>3072</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_repulseJntVel</Name>
+				<Type GUID="{652F03AC-D6CE-8F15-9B59-76904C581E70}">Vec2d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ self-collison avoid velocity]]></Comment>
+				<BitSize>512</BitSize>
+				<BitOffs>3264</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -2336,7 +2345,7 @@
 			</Tasks>
 		</System>
 		<Plc>
-			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
+			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x000f" FileArchiveSettings="#x001e" SymbolicMapping="true">
 				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
@@ -2400,12 +2409,12 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveInputDataPool.m_setupStatus</Name>
 							<Comment><![CDATA[ setup arms infromation;]]></Comment>
-							<Type GUID="{7CCFF24F-B98B-94FF-C0CF-8F944197851F}">ST_SetupStatus</Type>
+							<Type GUID="{807ADCB3-CC57-8613-5249-03C44106750F}">ST_SetupStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveInputDataPool.m_slaveDynaData</Name>
 							<Comment><![CDATA[ slave dynamic data]]></Comment>
-							<Type GUID="{B32D39E7-E972-BF67-BDCB-3DB7B11C4C7A}">ST_SlaveDynaData</Type>
+							<Type GUID="{BDE41F1F-D750-986F-8152-A6097BD7454F}">ST_SlaveDynaData</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[1].m_motorInputs</Name>
@@ -2628,25 +2637,6 @@
 							<Type>UDINT</Type>
 						</Var>
 						<Var>
-							<Name>SetupArmControl.m_setupInputDataPool.m_slaveStatus</Name>
-							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{2E9B7A8A-96CB-EA47-DDF7-608B146D648F}">ST_SlaveStatus</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupInputDataPool.m_safetyData</Name>
-							<Comment><![CDATA[ safety information, import from safety check task]]></Comment>
-							<Type GUID="{DECD9F57-69F5-04DF-DC39-F93FDC472347}">ST_SafetyData</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupInputDataPool.m_setupJnt3Gravity</Name>
-							<Comment><![CDATA[ slave gravity]]></Comment>
-							<Type GUID="{1731225E-543E-79E3-4A96-A9E6DBEFA803}">ARRAY [1..4] OF LREAL</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupInputDataPool.m_setupJnt5Gravity</Name>
-							<Type GUID="{1731225E-543E-79E3-4A96-A9E6DBEFA803}">ARRAY [1..4] OF LREAL</Type>
-						</Var>
-						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[1].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
 							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
@@ -2785,6 +2775,25 @@
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_asepticMegnetSpringBreakCheck</Name>
 							<Comment><![CDATA[arm aseptic cover megnet and  spring breakage from joint 3 check]]></Comment>
 							<Type>DINT</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupInputDataPool.m_slaveStatus</Name>
+							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
+							<Type GUID="{2E9B7A8A-96CB-EA47-DDF7-608B146D648F}">ST_SlaveStatus</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupInputDataPool.m_safetyData</Name>
+							<Comment><![CDATA[ safety information, import from safety check task]]></Comment>
+							<Type GUID="{DECD9F57-69F5-04DF-DC39-F93FDC472347}">ST_SafetyData</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupInputDataPool.m_setupJnt3Gravity</Name>
+							<Comment><![CDATA[ slave gravity]]></Comment>
+							<Type GUID="{1731225E-543E-79E3-4A96-A9E6DBEFA803}">ARRAY [1..4] OF LREAL</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupInputDataPool.m_setupJnt5Gravity</Name>
+							<Type GUID="{1731225E-543E-79E3-4A96-A9E6DBEFA803}">ARRAY [1..4] OF LREAL</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2" AreaNo="1">
@@ -2975,21 +2984,6 @@
 							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
 						</Var>
 						<Var>
-							<Name>SetupArmControl.m_setupStatus</Name>
-							<Comment><![CDATA[ setup robot information]]></Comment>
-							<Type GUID="{7CCFF24F-B98B-94FF-C0CF-8F944197851F}">ST_SetupStatus</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupJointsData</Name>
-							<Comment><![CDATA[ setup robot joint data]]></Comment>
-							<Type GUID="{3312EA40-469B-3080-213E-9B2F98E38E6C}">ST_SetupJointData</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupMotorData</Name>
-							<Comment><![CDATA[setup motor in_output to safety check]]></Comment>
-							<Type GUID="{41BF19EB-E8D5-80FC-E01B-C904F8C586D7}">ST_SetupMotorData</Type>
-						</Var>
-						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[1].m_motorOutputs</Name>
 							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
 						</Var>
@@ -3089,6 +3083,21 @@
 							<Comment><![CDATA[arm light out to drive]]></Comment>
 							<Type>DINT</Type>
 						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupStatus</Name>
+							<Comment><![CDATA[ setup robot information]]></Comment>
+							<Type GUID="{807ADCB3-CC57-8613-5249-03C44106750F}">ST_SetupStatus</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupJointsData</Name>
+							<Comment><![CDATA[ setup robot joint data]]></Comment>
+							<Type GUID="{3312EA40-469B-3080-213E-9B2F98E38E6C}">ST_SetupJointData</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupMotorData</Name>
+							<Comment><![CDATA[setup motor in_output to safety check]]></Comment>
+							<Type GUID="{41BF19EB-E8D5-80FC-E01B-C904F8C586D7}">ST_SetupMotorData</Type>
+						</Var>
 					</Vars>
 					<Vars VarGrpType="1" ContextId="1" AreaNo="16">
 						<Name>TaskDynamic Inputs</Name>
@@ -3103,6 +3112,11 @@
 							<Type GUID="{3312EA40-469B-3080-213E-9B2F98E38E6C}">ST_SetupJointData</Type>
 						</Var>
 						<Var>
+							<Name>RobotDynamics.m_setupStatus</Name>
+							<Comment><![CDATA[ setup arms infromation;]]></Comment>
+							<Type GUID="{807ADCB3-CC57-8613-5249-03C44106750F}">ST_SetupStatus</Type>
+						</Var>
+						<Var>
 							<Name>RobotDynamics.m_instruInfo</Name>
 							<Comment><![CDATA[ instrument info]]></Comment>
 							<Type GUID="{EF0B842B-9E73-88E8-DE44-858115ECFE13}">ARRAY [1..4] OF ST_InstruStatus</Type>
@@ -3113,7 +3127,7 @@
 						<Var>
 							<Name>RobotDynamics.m_slaveDynaData</Name>
 							<Comment><![CDATA[ dynamic output]]></Comment>
-							<Type GUID="{B32D39E7-E972-BF67-BDCB-3DB7B11C4C7A}">ST_SlaveDynaData</Type>
+							<Type GUID="{BDE41F1F-D750-986F-8152-A6097BD7454F}">ST_SlaveDynaData</Type>
 						</Var>
 						<Var>
 							<Name>RobotDynamics.m_setupJnt3Gravity</Name>
@@ -3340,7 +3354,7 @@
 						<Var>
 							<Name>SafetyCheck.m_setupStatus</Name>
 							<Comment><![CDATA[ setup robot information]]></Comment>
-							<Type GUID="{7CCFF24F-B98B-94FF-C0CF-8F944197851F}">ST_SetupStatus</Type>
+							<Type GUID="{807ADCB3-CC57-8613-5249-03C44106750F}">ST_SetupStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_setupJointsData</Name>
@@ -3494,9 +3508,6 @@
 				<Image Id="9" AddrType="9" ImageType="3">
 					<Name>Image</Name>
 				</Image>
-				<Image Id="14" AddrType="10" ImageType="3">
-					<Name>Image-2</Name>
-				</Image>
 				<Box Id="37" BoxType="9099" BoxFlags="#x00000020">
 					<Name>CartJoint5</Name>
 					<ImageId>1000</ImageId>
@@ -3509,6 +3520,7 @@
 						<Fmmu>0000000000000000001600010100000002000000000000000000000000000000</Fmmu>
 						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
 						<SuName>CartJoint5</SuName>
+						<SuTask>#x02010070</SuTask>
 						<DcData>0003000000000000000000000000000001000000010000000000000000000000</DcData>
 						<DcMode>4672656552554e0000000000000000004672656552554e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<DcMode>4443000000000000000000000000000044432053594e4330000000000000000000000000000000000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
@@ -3723,6 +3735,7 @@
 						<Fmmu>0000000000000000001600010100000002000000000000000000000000000000</Fmmu>
 						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
 						<SuName>CartJoint3</SuName>
+						<SuTask>#x02010070</SuTask>
 						<DcData>0003000000000000000000000000000001000000010000000000000000000000</DcData>
 						<DcMode>4672656552554e0000000000000000004672656552554e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<DcMode>4443000000000000000000000000000044432053594e4330000000000000000000000000000000000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
@@ -3937,6 +3950,7 @@
 						<Fmmu>0000000000000000001600010100000002000000000000000000000000000000</Fmmu>
 						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
 						<SuName>CartJoint4</SuName>
+						<SuTask>#x02010070</SuTask>
 						<DcData>0003000000000000000000000000000001000000010000000000000000000000</DcData>
 						<DcMode>4672656552554e0000000000000000004672656552554e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<DcMode>4443000000000000000000000000000044432053594e4330000000000000000000000000000000000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
@@ -4152,6 +4166,7 @@
 						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
 						<BootStrapData>0010800080108000</BootStrapData>
 						<SuName>CartJoint1</SuName>
+						<SuTask>#x02010070</SuTask>
 						<DcMode>53796e6368726f6e0000000000000000534d2d53796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<DcMode>4443000000000000000000000000000044432d53796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<Pdo Name="TxPdoMappingCspCsv" Index="#x1a00" Flags="#x0010" SyncMan="3">
@@ -4434,6 +4449,7 @@
 						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
 						<BootStrapData>0010800080108000</BootStrapData>
 						<SuName>CartJoint2</SuName>
+						<SuTask>#x02010070</SuTask>
 						<DcMode>53796e6368726f6e0000000000000000534d2d53796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<DcMode>4443000000000000000000000000000044432d53796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<Pdo Name="TxPdoMappingCspCsv" Index="#x1a00" Flags="#x0010" SyncMan="3">
@@ -4857,6 +4873,7 @@
 						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
 						<BootStrapData>0010800080108000</BootStrapData>
 						<SuName>CartJoint6</SuName>
+						<SuTask>#x02010070</SuTask>
 						<DcMode>53796e6368726f6e0000000000000000534d2d53796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<DcMode>4443000000000000000000000000000044432d53796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<Pdo Name="TxPdoMappingCspCsv" Index="#x1a00" Flags="#x0010" SyncMan="3">
@@ -5139,6 +5156,7 @@
 						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
 						<BootStrapData>0010800080108000</BootStrapData>
 						<SuName>CartJoint7</SuName>
+						<SuTask>#x02010070</SuTask>
 						<DcMode>53796e6368726f6e0000000000000000534d2d53796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<DcMode>4443000000000000000000000000000044432d53796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<Pdo Name="TxPdoMappingCspCsv" Index="#x1a00" Flags="#x0010" SyncMan="3">
@@ -5421,6 +5439,7 @@
 						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
 						<BootStrapData>0010800080108000</BootStrapData>
 						<SuName>CartJoint8</SuName>
+						<SuTask>#x02010070</SuTask>
 						<DcMode>53796e6368726f6e0000000000000000534d2d53796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<DcMode>4443000000000000000000000000000044432d53796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<Pdo Name="TxPdoMappingCspCsv" Index="#x1a00" Flags="#x0010" SyncMan="3">
@@ -16153,24 +16172,23 @@
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500830000403}" Id="#x020300f0"/>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500850000403}" Id="#x02030170"/>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500870000403}" Id="#x02030030"/>
-		<MappingInfo Identifier="{00000000-2001-0850-0020-500890000403}" Id="#x02030010"/>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-5008C0000403}" Id="#x02030080"/>
 		<MappingInfo Identifier="{00000000-2004-0850-0020-500800205008}" Id="#x020301e0"/>
+		<MappingInfo Identifier="{00000000-2004-0850-0220-500890000403}" Id="#x02030110"/>
 		<MappingInfo Identifier="{00000000-2004-0850-0220-5008B1000403}" Id="#x020300d0"/>
-		<MappingInfo Identifier="{00000000-2004-0850-0220-5008E1000403}" Id="#x02030120"/>
 		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030020" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2004-0850-0020-500802205008}" Id="#x02030070" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2005-0850-0020-500804205008}" Id="#x020300a0" Watchdog="10000000040000000400000004000000"/>
+		<MappingInfo Identifier="{08502001-0090-0304-0020-500890000403}" Id="#x02030010" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502004-2005-0850-0220-500804205008}" Id="#x020300c0" Watchdog="04000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502004-0010-0304-0020-500810000403}" Id="#x02030040" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502004-0030-0304-0020-500830000403}" Id="#x02030100" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502004-0050-0304-0020-500850000403}" Id="#x02030160" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502004-0070-0304-0020-500870000403}" Id="#x02030060" Watchdog="00000000000000000000000000000000"/>
-		<MappingInfo Identifier="{08502004-0090-0304-0020-500890000403}" Id="#x02030110" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502004-00C0-0304-0020-5008C0000403}" Id="#x02030090" Watchdog="00000000000000000000000000000000"/>
+		<MappingInfo Identifier="{08502005-0090-0304-0020-500890000403}" Id="#x02030120" Watchdog="04000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502005-00B0-0304-0020-5008B0000403}" Id="#x020300e0" Watchdog="04000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502005-00C0-0304-0020-5008C0000403}" Id="#x020300b0" Watchdog="00000000000000000000000000000000"/>
-		<MappingInfo Identifier="{08502005-00E0-0304-0020-5008E0000403}" Id="#x02030130" Watchdog="04000000040000000400000004000000"/>
 		<OwnerA Name="TIPC^SlaveController^SlaveController Instance">
 			<OwnerB Name="TIID^Cart^CartJoint1">
 				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_supportLegBreak[1]" VarB="RxPdoMappingCspCsv^Digital output"/>
@@ -16179,7 +16197,7 @@
 				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
 				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC"/>
+				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC for axis2"/>
 				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
 				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
 				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
@@ -16861,6 +16879,7 @@
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartDataPool.m_slaveStatus" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_instruInfo" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus^m_instruStauts"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_setupJointData" VarB="TaskSlaveArmControl Outputs^SetupArmControl.m_setupJointsData"/>
+				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_setupStatus" VarB="TaskSlaveArmControl Outputs^SetupArmControl.m_setupStatus"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_slaveJointsData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_cartJointsData" VarB="TaskCartControl Outputs^CartControl.m_cartJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_cartStatus" VarB="TaskCartControl Outputs^CartControl.m_cartStatus"/>
