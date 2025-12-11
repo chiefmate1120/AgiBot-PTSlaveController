@@ -2,52 +2,6 @@
 <TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.29">
 	<DataTypes>
 		<DataType>
-			<Name GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}" AutoDeleteType="true">ST_MotorInputs</Name>
-			<BitSize>192</BitSize>
-			<SubItem>
-				<Name>m_driverError</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
-				<Comment><![CDATA[ driver error info]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>0</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_statusWord</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
-				<Comment><![CDATA[ driver ethercat status]]></Comment>
-				<BitSize>16</BitSize>
-				<BitOffs>32</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_motorEncoder</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[ motor/relative encoder from IO]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>64</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_linkEncoder</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[ link/absolute encoder form IO]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>96</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_current</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[ motor current from IO]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>128</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_heartBeat</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
-				<Comment><![CDATA[drive heart beat]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>160</BitOffs>
-			</SubItem>
-		</DataType>
-		<DataType>
 			<Name GUID="{3CB7ED90-7127-49D3-B07C-B1898FA8B8B3}" PersistentType="true">MSCommu_Vec3d</Name>
 			<Comment><![CDATA[ data type specialized for master-slave control box communication]]></Comment>
 			<BitSize>192</BitSize>
@@ -712,6 +666,52 @@
 			</SubItem>
 		</DataType>
 		<DataType>
+			<Name GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}" AutoDeleteType="true">ST_MotorInputs</Name>
+			<BitSize>192</BitSize>
+			<SubItem>
+				<Name>m_driverError</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<Comment><![CDATA[ driver error info]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_statusWord</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[ driver ethercat status]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>32</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_motorEncoder</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[ motor/relative encoder from IO]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>64</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_linkEncoder</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[ link/absolute encoder form IO]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>96</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_current</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[ motor current from IO]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>128</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_heartBeat</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<Comment><![CDATA[drive heart beat]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>160</BitOffs>
+			</SubItem>
+		</DataType>
+		<DataType>
 			<Name GUID="{A23F74BD-F0AE-D71C-9646-92CB5B58D8BF}" AutoDeleteType="true">E_SlaveArmState</Name>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
@@ -1259,50 +1259,6 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}" AutoDeleteType="true">ST_MotorOutputs</Name>
-			<BitSize>96</BitSize>
-			<SubItem>
-				<Name>m_controlWord</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
-				<Comment><![CDATA[ driver control word]]></Comment>
-				<BitSize>16</BitSize>
-				<BitOffs>0</BitOffs>
-				<Default>
-					<Value>6</Value>
-				</Default>
-			</SubItem>
-			<SubItem>
-				<Name>m_opMode</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000003}">SINT</Type>
-				<Comment><![CDATA[ motor control mode, 0 for position mode, 1 for torque mode]]></Comment>
-				<BitSize>8</BitSize>
-				<BitOffs>16</BitOffs>
-				<Default>
-					<Value>0</Value>
-				</Default>
-			</SubItem>
-			<SubItem>
-				<Name>m_cmdMotorEncoder</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[ target motor encoder]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>32</BitOffs>
-				<Default>
-					<Value>0</Value>
-				</Default>
-			</SubItem>
-			<SubItem>
-				<Name>m_cmdCurrent</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[ motor current to IO]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>64</BitOffs>
-				<Default>
-					<Value>0</Value>
-				</Default>
-			</SubItem>
-		</DataType>
-		<DataType>
 			<Name GUID="{A08D5A40-E42B-47E3-ACC0-DC2B0A8D995B}" PersistentType="true">MSCommu_InstruStatus</Name>
 			<Comment><![CDATA[ data type specialized for master-slave control box communication]]></Comment>
 			<BitSize>128</BitSize>
@@ -1588,6 +1544,50 @@
 				<Comment><![CDATA[ slave DH joint position ]]></Comment>
 				<BitSize>1536</BitSize>
 				<BitOffs>14336</BitOffs>
+			</SubItem>
+		</DataType>
+		<DataType>
+			<Name GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}" AutoDeleteType="true">ST_MotorOutputs</Name>
+			<BitSize>96</BitSize>
+			<SubItem>
+				<Name>m_controlWord</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[ driver control word]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>0</BitOffs>
+				<Default>
+					<Value>6</Value>
+				</Default>
+			</SubItem>
+			<SubItem>
+				<Name>m_opMode</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000003}">SINT</Type>
+				<Comment><![CDATA[ motor control mode, 0 for position mode, 1 for torque mode]]></Comment>
+				<BitSize>8</BitSize>
+				<BitOffs>16</BitOffs>
+				<Default>
+					<Value>0</Value>
+				</Default>
+			</SubItem>
+			<SubItem>
+				<Name>m_cmdMotorEncoder</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[ target motor encoder]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>32</BitOffs>
+				<Default>
+					<Value>0</Value>
+				</Default>
+			</SubItem>
+			<SubItem>
+				<Name>m_cmdCurrent</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[ motor current to IO]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>64</BitOffs>
+				<Default>
+					<Value>0</Value>
+				</Default>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -2313,7 +2313,7 @@
 		<ImageData Id="1006">424de6000000000000007600000028000000100000000e000000010004000000000070000000120b0000120b0000100000001000000000000000000080000080000000808000800000008000800080800000c0c0c000808080000000ff0000ff000000ffff00ff000000ff00ff00ffff0000ffffff00dddd88888888dddddddd77777778d9dddddd77888778d99ddddd778889999999dddd77888778d99dddd977777778d9ddddd997888778dddd999999888778ddddddd997888778ddddddd977777778dddddddd777a7778dddddddd777a7778dddddddd777a7778dddddddd77777778dddd</ImageData>
 		<ImageData Id="1007">424dd6020000000000003600000028000000100000000e000000010018000000000000000000c40e0000c40e0000000000000000000000d8ff00d8ff80808080808080808080808080808000d8ff00d8ff80808080808080808080808080808000d8ff00d8ff80808000d8ff00d8ff80808080808080808080808000d8ff00d8ff80808080808080808080808000d8ff00d8ff80808080808080808000d8ff00d8ff00000000000000000000d8ff00d8ff00000000000000000000d8ff00d8ff80808080808080808080808000000000d8ff00d8ff00000000000000d8ff00d8ff00000000000000d8ff00d8ff00000080808080808080808080808000000000000000d8ff00d8ff00000000d8ff00d8ff00000000d8ff00d8ff00000000000080808080808080808080808000000000000000000000d8ff00d8ff00d8ff00d8ff00d8ff00d8ff0000000000000000008080808080808080808080800000000000000000ff0000ff0000ff0000ff0000ff0000ff0000ff0000ff0000000000008080808080808080808080800000000000000000ff0000ff0000ff0000ff0000ff0000ff0000ff0000ff0000000000008080808080808080808080800000000000000000ff0000ff0000ff0000ff0000ff0000ff0000ff0000ff0000000000008080808080808080808080800000000000000000ff0000ff0000ff0000ff0000ff0000ff0000ff0000ff00000000000080808080808080808080808000000000000000000000000000000000d8ff00d8ff00000000000000000000000000000080808080808080808080808000000000000000000000000000000000d8ff00d8ff00000000000000000000000000000080808080808080808080808080808080808080808080808080808000d8ff00d8ff80808080808080808080808080808080808080808080808080808080808080808080808080808080808000d8ff00d8ff808080808080808080808080808080808080808080</ImageData>
 	</ImageDatas>
-	<Project ProjectGUID="{33418E7D-C79D-4569-90F7-EA8084A60D49}" TargetNetId="169.254.167.183.1.1" Target64Bit="true" ShowHideConfigurations="#x6">
+	<Project ProjectGUID="{33418E7D-C79D-4569-90F7-EA8084A60D49}" TargetNetId="169.254.139.155.1.1" Target64Bit="true" ShowHideConfigurations="#x6">
 		<System>
 			<Settings MaxCpus="4" NonWinCpus="1">
 				<Cpu RtLimit="90"/>
@@ -2355,46 +2355,6 @@
 							<Name>SafetyCheck.m_stopButton</Name>
 							<Comment><![CDATA[emergency stop and stop botton]]></Comment>
 							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_masterRobotData</Name>
@@ -2799,38 +2759,6 @@
 					<Vars VarGrpType="2" AreaNo="1">
 						<Name>TaskSlaveArmControl Outputs</Name>
 						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorOutputs</Name>
-							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
 							<Name>SlaveArmControl.m_elecKnifeCtrlWordIO</Name>
 							<Comment><![CDATA[Electrical knife control code]]></Comment>
 							<Type>DINT</Type>
@@ -3169,12 +3097,22 @@
 							<Type GUID="{7EBDD008-A9A8-B259-6DF4-ACAC21313C21}">ARRAY [1..4] OF UDINT</Type>
 						</Var>
 						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_cartMotorVelSongxia</Name>
 							<Type>DINT</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_cartMotorTorqueSX</Name>
 							<Type>INT</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_cartMotorVelSongxia</Name>
@@ -3185,12 +3123,22 @@
 							<Type>INT</Type>
 						</Var>
 						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_cartMotorVelSongxia</Name>
 							<Type>DINT</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_cartMotorTorqueSX</Name>
 							<Type>INT</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_cartMotorVelSongxia</Name>
@@ -3201,12 +3149,22 @@
 							<Type>INT</Type>
 						</Var>
 						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_cartMotorVelSongxia</Name>
 							<Type>DINT</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_cartMotorTorqueSX</Name>
 							<Type>INT</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_cartMotorVelSongxia</Name>
@@ -3217,12 +3175,22 @@
 							<Type>INT</Type>
 						</Var>
 						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_cartMotorVelSongxia</Name>
 							<Type>DINT</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_cartMotorTorqueSX</Name>
 							<Type>INT</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{85E0EEF4-33D1-18BB-0848-84119CC8E348}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_cartMotorVelSongxia</Name>
@@ -3266,9 +3234,17 @@
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_cartMotorOutput</Name>
 							<Comment><![CDATA[Cart motor output IO]]></Comment>
 							<Type GUID="{37055E04-EA8D-06CF-E50F-4E7AA9281154}">ST_CartMotorOutput</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_cartMotorOutput</Name>
@@ -3276,9 +3252,17 @@
 							<Type GUID="{37055E04-EA8D-06CF-E50F-4E7AA9281154}">ST_CartMotorOutput</Type>
 						</Var>
 						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_cartMotorOutput</Name>
 							<Comment><![CDATA[Cart motor output IO]]></Comment>
 							<Type GUID="{37055E04-EA8D-06CF-E50F-4E7AA9281154}">ST_CartMotorOutput</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_cartMotorOutput</Name>
@@ -3286,9 +3270,17 @@
 							<Type GUID="{37055E04-EA8D-06CF-E50F-4E7AA9281154}">ST_CartMotorOutput</Type>
 						</Var>
 						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_cartMotorOutput</Name>
 							<Comment><![CDATA[Cart motor output IO]]></Comment>
 							<Type GUID="{37055E04-EA8D-06CF-E50F-4E7AA9281154}">ST_CartMotorOutput</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_cartMotorOutput</Name>
@@ -3296,9 +3288,17 @@
 							<Type GUID="{37055E04-EA8D-06CF-E50F-4E7AA9281154}">ST_CartMotorOutput</Type>
 						</Var>
 						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_cartMotorOutput</Name>
 							<Comment><![CDATA[Cart motor output IO]]></Comment>
 							<Type GUID="{37055E04-EA8D-06CF-E50F-4E7AA9281154}">ST_CartMotorOutput</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_cartMotorOutput</Name>
@@ -3496,7 +3496,7 @@
 					<Esl SyncSlaveProtocolPort="-1"/>
 				</Ethernet>
 			</Device>
-			<Device Id="8" DevType="111" DevFlags="#x0003" AmsPort="28680" AmsNetId="169.254.167.183.9.1" RemoteName="Cart" InfoImageId="10">
+			<Device Id="8" DevType="111" DevFlags="#x0003" AmsPort="28680" AmsNetId="169.254.139.155.9.1" RemoteName="Cart" InfoImageId="10">
 				<Name>Cart</Name>
 				<AddressInfo>
 					<Pnp>
@@ -5711,7 +5711,7 @@
 				</Box>
 				<EtherCAT VirtualDeviceName="true" DcSyncMode="3"/>
 			</Device>
-			<Device Id="9" DevType="111" DevFlags="#x0003" AmsPort="28681" AmsNetId="169.254.167.183.10.1" RemoteName="MSCommunication" InfoImageId="13">
+			<Device Id="9" DevType="111" DevFlags="#x0003" AmsPort="28681" AmsNetId="169.254.139.155.10.1" RemoteName="MSCommunication" InfoImageId="13">
 				<Name>MSCommunication</Name>
 				<AddressInfo>
 					<Pnp>
@@ -7075,7 +7075,7 @@
 				</Box>
 				<EtherCAT VirtualDeviceName="true" ManualDcSelect="true" DcSyncMode="2" EnableVirtualSwitch="true" MaxSwitchPorts="2" MaxSwitchFrames="120"/>
 			</Device>
-			<Device Id="4" DevType="111" DevFlags="#x0003" AmsPort="28676" AmsNetId="169.254.167.183.5.1" RemoteName="SlaveArm1" InfoImageId="2">
+			<Device Id="4" DevType="111" DevFlags="#x0003" AmsPort="28676" AmsNetId="169.254.139.155.5.1" RemoteName="SlaveArm1" InfoImageId="2">
 				<Name>SlaveArm1</Name>
 				<AddressInfo>
 					<TcCom>
@@ -9348,7 +9348,7 @@
 				</Box>
 				<EtherCAT/>
 			</Device>
-			<Device Id="5" DevType="111" DevFlags="#x0003" AmsPort="28677" AmsNetId="169.254.167.183.6.1" RemoteName="SlaveArm2" InfoImageId="4">
+			<Device Id="5" DevType="111" DevFlags="#x0003" AmsPort="28677" AmsNetId="169.254.139.155.6.1" RemoteName="SlaveArm2" InfoImageId="4">
 				<Name>SlaveArm2</Name>
 				<AddressInfo>
 					<TcCom>
@@ -11621,7 +11621,7 @@
 				</Box>
 				<EtherCAT/>
 			</Device>
-			<Device Id="6" DevType="111" DevFlags="#x0003" AmsPort="28678" AmsNetId="169.254.167.183.7.1" RemoteName="SlaveArm3" InfoImageId="6">
+			<Device Id="6" DevType="111" DevFlags="#x0003" AmsPort="28678" AmsNetId="169.254.139.155.7.1" RemoteName="SlaveArm3" InfoImageId="6">
 				<Name>SlaveArm3</Name>
 				<AddressInfo>
 					<TcCom>
@@ -13891,7 +13891,7 @@
 				</Box>
 				<EtherCAT/>
 			</Device>
-			<Device Id="7" DevType="111" DevFlags="#x0003" AmsPort="28679" AmsNetId="169.254.167.183.8.1" RemoteName="SlaveArm4" InfoImageId="8">
+			<Device Id="7" DevType="111" DevFlags="#x0003" AmsPort="28679" AmsNetId="169.254.139.155.8.1" RemoteName="SlaveArm4" InfoImageId="8">
 				<Name>SlaveArm4</Name>
 				<AddressInfo>
 					<TcCom>
@@ -16174,12 +16174,11 @@
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500870000403}" Id="#x02030030"/>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-5008C0000403}" Id="#x02030080"/>
 		<MappingInfo Identifier="{00000000-2004-0850-0020-500800205008}" Id="#x020301e0"/>
-		<MappingInfo Identifier="{00000000-2004-0850-0220-500890000403}" Id="#x02030110"/>
-		<MappingInfo Identifier="{00000000-2004-0850-0220-5008B1000403}" Id="#x020300d0"/>
+		<MappingInfo Identifier="{00000000-2004-0850-0220-500890000403}" Id="#x020300d0"/>
+		<MappingInfo Identifier="{00000000-2004-0850-0220-5008B1000403}" Id="#x02030010"/>
 		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030020" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2004-0850-0020-500802205008}" Id="#x02030070" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2005-0850-0020-500804205008}" Id="#x020300a0" Watchdog="10000000040000000400000004000000"/>
-		<MappingInfo Identifier="{08502001-0090-0304-0020-500890000403}" Id="#x02030010" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502004-2005-0850-0220-500804205008}" Id="#x020300c0" Watchdog="04000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502004-0010-0304-0020-500810000403}" Id="#x02030040" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502004-0030-0304-0020-500830000403}" Id="#x02030100" Watchdog="00000000000000000000000000000000"/>
@@ -16191,93 +16190,93 @@
 		<MappingInfo Identifier="{08502005-00C0-0304-0020-5008C0000403}" Id="#x020300b0" Watchdog="00000000000000000000000000000000"/>
 		<OwnerA Name="TIPC^SlaveController^SlaveController Instance">
 			<OwnerB Name="TIID^Cart^CartJoint1">
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^Error message"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC for axis2"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_supportLegBreak[1]" VarB="RxPdoMappingCspCsv^Digital output"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^Error message"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC for axis2"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^Cart^CartJoint2">
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^Error message"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_supportLegBreak[2]" VarB="RxPdoMappingCspCsv^Digital output"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^Error message"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^Cart^CartJoint3">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_cartMotorTorqueSX" VarB="Transmit PDO mapping 2^Torque actual value"/>
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_cartMotorVelSongxia" VarB="Transmit PDO mapping 2^Velocity actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_motorInputs^m_statusWord" VarB="Transmit PDO mapping 2^Statusword"/>
 				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_cartMotorOutput^m_cmdVelMax" VarB="Receive PDO mapping 2^Max motor speed"/>
 				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_cartMotorOutput^m_cmdVelMzVelMode" VarB="Receive PDO mapping 2^Target velocity"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_motorInputs^m_statusWord" VarB="Transmit PDO mapping 2^Statusword"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_motorOutputs^m_controlWord" VarB="Receive PDO mapping 2^Controlword"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_motorOutputs^m_opMode" VarB="Receive PDO mapping 2^Modes of operation"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_motorOutputs^m_controlWord" VarB="Receive PDO mapping 2^Controlword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_motorOutputs^m_opMode" VarB="Receive PDO mapping 2^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^Cart^CartJoint4">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_cartMotorTorqueSX" VarB="Transmit PDO mapping 2^Torque actual value"/>
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_cartMotorVelSongxia" VarB="Transmit PDO mapping 2^Velocity actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_motorInputs^m_statusWord" VarB="Transmit PDO mapping 2^Statusword"/>
 				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_cartMotorOutput^m_cmdVelMax" VarB="Receive PDO mapping 2^Max motor speed"/>
 				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_cartMotorOutput^m_cmdVelMzVelMode" VarB="Receive PDO mapping 2^Target velocity"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_motorInputs^m_statusWord" VarB="Transmit PDO mapping 2^Statusword"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_motorOutputs^m_controlWord" VarB="Receive PDO mapping 2^Controlword"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_motorOutputs^m_opMode" VarB="Receive PDO mapping 2^Modes of operation"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_motorOutputs^m_controlWord" VarB="Receive PDO mapping 2^Controlword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_motorOutputs^m_opMode" VarB="Receive PDO mapping 2^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^Cart^CartJoint5">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_cartMotorTorqueSX" VarB="Transmit PDO mapping 2^Torque actual value"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorInputs^m_motorEncoder" VarB="Transmit PDO mapping 2^Position actual value"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorInputs^m_statusWord" VarB="Transmit PDO mapping 2^Statusword"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorOutputs^m_cmdMotorEncoder" VarB="Receive PDO mapping 1^Target position"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorOutputs^m_controlWord" VarB="Receive PDO mapping 1^Controlword"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorOutputs^m_opMode" VarB="Receive PDO mapping 1^Modes of operation"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorInputs^m_motorEncoder" VarB="Transmit PDO mapping 2^Position actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorInputs^m_statusWord" VarB="Transmit PDO mapping 2^Statusword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorOutputs^m_cmdMotorEncoder" VarB="Receive PDO mapping 1^Target position"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorOutputs^m_controlWord" VarB="Receive PDO mapping 1^Controlword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorOutputs^m_opMode" VarB="Receive PDO mapping 1^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^Cart^CartJoint6">
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^Error message"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
 				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_openHorizonLaser" VarB="RxPdoMappingCspCsv^Digital output"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^Error message"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^Cart^CartJoint7">
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^Error message"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^Error message"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^Cart^CartJoint8">
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^Error message"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
 				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_openCrossLaser" VarB="RxPdoMappingCspCsv^Digital output"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^Error message"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
-				<Link VarA="TaskSlaveArmControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
-				<Link VarA="TaskSlaveArmControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^Cart^RS232">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_driveForce[1]" VarB="TxPdoMappingCspCsv^FX"/>
