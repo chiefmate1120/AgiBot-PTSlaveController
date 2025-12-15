@@ -43,7 +43,6 @@ IF m_timePeriod < 1.0 THEN
 	m_cmdJntPos:=i_setupArm.curJntPos;
 END_IF
 
-
 IF g_motionTest.m_uiFixedEndoFlag AND i_setupArm.armIdx = g_motionTest.m_endoArmIdx THEN
 	IF NOT m_jntPlanInitFlag THEN		
 		FOR i:=3 TO 5 DO
@@ -53,7 +52,6 @@ IF g_motionTest.m_uiFixedEndoFlag AND i_setupArm.armIdx = g_motionTest.m_endoArm
 		m_T:=0;//Reset the planning duration to zero
 		m_jntPlanInitFlag:=TRUE; //Complete initialization
 		m_jntPlanFinishFlag:=FALSE; //The trajectory has not been completed
-		g_motionTest.m_uiFixedEndoSetupFlag := TRUE;
 	END_IF
 
 	IF NOT m_jntPlanFinishFlag THEN
@@ -120,10 +118,12 @@ m_deltaAngle[1]:=0;
 m_deltaAngle[2]:=0;
 normAngle:=norm(m_deltaAngle);
 
-IF normAngle<1.0*g_deg2rad AND i_setupArm.armIdx = g_motionTest.m_endoArmIdx THEN
+IF normAngle<0.1*g_deg2rad AND i_setupArm.armIdx = g_motionTest.m_endoArmIdx THEN
 	g_motionTest.m_uiFixedEndoSetupFlag := FALSE;
 	m_jntPlanInitFlag:=TRUE;
+	m_jntEnableFlag :=g_zeroVec5i;
 ELSE
+	g_motionTest.m_uiFixedEndoSetupFlag := TRUE;
 	m_jntPlanInitFlag:=FALSE;
 END_IF
 m_jntPlanFinishFlag:=TRUE;
@@ -137,41 +137,11 @@ m_initT:=0.0;]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupCtrlHoldEndoscope.calcCmdJntPos">
-      <LineId Id="143" Count="0" />
-      <LineId Id="177" Count="0" />
-      <LineId Id="188" Count="2" />
-      <LineId Id="241" Count="0" />
-      <LineId Id="201" Count="1" />
-      <LineId Id="206" Count="14" />
-      <LineId Id="224" Count="3" />
-      <LineId Id="98" Count="0" />
-      <LineId Id="243" Count="2" />
+      <LineId Id="253" Count="28" />
       <LineId Id="242" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupCtrlHoldEndoscope.init">
-      <LineId Id="104" Count="0" />
-      <LineId Id="143" Count="9" />
-      <LineId Id="142" Count="0" />
-      <LineId Id="129" Count="0" />
-      <LineId Id="128" Count="0" />
-      <LineId Id="130" Count="1" />
-      <LineId Id="107" Count="0" />
-      <LineId Id="106" Count="0" />
-      <LineId Id="105" Count="0" />
-      <LineId Id="213" Count="1" />
-      <LineId Id="212" Count="0" />
-      <LineId Id="165" Count="1" />
-      <LineId Id="117" Count="0" />
-      <LineId Id="211" Count="0" />
-      <LineId Id="215" Count="0" />
-      <LineId Id="233" Count="0" />
-      <LineId Id="162" Count="0" />
-      <LineId Id="232" Count="0" />
-      <LineId Id="197" Count="0" />
-      <LineId Id="190" Count="4" />
-      <LineId Id="216" Count="3" />
-      <LineId Id="187" Count="0" />
-      <LineId Id="170" Count="2" />
+      <LineId Id="246" Count="45" />
       <LineId Id="169" Count="0" />
     </LineIds>
   </POU>

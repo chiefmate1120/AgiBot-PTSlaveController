@@ -322,9 +322,11 @@ FOR i:=1 TO g_sArmNum DO
 		//hold
 		SetupArmState_Hold:
 			IF g_motionTest.m_enterPrecisionTestMode[i] THEN
+				g_motionTest.m_originSetupFlag := g_motionTest.m_uiArmModeL[i,6];
 				IF g_motionTest.m_uiFixedEndoFlag AND g_motionTest.m_endoArmIdx = i THEN
 					m_nextSetupArmState[i]:=SetupArmState_HoldEndoscope;
-				ELSIF g_motionTest.m_uiArmModeL[i,6] THEN
+				ELSIF g_motionTest.m_originSetupFlag THEN
+					g_motionTest.m_instruArmIdx := i;
 					m_nextSetupArmState[i]:=SetupArmState_HoldInstru;			
 				END_IF
 			END_IF
@@ -659,7 +661,7 @@ END_FOR
       <LineId Id="22" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.stateMachine">
-      <LineId Id="1634" Count="277" />
+      <LineId Id="1919" Count="279" />
       <LineId Id="16" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.updateArmLight">

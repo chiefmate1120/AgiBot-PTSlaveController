@@ -622,6 +622,9 @@
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlScopeOrigin.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlScopeRotate.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlScopeToggle.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -745,6 +748,9 @@
     <Compile Include="FBs_Test\FBs_SlaveArm\FB_SlaveCtrlMotionTest.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_Test\FBs_SlaveArm\FB_SlaveCtrlOffScreenTest.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_Test\FBs_SlaveArm\FB_SlaveCtrlResponseTest.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -794,6 +800,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Test\Type\ST_MotionTest.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Test\Type\ST_OffScreenTest.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Test\Type\ST_ResponseTest.TcDUT">

@@ -5,9 +5,16 @@
 STRUCT
 	m_endoArmIdx:INT:=0;
 	m_instruArmIdx:INT:=0;
+	m_endoRotateAngle:REAL:=5.0;
+	m_endoRotateDir:INT:=0;
+	
 	m_uiFixedEndoFlag:BOOL:=FALSE;
 	m_uiFixedEndoSetupFlag:BOOL:=FALSE;
 	m_uiFixedEndoSlaveFlag:BOOL:=FALSE;
+	
+	m_uiRotateEndoFlag:BOOL:=FALSE;
+	m_endoOriginFlag:ARRAY[1..g_sArmNum] OF BOOL:=[4(FALSE)];
+	
 	m_originSetupFlag:BOOL:=FALSE;
 	//**********************variables related to slave arm*******************//
 	//enter precision test mode

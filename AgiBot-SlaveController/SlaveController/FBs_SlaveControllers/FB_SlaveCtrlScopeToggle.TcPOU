@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
-  <POU Name="FB_SlaveCtrlScopeToggle" Id="{5cd767b7-130a-4975-8c92-adc490bf0759}" SpecialFunc="None">
+  <POU Name="FB_SlaveCtrlScopeToggle" Id="{7c81d110-4a66-4446-919c-d0cb50345b9f}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: toggle endoscope posture
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlScopeToggle EXTENDS FB_SlaveArmCtrlBase
 VAR_INPUT
@@ -30,7 +30,7 @@ END_VAR
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
-    <Method Name="calcCmdJntPos" Id="{55a7397a-30dd-4aff-af51-3ef260bb1bce}">
+    <Method Name="calcCmdJntPos" Id="{469aa98e-c8dc-4b9b-a336-7d3e4f2d0ae8}">
       <Declaration><![CDATA[// override this function in each exact controller
 METHOD PROTECTED calcCmdJntPos : BOOL
 VAR_IN_OUT CONSTANT
@@ -61,7 +61,7 @@ trackErr := ABS(i_slaveArm.curJntPos[m_scopeRotJntIdx] - m_targetRotJntPos);
 m_isFinished := m_timePeriod > m_scopeTogglePlanner.duration AND trackErr < g_jntCtrlAngTolHigh/5 AND i_slaveArm.curJntVel[m_scopeRotJntIdx]<g_jntStaticVelThres/10;]]></ST>
       </Implementation>
     </Method>
-    <Method Name="init" Id="{45bb1c08-1188-4e54-add1-34194dfd8075}">
+    <Method Name="init" Id="{dbfee31a-94b1-4b1b-a439-d410ee01ff1d}">
       <Declaration><![CDATA[METHOD PUBLIC init : BOOL
 VAR_IN_OUT CONSTANT
 	i_slaveArm	:FB_SlaveArm;
@@ -146,9 +146,9 @@ i_slaveArm.instrument.curScopePosture := i_slaveArm.instrument.nextScopePosture;
 copyCmds(r_slaveArmCtrlCmd);]]></ST>
       </Implementation>
     </Method>
-    <Property Name="scopeIsTypeToggle" Id="{f7604c60-b90d-4320-ac7c-eb3c8f435e7c}">
+    <Property Name="scopeIsTypeToggle" Id="{514007d6-897e-4e45-9097-9562c0872791}">
       <Declaration><![CDATA[PROPERTY scopeIsTypeToggle : BOOL]]></Declaration>
-      <Get Name="Get" Id="{1462a605-dc40-4900-990b-8e28a05ba992}">
+      <Get Name="Get" Id="{10506855-eb62-4d60-8224-15e41b3aae83}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>

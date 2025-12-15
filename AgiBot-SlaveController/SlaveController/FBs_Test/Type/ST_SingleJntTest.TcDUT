@@ -3,6 +3,12 @@
   <DUT Name="ST_SingleJntTest" Id="{fb4c8685-e35b-4d98-ab29-8009c223b88a}">
     <Declaration><![CDATA[TYPE ST_SingleJntTest :
 STRUCT	
+	m_instruPose:ARRAY[1..g_sArmNum] OF ST_Frame;
+	m_instruPoseAnother:ST_Frame;
+	m_instruPoseError:ARRAY[1..g_sArmNum] OF ST_Frame;
+	m_instruAnotherIdx:INT:=0;
+	m_instruErrDis:ARRAY[1..g_sArmNum] OF REAL;
+
 	//enter Single Joint test mode
 	m_enterSingleJntTestMode:ARRAY[1..g_sArmNum] OF BOOL;
 	m_singleJntFlag,m_return2OriginFlag,m_move2StartFlag:BOOL;

@@ -32,6 +32,7 @@
 	SlaveArmState_slaveDynaCali := 27,
 	
 	SlaveArmState_ScopeOrigin:=28,
+	SlaveArmState_ScopeRotate:=29,
 		
 	SlaveArmState_MotionTest:=50,
 	SlaveArmState_CycleTest:=51,
@@ -39,6 +40,9 @@
 	SlaveArmState_ResponseTest:=53,
 	SlaveArmState_armCali:=54,
 	SlaveArmState_DargFreeTest:=55,
+	
+	//hdk：calibration for endoscpoe
+	SlaveArmState_OffScreenTest:=59,
 	//hdk:single joint of each arm moves
 	SlaveArmState_SingleJntTest :=60,
 		

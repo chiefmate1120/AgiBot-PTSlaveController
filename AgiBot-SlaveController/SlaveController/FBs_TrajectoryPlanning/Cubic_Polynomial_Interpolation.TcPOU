@@ -46,9 +46,12 @@ a0:=0;
 a1:=0;
 a2:=0;
 a3:=0;
+
 h:=q1-q0;
 Tp:=t1-t0;
-
+IF Tp<0.001 THEN
+	Tp:=5;
+END_IF
 a0:=q0;
 a1:=v0;
 a2:=3/EXPT(Tp,2)*h-2/Tp*v0-1/Tp*v1;
@@ -94,15 +97,7 @@ END_IF]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="Cubic_Polynomial_Interpolation.init">
-      <LineId Id="26" Count="2" />
-      <LineId Id="31" Count="0" />
-      <LineId Id="29" Count="1" />
-      <LineId Id="32" Count="0" />
-      <LineId Id="6" Count="5" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="15" Count="0" />
-      <LineId Id="14" Count="0" />
-      <LineId Id="16" Count="0" />
+      <LineId Id="38" Count="19" />
       <LineId Id="20" Count="0" />
     </LineIds>
     <LineIds Name="Cubic_Polynomial_Interpolation.run">
