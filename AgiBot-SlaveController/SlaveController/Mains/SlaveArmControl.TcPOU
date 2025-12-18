@@ -337,6 +337,11 @@ FOR i := 1 TO g_sArmNum DO
 		GVL_interactUI.g_instruInformatiom[i].m_instruPosY:=m_slaveInputDataPool.m_slaveDynaData.m_insruViewData[i][2];
 		GVL_interactUI.g_instruInformatiom[i].m_instruPosZ:=m_slaveInputDataPool.m_slaveDynaData.m_insruViewData[i][3];
 	END_IF
+	
+	IF g_offScreenTest.m_enterOffScreenTestMode[i] THEN
+		GVL_interactUI.g_instruInformatiom[i].m_instruPosX:=20000;
+		GVL_interactUI.g_instruInformatiom[i].m_instruPosY:=20000;
+	END_IF
 END_FOR
 
 FOR i := 1 TO g_sArmNum DO
@@ -381,7 +386,11 @@ END_FOR]]></ST>
       <LineId Id="69" Count="0" />
     </LineIds>
     <LineIds Name="SlaveArmControl.UIOutputProcess">
-      <LineId Id="1068" Count="108" />
+      <LineId Id="1068" Count="107" />
+      <LineId Id="1217" Count="0" />
+      <LineId Id="1219" Count="2" />
+      <LineId Id="1218" Count="0" />
+      <LineId Id="1176" Count="0" />
       <LineId Id="1202" Count="0" />
       <LineId Id="1177" Count="0" />
       <LineId Id="1191" Count="10" />

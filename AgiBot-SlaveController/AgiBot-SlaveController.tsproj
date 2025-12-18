@@ -3434,19 +3434,6 @@
 							<Type>UDINT</Type>
 						</Var>
 					</Vars>
-					<UnrestoredVarLinks ImportTime="2025-12-15T18:53:14">
-						<OwnerA Name="InputDst" Prefix="TIPC^SlaveController^SlaveController Instance" Type="1">
-							<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
-								<Link VarA="SetupArmControl.m_setupInputDataPool.m_slaveStatus" TypeA="ST_SlaveStatus" InOutA="0" GuidA="{2E9B7A8A-96CB-EA47-DDF7-608B146D648F}" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus" RestoreInfo="TypeChanged" IdA="655"/>
-							</OwnerB>
-						</OwnerA>
-						<OwnerA Name="OutputSrc" Prefix="TIPC^SlaveController^SlaveController Instance" Type="2">
-							<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
-								<Link VarA="SlaveArmControl.m_slaveStatus" TypeA="ST_SlaveStatus" InOutA="1" GuidA="{2E9B7A8A-96CB-EA47-DDF7-608B146D648F}" VarB="TaskCartControl Inputs^CartControl.m_cartDataPool.m_slaveStatus" RestoreInfo="TypeChanged" IdA="1146"/>
-								<Link VarA="SlaveArmControl.m_slaveStatus" TypeA="ST_SlaveStatus" InOutA="1" GuidA="{2E9B7A8A-96CB-EA47-DDF7-608B146D648F}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_slaveStatus" RestoreInfo="TypeChanged" IdA="1146"/>
-							</OwnerB>
-						</OwnerA>
-					</UnrestoredVarLinks>
 					<Contexts>
 						<Context>
 							<Id NeedCalleeCall="true">0</Id>
