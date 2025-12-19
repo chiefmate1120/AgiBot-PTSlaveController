@@ -381,7 +381,7 @@ METHOD reset : BOOL
       <Implementation>
         <ST><![CDATA[m_isFinished:=FALSE;
 m_timePeriod:=0;
-m_isFinished :=TRUE;
+//m_isFinished :=TRUE;
 AGILOG_DebugStop();]]></ST>
       </Implementation>
     </Method>

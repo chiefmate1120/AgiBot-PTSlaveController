@@ -4567,7 +4567,7 @@
                       <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                         <o>
                           <v n="Id">1186196937L</v>
-                          <v n="Value">"g_offScreenTest.m_enterSingleJntTestMode[1]"</v>
+                          <v n="Value">"g_offScreenTest.m_enterOffScreenTestMode[1]"</v>
                         </o>
                       </l>
                     </o>
@@ -4723,7 +4723,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"g_offScreenTest.m_enterSingleJntTestMode[1]"</v>
+                      <v n="Value">"g_offScreenTest.m_enterOffScreenTestMode[1]"</v>
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
@@ -6650,11 +6650,11 @@
                     </o>
                     <o>
                       <v n="Id">2597686782L</v>
-                      <v n="Value">false</v>
+                      <v n="Value">true</v>
                     </o>
                     <o>
                       <v n="Id">401380312L</v>
-                      <v n="Value">"m_offScreenTest.m_caliPointEndFlag[1]"</v>
+                      <v n="Value">""</v>
                     </o>
                   </l>
                 </o>
@@ -6752,7 +6752,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"&lt;toggle/tap variable&gt;"</v>
+                      <v n="Value">"g_offScreenTest.m_caliPointStartFlag[1]"</v>
                     </o>
                     <o>
                       <v n="Id">3719097617L</v>
@@ -6823,11 +6823,11 @@
                     </o>
                     <o>
                       <v n="Id">401380312L</v>
-                      <v n="Value">"m_offScreenTest.m_caliPointEndFlag[1]"</v>
+                      <v n="Value">""</v>
                     </o>
                     <o>
                       <v n="Id">2167032090L</v>
-                      <v n="Value">"m_offScreenTest.m_caliPointStartFlag[1]"</v>
+                      <v n="Value">"g_offScreenTest.m_dwAlarm"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -7184,7 +7184,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"&lt;toggle/tap variable&gt;"</v>
+                      <v n="Value">"g_offScreenTest.m_caliPointStartFlag[2]"</v>
                     </o>
                     <o>
                       <v n="Id">3719097617L</v>
@@ -7251,11 +7251,11 @@
                     </o>
                     <o>
                       <v n="Id">401380312L</v>
-                      <v n="Value">"m_offScreenTest.m_caliPointEndFlag[2]"</v>
+                      <v n="Value">"g_offScreenTest.m_dwNormal"</v>
                     </o>
                     <o>
                       <v n="Id">2167032090L</v>
-                      <v n="Value">"m_offScreenTest.m_caliPointStartFlag[2]"</v>
+                      <v n="Value">"g_offScreenTest.m_dwAlarm"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -7354,7 +7354,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"&lt;toggle/tap variable&gt;"</v>
+                      <v n="Value">"g_offScreenTest.m_caliPointStartFlag[4]"</v>
                     </o>
                     <o>
                       <v n="Id">3719097617L</v>
@@ -7421,11 +7421,11 @@
                     </o>
                     <o>
                       <v n="Id">401380312L</v>
-                      <v n="Value">"m_offScreenTest.m_caliPointEndFlag[4]"</v>
+                      <v n="Value">"g_offScreenTest.m_dwNormal"</v>
                     </o>
                     <o>
                       <v n="Id">2167032090L</v>
-                      <v n="Value">"m_offScreenTest.m_caliPointStartFlag[4]"</v>
+                      <v n="Value">"g_offScreenTest.m_dwAlarm"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -7527,7 +7527,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"&lt;toggle/tap variable&gt;"</v>
+                      <v n="Value">"g_offScreenTest.m_caliPointStartFlag[5]"</v>
                     </o>
                     <o>
                       <v n="Id">3719097617L</v>
@@ -7594,11 +7594,11 @@
                     </o>
                     <o>
                       <v n="Id">401380312L</v>
-                      <v n="Value">"m_offScreenTest.m_caliPointEndFlag[5]"</v>
+                      <v n="Value">""</v>
                     </o>
                     <o>
                       <v n="Id">2167032090L</v>
-                      <v n="Value">"m_offScreenTest.m_caliPointStartFlag[5]"</v>
+                      <v n="Value">"g_offScreenTest.m_dwAlarm"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -7697,7 +7697,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"&lt;toggle/tap variable&gt;"</v>
+                      <v n="Value">"g_offScreenTest.m_caliPointStartFlag[6]"</v>
                     </o>
                     <o>
                       <v n="Id">3719097617L</v>
@@ -7764,11 +7764,11 @@
                     </o>
                     <o>
                       <v n="Id">401380312L</v>
-                      <v n="Value">"m_offScreenTest.m_caliPointEndFlag[6]"</v>
+                      <v n="Value">"g_offScreenTest.m_dwNormal"</v>
                     </o>
                     <o>
                       <v n="Id">2167032090L</v>
-                      <v n="Value">"m_offScreenTest.m_caliPointStartFlag[6]"</v>
+                      <v n="Value">"g_offScreenTest.m_dwAlarm"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -7870,7 +7870,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"&lt;toggle/tap variable&gt;"</v>
+                      <v n="Value">"g_offScreenTest.m_caliPointStartFlag[7]"</v>
                     </o>
                     <o>
                       <v n="Id">3719097617L</v>
@@ -7937,11 +7937,11 @@
                     </o>
                     <o>
                       <v n="Id">401380312L</v>
-                      <v n="Value">"m_offScreenTest.m_caliPointEndFlag[7]"</v>
+                      <v n="Value">""</v>
                     </o>
                     <o>
                       <v n="Id">2167032090L</v>
-                      <v n="Value">"m_offScreenTest.m_caliPointStartFlag[7]"</v>
+                      <v n="Value">"g_offScreenTest.m_dwAlarm"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -8040,7 +8040,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"&lt;toggle/tap variable&gt;"</v>
+                      <v n="Value">"g_offScreenTest.m_caliPointStartFlag[8]"</v>
                     </o>
                     <o>
                       <v n="Id">3719097617L</v>
@@ -8107,11 +8107,11 @@
                     </o>
                     <o>
                       <v n="Id">2167032090L</v>
-                      <v n="Value">"m_offScreenTest.m_caliPointStartFlag[8]"</v>
+                      <v n="Value">"g_offScreenTest.m_dwAlarm"</v>
                     </o>
                     <o>
                       <v n="Id">401380312L</v>
-                      <v n="Value">"m_offScreenTest.m_caliPointEndFlag[8]"</v>
+                      <v n="Value">"g_offScreenTest.m_dwNormal"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -8210,7 +8210,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"&lt;toggle/tap variable&gt;"</v>
+                      <v n="Value">"g_offScreenTest.m_caliPointStartFlag[9]"</v>
                     </o>
                     <o>
                       <v n="Id">3719097617L</v>
@@ -8277,11 +8277,11 @@
                     </o>
                     <o>
                       <v n="Id">401380312L</v>
-                      <v n="Value">"m_offScreenTest.m_caliPointEndFlag[1]"</v>
+                      <v n="Value">"g_offScreenTest.m_dwNormal"</v>
                     </o>
                     <o>
                       <v n="Id">2167032090L</v>
-                      <v n="Value">"m_offScreenTest.m_caliPointStartFlag[1]"</v>
+                      <v n="Value">"g_offScreenTest.m_dwAlarm"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -8383,7 +8383,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"&lt;toggle/tap variable&gt;"</v>
+                      <v n="Value">"g_offScreenTest.m_caliPointStartFlag[3]"</v>
                     </o>
                     <o>
                       <v n="Id">3719097617L</v>
@@ -8450,11 +8450,11 @@
                     </o>
                     <o>
                       <v n="Id">401380312L</v>
-                      <v n="Value">"m_offScreenTest.m_caliPointEndFlag[3]"</v>
+                      <v n="Value">""</v>
                     </o>
                     <o>
                       <v n="Id">2167032090L</v>
-                      <v n="Value">"m_offScreenTest.m_caliPointStartFlag[3]"</v>
+                      <v n="Value">"g_offScreenTest.m_dwAlarm"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -9177,7 +9177,7 @@
                     </o>
                     <o>
                       <v n="Id">357335551L</v>
-                      <v n="Value">545</v>
+                      <v n="Value">546</v>
                     </o>
                     <o>
                       <v n="Id">2422045748L</v>
@@ -9352,10 +9352,10 @@
               <d n="FbMethods" t="CaseInsensitiveHashtable_1" ckt="String" cvt="Guid">
                 <v>FB_Init</v>
                 <v>fb6015af-d708-449c-b13f-7f05b12e011d</v>
-                <v>FB_Exit</v>
-                <v>c97a0b92-b29a-4f9b-ab6b-206b9d1db894</v>
                 <v>FB_Reinit</v>
                 <v>80543131-2dfb-4d22-9afd-11a156d6e89e</v>
+                <v>FB_Exit</v>
+                <v>c97a0b92-b29a-4f9b-ab6b-206b9d1db894</v>
               </d>
               <v n="FbName">"NotImportant"</v>
               <v n="FbGuid">{e294c4c3-2bd5-4368-9fb1-10b6d4971361}</v>

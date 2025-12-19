@@ -357,7 +357,7 @@ VAR_IN_OUT CONSTANT
 		i_slavesInputDataPool:ST_SlaveInputDataPool;
 END_VAR
 VAR
-	i,j:INT;
+	i,j,k:INT;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// check package state
@@ -786,6 +786,9 @@ FOR i:=1 TO g_sArmNum DO
 		// off-screen calibration
 		SlaveArmState_OffScreenTest:	
 			IF m_armCtrl[i].isFinished THEN
+				FOR k:=1 TO 9 DO
+					g_offScreenTest.m_caliPointStartFlag[k] := FALSE;
+				END_FOR
 				m_nextSlaveArmState[i] :=SlaveArmState_Standby;
 			END_IF
 			
@@ -884,13 +887,14 @@ FOR i:=1 TO g_sArmNum DO
 	
 	//to SlaveArmState_OffScreenTest
 	IF g_offScreenTest.m_enterOffScreenTestMode[i] AND NOT (m_nextSlaveArmState[i] = SlaveArmState_OffScreenTest)THEN
-		g_offScreenTest.m_caliPointStartFlag[1] := TRUE;
-		g_offScreenTest.m_caliPointEndFlag[1] := FALSE;
 		m_nextSlaveArmState[i] := SlaveArmState_OffScreenTest;
 	END_IF
 	
 	//SlaveArmState_OffScreenTest exit (double check)
 	IF (NOT g_offScreenTest.m_enterOffScreenTestMode[i]) AND (m_slaveArmState[i]=SlaveArmState_OffScreenTest) THEN
+		FOR k:=1 TO 9 DO
+			g_offScreenTest.m_caliPointStartFlag[k] := FALSE;
+		END_FOR
 		m_nextSlaveArmState[i] := SlaveArmState_Standby;
 	END_IF	
 	
@@ -1061,7 +1065,13 @@ m_lastEndoScopePostureUI := GVL_interactUI.g_uiWriteScopeUpDown;
       <LineId Id="389" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.stateMachine">
-      <LineId Id="9134" Count="555" />
+      <LineId Id="9134" Count="425" />
+      <LineId Id="9710" Count="2" />
+      <LineId Id="9560" Count="97" />
+      <LineId Id="9660" Count="4" />
+      <LineId Id="9708" Count="1" />
+      <LineId Id="9707" Count="0" />
+      <LineId Id="9665" Count="24" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.updateScopeUIInfo">

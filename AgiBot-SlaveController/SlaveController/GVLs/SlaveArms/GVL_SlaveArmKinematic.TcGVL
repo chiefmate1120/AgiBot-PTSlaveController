@@ -154,14 +154,14 @@ g_slaveArm4Base :ARRAY[1..4, 1..4] OF LREAL := [     0.0,    -1,  	0,   0.17,
 													   0,      0,     0,   1.0];
 																	
 //endoscoe extrinsic parameters,  tcp pose wrt true scope pose
-g_rotTcpWrtScope :ARRAY[1..3, 1..3] OF LREAL:=[0.9941, 0.0929, 0.0557, 
-					-0.0948, 0.9950, 0.0327,
-					-0.0523, -0.0377,  0.9979];
-g_posTcpWrtScope :ARRAY[1..3] OF LREAL:= [0.003, 0.000575, 0.0012];
+g_rotTcpWrtScope :ARRAY[1..3, 1..3] OF LREAL:=[    0.99930652,    0.037231766, 0.00052376966,
+												-0.037231938,      0.9993066, 0.00032299355,
+												-0.00051138086, -0.00034227052,    0.99999981];
+g_posTcpWrtScope :ARRAY[1..3] OF LREAL:= [0.003, -0.005, 0.01];
 
 // endoscoe intrinsic parameters
-g_endoScopeFocalLength :LREAL :=2843;
-g_endoScopePrincipalBias :ARRAY[1..2] OF LREAL :=[-235, -40];
+g_endoScopeFocalLength :LREAL := 3018.2;
+g_endoScopePrincipalBias :ARRAY[1..2] OF LREAL :=[ -20.0, -20.0];
 													
 
 // rotation from joint7 to tcp

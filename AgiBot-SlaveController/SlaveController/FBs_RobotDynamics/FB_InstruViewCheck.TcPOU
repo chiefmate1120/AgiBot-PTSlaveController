@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_InstruViewCheck" Id="{7964d976-fe93-456f-842c-b0386e5ee4c4}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_InstruViewCheck
 VAR
@@ -149,7 +149,16 @@ IF m_scopeReady THEN
 	END_FOR
 END_IF
 
-
+FOR i:=1 TO 4 DO
+	g_singleJntTest.m_instruPose[i] := m_instruPose[i];
+END_FOR
+IF g_singleJntTeST.m_instruAnotherIdx>0 AND g_singleJntTeST.m_instruAnotherIdx<5 THEN
+	g_singleJntTest.m_instruPoseAnother := m_instruPose[g_singleJntTeST.m_instruAnotherIdx];
+	FOR i:=1 TO 4 DO
+		vecSub(g_singleJntTest.m_instruPose[i].m_pos,g_singleJntTest.m_instruPoseAnother.m_pos,g_singleJntTest.m_instruPoseError[i].m_pos);
+		g_singleJntTest.m_instruErrDis[i] := SQRT(EXPT(g_singleJntTest.m_instruPoseError[i].m_pos[1],2)+EXPT(g_singleJntTest.m_instruPoseError[i].m_pos[2],2)+EXPT(g_singleJntTest.m_instruPoseError[i].m_pos[3],2));
+	END_FOR
+END_IF
 
 
 
@@ -165,7 +174,7 @@ END_IF
       <LineId Id="58" Count="3" />
     </LineIds>
     <LineIds Name="FB_InstruViewCheck.run">
-      <LineId Id="431" Count="65" />
+      <LineId Id="515" Count="74" />
       <LineId Id="34" Count="0" />
     </LineIds>
   </POU>

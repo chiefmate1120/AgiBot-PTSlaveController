@@ -9,8 +9,10 @@ STRUCT
 	m_singleJntFlag,m_return2OriginFlag,m_move2StartFlag:BOOL;
 	m_kineCaliJntIdx:INT:=0;
 	
+	// current sample number
+	m_curSampleNum :INT := 1;
+	
 	m_caliPointStartFlag:ARRAY[1..9] OF BOOL := [9(FALSE)];
-	m_caliPointEndFlag:ARRAY[1..9] OF BOOL := [9(TRUE)];
 	
 	m_dataRecordFlag:ARRAY[1..g_sArmNum] OF BOOL:=[4(FALSE)];
 	m_dataRecordCount:ARRAY[1..g_sArmNum] OF INT:=[4(0)];
@@ -18,7 +20,9 @@ STRUCT
 	m_dataShowCount:STRING:='0';
 	m_dataRecordText:STRING := 'No record';
 
-	
+	m_dwWhite: DWORD := 16#FFFFFFFF;  // 正常色（不透明+白色）
+	m_dwNormal: DWORD := 16#FFFF4F4F;  // 正常色（不透明+红色）
+	m_dwAlarm : DWORD := 16#FFFFA500;  // 报警色（不透明+橙色）
 END_STRUCT
 END_TYPE
 ]]></Declaration>
