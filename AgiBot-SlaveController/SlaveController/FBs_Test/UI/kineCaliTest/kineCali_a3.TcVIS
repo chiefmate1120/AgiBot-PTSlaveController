@@ -4057,7 +4057,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_singleJntTest.m_instruPoseAnother.m_pos[2]"</v>
+                      <v n="Value">"g_singleJntTest.m_instruPoseAnother.m_pos[3]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -9337,10 +9337,10 @@
               <d n="FbMethods" t="CaseInsensitiveHashtable_1" ckt="String" cvt="Guid">
                 <v>FB_Init</v>
                 <v>d3f79588-1168-430b-86cc-5f0ae09dbf16</v>
-                <v>FB_Reinit</v>
-                <v>c4caf9ad-e8db-4e3c-80dc-607cb6f2b8ff</v>
                 <v>FB_Exit</v>
                 <v>40d45388-12aa-4e37-83df-1d1caa68faed</v>
+                <v>FB_Reinit</v>
+                <v>c4caf9ad-e8db-4e3c-80dc-607cb6f2b8ff</v>
               </d>
               <v n="FbName">"NotImportant"</v>
               <v n="FbGuid">{386b1fd8-f7fa-4407-b24c-ecaa6a739d3b}</v>

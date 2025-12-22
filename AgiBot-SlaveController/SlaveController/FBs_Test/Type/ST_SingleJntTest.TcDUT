@@ -6,8 +6,8 @@ STRUCT
 	m_instruPose:ARRAY[1..g_sArmNum] OF ST_Frame;
 	m_instruPoseAnother:ST_Frame;
 	m_instruPoseError:ARRAY[1..g_sArmNum] OF ST_Frame;
-	m_instruAnotherIdx:INT:=0;
-	m_instruErrDis:ARRAY[1..g_sArmNum] OF REAL;
+	m_instruAnotherIdx:INT := 0;
+	m_instruErrDis:ARRAY[1..g_sArmNum] OF REAL := [4(0)];
 
 	//enter Single Joint test mode
 	m_enterSingleJntTestMode:ARRAY[1..g_sArmNum] OF BOOL;

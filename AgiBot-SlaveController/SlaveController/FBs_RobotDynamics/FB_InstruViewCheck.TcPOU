@@ -156,7 +156,7 @@ IF g_singleJntTeST.m_instruAnotherIdx>0 AND g_singleJntTeST.m_instruAnotherIdx<5
 	g_singleJntTest.m_instruPoseAnother := m_instruPose[g_singleJntTeST.m_instruAnotherIdx];
 	FOR i:=1 TO 4 DO
 		vecSub(g_singleJntTest.m_instruPose[i].m_pos,g_singleJntTest.m_instruPoseAnother.m_pos,g_singleJntTest.m_instruPoseError[i].m_pos);
-		g_singleJntTest.m_instruErrDis[i] := SQRT(EXPT(g_singleJntTest.m_instruPoseError[i].m_pos[1],2)+EXPT(g_singleJntTest.m_instruPoseError[i].m_pos[2],2)+EXPT(g_singleJntTest.m_instruPoseError[i].m_pos[3],2));
+		g_singleJntTest.m_instruErrDis[i] := norm(g_singleJntTest.m_instruPoseError[i].m_pos);
 	END_FOR
 END_IF
 
@@ -174,7 +174,9 @@ END_IF
       <LineId Id="58" Count="3" />
     </LineIds>
     <LineIds Name="FB_InstruViewCheck.run">
-      <LineId Id="515" Count="74" />
+      <LineId Id="515" Count="68" />
+      <LineId Id="608" Count="0" />
+      <LineId Id="585" Count="4" />
       <LineId Id="34" Count="0" />
     </LineIds>
   </POU>

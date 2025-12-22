@@ -328,7 +328,6 @@ FOR i := 1 TO g_sArmNum DO
 END_FOR
 FOR i := 1 TO g_sArmNum DO
 	IF masterslaveMode THEN
-//	IF TRUE THEN
 		GVL_interactUI.g_instruInformatiom[i].m_instruPosX:=0;
 		GVL_interactUI.g_instruInformatiom[i].m_instruPosY:=0;
 		GVL_interactUI.g_instruInformatiom[i].m_instruPosZ:=0;
@@ -386,7 +385,8 @@ END_FOR]]></ST>
       <LineId Id="69" Count="0" />
     </LineIds>
     <LineIds Name="SlaveArmControl.UIOutputProcess">
-      <LineId Id="1068" Count="107" />
+      <LineId Id="1068" Count="98" />
+      <LineId Id="1168" Count="7" />
       <LineId Id="1217" Count="0" />
       <LineId Id="1219" Count="2" />
       <LineId Id="1218" Count="0" />
