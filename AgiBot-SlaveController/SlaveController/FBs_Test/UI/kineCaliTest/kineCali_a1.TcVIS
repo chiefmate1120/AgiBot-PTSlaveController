@@ -6337,7 +6337,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"g_singleJntTest.m_instruErrDis"</v>
+                      <v n="Value">"g_singleJntTest.m_instruErrDis[1]"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -9352,10 +9352,10 @@
               <d n="FbMethods" t="CaseInsensitiveHashtable_1" ckt="String" cvt="Guid">
                 <v>FB_Init</v>
                 <v>fb6015af-d708-449c-b13f-7f05b12e011d</v>
-                <v>FB_Exit</v>
-                <v>c97a0b92-b29a-4f9b-ab6b-206b9d1db894</v>
                 <v>FB_Reinit</v>
                 <v>80543131-2dfb-4d22-9afd-11a156d6e89e</v>
+                <v>FB_Exit</v>
+                <v>c97a0b92-b29a-4f9b-ab6b-206b9d1db894</v>
               </d>
               <v n="FbName">"NotImportant"</v>
               <v n="FbGuid">{e294c4c3-2bd5-4368-9fb1-10b6d4971361}</v>
