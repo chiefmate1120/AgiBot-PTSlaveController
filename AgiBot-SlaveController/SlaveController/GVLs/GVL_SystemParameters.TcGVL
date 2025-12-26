@@ -45,6 +45,9 @@
 	RecipeDefinitionNameCart : STRING := 'SlaveCartEncValue';
 	RecipeDefinitionNameMotorPara : STRING := 'SlaveMotorParaVersion';
 	RecipeDefinitionNameRecordParam : STRING := 'RecordParameters';
+	
+	RecipeDefinitionNameScope : STRING := 'EndoscopeParameters';
+	
 	//device NetID  and device box addr
 	g_deviceName : ARRAY [1..6] OF T_MaxString:=['SlaveArm1','SlaveArm2','SlaveArm3','SlaveArm4','Cart','MSCommunication'];
 	g_armDeviceJntName : ARRAY [1..13] OF T_MaxString:=['SetupJoint12','SetupJoint12','SetupJoint3','SetupJoint45','SetupJoint45','SlaveJoint1','SlaveJoint2','SlaveJoint3','SlaveJoint45','SlaveJoint45','SlaveJoint678','SlaveJoint678','SlaveJoint678'];
