@@ -26,13 +26,14 @@ VAR
 	
 	//The fault is sent to the UI at the frequency of 0.1S
 	m_errCodeUpdateFlag: ARRAY [1..3] OF BOOL;
-	m_errCodeUpdateTon: ARRAY [1..3] OF TON;
+	m_errCodeUpdateTon: ARRAY [1..3] OF FB_TON;
 	 
 	m_cmdJntPosLast : ARRAY [1..g_maxArmNum] OF vec13d;  
 	m_simCmdLast :ARRAY [1..g_sArmNum] OF  vec6d;
 	m_cartCurJntTorqueIOlast :vec8di;  
 	m_cartCmdJntPosLast : vec8d;  
 	o_ErrCode:ARRAY [0..3] OF UDINT;
+	m_checkOPState : BOOL;
 		
 	m_PromptMassBusy:BOOL;
 	m_PromptFlag:ARRAY[1..g_maxNum,1..50] OF UINT;
@@ -49,7 +50,7 @@ END_VAR
 
 
 VAR CONSTANT
-	m_codeUpdateDelay:TIME:=T#0.1S;
+	m_codeUpdateDelay:TIME:=T#0.15S;
 	
 	//Fault level: 1 indicates  prompt message, 2 indicates a recoverable fault and 3 indicates an unrecoverable fault
 	m_promptMessageLevel : UINT :=1;
@@ -258,40 +259,33 @@ END_IF]]></ST>
     <Method Name="checkOPStatus" Id="{3d1e8b99-1cb7-4b50-92fc-5aa7708cc80d}">
       <Declaration><![CDATA[METHOD checkOPStatus : UDINT
 VAR_IN_OUT CONSTANT
-	i_armEtherCATOPStatus :vec4b;
-	i_cartEtherCATOPStatus : BOOL;
-	i_masterRobotData : MSCommu_MasterStatus;
+	i_moduleEtherCATInOPState :vec5b;
 END_VAR
 VAR
+	//arm 1-4 ,cart is 5
 	arm : UDINT;
-	armCheckOPStatus :ARRAY [1..g_sArmNum] OF UDINT ;
+	errCode : UDINT;
 END_VAR
 
 VAR_STAT
 	clearFaultTime : FB_TON;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[FOR arm := 1 TO g_sArmNum DO
-	IF NOT i_armEtherCATOPStatus[arm] THEN
-		checkOPStatus:=SHL(arm+3,24)+SHL(0,16)+16#2010;
-		g_ArrayErrCodeArm[arm][0] := checkOPStatus;
+        <ST><![CDATA[FOR arm := 1 TO g_maxNum DO
+	IF NOT i_moduleEtherCATInOPState[arm] AND NOT m_checkOPState THEN
+		IF arm = g_maxNum THEN
+			errCode:=SHL(arm+3,24)+SHL(0,20)+SHL(0,16)+16#2011;
+		ELSE
+			errCode:=SHL(arm+3,24)+SHL(0,20)+SHL(0,16)+16#2010;
+		END_IF
+		
+		m_errNumType[m_rcvLevel]:=LIMIT(0,m_errNumType[m_rcvLevel]+1,100);
+		m_arrayErrCodeType[m_rcvLevel][m_errNumType[m_rcvLevel]]:=errCode;
+		g_arrayErrCodeArm[arm]:=arrayFILO(i_Array:= g_arrayErrCodeArm[arm], i_NewData:=m_errCode );
+		m_checkOPState := TRUE;
 		EXIT;
 	END_IF
-END_FOR
-
-IF NOT i_cartEtherCATOPStatus THEN
-	arm := g_cartNum + 3;
-	checkOPStatus:=SHL(arm,24)+SHL(0,16)+16#2011;
-	g_ArrayErrCodeArm[g_cartNum][0] := checkOPStatus;
-END_IF
-
-clearFaultTime(IN:=  GVL_interactUI.g_uiFaultReset=1 OR i_masterRobotData.m_uiResetFault = 1, PT:= T#150MS, Q=> , ET=> );
-IF GVL_interactUI.g_uiFaultReset=1 OR i_masterRobotData.m_uiResetFault = 1 THEN
-	checkOPStatus := 0;
-	IF clearFaultTime.Q THEN
-		GVL_interactUI.g_uiFaultReset:=0;
-	END_IF
-END_IF]]></ST>
+END_FOR]]></ST>
       </Implementation>
     </Method>
     <Property Name="checkPermit" Id="{4ac5d9ef-e4e1-4258-a3b3-a263171adb15}" FolderPath="interface\">
@@ -465,6 +459,8 @@ END_FOR
 m_ArrayErrCodeType[2] := g_zeroErrCodeArray;
 m_resetFlag := TRUE;
 m_stopButtonTrigger := FALSE;
+m_checkOPState := FALSE;
+m_errCodeUpdateTon[2].reset();
 o_ErrCode[2]:=0;]]></ST>
       </Implementation>
     </Method>
@@ -595,6 +591,17 @@ ELSE
 END_IF
 rcpErrCheck := r_errCount >= g_faultTriggerCounts;
 ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="resetOPErrCode" Id="{5734d999-d617-4847-ad95-15b8dd0e40af}">
+      <Declaration><![CDATA[METHOD resetOPErrCode : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF (o_ErrCode[2] AND 16#2010) = 16#2010 THEN
+	o_ErrCode[2] := 0;
+END_IF]]></ST>
       </Implementation>
     </Method>
     <Method Name="rotErrCheck" Id="{df37059b-7933-4d28-9454-a61d79bfe88f}">
@@ -989,6 +996,11 @@ FOR i:=1 TO g_sJntNum DO
 	END_IF
 END_FOR
 
+//joint motion limit error
+IF SlaveArmControl.m_slaveRobot.m_armMasterSlave[i_armId].m_macroJntLimitErr AND  m_checkPermit[i_ArmId].m_jntLimitErr THEN
+	errCodeAssign(i_armId, i_ArmId+3, 0, 0, 16#2013, m_rcvLevel );
+END_IF
+
 //drive software jam 
 FOR i:=4 TO g_sJntNum DO
 	IF driveErrorCheck(i_armId, i, 4,i_safetyCheckVar[i_armId].m_slaveDriverInput[i].m_driverError) = 1 THEN
@@ -1147,16 +1159,13 @@ vecB[0]:=i_newData;]]></ST>
       <LineId Id="553" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.checkOPStatus">
-      <LineId Id="126" Count="6" />
-      <LineId Id="155" Count="0" />
-      <LineId Id="133" Count="3" />
-      <LineId Id="118" Count="0" />
-      <LineId Id="157" Count="0" />
-      <LineId Id="86" Count="0" />
-      <LineId Id="89" Count="0" />
-      <LineId Id="96" Count="0" />
-      <LineId Id="158" Count="2" />
-      <LineId Id="88" Count="0" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="187" Count="0" />
+      <LineId Id="195" Count="1" />
+      <LineId Id="198" Count="1" />
+      <LineId Id="197" Count="0" />
+      <LineId Id="188" Count="5" />
+      <LineId Id="131" Count="1" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.checkPermit.Get">
       <LineId Id="2" Count="0" />
@@ -1208,8 +1217,7 @@ vecB[0]:=i_newData;]]></ST>
       <LineId Id="23" Count="3" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.errFlagReset">
-      <LineId Id="45" Count="8" />
-      <LineId Id="57" Count="0" />
+      <LineId Id="61" Count="11" />
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.poseErrCheck">
@@ -1305,8 +1313,7 @@ vecB[0]:=i_newData;]]></ST>
       <LineId Id="145" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.slaveSafetyCheck">
-      <LineId Id="1914" Count="170" />
-      <LineId Id="2096" Count="5" />
+      <LineId Id="2113" Count="181" />
       <LineId Id="145" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.systemSafetyCheck">
@@ -1319,11 +1326,10 @@ vecB[0]:=i_newData;]]></ST>
       <LineId Id="385" Count="0" />
       <LineId Id="384" Count="0" />
       <LineId Id="399" Count="0" />
-      <LineId Id="386" Count="0" />
+      <LineId Id="513" Count="0" />
       <LineId Id="388" Count="0" />
-      <LineId Id="401" Count="0" />
-      <LineId Id="390" Count="1" />
-      <LineId Id="389" Count="0" />
+      <LineId Id="509" Count="2" />
+      <LineId Id="507" Count="0" />
       <LineId Id="387" Count="0" />
       <LineId Id="432" Count="0" />
       <LineId Id="429" Count="2" />

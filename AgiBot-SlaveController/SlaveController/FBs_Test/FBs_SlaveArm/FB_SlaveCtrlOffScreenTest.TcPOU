@@ -1,0 +1,179 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_SlaveCtrlOffScreenTest" Id="{0de35542-f418-484a-8b25-3d2d3fcee84c}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Slave Arm Adjust
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlOffScreenTest EXTENDS FB_SlaveArmCtrlBase
+VAR CONSTANT
+	m_sampleNum :INT := 9;
+END_VAR
+VAR
+	// sample joint position 
+	m_sampleSetupJntPos :ARRAY[1..m_sampleNum] OF Vec5d;
+	m_sampleSlaveJntPos :ARRAY[1..m_sampleNum] OF Vec6d;
+	
+	// sample signal
+	m_sampleSignal : FB_AdjustLongPress;
+	
+	m_logStr:STRING;
+	m_armStr:STRING;
+	
+	idx:INT:=0;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{281a553a-abc7-436e-8e20-e6db994ac83e}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.calcCmdJntPos(i_endoscopePose,i_masterStatus, i_setupStatus, i_slaveArm);
+
+//IF g_offScreenTest.m_curSampleNum > m_sampleNum THEN
+//	m_isFinished :=TRUE;
+//	AGILOG_DebugStop();
+//	g_offScreenTest.m_enterOffScreenTestMode[idx] := FALSE;
+//	RETURN;
+//END_IF
+
+IF i_slaveArm.adjustOn THEN //After pressing the button, the joint is enabled.
+	FOR i:=1 TO 3 DO
+		m_jntEnableFlag[i] := 1;
+		m_jntOPMode[i] := DriverOPMode_Trq;//current joint enter adjust mode
+		m_cmdJntPos[i] := i_slaveArm.curJntPos[i];
+	END_FOR
+END_IF	
+				
+	
+IF g_offScreenTest.m_dataRecordFlag[idx] THEN
+	IF g_offScreenTest.m_curSampleNum>0 AND g_offScreenTest.m_curSampleNum<10 THEN
+		g_offScreenTest.m_caliPointStartFlag[g_offScreenTest.m_curSampleNum] := FALSE;//the last point finish
+		
+		m_sampleSetupJntPos[g_offScreenTest.m_curSampleNum] := SetupArmControl.m_setupRobot.m_setupArms[i_slaveArm.armIdx].curJntPos;
+		m_sampleSlaveJntPos[g_offScreenTest.m_curSampleNum] := i_slaveArm.curDHJntPos;
+		
+		//AGILOG_DEBUG(m_armStr, FALSE, 1); //can be deleted
+		
+		AGILOG_DEBUG(RobotDynamics.m_instruViewCheck.m_instruPoseInScope[i_slaveArm.armIdx].m_pos,FALSE, 1);
+		
+		g_offScreenTest.m_curSampleNum := g_offScreenTest.m_curSampleNum +1;
+		IF g_offScreenTest.m_curSampleNum<10 THEN
+			g_offScreenTest.m_caliPointStartFlag[g_offScreenTest.m_curSampleNum] := TRUE;//the next point begin
+		END_IF
+	END_IF
+	g_offScreenTest.m_dataRecordFlag[idx]:=FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{e01a414e-349a-49ce-840c-54e7ef82b96a}">
+      <Declaration><![CDATA[METHOD PUBLIC Init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+
+VAR
+	fileName:STRING;
+	initState:ARRAY[1..9] OF BOOL := [TRUE,8(FALSE)];
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//init
+SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+m_jntEnableFlag := g_zeroVec8i;
+
+idx := i_slaveArm.armIdx;
+g_offScreenTest.m_dataRecordCount[idx]:=0;
+
+g_offScreenTest.m_curSampleNum:=1;
+g_offScreenTest.m_caliPointStartFlag := initState;
+ 
+fileName := CONCAT('OffScreenCali_arm', INT_TO_STRING(i_slaveArm.armIdx));
+fileName := CONCAT(fileName, '.txt');
+AGILOG_DebugStart(fileName);
+
+m_logStr := '########Start Off-screen calibration sampling.########';
+AGILOG_DEBUG(m_logStr, TRUE, 1);
+
+m_armStr := concat('slaveArm', INT_TO_STRING(i_slaveArm.armIdx));
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="reset" Id="{c5285e87-bbae-41a5-8ff1-e823817e8184}">
+      <Declaration><![CDATA[{warning '添加方法实现'}
+METHOD reset : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_isFinished:=FALSE;
+m_timePeriod:=0;
+AGILOG_DebugStop();]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveCtrlOffScreenTest">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlOffScreenTest.calcCmdJntPos">
+      <LineId Id="218" Count="3" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="267" Count="0" />
+      <LineId Id="222" Count="1" />
+      <LineId Id="270" Count="1" />
+      <LineId Id="278" Count="0" />
+      <LineId Id="274" Count="1" />
+      <LineId Id="268" Count="0" />
+      <LineId Id="279" Count="0" />
+      <LineId Id="277" Count="0" />
+      <LineId Id="276" Count="0" />
+      <LineId Id="224" Count="1" />
+      <LineId Id="318" Count="0" />
+      <LineId Id="328" Count="0" />
+      <LineId Id="261" Count="0" />
+      <LineId Id="227" Count="4" />
+      <LineId Id="235" Count="0" />
+      <LineId Id="305" Count="0" />
+      <LineId Id="323" Count="0" />
+      <LineId Id="331" Count="0" />
+      <LineId Id="329" Count="1" />
+      <LineId Id="319" Count="0" />
+      <LineId Id="327" Count="0" />
+      <LineId Id="200" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlOffScreenTest.Init">
+      <LineId Id="246" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="308" Count="1" />
+      <LineId Id="306" Count="0" />
+      <LineId Id="305" Count="0" />
+      <LineId Id="254" Count="0" />
+      <LineId Id="253" Count="0" />
+      <LineId Id="321" Count="0" />
+      <LineId Id="292" Count="0" />
+      <LineId Id="283" Count="0" />
+      <LineId Id="293" Count="0" />
+      <LineId Id="282" Count="0" />
+      <LineId Id="264" Count="0" />
+      <LineId Id="263" Count="0" />
+      <LineId Id="262" Count="0" />
+      <LineId Id="273" Count="0" />
+      <LineId Id="272" Count="0" />
+      <LineId Id="274" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlOffScreenTest.reset">
+      <LineId Id="7" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="10" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

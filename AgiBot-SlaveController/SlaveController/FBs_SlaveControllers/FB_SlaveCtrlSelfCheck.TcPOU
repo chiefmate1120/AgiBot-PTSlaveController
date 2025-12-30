@@ -3,27 +3,25 @@
   <POU Name="FB_SlaveCtrlSelfCheck" Id="{ff8ccb3f-4929-4315-b540-e9546f2dbd07}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm Run Self-check Trajectory
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlSelfCheck EXTENDS FB_SlaveArmCtrlBase
-VAR CONSTANT
-	m_selfCheckMotionNum :INT :=2;
-END_VAR
+
 VAR
 	// slave self-check motion parameters
-	m_selfCheckPosture:ARRAY [1..m_selfCheckMotionNum, 1..g_sJntNum] OF LREAL:=[0.0, 	0.0,	GVL_SlaveMotorParameters.g_maxDHJntPos[3], 	5(-g_2pi),
-																																				0.0, 	-PI/2, GVL_SlaveMotorParameters.g_maxDHJntPos[3], 	5(0.0)];																			//PI/4, -PI/4, 0.3, pi, pi, pi, pi, pi];
-	m_selfCheckMaxjntVel:Vec8d:=	 [pi/4,	 pi/4, 0.3/2, 5(2*pi)];
-	m_selfCheckMaxjntAcc:Vec8d:=[pi/2,		 pi/2, 	0.6/2, 5(4*pi)];
-	m_selfCheckMaxjntJerk:Vec8d:=[pi, pi,	1.0/2, 5(8*pi)];
+	m_selfCheckPosture:ARRAY [1..g_sJntNum] OF LREAL:=[0.0,	-PI/2,	GVL_SlaveMotorParameters.g_maxDHJntPos[3], 	5(-g_2pi)];																			//PI/4, -PI/4, 0.3, pi, pi, pi, pi, pi];
+	m_selfCheckMaxjntVel:Vec8d:=[2(20*g_deg2Rad),  0.3/2, 5(2*pi)];
+	m_selfCheckMaxjntAcc:Vec8d:=[2(20*g_deg2Rad), 	0.6/2, 5(4*pi)];
+	m_selfCheckMaxjntJerk:Vec8d:=[2(20*g_deg2Rad),  1.0/2, 5(8*pi)];
 	
-	m_selfCheckTrajIdx: INT := 1;
-	m_slefCheckPlanner: ARRAY[1..m_selfCheckMotionNum] OF FB_TrajMoveJ;
+	m_slefCheckPlanner: ARRAY[1..g_sJntNum] OF FB_BasicDoubleS;
 	
    // wait time for joint enable
    m_enableWaitTime :LREAL := 1.0;
 
-   // time gap between enable and motion
-   m_jntMotionTimeGap :LREAL := 0.5;
+   // time wait to motion
+   m_jntMotionWaitTime :LREAL := 3.0;
+   
+   m_selfCheckMotionKp :LREAL := 10;
+   m_jntVelFilt :ARRAY[1..2] OF FB_LowPassFilter;
 
-	m_selfCheckNum :INT;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -41,44 +39,58 @@ END_VAR
 
 VAR 
 	i :INT;
-	curJntVel :Vec8d;
+	curJntPos :Vec8d;
+	posErr:Vec8d;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// check if planner is ready
-IF m_slefCheckPlanner[m_selfCheckTrajIdx].isGene = FALSE THEN
-	calcCmdJntPos:=FALSE;
-	RETURN;
-END_IF
-
-//check setup robot selfcheck state
-IF NOT i_setupStatus.m_setupSelfCheckPass[i_slaveArm.armIdx] THEN
-	m_timePeriod := 0;
-	RETURN;
-END_IF
+FOR i:=3 TO g_sJntNum DO 
+	IF m_slefCheckPlanner[i].isGene = FALSE THEN
+		calcCmdJntPos:=FALSE;
+		RETURN;
+	END_IF
+END_FOR  
 
 // arms enable successively
 IF m_timePeriod > m_enableWaitTime THEN
        m_jntEnableFlag :=g_onesVec8i;
 END_IF
 
-IF m_timePeriod < m_enableWaitTime + m_jntMotionTimeGap THEN
+IF m_timePeriod < m_jntMotionWaitTime THEN
 	RETURN;
 END_IF
 
 // traj plan
-calcCmdJntPos :=m_slefCheckPlanner[m_selfCheckTrajIdx].evaluate(m_timePeriod-m_enableWaitTime-m_jntMotionTimeGap, jntPos=> m_cmdJntPos, jntVel=>m_cmdJntVel, jntAcc=> m_cmdJntAcc);
+FOR i:=3 TO g_sJntNum DO 
+	calcCmdJntPos :=m_slefCheckPlanner[i].evaluate(m_timePeriod-m_jntMotionWaitTime, q=> m_cmdJntPos[i], q_dot=>m_cmdJntVel[i], q_ddot=> m_cmdJntAcc[i]);
+END_FOR 
 
-// check if to transit to next segment
-curJntVel :=i_slaveArm.curJntVel;
-IF(m_timePeriod - m_enableWaitTime - m_jntMotionTimeGap > m_slefCheckPlanner[m_selfCheckTrajIdx].duration  AND norm(curJntVel)<7*GVL_SlaveControlParameters.g_jntStaticVelThres) THEN
-	m_selfCheckTrajIdx:=m_selfCheckTrajIdx+1;
-	m_timePeriod:=i_slaveArm.armIdx-1;
-END_IF
+// self-collision avoid motion 
+FOR i:=1 TO 2 DO 
+	m_cmdJntVel[i] := m_selfCheckMotionKp *(m_selfCheckPosture[i]-m_cmdJntPos[i]);
+	m_cmdJntVel[i] := LIMIT(-m_selfCheckMaxjntVel[i], m_cmdJntVel[i], m_selfCheckMaxjntVel[i]);
+	m_cmdJntVel[i]:=m_jntVelFilt[i].run(m_cmdJntVel[i]+i_slaveArm.m_repulseJntVel[i]);
+	
+	// boundary limit
+	IF (m_cmdJntPos[i] > GVL_SlaveMotorParameters.g_maxDHJntPos[i] AND m_cmdJntVel[i] > 0) OR
+		(m_cmdJntPos[i] < GVL_SlaveMotorParameters.g_minDHJntPos[i] AND m_cmdJntVel[i] < 0) THEN
+		m_cmdJntVel[i] :=0;
+	END_IF
+	
+	m_cmdJntPos[i] := m_cmdJntPos[i] + m_cmdJntVel[i] * g_slaveArmCtrlCycleTime;
+END_FOR
 
 // check if to terminated
-IF(m_selfCheckTrajIdx > m_selfCheckNum) THEN
-	m_isFinished:=TRUE;
-END_IF]]></ST>
+curJntPos := i_slaveArm.curJntPos;
+vecSub(m_selfCheckPosture, curJntPos, posErr);
+m_isFinished := TRUE;
+FOR i:=1 TO g_sJntNum DO
+	IF (i=3 AND ABS(posErr[i]) > g_cartCtrlPosTolHigh/2.0) OR (i<>3 AND ABS(posErr[i]) > g_jntCtrlAngTolHigh/2.0) THEN
+		m_isFinished := FALSE;
+		RETURN;
+	END_IF
+END_FOR
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{c6523e12-84cb-49f8-843e-9a168bb4ce28}">
@@ -91,10 +103,10 @@ VAR_IN_OUT
 END_VAR
 
 VAR_STAT
-	i,j :INT;
-	startJntPos,endJntPos :Vec8d;
+	i :INT;
 	baseJntPos:Vec8d;
 	cycleNum :LREAL;
+	q,v :Vec2d;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -102,47 +114,36 @@ END_VAR
 m_jntEnableFlag :=g_zeroVec8i;
 
 //set different wait time for each arm, so the arms would run self-check successively
-m_enableWaitTime := i_slaveArm.armIdx-1;
+m_enableWaitTime := (i_slaveArm.armIdx-1.0)/2.0;
+m_selfCheckPosture[3] := GVL_SlaveMotorParameters.g_maxDHJntPos[3];
 
 // determine base joint position for instrument joint
 baseJntPos :=g_zeroVec8d;
-FOR i:=1 TO g_sJntNum DO
-	IF i >= 4 THEN
+FOR i:=4 TO g_sJntNum DO
 		cycleNum := FLOOR(i_slaveArm.curJntPos[i]/(2*pi));
 		baseJntPos[i]:=cycleNum* g_2Pi;
-	ELSIF i <= 2 THEN
-		m_selfCheckPosture[1,i] := i_slaveArm.curJntPos[i];
-	END_IF
+		m_selfCheckPosture[i]:=baseJntPos[i] + m_selfCheckPosture[i];
 END_FOR
 
-// traj plan
-// fisrt segment
-// TODO: joint1/2 stay still in case arms collision
-m_selfCheckTrajIdx :=1;
-startJntPos:=i_slaveArm.curJntPos;
-endJntPos:=startJntPos;
-FOR j:=3 TO g_sJntNum DO 
-	endJntPos[j]:=baseJntPos[j] + m_selfCheckPosture[1,j];
+// traj plan for joint 3-8
+FOR i:=3 TO g_sJntNum DO 
+	q[1]:=i_slaveArm.curJntPos[i];
+	q[2]:=m_selfCheckPosture[i];
+	v[1]:=0;
+	v[2]:=0;
+	m_slefCheckPlanner[i].init(q,v,m_selfCheckMaxjntVel[i], m_selfCheckMaxjntAcc[i], m_selfCheckMaxjntJerk[i]);
 END_FOR
-m_slefCheckPlanner[1].init(startJntPos,endJntPos,m_selfCheckMaxjntVel, m_selfCheckMaxjntAcc,m_selfCheckMaxjntJerk);
-m_selfCheckNum := m_selfCheckMotionNum;
+
+FOR i:=1 TO 2 DO
+	m_jntVelFilt[i].init(1, 1, g_slaveArmCtrlFreq);
+	m_jntVelFilt[i].run(0);;
+END_FOR
 
 //check trocar on
 IF CartControl.m_cartRobot.m_slaveCart.m_trocarOnFlag > 0 THEN
-	m_selfCheckNum:=1;
+	m_selfCheckPosture[1]:=i_slaveArm.curJntPos[1];
+	m_selfCheckPosture[2]:=i_slaveArm.curJntPos[2];
 END_IF
-
-// other segments
-IF m_selfCheckMotionNum>= 2 THEN
-	FOR i:=2 TO m_selfCheckMotionNum DO 
-		startJntPos := endJntPos;
-		FOR j:=1 TO 3 DO 
-			startJntPos[j]:=LIMIT(g_minJntPos[i_slaveArm.armIdx, j+5], baseJntPos[j]+m_selfCheckPosture[i-1,j],g_maxJntPos[i_slaveArm.armIdx, j+5]);
-			endJntPos[j]:=LIMIT(g_minJntPos[i_slaveArm.armIdx, j+5], baseJntPos[j]+m_selfCheckPosture[i,j],g_maxJntPos[i_slaveArm.armIdx, j+5]);
-		END_FOR
-		m_slefCheckPlanner[i].init(startJntPos,endJntPos,m_selfCheckMaxjntVel, m_selfCheckMaxjntAcc,m_selfCheckMaxjntJerk);
-	END_FOR
-END_IF;
 
 // update commands to arm
 copyCmds(r_slaveArmCtrlCmd);]]></ST>
@@ -153,73 +154,67 @@ copyCmds(r_slaveArmCtrlCmd);]]></ST>
     </LineIds>
     <LineIds Name="FB_SlaveCtrlSelfCheck.calcCmdJntPos">
       <LineId Id="41" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="67" Count="0" />
-      <LineId Id="39" Count="1" />
-      <LineId Id="187" Count="0" />
-      <LineId Id="186" Count="0" />
-      <LineId Id="188" Count="0" />
-      <LineId Id="191" Count="0" />
-      <LineId Id="189" Count="1" />
+      <LineId Id="204" Count="0" />
+      <LineId Id="207" Count="2" />
+      <LineId Id="206" Count="0" />
+      <LineId Id="205" Count="0" />
       <LineId Id="173" Count="0" />
       <LineId Id="167" Count="5" />
       <LineId Id="153" Count="0" />
       <LineId Id="152" Count="0" />
       <LineId Id="42" Count="0" />
       <LineId Id="33" Count="0" />
-      <LineId Id="14" Count="0" />
+      <LineId Id="221" Count="0" />
+      <LineId Id="226" Count="0" />
       <LineId Id="112" Count="0" />
-      <LineId Id="27" Count="0" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="32" Count="0" />
-      <LineId Id="91" Count="0" />
-      <LineId Id="93" Count="0" />
-      <LineId Id="92" Count="0" />
+      <LineId Id="237" Count="1" />
+      <LineId Id="232" Count="2" />
+      <LineId Id="240" Count="1" />
+      <LineId Id="243" Count="3" />
+      <LineId Id="242" Count="0" />
+      <LineId Id="247" Count="1" />
+      <LineId Id="235" Count="0" />
       <LineId Id="136" Count="0" />
       <LineId Id="94" Count="0" />
-      <LineId Id="96" Count="2" />
+      <LineId Id="251" Count="0" />
+      <LineId Id="250" Count="0" />
+      <LineId Id="252" Count="0" />
+      <LineId Id="254" Count="1" />
+      <LineId Id="257" Count="0" />
+      <LineId Id="259" Count="0" />
+      <LineId Id="258" Count="0" />
+      <LineId Id="256" Count="0" />
+      <LineId Id="98" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlSelfCheck.init">
       <LineId Id="57" Count="0" />
       <LineId Id="218" Count="0" />
       <LineId Id="199" Count="2" />
       <LineId Id="233" Count="0" />
+      <LineId Id="378" Count="0" />
       <LineId Id="232" Count="0" />
       <LineId Id="237" Count="0" />
       <LineId Id="234" Count="0" />
-      <LineId Id="253" Count="1" />
+      <LineId Id="254" Count="0" />
       <LineId Id="256" Count="0" />
-      <LineId Id="315" Count="0" />
-      <LineId Id="314" Count="0" />
-      <LineId Id="255" Count="0" />
+      <LineId Id="348" Count="0" />
       <LineId Id="236" Count="0" />
       <LineId Id="121" Count="0" />
       <LineId Id="70" Count="0" />
-      <LineId Id="138" Count="0" />
-      <LineId Id="172" Count="0" />
-      <LineId Id="217" Count="0" />
-      <LineId Id="82" Count="0" />
-      <LineId Id="185" Count="0" />
       <LineId Id="98" Count="0" />
-      <LineId Id="86" Count="0" />
+      <LineId Id="336" Count="1" />
+      <LineId Id="339" Count="1" />
+      <LineId Id="330" Count="0" />
       <LineId Id="99" Count="0" />
-      <LineId Id="74" Count="0" />
-      <LineId Id="298" Count="1" />
+      <LineId Id="343" Count="0" />
+      <LineId Id="345" Count="2" />
+      <LineId Id="342" Count="0" />
+      <LineId Id="299" Count="0" />
       <LineId Id="295" Count="2" />
+      <LineId Id="341" Count="0" />
       <LineId Id="294" Count="0" />
-      <LineId Id="159" Count="0" />
-      <LineId Id="158" Count="0" />
-      <LineId Id="156" Count="0" />
-      <LineId Id="127" Count="0" />
-      <LineId Id="279" Count="0" />
-      <LineId Id="135" Count="0" />
-      <LineId Id="276" Count="0" />
-      <LineId Id="278" Count="0" />
-      <LineId Id="132" Count="1" />
-      <LineId Id="126" Count="0" />
-      <LineId Id="157" Count="0" />
       <LineId Id="154" Count="1" />
-      <LineId Id="152" Count="0" />
+      <LineId Id="363" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

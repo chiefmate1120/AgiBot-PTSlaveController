@@ -26,6 +26,12 @@ VAR
 	m_trocarFlag : ARRAY [1..4] OF BOOL;
 	m_trocarOnFlag : INT:=0;
 	
+	// adjust detect
+	m_manualAdjustOnFlag :Vec4b := [4(FALSE)];
+	m_jnt5AdjustDir :Vec4i := [4(0)]; // -1, 0, 1;
+	m_manualAdjustDetect :ARRAY [1..4] OF FB_setupAdjustDetect;
+	m_jnt5AdjustDetect :ARRAY [1..4] OF FB_setupJnt5AdjustDetect;
+	
 	//output screw break IO 
 	m_screwBreak AT %Q* : BOOL;
 	m_screwBreakSR : SR;
@@ -87,6 +93,9 @@ VAR
 	// velocity filter
 	m_jntVelLpf :FB_LowPassFilter;
 	columnJntVel : LREAL;
+	
+	//cart joint error state
+	m_jntErrFlag : Vec8b;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -298,6 +307,8 @@ m_rotaOverhangOnFlag := MAX( m_rotaButtonDetect[1].run(m_carRotaOverhangIO[1]), 
 FOR i := 1 TO g_sArmNum BY 1 DO
 	//trocar in place monitor
 	m_trocarFlag[i] := m_trocarCheck[i].run(m_trocarIO[i] );
+	m_manualAdjustOnFlag[i] := m_manualAdjustDetect[i].run(m_trocarIO[i]);
+	m_jnt5AdjustDir[i] := m_jnt5AdjustDetect[i].run(m_trocarIO[i]);
 END_FOR
 
 m_trocarOnFlag := BOOL_TO_INT(m_trocarFlag[1]) + BOOL_TO_INT(m_trocarFlag[2]) + BOOL_TO_INT(m_trocarFlag[3]) + BOOL_TO_INT(m_trocarFlag[4]);
@@ -345,21 +356,24 @@ VAR_STAT
 	columnJntVel : vec4d;
 	adjustStartFlag : vec4b;
 	m_columnAdjustEnable : vec4b;
+	m_adjustFlagMode2 : vec4b;
 END_VAR
 VAR
 	i : INT;
 	armId : INT;
 	limitDis : vec4d;
 	m_adjustFlag : vec4b;
+	
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[FOR i := 1 TO g_sArmNum DO
 	curJntPos[i] := SetupArmControl.m_setupRobot.m_setupArms[i].curJntPos[3];
 	curJntVel[i] := SetupArmControl.m_setupRobot.m_setupArms[i].curJntVel[3];//.m_curJntVel[3];
-	m_adjustFlag[i] := SetupArmControl.m_setupRobot.m_setupArms[i].m_manualAdjustOnFlag AND m_trocarOnFlag=0 AND SetupArmControl.m_setupRobot.m_setupArmState[i] = SetupArmState_ManualAdjust 
+	m_adjustFlag[i] := m_manualAdjustOnFlag[i] AND m_trocarOnFlag=0 AND SetupArmControl.m_setupRobot.m_setupArmState[i] = SetupArmState_ManualAdjust 
 									AND NOT SafetyCheck.m_SafetyCheck.m_jntErrFlag[i,0,2] AND NOT SafetyCheck.m_SafetyCheck.m_jntErrFlag[i,0,3] AND NOT SafetyCheck.m_SafetyCheck.m_jntErrFlag[i,3,3] AND NOT SafetyCheck.m_SafetyCheck.m_jntErrFlag[i,3,2] ;
+	m_adjustFlagMode2[i] := m_adjustFlag[i] AND (m_jnt5AdjustDir[i] <> 0 OR m_adjustFlagMode2[i]);
 	
-	IF m_adjustFlag[i] THEN
+	IF m_adjustFlag[i] AND GVL_CartControlParameters.g_standColumnMotionMode = 1 THEN
 		limitDis[i] := MIN(GVL_SetupMotorParameters.g_maxJntPos[i,3] - curJntPos[i], curJntPos[i]-GVL_SetupMotorParameters.g_minJntPos[i,3]);
 		IF limitDis[i] < m_limitBufferForCtrl THEN
 			adjustStartFlag[i] := TRUE; 
@@ -381,6 +395,12 @@ END_VAR]]></Declaration>
 		
 		armId := i;
 		enableTon[i](IN:= adjustStartFlag[i], PT:= T#3S, Q=> m_columnAdjustEnable[i], ET=> );
+		EXIT;
+	ELSIF m_adjustFlagMode2[i] AND GVL_CartControlParameters.g_standColumnMotionMode = 2 THEN
+		armId := i;
+		adjustStartFlag[i] := TRUE; 
+		columnJntVel[i] := sign(m_jnt5AdjustDir[i]) * GVL_CartControlParameters.g_maxJntVel[5]/2;
+		enableTon[i](IN:= m_adjustFlagMode2[i], PT:= T#3S, Q=> m_columnAdjustEnable[i], ET=> );
 		EXIT;
 	ELSE
 		adjustStartFlag[i] := FALSE;
@@ -515,13 +535,13 @@ END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[FOR i:=1 TO g_cartJntNum DO
 	IF 3<=i AND i<5 THEN
-		IF 1= i_jntIdx[i] THEN
+		IF 1= i_jntIdx[i] AND NOT  m_jntErrFlag[i] THEN
 			m_cartJoints[i].enableMZ();
 		ELSE
 			m_cartJoints[i].disableMZ();
 		END_IF
-	ELSIF i = 5 THEN
-		IF 1= i_jntIdx[i] THEN
+	ELSIF i = 5  THEN
+		IF 1= i_jntIdx[i] AND NOT  m_jntErrFlag[i]  THEN
 			m_screwBreak := m_standColumnEnableDetect.run(IOValue:= m_cartJoints[i].enableMZ());
 			m_standColumnDisenableDetect.run(IOValue:=FALSE );
 		ELSE
@@ -529,7 +549,7 @@ END_VAR]]></Declaration>
 			m_screwBreak :=  NOT m_standColumnDisenableDetect.run(IOValue:=m_cartJoints[i].disableMZ());
 		END_IF
 	ELSE
-		IF 1= i_jntIdx[i] THEN
+		IF 1= i_jntIdx[i] AND NOT m_jntErrFlag[i] THEN
 			m_cartJoints[i].enable();
 		ELSE
 			m_cartJoints[i].disable();
@@ -609,6 +629,17 @@ END_FOR
 ]]></ST>
       </Implementation>
     </Method>
+    <Property Name="jntErrFlag" Id="{60ea420c-dc2b-4110-ba45-b1afd51895ad}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY jntErrFlag : REFERENCE TO Vec8b]]></Declaration>
+      <Get Name="Get" Id="{cf2182ad-d704-47b1-8b3b-f95acfd2d849}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[jntErrFlag REF= m_jntErrFlag;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Method Name="joystickSignalAnalysis" Id="{15b803f9-93d6-4377-9b18-7562f2015d41}">
       <Declaration><![CDATA[METHOD  joystickSignalAnalysis : Vec8d 
 VAR_INPUT
@@ -740,6 +771,25 @@ FOR i:=1 TO g_sJntNum DO
 END_FOR]]></ST>
       </Implementation>
     </Method>
+    <Method Name="updateJntErrState" Id="{2f058f20-744a-41db-8eac-b3f33cc86457}">
+      <Declaration><![CDATA[METHOD updateJntErrState : BOOL
+VAR_IN_OUT CONSTANT
+	i_safetyData : ST_SafetyData;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+m_jntErrFlag[1] := i_safetyData.m_cartSteadyFootErr;
+m_jntErrFlag[2] := i_safetyData.m_cartSteadyFootErr;
+m_jntErrFlag[3] := i_safetyData.m_cartWheelErr;
+m_jntErrFlag[4] := i_safetyData.m_cartWheelErr;
+m_jntErrFlag[5] := i_safetyData.m_cartStandColumnErr;
+m_jntErrFlag[6] := i_safetyData.m_cartAdjustErr;
+m_jntErrFlag[7] := i_safetyData.m_cartAdjustErr;
+m_jntErrFlag[8] := i_safetyData.m_cartOverhangErr;
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="updateStatus" Id="{7dc0698e-0910-43df-8937-4fb176791915}">
       <Declaration><![CDATA[METHOD PUBLIC updateStatus : BOOL
 VAR_INPUT
@@ -812,8 +862,7 @@ END_FOR ]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.checkIO">
-      <LineId Id="81" Count="11" />
-      <LineId Id="99" Count="0" />
+      <LineId Id="106" Count="14" />
       <LineId Id="73" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.cmdJntPos.Get">
@@ -823,11 +872,7 @@ END_FOR ]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.columnAdjustEnable">
-      <LineId Id="261" Count="17" />
-      <LineId Id="318" Count="1" />
-      <LineId Id="321" Count="1" />
-      <LineId Id="320" Count="0" />
-      <LineId Id="280" Count="17" />
+      <LineId Id="431" Count="47" />
       <LineId Id="66" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.ctrlEnable.Get">
@@ -861,22 +906,7 @@ END_FOR ]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.enable">
-      <LineId Id="15" Count="0" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="58" Count="3" />
-      <LineId Id="57" Count="0" />
-      <LineId Id="56" Count="0" />
-      <LineId Id="38" Count="1" />
-      <LineId Id="75" Count="0" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="68" Count="0" />
-      <LineId Id="41" Count="0" />
-      <LineId Id="36" Count="0" />
-      <LineId Id="42" Count="0" />
-      <LineId Id="44" Count="3" />
-      <LineId Id="43" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="5" Count="0" />
+      <LineId Id="82" Count="22" />
       <LineId Id="48" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.forceAbnormalCali.Get">
@@ -885,6 +915,9 @@ END_FOR ]]></ST>
     <LineIds Name="FB_SlaveCart.init">
       <LineId Id="226" Count="46" />
       <LineId Id="57" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.jntErrFlag.Get">
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.joystickSignalAnalysis">
       <LineId Id="67" Count="22" />
@@ -906,6 +939,10 @@ END_FOR ]]></ST>
     <LineIds Name="FB_SlaveCart.updateCmds">
       <LineId Id="112" Count="30" />
       <LineId Id="41" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.updateJntErrState">
+      <LineId Id="3" Count="8" />
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.updateStatus">
       <LineId Id="84" Count="21" />

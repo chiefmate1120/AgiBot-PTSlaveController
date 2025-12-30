@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_CartJoint" Id="{28a097bf-9305-41bd-b49b-5cc15db4c0fc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CartJoint EXTENDS FB_JointBase
 VAR_INPUT
@@ -96,9 +96,9 @@ m_maxCurrent :=GVL_CartMotorParameters.g_motorMaxCurrent[i_jntIdx];
 m_motorDir :=GVL_CartMotorParameters.g_motorDir[i_jntIdx];								
 m_minJntPos	:=GVL_CartMotorParameters.g_minJntPos[i_jntIdx];
 m_maxJntPos	:=GVL_CartMotorParameters.g_maxJntPos[i_jntIdx];
+m_linkEncoderDir :=GVL_CartMotorParameters.g_asbEncoderDir[i_jntIdx];
 
 //link encoder calibartion data
-m_linkEncoderDir :=GVL_CartJointEncoderCaliData.g_asbEncoderDir[i_jntIdx];
 m_minLinkEncoder :=GVL_CartJointEncoderCaliData.g_minLinkEncoder[ i_jntIdx] - GVL_CartJointEncoderCaliData.g_linkEncLimitBuffer; // expand limit
 m_maxLinkEncoder :=GVL_CartJointEncoderCaliData.g_maxLinkEncoder[ i_jntIdx] + GVL_CartJointEncoderCaliData.g_linkEncLimitBuffer; // expand limit
 m_caliLinkEncoder :=GVL_CartJointEncoderCaliData.g_caliLinkEncoder[ i_jntIdx];
@@ -244,7 +244,7 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="7" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartJoint.init">
-      <LineId Id="254" Count="58" />
+      <LineId Id="318" Count="58" />
       <LineId Id="39" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartJoint.updateCmd">

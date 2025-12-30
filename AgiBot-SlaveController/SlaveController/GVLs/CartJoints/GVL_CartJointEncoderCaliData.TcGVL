@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_CartJointEncoderCaliData" Id="{228227e9-6d08-46b5-93e9-6ff8dcc6aa43}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 // Robot3 --joints parameters of setup arms
@@ -19,15 +19,12 @@ VAR_GLOBAL
 
 	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
 	g_linkEncLimitBuffer : DINT := 1000;
-
-	// absolute encoder direction
-	g_asbEncoderDir :ARRAY[1..g_cartJntNum] OF INT :=[1, 1, 1, 1, -1, 1, -1, -1];
 													
 	// flag if joint can rotate multiple cycles
 	g_multipleCyclesJoint :ARRAY[1..g_cartJntNum] OF INT :=[0, 0, 0, 0, 0, 0, 0, 0];
 		 
 	// joint position at link encoder calibrated point
-	g_linkEncCaliJntPos :ARRAY[1..g_cartJntNum] OF LREAL :=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0.0];
+	g_linkEncCaliJntPos :ARRAY[1..g_cartJntNum] OF LREAL :=[0.0, 0.0, 0.0, 0.0, 0.215, 0.0, 0, 0.0];
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

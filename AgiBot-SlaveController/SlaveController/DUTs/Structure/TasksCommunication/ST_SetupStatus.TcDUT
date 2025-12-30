@@ -12,9 +12,6 @@ STRUCT
 	// position of remote center point
 	m_rcPos :ARRAY[1..g_sArmNum] OF Vec3d;
 	
-	//arm aseptic cover megnet check
-	m_asepticMegnetSpringBreakCheck : ARRAY[1..g_sArmNum] OF DINT;
-	
 	//setup robot selfcheck finshed
 	m_setupSelfCheckPass : Vec4b;
 END_STRUCT

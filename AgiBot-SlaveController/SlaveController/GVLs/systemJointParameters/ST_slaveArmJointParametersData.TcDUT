@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_slaveArmJointParametersData" Id="{40736fae-7e66-46ac-8bb0-554424f1787f}">
+    <Declaration><![CDATA[TYPE ST_slaveArmJointParametersData :
+STRUCT
+	// encoder resolution
+	m_incEncoderRes :ARRAY[1..g_sArmNum,1..g_sJntNum] OF DINT :=[2(65536),4096,5(2048),
+																						2(65536),4096,5(2048),
+																						2(65536),4096,5(2048),
+																						2(65536),4096,5(2048)];
+	m_absEncoderRes :ARRAY[1..g_sArmNum,1..g_sJntNum] OF DINT :=[2(131072),6(65536),
+																						2(131072),6(65536),
+																						2(131072),6(65536),
+																						2(131072),6(65536)];
+	
+	// reduction ratio
+	m_motorReduction :ARRAY[1..g_sArmNum,1..g_sJntNum] OF LREAL :=[ 81,81,  2*pi/0.006, 5(221.0/11),
+																	 81,81,  2*pi/0.006, 5(221.0/11),
+																	 81,81,  2*pi/0.006, 5(221.0/11),
+																	 81,81,  2*pi/0.006, 5(221.0/11)];
+	m_absEncoderReduction :ARRAY[1..g_sArmNum,1..g_sJntNum] OF LREAL :=[2(1.0), 2*PI/0.5364, 5(1.0),
+																		2(1.0), 2*PI/0.5364, 5(1.0),
+																		2(1.0), 2*PI/0.5364, 5(1.0),
+																		2(1.0), 2*PI/0.5364, 5(1.0)];//8 0.5364
+	
+	// motor parameters
+	m_motorTrqConst :ARRAY[1..g_sArmNum,1..g_sJntNum] OF LREAL :=[ 0.9/5.6,0.9/5.6, 0.032,5(0.0303),
+																	0.9/5.6,0.9/5.6, 0.032,5(0.0303),
+																	0.9/5.6,0.9/5.6, 0.032,5(0.0303),
+																	0.9/5.6,0.9/5.6, 0.0303,5(0.0303)];
+	m_motorMaxCurrent :ARRAY[1..g_sArmNum,1..g_sJntNum] OF LREAL :=[ 5600,5600,  1600, 5(800),
+																	5600,5600,  1600, 5(800),
+																	5600,5600,  1600, 5(800),
+																	5600,5600,  1600, 5(800)];//mA
+	
+	// motor encoder direction
+	m_motorDir :ARRAY[1..g_sJntNum] OF INT :=[-1, 1, -1, 1, 1, 1, 1, 1];
+	// absolute encoder direction
+	m_asbEncoderDir :ARRAY[1..g_sJntNum] OF INT :=[-1, 1, 1, -1, -1, -1, -1, -1];
+							 
+	// joint position limit
+	m_minJntPos: ARRAY[1..g_sJntNum] OF LREAL:=[-2.7,	-2.9,	0.235, 	5(-g_largeNum)];	
+	m_maxJntPos: ARRAY[1..g_sJntNum] OF LREAL:=[2.7,		-0.3, 	0.535, 	5(g_largeNum)];
+	
+	// DH joint position limit
+	//NOTE: wrist pitch and yaw angle is reset after instrument is mounted 
+	m_minDHJntPos : ARRAY[1..6] OF LREAL :=[-2.7,	-2.9,	0.235, -5.5, -PI/2 - 75*g_deg2Rad , -PI/2];
+	m_maxDHJntPos : ARRAY[1..6] OF LREAL :=[2.7,	-0.29, 	0.535, 5.5, -PI/2 + 75*g_deg2Rad, PI/2];
+	
+	// joint velocity limit
+	m_maxJntVel :ARRAY[1..g_sJntNum] OF LREAL :=[1.25, 1.25, 0.5, 5(11.0)];
+
+	// joint position at link encoder calibrated point
+	m_linkEncCaliJntPos :ARRAY[1..g_sJntNum] OF LREAL :=
+		[0.0,-pi/2, 0.54608, 5(-pi/2)];
+
+	// minimum distance between instrument/endoscope tip and remote center
+	m_minInstruRCDis:LREAL := 0.03;
+	m_minScopeRCDis:LREAL := 0.03;	
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

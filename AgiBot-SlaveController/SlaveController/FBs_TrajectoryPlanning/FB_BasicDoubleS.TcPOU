@@ -250,7 +250,11 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[T1:=SQRT(ABS(v1-v0)/maxJ);
+        <ST><![CDATA[IF ABS(maxJ)<0.0001 OR ABS(maxA)<0.0001 THEN
+	trajCheck:=FALSE;
+	RETURN;
+END_IF
+T1:=SQRT(ABS(v1-v0)/maxJ);
 T2:=maxA/maxJ;
 t:=MIN(T1,T2);
 IF t<T2 THEN
@@ -297,10 +301,7 @@ END_IF]]></ST>
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_BasicDoubleS.trajCheck">
-      <LineId Id="7" Count="0" />
-      <LineId Id="28" Count="0" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="30" Count="9" />
+      <LineId Id="53" Count="16" />
       <LineId Id="5" Count="0" />
     </LineIds>
   </POU>

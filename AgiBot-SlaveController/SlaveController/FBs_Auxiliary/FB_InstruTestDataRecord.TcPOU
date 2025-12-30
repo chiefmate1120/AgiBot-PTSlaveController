@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_InstruTestDataRecord" Id="{469b9646-19b2-449c-98ab-96fe7d38ab70}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_InstruTestDataRecord
 VAR
@@ -8,7 +8,7 @@ VAR
 	
 	m_instruMaxPithCurrent :LREAL:=540;;
 	
-	m_reverseThres :LREAL :=40*g_deg2Rad;
+	m_reverseThres :LREAL :=20*g_deg2Rad;
 	m_yawDir :INT:=1;
 	m_lastYawAng:LREAL;
 	

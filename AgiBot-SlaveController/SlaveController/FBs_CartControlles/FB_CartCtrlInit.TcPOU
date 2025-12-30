@@ -12,6 +12,10 @@ VAR
 	m_minOffset:Vec6d;
 	m_dataNum:LREAL :=0;
 	m_offsetThres:LREAL:=1;
+	
+	//stand column max troque limit   maxtrq = 4.63A/5.7A  ‰
+	m_standColuMaxTrqSDOWrite:  FB_EcCoESdoWrite;
+	m_standColuMaxTrq : UINT := 812;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -52,7 +56,16 @@ IF m_timePeriod > 1.0 THEN
 			m_driveForceOffset:=g_zeroVec6d;
 		END_IF
 	END_FOR
-END_IF]]></ST>
+END_IF
+
+//	// write max motor current if it changes and works in position mode  GVL_SlaveMotorParameters.g_motorMaxCurrent[jntIdx]
+	m_standColuMaxTrqSDOWrite(sNetID:= GVL_SystemParameters.g_slaveCartNetID,
+					nSlaveAddr := GVL_SystemParameters.g_cartJointNetPort[1],
+					nSubIndex:=0,nIndex:=16#6072,pSrcBuf:=ADR(m_standColuMaxTrq),
+					cbBufLen:=SIZEOF(m_standColuMaxTrq),bExecute:=TRUE);
+	IF NOT m_standColuMaxTrqSDOWrite.bBusy THEN
+		m_standColuMaxTrqSDOWrite(bExecute:=FALSE);
+	END_IF]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{08fbbc2f-884e-4360-8758-0ef84c282cba}">
@@ -82,21 +95,7 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlInit.calcCmdJntPos">
-      <LineId Id="41" Count="3" />
-      <LineId Id="20" Count="0" />
-      <LineId Id="22" Count="1" />
-      <LineId Id="37" Count="1" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="39" Count="0" />
-      <LineId Id="18" Count="0" />
-      <LineId Id="9" Count="0" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="10" Count="0" />
-      <LineId Id="45" Count="0" />
-      <LineId Id="50" Count="0" />
-      <LineId Id="46" Count="0" />
-      <LineId Id="48" Count="1" />
-      <LineId Id="47" Count="0" />
+      <LineId Id="62" Count="29" />
       <LineId Id="8" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlInit.init">

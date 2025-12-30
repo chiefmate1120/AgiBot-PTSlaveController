@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="ST_SlaveDynaData" Id="{720ec479-04e0-4039-9c54-19b1d24e2b5b}">
     <Declaration><![CDATA[TYPE ST_SlaveDynaData :
 STRUCT
@@ -11,6 +11,10 @@ STRUCT
 	
 	// instrument out-of-view data
 	m_insruViewData :ARRAY[1..g_sArmNum] OF Vec3i;
+	
+	// self-collison avoid velocity
+	m_repulseJntVel:ARRAY[1..g_sArmNum] OF Vec2d;
+	
 END_STRUCT
 END_TYPE
 ]]></Declaration>

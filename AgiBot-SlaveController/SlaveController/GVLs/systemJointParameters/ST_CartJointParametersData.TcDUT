@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_CartJointParametersData" Id="{4c5b1ae6-f61e-4fef-93d0-ca1e9fef0e5c}">
+    <Declaration><![CDATA[TYPE ST_CartJointParametersData :
+STRUCT
+	// encoder resolution
+	//TODO: resolution of joint 2/3 need verification
+	m_incEncoderRes :ARRAY[1..g_cartJntNum] OF DINT :=[2(65536), 8192, 8192, 8192, 3(65536)];
+	m_absEncoderRes :ARRAY[1..g_cartJntNum] OF DINT := [1, 1, 1, 1, 4096, 131072, 8192,131072];
+	
+	// reduction ratio
+	m_motorReduction :ARRAY[1..g_cartJntNum] OF LREAL :=
+		[40.6*2*pi/0.020, 40.6*2*pi/0.020, 40, 40,  
+			2*(2*pi)/0.005, 676.0/49*356, 299.0/14*(2*pi)/0.020, 676.0/49*238];
+	m_absEncoderReduction :ARRAY[1..g_cartJntNum] OF LREAL:=[4(1.0), 2*pi/0.150 , 1.0, 2*pi/0.002, 1.0];
+	 
+	// motor parameters
+	m_motorTrqConst :ARRAY[1..g_cartJntNum] OF LREAL :=[ 0.0256, 0.0256, 0.058,0.058,  0.123,0.0292,0.0292,0.0292];
+	m_motorMaxCurrent :ARRAY[1..g_cartJntNum] OF LREAL :=[ 41200,41200,50000,50000,  33000,41200,41200,41200];//mA
+	
+	// motor and absEncoder direction
+	m_motorDir :ARRAY[1..g_cartJntNum] OF INT :=[1, 1, 1, -1, 1, 1, -1, -1];
+	
+	// absolute encoder direction
+	m_asbEncoderDir :ARRAY[1..g_cartJntNum] OF INT :=[1, 1, 1, 1, 1, 1, -1, -1];
+																		 
+	// joint position limit
+	m_minJntPos: vec8d :=[0, 0, 1, 1, 0, -30*g_deg2Rad, 0.002, -170*g_deg2Rad];	
+	m_maxJntPos: vec8d :=[0.053, 0.053, 1, 1,  0.69, 30*g_deg2Rad, 0.498, 170*g_deg2Rad];	
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,200 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_SlaveCtrlScopeRotate" Id="{5cd767b7-130a-4975-8c92-adc490bf0759}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: toggle endoscope posture
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlScopeRotate EXTENDS FB_SlaveArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// target joint position
+	m_targetRotJntPos :LREAL;
+	
+	// motion planning
+	m_scopeTogglePlanner : FB_TrajMoveJ;
+	m_rotVelJ :Vec8d := [3(g_largeNum), 5(4*pi)];
+	m_rotAccJ :Vec8d := [3(g_largeNum), 5(8*pi)];
+	m_rotJerkJ :Vec8d := [3(g_largeNum), 5(16*pi)];
+	
+	// as there are two types scope holder, need to determin the rotate joint index
+	m_scopeRotJntIdx: INT;
+	
+	m_lastJntPosHandDown : LREAL;
+	m_lastJntPosHandUp : LREAL;
+	m_thresholdError : LREAL := 2*g_deg2Rad;
+
+	m_scopeTypeToggle : BOOL;
+	
+	m_scopeRotateAngle:REAL:=0.0; //unit:rad
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{55a7397a-30dd-4aff-af51-3ef260bb1bce}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR 
+	i :INT;
+	trackErr:LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF m_scopeTogglePlanner.isGene = FALSE THEN
+	calcCmdJntPos:=FALSE;
+	RETURN;
+END_IF
+
+// traj plan
+calcCmdJntPos := m_scopeTogglePlanner.evaluate(m_timePeriod, jntPos=> m_cmdJntPos, jntVel=>m_cmdJntVel, jntAcc=> m_cmdJntAcc);
+
+// reach target check
+trackErr := ABS(i_slaveArm.curJntPos[m_scopeRotJntIdx] - m_targetRotJntPos);
+m_isFinished := m_timePeriod > m_scopeTogglePlanner.duration AND trackErr < g_jntCtrlAngTolHigh/5 AND i_slaveArm.curJntVel[m_scopeRotJntIdx]<g_jntStaticVelThres/10;
+IF m_isFinished THEN
+	g_motionTest.m_uiRotateEndoFlag:=FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{45bb1c08-1188-4e54-add1-34194dfd8075}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+
+VAR
+	i:INT;
+	cycleNum:LREAL;
+	curJntPos : LREAL;
+	startJntPos,endJntPos :Vec8d;
+	m_targetRotJntPosJ6 : LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_scopeRotateAngle := g_motionTest.m_endoRotateDir * g_motionTest.m_endoRotateAngle * g_deg2rad;
+
+// check if to hold the command joint position unchanged
+m_holdLastCmds := checkToHoldLastCmds(i_slaveArm);
+
+SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+m_jntEnableFlag[1] := 0;
+m_jntEnableFlag[2] := 0;
+m_jntEnableFlag[3] := 0;
+//m_jntOPMode[6] := DriverOPMode_PosTrq;
+//m_jntOPMode[7] := DriverOPMode_PosTrq;
+//m_jntOPMode[8] := DriverOPMode_PosTrq;
+
+IF i_slaveArm.instrument.onChipData.m_InstruID = InstruType_NewEndoscope THEN
+	m_scopeRotJntIdx :=7;
+ELSE
+	m_scopeRotJntIdx:=8;
+END_IF
+
+//avoid errors
+//IF i_slaveArm.instrument.nextScopePosture <> i_slaveArm.instrument.curScopePosture THEN
+//	IF i_slaveArm.instrument.nextScopePosture = EndoScopePosture_HeadDown THEN
+//		IF ABS(i_slaveArm.curLinkPos[m_scopeRotJntIdx] - m_lastJntPosHandDown)> m_thresholdError THEN
+//			curJntPos :=  i_slaveArm.curLinkPos[m_scopeRotJntIdx];
+//			m_lastJntPosHandDown := curJntPos;
+//		ELSE
+//			curJntPos := m_lastJntPosHandDown;
+//		END_IF
+//	ELSE
+//		IF ABS(i_slaveArm.curLinkPos[m_scopeRotJntIdx] - m_lastJntPosHandUp)> m_thresholdError THEN
+//			curJntPos :=  i_slaveArm.curLinkPos[m_scopeRotJntIdx];
+//			m_lastJntPosHandUp := curJntPos;
+//		ELSE
+//			curJntPos := m_lastJntPosHandUp;
+//		END_IF
+//	END_IF
+//END_IF
+
+curJntPos := i_slaveArm.curLinkPos[m_scopeRotJntIdx];
+
+// endoscope posture toggle
+//IF i_slaveArm.instrument.curScopeType = EndoScopeType_30 THEN
+	m_targetRotJntPos := curJntPos + m_scopeRotateAngle / i_slaveArm.instrument.m_endoscopeRotateReduction;
+	m_targetRotJntPosJ6 := i_slaveArm.curLinkPos[6] - (m_scopeRotateAngle / i_slaveArm.instrument.m_endoscopeRotateReduction)*i_slaveArm.instrument.m_newScopeRotateReduction;
+//ELSE
+//	m_targetRotJntPos := m_cmdJntPos[m_scopeRotJntIdx];
+//	m_targetRotJntPosJ6 := i_slaveArm.curLinkPos[6];
+//END_IF
+
+//traj plan
+startJntPos:= i_slaveArm.curJntPos;
+endJntPos := i_slaveArm.curJntPos;
+IF i_slaveArm.instrument.onChipData.m_InstruID = InstruType_NewEndoscope THEN
+	endJntPos[6] := m_targetRotJntPosJ6;
+END_IF
+endJntPos[7] := m_targetRotJntPos;
+m_scopeTogglePlanner.init(startJntPos,endJntPos,m_rotVelJ,m_rotAccJ,m_rotJerkJ);
+
+// update endoscope type/posture
+//i_slaveArm.instrument.curScopeType := i_slaveArm.instrument.nextScopeType;
+//i_slaveArm.instrument.curScopePosture := i_slaveArm.instrument.nextScopePosture;
+
+// update commands to arm
+copyCmds(r_slaveArmCtrlCmd);]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="scopeIsTypeToggle" Id="{f7604c60-b90d-4320-ac7c-eb3c8f435e7c}">
+      <Declaration><![CDATA[PROPERTY scopeIsTypeToggle : BOOL]]></Declaration>
+      <Get Name="Get" Id="{1462a605-dc40-4900-990b-8e28a05ba992}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[scopeIsTypeToggle := m_scopeTypeToggle;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <LineIds Name="FB_SlaveCtrlScopeRotate">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlScopeRotate.calcCmdJntPos">
+      <LineId Id="339" Count="2" />
+      <LineId Id="337" Count="0" />
+      <LineId Id="391" Count="0" />
+      <LineId Id="343" Count="0" />
+      <LineId Id="392" Count="0" />
+      <LineId Id="322" Count="2" />
+      <LineId Id="211" Count="0" />
+      <LineId Id="447" Count="1" />
+      <LineId Id="446" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlScopeRotate.init">
+      <LineId Id="728" Count="1" />
+      <LineId Id="630" Count="3" />
+      <LineId Id="745" Count="2" />
+      <LineId Id="634" Count="10" />
+      <LineId Id="712" Count="0" />
+      <LineId Id="646" Count="14" />
+      <LineId Id="711" Count="0" />
+      <LineId Id="716" Count="0" />
+      <LineId Id="715" Count="0" />
+      <LineId Id="662" Count="1" />
+      <LineId Id="723" Count="0" />
+      <LineId Id="666" Count="1" />
+      <LineId Id="719" Count="2" />
+      <LineId Id="717" Count="0" />
+      <LineId Id="679" Count="8" />
+      <LineId Id="725" Count="2" />
+      <LineId Id="724" Count="0" />
+      <LineId Id="694" Count="1" />
+      <LineId Id="191" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlScopeRotate.scopeIsTypeToggle.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

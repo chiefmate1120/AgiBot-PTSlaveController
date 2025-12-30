@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveJoint" Id="{13c09c14-ad6e-446d-ae84-5ae40081815a}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveJoint EXTENDS FB_JointBase
 VAR_INPUT
@@ -44,12 +44,12 @@ m_minJntPos	:=GVL_SlaveMotorParameters.g_minJntPos[i_jntIdx];
 m_maxJntPos	:=GVL_SlaveMotorParameters.g_maxJntPos[i_jntIdx];
 
 //link encoder calibartion data
-m_linkEncoderDir :=GVL_SlaveJointEncoderCaliData.g_asbEncoderDir[i_jntIdx];
+m_linkEncoderDir :=GVL_SlaveMotorParameters.g_asbEncoderDir[i_jntIdx];
 m_linkEncLimitBuffer := GVL_SlaveJointEncoderCaliData.g_linkEncLimitBuffer[i_jntIdx];
 m_minLinkEncoder :=GVL_SlaveJointEncoderCaliData.g_minLinkEncoder[i_armIdx, i_jntIdx] - m_linkEncLimitBuffer; // expand limit
 m_maxLinkEncoder :=GVL_SlaveJointEncoderCaliData.g_maxLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncLimitBuffer; // expand limit
 m_caliLinkEncoder :=GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[i_armIdx, i_jntIdx];
-m_linkEncCaliJntPos :=GVL_SlaveJointEncoderCaliData.g_linkEncCaliJntPos[i_jntIdx];
+m_linkEncCaliJntPos :=GVL_SlaveMotorParameters.g_linkEncCaliJntPos[i_jntIdx];
 m_linkJntPosOffset := GVL_SlaveJointEncoderCaliData.g_linkJntPosOffset[i_armIdx, i_jntIdx];
 m_linkEncZeroCross :=GVL_SlaveJointEncoderCaliData.g_linkEncZeroCross[i_armIdx, i_jntIdx];
 m_multiCycles :=GVL_SlaveJointEncoderCaliData.g_multipleCyclesJoint[i_armIdx,i_jntIdx];
@@ -165,7 +165,7 @@ END_IF
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveJoint.init">
-      <LineId Id="393" Count="60" />
+      <LineId Id="463" Count="60" />
       <LineId Id="39" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveJoint.updateCmds">

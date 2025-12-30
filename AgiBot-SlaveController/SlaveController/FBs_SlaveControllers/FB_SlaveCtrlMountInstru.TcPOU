@@ -474,7 +474,7 @@ CASE m_scopeMountStatus OF
 		IF i_slaveArm.instrument.onChipData.m_InstruPos[1] <> 0 THEN
 			m_instruZeroDeviation[4] :=  i_slaveArm.linkSingle[7] - i_slaveArm.instrument.onChipData.m_InstruPos[1];
 		ELSE
-			m_instruZeroDeviation[4] :=  i_slaveArm.linkSingle[7] - i_slaveArm.instrument.onChipData.m_InstruPos[4];
+			m_instruZeroDeviation[4] :=  i_slaveArm.linkSingle[7] - i_slaveArm.instrument.onChipData.m_InstruPos[4] + 0.1;
 		END_IF
 		m_jntOPMode[6] := DriverOPMode_Trq;
 		m_scopeMountStatus :=3;

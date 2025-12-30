@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_systemJointParameters" Id="{96fd230f-db0a-49e5-99e8-1099d6046cef}">
+    <Declaration><![CDATA[TYPE ST_systemJointParameters :
+STRUCT
+	//*************************Slave Arm Joint Parameters******************//
+	//base
+	m_slaveArmJointParaVer1 : ST_slaveArmJointParametersData;
+	
+	//modify joint 8, calibration position
+	m_slaveArmJointParaVer2 : ST_slaveArmJointParametersData:=
+	(m_linkEncCaliJntPos :=[0.0,-pi/2, 0.5295, 5(-pi/2)], m_minInstruRCDis := 0.04658, m_minScopeRCDis:= 0.04658,
+	m_minDHJntPos := [-2.7,	-2.9,	0.215, -5.5, -PI/2 - 75*g_deg2Rad , -PI/2],
+	m_maxDHJntPos := [2.7,	-0.29, 	0.5195, 5.5, -PI/2 + 75*g_deg2Rad, PI/2]);
+	
+	
+	
+	
+	//*************************Cart Joint Parameters******************//
+	//base
+	m_cartJointParaVer1 : ST_CartJointParametersData;
+	
+	//modify stand colum and telescopic link abs encoder
+	m_cartJointParaVer2 :ST_CartJointParametersData:= 
+	( m_absEncoderRes := [1, 1, 1, 1, 4096, 131072, 4096,131072],
+	m_absEncoderReduction:=[4(1.0), 2*pi/0.150 , 1.0, 2*pi/0.060, 1.0],
+	m_asbEncoderDir :=[1, 1, 1, 1, 1, 1, 1, -1]);
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

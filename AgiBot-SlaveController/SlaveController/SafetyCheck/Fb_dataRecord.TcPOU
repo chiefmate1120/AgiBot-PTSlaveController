@@ -296,6 +296,9 @@ END_VAR
 	//cart actual torque 
 	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=DINT_TO_STRING(i_safetyCheckVar.m_cartDriverInput[1].m_current);  gCSV_Buffer[5].aBuffer[1][c]:='cartCurrentIOJ1';
 	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=DINT_TO_STRING(i_safetyCheckVar.m_cartDriverInput[2].m_current);  gCSV_Buffer[5].aBuffer[1][c]:='cartCurrentIOJ2';
+	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=DINT_TO_STRING(CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_cartMotorTorqueSX);  gCSV_Buffer[5].aBuffer[1][c]:='cartCurrentIOJ3';
+	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=DINT_TO_STRING(CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_cartMotorTorqueSX);  gCSV_Buffer[5].aBuffer[1][c]:='cartCurrentIOJ4';
+	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=DINT_TO_STRING(CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_cartMotorTorqueSX);  gCSV_Buffer[5].aBuffer[1][c]:='cartCurrentIOJ5';
 	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=DINT_TO_STRING(i_safetyCheckVar.m_cartDriverInput[6].m_current);  gCSV_Buffer[5].aBuffer[1][c]:='cartCurrentIOJ6';
 	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=DINT_TO_STRING(i_safetyCheckVar.m_cartDriverInput[7].m_current);  gCSV_Buffer[5].aBuffer[1][c]:='cartCurrentIOJ7';
 	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=DINT_TO_STRING(i_safetyCheckVar.m_cartDriverInput[8].m_current);  gCSV_Buffer[5].aBuffer[1][c]:='cartCurrentIOJ8';
@@ -369,6 +372,11 @@ FOR i:=1 TO g_maxNum BY 1 DO
 		mErrNameLocation[arm,1]:=LREAL_TO_FMTSTR(Arm,0, TRUE);
 		mErrNameLocation[arm,2]:=LREAL_TO_FMTSTR(Joint,0, TRUE);
 		mErrNameLocation[arm,3]:=DWORD_TO_HEXSTR(UDINT_TO_DWORD(ErrID),0, TRUE);
+		mErrNameLocation[arm,5]:=CONCAT('Version', g_SWVersion);
+		mErrNameLocation[arm,6]:=CONCAT('setupArmJointParaVer', g_setupArmJointParametersVer);
+		mErrNameLocation[arm,7]:=CONCAT('slaveArmJointParaVer', g_slaveArmJointParametersVer);
+		mErrNameLocation[arm,8]:=CONCAT('CartJointParaVer', g_cartJointParametersVer);
+		
 		IF arm < g_maxNum THEN
 			mErrNameLocation[arm,4] := LINT_TO_STRING(GVL_interactUI.g_instruInformatiom[i].m_instruSerialNum);
 		END_IF
@@ -457,6 +465,10 @@ END_VAR
 	gCSV_Buffer[_iBuffer].aBuffer[0][2] := mErrNameLocation[_iBuffer,2];
 	gCSV_Buffer[_iBuffer].aBuffer[0][3] := mErrNameLocation[_iBuffer,3];
 	gCSV_Buffer[_iBuffer].aBuffer[0][4] := mErrNameLocation[_iBuffer,4];
+	gCSV_Buffer[_iBuffer].aBuffer[0][5] := mErrNameLocation[_iBuffer,5];
+	gCSV_Buffer[_iBuffer].aBuffer[0][6] := mErrNameLocation[_iBuffer,6];
+	gCSV_Buffer[_iBuffer].aBuffer[0][7] := mErrNameLocation[_iBuffer,7];
+	gCSV_Buffer[_iBuffer].aBuffer[0][8] := mErrNameLocation[_iBuffer,8];
 	
 	(*The second line shows the variable name*)
 	gCSV_Buffer[_iBuffer].aBuffer[1][0] := 'SystemTime';
@@ -510,7 +522,9 @@ END_IF
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="Fb_dataRecord.cartDataCast">
-      <LineId Id="154" Count="80" />
+      <LineId Id="154" Count="37" />
+      <LineId Id="258" Count="2" />
+      <LineId Id="192" Count="42" />
       <LineId Id="243" Count="3" />
       <LineId Id="250" Count="1" />
       <LineId Id="235" Count="1" />
@@ -522,6 +536,10 @@ END_IF
       <LineId Id="37" Count="1" />
       <LineId Id="36" Count="0" />
       <LineId Id="10" Count="4" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="53" Count="1" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="49" Count="0" />
       <LineId Id="43" Count="2" />
       <LineId Id="42" Count="0" />
       <LineId Id="15" Count="3" />
@@ -545,7 +563,9 @@ END_IF
     <LineIds Name="Fb_dataRecord.TransferToWrittenVariable">
       <LineId Id="7" Count="4" />
       <LineId Id="37" Count="0" />
-      <LineId Id="12" Count="21" />
+      <LineId Id="12" Count="4" />
+      <LineId Id="41" Count="3" />
+      <LineId Id="17" Count="16" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="Fb_dataRecord.writerCSV">

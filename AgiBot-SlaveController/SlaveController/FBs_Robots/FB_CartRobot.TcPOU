@@ -236,6 +236,9 @@ m_slaveCart.ProcessingUIData(i_cartDataPool.m_UIData);
 //update cart joint status
 m_slaveCart.updateStatus();
 
+//update cart safety check
+m_slaveCart.updateJntErrState(i_cartDataPool.m_safetyData);
+
 laserIO();
 
 // null ptr check
@@ -469,8 +472,7 @@ END_IF
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.run">
-      <LineId Id="93" Count="17" />
-      <LineId Id="113" Count="0" />
+      <LineId Id="120" Count="21" />
       <LineId Id="51" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.stateMachine">

@@ -1,0 +1,579 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SelfCollisionAvoid" Id="{f7ed0840-5f1c-44ae-8263-d876639f029e}" SpecialFunc="None">
+    <Declaration><![CDATA[//! we only check self-collison of link8 currently
+FUNCTION_BLOCK FB_SelfCollisionAvoid
+VAR
+	//joint 6/7
+	m_slaveArmDH :ARRAY[1..g_sArmNum, 1..2] OF Vec4d;
+	
+	// vertex point of link8
+	m_link8Seg :ARRAY[1..g_sArmNum,1..2] OF Vec3d;
+	m_link8WidthZ :LREAL := 0.05;
+	m_link8LengthX : LREAL := 0.14;
+	
+	// nearest points pair between each link8
+	m_nearestPts1:ARRAY[1..g_sArmNum, 1..g_sArmNum] OF Vec3d;
+	m_nearestPts2:ARRAY[1..g_sArmNum, 1..g_sArmNum] OF Vec3d;
+	m_collisionPts:ARRAY[1..g_sArmNum, 1..2] OF Vec3d;
+	m_collisionDis :ARRAY[1..g_sArmNum] OF LREAL;
+	m_rcPose:ARRAY[1..g_sArmNum] OF ST_Frame;
+	
+	m_link8BottomFrame:ST_Frame;
+	m_link8TopFrame:ST_Frame;
+	
+	// safety distance
+	m_maxSafeDis :LREAL := 0.06;
+	m_minSafeDis :LREAL :=0.03;
+	
+	// repulse velocity
+	m_repulseVel :ARRAY[1..g_sArmNum] OF Vec3d;
+	m_maxRepulseVel :LREAL :=0.2;
+	m_repulseJntVel:ARRAY[1..g_sArmNum] OF Vec2d;
+	
+	m_rcJw :ARRAY[1..4] OF Mat32;
+	m_collisionPtJp:ARRAY[1..4] OF Mat32;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCollisionPts" Id="{b26cecf0-d818-4376-828d-c94aef50662f}">
+      <Declaration><![CDATA[METHOD calcCollisionPts : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	armIdx, i, j :INT;
+	np,nq:Vec3d;
+	disVec:Vec3d;
+	dis,minDis:LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// nearest points pair of every link8 pairs
+FOR i:=1 TO g_sArmNum-1 DO 
+	FOR j:= i+1 TO g_sArmNum DO
+		calcMinDisPts(m_link8Seg[i,1],m_link8Seg[i,2], m_link8Seg[j,1], m_link8Seg[j,2], np=>np,nq=>nq);
+		m_nearestPts1[i,j]:=np;
+		m_nearestPts2[i,j]:=nq;
+		m_nearestPts1[j,i]:=nq;
+		m_nearestPts2[j,i]:=np;
+	END_FOR
+END_FOR
+
+// potential collison points pair
+FOR i:=1 TO g_sArmNum DO
+	minDis:=g_largeNum;
+	FOR j:=1 TO g_sArmNum DO
+		IF i<>j THEN
+			vecSub(m_nearestPts1[i,j], m_nearestPts2[i,j], disVec);
+			dis:=norm(disVec);
+			IF dis<minDis THEN
+				minDis:=dis;
+				m_collisionPts[i,1]:=m_nearestPts1[i,j];
+				m_collisionPts[i,2]:=m_nearestPts2[i,j];
+				
+				// compute link width on collison direction
+				m_collisionDis[i]:= innerLength(m_rcPose[i], m_collisionPts[i,1], m_collisionPts[i,2]) + innerLength(m_rcPose[j], m_collisionPts[i,2], m_collisionPts[i,1]);  
+			END_IF
+		END_IF
+	END_FOR
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcJp" Id="{49d4950e-3b1c-4f83-8557-df9424095b72}">
+      <Declaration><![CDATA[METHOD calcJp : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupPose:ARRAY[1..g_sArmNum] OF ST_Frame;
+	
+	// slave joint position
+	i_slaveDHJntPos :ARRAY[1..g_sArmNum] OF Vec6d;
+END_VAR
+
+VAR
+	i,j:INT;
+	ptBiasWrd, ptBias:Vec3d;
+	ptBiasMat:Mat3d;
+	matT:Mat3d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// calculate translation jacobian of collision points
+// calculate Jw OF joint1/2
+FOR i:=1 TO g_sArmNum DO
+	FOR j:=1 TO 2 DO 
+		m_rcJw[i][1,1]:=0;
+		m_rcJw[i][1,2]:=-SIN(i_slaveDHJntPos[i][1]);
+		
+		m_rcJw[i][2,1]:=-1;
+		m_rcJw[i][2,2]:=0;
+		
+		m_rcJw[i][3,1]:=0;
+		m_rcJw[i][3,2]:=COS(i_slaveDHJntPos[i][1]);	
+	END_FOR
+END_FOR
+
+
+// calculate Jp of collision points
+FOR i:=1 TO g_sArmNum DO
+	vecSub(m_collisionPts[i,1], m_rcPose[i].m_pos, ptBiasWrd);
+	matTranspose(i_setupPose[i].m_rot, matT);
+	matMultiVec(matT, ptBiasWrd, ptBias);
+	// pre multiply -1
+	ptBiasMat[1,1]:= 0; 
+	ptBiasMat[1,2]:= ptBias[3]; 
+	ptBiasMat[1,3]:= -ptBias[2]; 
+	
+	ptBiasMat[2,1]:= -ptBias[3]; 
+	ptBiasMat[2,2]:= 0; 
+	ptBiasMat[2,3]:= ptBias[1]; 
+	
+	ptBiasMat[3,1]:= ptBias[2]; 
+	ptBiasMat[3,2]:= -ptBias[1]; 
+	ptBiasMat[3,3]:= 0; 
+	
+	matMultiply(ptBiasMat, m_rcJw[i], m_collisionPtJp[i]);
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcLink8Seg" Id="{a4f13928-fbee-4c03-a8db-eaab315b8424}">
+      <Declaration><![CDATA[METHOD calcLink8Seg : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupPose:ARRAY[1..g_sArmNum] OF ST_Frame;
+	
+	i_slaveDHJntPos :ARRAY[1..g_sArmNum] OF Vec6d;
+END_VAR
+
+VAR
+	armIdx, i,j:INT;
+	jnt7Frame,T1,T2:ST_Frame;
+	
+	currentDH:Vec4d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// vertex points of link8
+FOR armIdx:=1 TO g_sArmNum DO
+	jnt7Frame:= i_setupPose[armIdx];
+	FOR i:=1 TO 2 DO 
+		currentDH := m_slaveArmDH[armIdx, i];
+		currentDH[3]:=currentDH[3]+i_slaveDHJntPos[armIdx][i];
+		T1:=DHTrans(currentDH);
+		T2:=transform(jnt7Frame,T1);
+		jnt7Frame:=T2;
+	END_FOR
+	m_rcPose[armIdx]:=jnt7Frame;
+	T1:=transform(jnt7Frame,m_link8BottomFrame);
+	m_link8Seg[armIdx, 1]:=T1.m_pos;
+	T2:=transform(T1,m_link8TopFrame);
+	m_link8Seg[armIdx, 2]:=T2.m_pos;
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcMinDisPts" Id="{288d5a25-9d3a-455d-b25d-05222ba49cb1}">
+      <Declaration><![CDATA[METHOD calcMinDisPts : BOOL
+VAR_INPUT
+	p1, p2, q1,q2 :Vec3d;
+END_VAR
+VAR_OUTPUT
+	np, nq :Vec3d;
+	
+END_VAR
+VAR
+	u,v,w0 :Vec3d;
+	a,b,c,d,e :LREAL;
+	DD, sc, sN, sD, tc, tN, tD :LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[vecSub(p2,p1, u);
+vecSub(q2,q1, v);
+vecSub(p1,q1, w0);
+    
+a := vecDot(u, u);
+b := vecDot(u, v);
+c := vecDot(v, v);
+d := vecDot(u, w0);
+e := vecDot(v, w0);
+    
+DD := a * c - b * b;
+sc:=0;
+sN:=0;
+sD:=DD;
+tc:=0;
+tN:=0;
+tD:=DD;
+
+IF DD < g_smallNum THEN  // 平行
+	sN := 0.0;
+	sD := 1.0;
+	tN := e;
+	tD := c;
+ELSE
+	sN := (b*e - c*d);
+	tN := (a*e - b*d);
+	IF sN < 0 THEN
+		sN := 0;
+		tN := e;
+		tD := c;
+	ELSIF sN > sD THEN  // s>1
+		sN := sD;
+		tN := e + b;
+		tD := c;
+	END_IF
+END_IF
+
+IF tN < 0 THEN  // t<0
+	tN := 0;
+	IF -d < 0 THEN
+		sN := 0;
+	ELSIF -d > a THEN
+		sN := sD;
+	ELSE
+		sN := -d;
+		sD := a;
+	END_IF
+ELSIF tN > tD THEN  // t>1
+	tN := tD;
+	IF (-d + b) < 0 THEN
+		sN := 0;
+	ELSIF (-d + b) > a THEN
+		sN := sD;
+	ELSE
+		sN := (-d + b);
+		sD := a;
+	END_IF
+END_IF
+
+sc :=  sN / sD;
+tc :=  tN / tD;
+
+vecSelfMultiNum(u,sc);
+vecAdd(p1,u, np);
+vecSelfMultiNum(v,tc);
+vecAdd(q1,v, nq);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcRepulseVel" Id="{cc0603e9-9f8c-4b0b-b0db-7022c487ff7d}">
+      <Declaration><![CDATA[METHOD calcRepulseVel : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupPose:ARRAY[1..g_sArmNum] OF ST_Frame;
+END_VAR
+VAR
+	i,j:INT;
+	collisionVec:Vec3d;
+	collisionDis,safetyDis:LREAL;
+	ratio:LREAL;
+	repulseVelWrd:Vec3d;
+	matT:Mat3d;
+
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// calculate repulse velocity
+FOR i:=1 TO g_sArmNum DO
+	vecSub(m_collisionPts[i,1], m_collisionPts[i,2], collisionVec);
+	collisionDis:=norm(collisionVec);
+	IF collisionDis <g_smallNum THEN
+		//TODO
+		collisionVec:=g_zeroVec3d;
+	ELSE
+		vecSelfMultiNum(collisionVec, 1.0/collisionDis);
+	END_IF
+	
+	safetyDis:=collisionDis-m_collisionDis[i];
+	ratio:= LIMIT(0, (m_maxSafeDis-safetyDis)/(m_maxSafeDis-m_minSafeDis), 1.0);
+	vecMultiNum(collisionVec, m_maxRepulseVel*ratio, repulseVelWrd);
+	matTranspose(i_setupPose[i].m_rot, matT);
+	matMultiVec(matT, repulseVelWrd, m_repulseVel[i]);
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{80d69e05-8e53-46ee-ad0a-d8b425030c70}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i,j,k:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// nominal DH
+FOR i:=1 TO 2 DO 
+	FOR j:=1 TO 4 DO
+			m_slaveArmDH[1, i][j]:= GVL_SlaveArmKinematic.g_slaveArmDH[i,j]+GVL_SlaveArmKinematic.g_slaveArm1DHErr[i+5,j];
+			m_slaveArmDH[2, i][j]:= GVL_SlaveArmKinematic.g_slaveArmDH[i,j]+GVL_SlaveArmKinematic.g_slaveArm2DHErr[i+5,j];
+			m_slaveArmDH[3, i][j]:= GVL_SlaveArmKinematic.g_slaveArmDH[i,j]+GVL_SlaveArmKinematic.g_slaveArm3DHErr[i+5,j];
+			m_slaveArmDH[4, i][j]:= GVL_SlaveArmKinematic.g_slaveArmDH[i,j]+GVL_SlaveArmKinematic.g_slaveArm4DHErr[i+5,j];
+	END_FOR	
+END_FOR
+
+
+m_link8TopFrame.m_pos:=g_zeroVec3d;
+m_link8TopFrame.m_pos[2]:=0.5;
+m_link8TopFrame.m_rot:=g_eye3d;
+
+m_link8BottomFrame.m_pos:=g_zeroVec3d;
+m_link8BottomFrame.m_pos[1]:=-0.054;
+m_link8BottomFrame.m_pos[2]:=0.097;
+m_link8BottomFrame.m_rot:=g_eye3d;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="innerLength" Id="{0d3a3518-d5f7-47cd-8e10-8403a9360510}">
+      <Declaration><![CDATA[METHOD innerLength : LREAL
+VAR_INPUT
+	i_rcPose :ST_Frame;
+	i_innerPt :Vec3d;
+	i_outPt :Vec3d;
+END_VAR
+
+VAR
+	i:INT;
+	ptVec:Vec3d;
+	XAxis,YAxis,ZAxis:Vec3d;
+	ptVecOnY :Vec3d;
+	ptProj:Vec3d;
+	yAng, zAng, recAng:LREAL;
+	projLength:LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[vecSub(i_outPt, i_innerPt, ptVec);
+
+FOR i:=1 TO 3 DO 
+	XAxis[i]:=i_rcPose.m_rot[i,1];
+	YAxis[i]:=i_rcPose.m_rot[i,2];
+	ZAxis[i]:=i_rcPose.m_rot[i,3];
+END_FOR
+
+vecMultiNum(Yaxis,  vecDot(ptVec, YAxis), ptVecOnY);
+vecSub(ptVec, ptVecOnY, ptProj);
+
+IF norm(ptVec) < g_smallAng THEN
+	yAng:=0;
+ELSE
+	yAng:=ACOS(LIMIT(-1, vecDot(ptVec, YAxis)/norm(ptVec), 1));
+END_IF
+
+
+IF norm(ptProj) < g_smallAng THEN
+	zAng:=0;
+ELSE
+	zAng:=ACOS(LIMIT(-1, vecDot(ptProj, ZAxis)/norm(ptProj), 1));
+END_IF
+
+recAng := ATAN(m_link8LengthX/m_link8WidthZ);
+IF zAng< recAng OR zAng > PI-recAng THEN // intersect at Xlenght
+	projLength:=ABS(m_link8WidthZ*0.5/(COS(zAng)));
+ELSE // intersect at Zwidth
+	projLength:=abs(m_link8LengthX*0.5/(SIN(zAng)));
+END_IF
+
+innerLength := projLength/SIN(yAng);
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{7c942261-dd6e-4a72-a02c-e89a75df4f75}">
+      <Declaration><![CDATA[METHOD run : BOOL
+VAR_IN_OUT CONSTANT
+	// setup pose
+	i_setupPose:ARRAY[1..g_sArmNum] OF ST_Frame;
+	
+	// slave joint position
+	i_slaveDHJntPos :ARRAY[1..g_sArmNum] OF Vec6d;
+END_VAR
+
+VAR_OUTPUT
+	o_repulseJntVel:ARRAY[1..g_sArmNum] OF Vec2d;
+END_VAR
+
+VAR
+	i,j:INT;
+	ptBias:Vec3d;
+	ptBiasMat:Mat3d;
+	Jt :Mat23;
+	JtJ, JtJInv :Mat2d;
+	pinvJ:Mat23;
+	velScale :LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[calcLink8Seg(i_setupPose, i_slaveDHJntPos);
+
+calcCollisionPts();
+
+calcRepulseVel(i_setupPose);
+
+calcJp(i_setupPose, i_slaveDHJntPos);
+
+// calculate repulse joint velocity 
+FOR i:=1 TO g_sArmNum DO
+	// pinv jaco
+	matTranspose(m_collisionPtJp[i], Jt);
+	matMultiply(Jt, m_collisionPtJp[i], JtJ);
+	IF NOT(invMat2(JtJ, JtJInv)) THEN
+		m_repulseJntVel[i][1] :=0;
+		m_repulseJntVel[i][2] :=0;
+		RETURN;
+	END_IF
+	matMultiply(JtJInv,Jt, pinvJ);
+	matMultiVec(pinvJ, m_repulseVel[i], m_repulseJntVel[i]);
+	
+	// limit max velocity
+	velScale := 1;
+	FOR j:=1 TO 2 DO 
+		velScale:=MAX(velScale, ABS(m_repulseJntVel[i][j]/GVL_SlaveMotorParameters.g_maxJntVel[j]));
+	END_FOR
+	vecSelfMultiNum(m_repulseJntVel[i], 1.0/velScale);
+END_FOR
+
+o_repulseJntVel:=m_repulseJntVel;
+
+	
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SelfCollisionAvoid">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SelfCollisionAvoid.calcCollisionPts">
+      <LineId Id="47" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="24" Count="3" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="28" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="36" Count="2" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="57" Count="2" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="31" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SelfCollisionAvoid.calcJp">
+      <LineId Id="5" Count="0" />
+      <LineId Id="7" Count="17" />
+      <LineId Id="53" Count="1" />
+      <LineId Id="25" Count="13" />
+      <LineId Id="6" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SelfCollisionAvoid.calcLink8Seg">
+      <LineId Id="28" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="15" Count="1" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="17" Count="3" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="14" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SelfCollisionAvoid.calcMinDisPts">
+      <LineId Id="66" Count="2" />
+      <LineId Id="12" Count="7" />
+      <LineId Id="78" Count="5" />
+      <LineId Id="23" Count="16" />
+      <LineId Id="84" Count="1" />
+      <LineId Id="40" Count="9" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="50" Count="8" />
+      <LineId Id="87" Count="1" />
+      <LineId Id="59" Count="2" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="98" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SelfCollisionAvoid.calcRepulseVel">
+      <LineId Id="5" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="152" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="153" Count="0" />
+      <LineId Id="122" Count="0" />
+      <LineId Id="154" Count="0" />
+      <LineId Id="109" Count="2" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="20" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SelfCollisionAvoid.init">
+      <LineId Id="70" Count="2" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="141" Count="2" />
+      <LineId Id="74" Count="1" />
+      <LineId Id="151" Count="3" />
+      <LineId Id="150" Count="0" />
+      <LineId Id="156" Count="3" />
+      <LineId Id="155" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SelfCollisionAvoid.innerLength">
+      <LineId Id="5" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="27" Count="1" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="51" Count="4" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="38" Count="1" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="44" Count="1" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="23" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SelfCollisionAvoid.run">
+      <LineId Id="590" Count="0" />
+      <LineId Id="594" Count="0" />
+      <LineId Id="593" Count="0" />
+      <LineId Id="596" Count="0" />
+      <LineId Id="595" Count="0" />
+      <LineId Id="598" Count="0" />
+      <LineId Id="597" Count="0" />
+      <LineId Id="576" Count="0" />
+      <LineId Id="618" Count="11" />
+      <LineId Id="661" Count="1" />
+      <LineId Id="664" Count="3" />
+      <LineId Id="663" Count="0" />
+      <LineId Id="579" Count="0" />
+      <LineId Id="652" Count="0" />
+      <LineId Id="651" Count="0" />
+      <LineId Id="574" Count="1" />
+      <LineId Id="564" Count="0" />
+      <LineId Id="34" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

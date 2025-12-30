@@ -154,24 +154,20 @@ g_slaveArm4Base :ARRAY[1..4, 1..4] OF LREAL := [     0.0,    -1,  	0,   0.17,
 													   0,      0,     0,   1.0];
 																	
 //endoscoe extrinsic parameters,  tcp pose wrt true scope pose
-g_rotTcpWrtScope :ARRAY[1..3, 1..3] OF LREAL:=[0.9941, 0.0929, 0.0557, 
-					-0.0948, 0.9950, 0.0327,
-					-0.0523, -0.0377,  0.9979];
-g_posTcpWrtScope :ARRAY[1..3] OF LREAL:= [0.003, 0.000575, 0.0012];
+g_rotTcpWrtScope :ARRAY[1..3, 1..3] OF LREAL:=[ 1, 0, 0,
+												0, 0, 0,
+												0, 0, 1];
+g_posTcpWrtScope :ARRAY[1..3] OF LREAL:= [3(0)];
 
 // endoscoe intrinsic parameters
-g_endoScopeFocalLength :LREAL :=2843;
-g_endoScopePrincipalBias :ARRAY[1..2] OF LREAL :=[-235, -40];
+g_endoScopeFocalLength :LREAL := 3000;
+g_endoScopePrincipalBias :ARRAY[1..2] OF LREAL :=[2(0)];
 													
 
 // rotation from joint7 to tcp
 g_tcpRotation :Mat3d :=[0.0,	0.0,	1.0,
 					    -1.0,	0.0,	0.0,
 					    0.0,	-1.0,	0.0];
-
-// minimum distance between instrument/endoscope tip and remote center
-g_minInstruRCDis:LREAL := 0.03;
-g_minScopeRCDis:LREAL := 0.03;
 	
 // height of the panel
 g_panelHeight :LREAL := 0.009;

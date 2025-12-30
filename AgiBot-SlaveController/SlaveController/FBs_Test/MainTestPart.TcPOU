@@ -84,63 +84,6 @@ controlSignalAnalysis();
 writeArmTestData();
 ]]></ST>
     </Implementation>
-    <Method Name="cartInfoUpdate" Id="{e2abd282-3224-4ce8-9e7b-736da8384d14}">
-      <Declaration><![CDATA[METHOD cartInfoUpdate : BOOL
-VAR_IN_OUT CONSTANT
-	// slave cart joint data
-	i_slaveCart :FB_SlaveCart;
-END_VAR
-
-VAR
-	i: INT;
-	cartJntPos : Vec8d;
-END_VAR]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[//update system information
-cartJntPos := m_unitFun.carArmUnit2User( i_slaveCart.curJntPos);
-FOR i:=1 TO g_cartJntNum BY 1 DO
-	//motor input and output information
-	g_systemInfo.m_cartJntInfo[i].m_motorInput:=i_slaveCart.m_cartJoints[i].m_motorInputs;
-	g_systemInfo.m_cartJntInfo[i].m_motorOutput:=i_slaveCart.m_cartJoints[i].m_motorOutputs;
-	
-	//joint position and max/min
-	g_systemInfo.m_cartJntInfo[i].m_curJntPos:=cartJntPos[i];
-	g_systemInfo.m_cartJntInfo[i].m_curLinkPos:=i_slaveCart.curLinkPos[i];
-	g_systemInfo.m_cartJntInfo[i].m_encErr:=i_slaveCart.curJntPos[i]-i_slaveCart.curLinkPos[i];
-	
-	//joint min and max
-	g_systemInfo.m_cartJntInfo[i].m_jntMax:=GVL_CartMotorParameters.g_maxJntPos[i];
-	g_systemInfo.m_cartJntInfo[i].m_jntMin:=GVL_CartMotorParameters.g_minJntPos[i];
-END_FOR
-
-
-//update system information
-FOR i:=1 TO g_cartJntNum BY 1 DO
-	//motor input and output information
-	g_systemInfo.m_cartInfo.m_motorInput[i]:=i_slaveCart.m_cartJoints[i].m_motorInputs;
-	g_systemInfo.m_cartInfo.m_motorOutput[i]:=i_slaveCart.m_cartJoints[i].m_motorOutputs;	
-	g_systemInfo.m_cartInfo.m_encErr[i]:=i_slaveCart.curJntPos[i]-i_slaveCart.curLinkPos[i];
-END_FOR
-
-//joint position
-g_systemInfo.m_cartInfo.m_curJntPos:=i_slaveCart.curJntPos;
-g_systemInfo.m_cartInfo.m_curLinkPos:=i_slaveCart.curLinkPos;
-g_systemInfo.m_cartInfo.m_curJntPosDegMM:=m_unitFun.carArmUnit2User(i_dataSystem:= i_slaveCart.curJntPos);
-g_systemInfo.m_cartInfo.m_curJntVelDegMM:=m_unitFun.carArmUnit2User(i_dataSystem:= i_slaveCart.curJntVel);
-
-
-//joint min and max
-g_systemInfo.m_cartInfo.m_jntMax:=GVL_CartMotorParameters.g_maxJntPos;
-g_systemInfo.m_cartInfo.m_jntMin:=GVL_CartMotorParameters.g_minJntPos;
-
-//state machine
-g_systemInfo.m_cartInfo.m_stateMachine:=CartControl.m_cartRobot.m_cartState;
-
-//IP Address
-g_systemInfo.m_cartInfo.m_IPAddress:=GVL_SystemParameters.g_slaveCartNetID;
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="controlSignalAnalysis" Id="{600771a8-3e3f-46e2-8822-6a6fc4cde8bd}">
       <Declaration><![CDATA[//*********Analyze the signals of the interactive interface*********//
 METHOD controlSignalAnalysis : BOOL
@@ -308,12 +251,6 @@ FOR i:= 1 TO 4 BY 1 DO
 		setupInfoUpdate(i_setupArm:= SetupArmControl.m_setupRobot.m_setupArms[i]);	
 	END_IF	
 END_FOR
-
-
-//cart information
-IF (CartControl.m_cartInit=TRUE) THEN
-	cartInfoUpdate(i_slaveCart:= CartControl.m_cartRobot.m_slaveCart);
-END_IF
 
 
 //update the instrument information
@@ -764,37 +701,6 @@ END_CASE
       <LineId Id="412" Count="1" />
       <LineId Id="283" Count="0" />
     </LineIds>
-    <LineIds Name="MainTestPart.cartInfoUpdate">
-      <LineId Id="32" Count="0" />
-      <LineId Id="151" Count="0" />
-      <LineId Id="30" Count="0" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="65" Count="0" />
-      <LineId Id="67" Count="0" />
-      <LineId Id="66" Count="0" />
-      <LineId Id="42" Count="1" />
-      <LineId Id="53" Count="0" />
-      <LineId Id="55" Count="1" />
-      <LineId Id="54" Count="0" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="38" Count="0" />
-      <LineId Id="34" Count="0" />
-      <LineId Id="111" Count="0" />
-      <LineId Id="85" Count="0" />
-      <LineId Id="88" Count="4" />
-      <LineId Id="113" Count="0" />
-      <LineId Id="86" Count="0" />
-      <LineId Id="110" Count="0" />
-      <LineId Id="103" Count="2" />
-      <LineId Id="114" Count="0" />
-      <LineId Id="124" Count="0" />
-      <LineId Id="123" Count="0" />
-      <LineId Id="107" Count="2" />
-      <LineId Id="87" Count="0" />
-      <LineId Id="134" Count="0" />
-      <LineId Id="137" Count="4" />
-      <LineId Id="133" Count="0" />
-    </LineIds>
     <LineIds Name="MainTestPart.controlSignalAnalysis">
       <LineId Id="187" Count="0" />
       <LineId Id="15" Count="0" />
@@ -876,10 +782,6 @@ END_CASE
       <LineId Id="28" Count="0" />
       <LineId Id="33" Count="1" />
       <LineId Id="14" Count="0" />
-      <LineId Id="53" Count="0" />
-      <LineId Id="20" Count="0" />
-      <LineId Id="9" Count="0" />
-      <LineId Id="35" Count="2" />
       <LineId Id="45" Count="1" />
       <LineId Id="48" Count="4" />
       <LineId Id="47" Count="0" />

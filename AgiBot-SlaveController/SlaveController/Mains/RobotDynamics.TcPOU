@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="RobotDynamics" Id="{798b314f-0a53-4e08-997d-5fefed426c86}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM RobotDynamics
 
@@ -9,6 +9,9 @@ VAR
 	
 	// setup joint5 position
 	m_setupJointData AT %I* :ST_SetupJointData;
+	
+	// setup arms infromation;
+	m_setupStatus AT %I* : ST_SetupStatus;
 	
 	// instrument info
 	m_instruInfo AT %I* :ARRAY[1..g_sArmNum] OF ST_InstruStatus;
@@ -31,6 +34,9 @@ VAR
 	// instument out-of-view check
 	m_instruViewCheck :FB_InstruViewCheck;
 	
+	// slave arm self-collision avoidance
+	m_selfCollisonAvoid : FB_SelfCollisionAvoid;
+	
 	// code execute time measure
 	m_codeTime : Profiler;
 	
@@ -43,7 +49,7 @@ END_VAR
       <ST><![CDATA[m_codeTime(START:=TRUE, RESET:=TRUE);
 
 // wait config file loaded
-IF NOT(SafetyCheck.m_loadConfigFileOK) THEN
+IF NOT(SafetyCheck.m_loadConfigFileOK) OR NOT(slaveArmControl.m_robotInit) OR NOT(SetupArmControl.m_robotInit) THEN
 	RETURN;
 END_IF
 
@@ -55,6 +61,7 @@ IF m_robotDynaInit =FALSE THEN
 		m_slaveDynamicModel[i].init(i);
 	END_FOR
 	m_instruViewCheck.init();
+	m_selfCollisonAvoid.init();
 
 	m_robotDynaInit:=TRUE;
 END_IF
@@ -73,11 +80,13 @@ END_FOR
 m_instruViewCheck.run(m_setupJointData.m_curJntPos, m_slaveJointsData.m_curDHJntPos, m_instruInfo);
 m_slaveDynaData.m_insruViewData:=m_instruViewCheck.m_instruImgBoundPos;
 
+m_selfCollisonAvoid.run(m_setupStatus.m_curEndPose,m_slaveJointsData.m_curDHJntPos, o_repulseJntVel=>m_slaveDynaData.m_repulseJntVel);
+
 m_codeTime(START:=FALSE);
 ]]></ST>
     </Implementation>
     <LineIds Name="RobotDynamics">
-      <LineId Id="450" Count="33" />
+      <LineId Id="676" Count="36" />
       <LineId Id="110" Count="0" />
     </LineIds>
   </POU>

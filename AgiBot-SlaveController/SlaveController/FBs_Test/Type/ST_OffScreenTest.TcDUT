@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_OffScreenTest" Id="{a8c6a6f1-dce6-473b-ab0c-062c11b2196d}">
+    <Declaration><![CDATA[TYPE ST_OffScreenTest :
+STRUCT	
+
+	//enter Single Joint test mode
+	m_enterOffScreenTestMode:ARRAY[1..g_sArmNum] OF BOOL;
+	m_singleJntFlag,m_return2OriginFlag,m_move2StartFlag:BOOL;
+	m_kineCaliJntIdx:INT:=0;
+	
+	// current sample number
+	m_curSampleNum :INT := 1;
+	
+	m_caliPointStartFlag:ARRAY[1..9] OF BOOL := [9(FALSE)];
+	
+	m_dataRecordFlag:ARRAY[1..g_sArmNum] OF BOOL:=[4(FALSE)];
+	m_dataRecordCount:ARRAY[1..g_sArmNum] OF INT:=[4(0)];
+	m_dataSingleCount:INT:=0;
+	m_dataShowCount:STRING:='0';
+	m_dataRecordText:STRING := 'No record';
+
+	m_dwWhite: DWORD := 16#FFFFFFFF;  // 正常色（不透明+白色）
+	m_dwNormal: DWORD := 16#FFFF4F4F;  // 正常色（不透明+红色）
+	m_dwAlarm : DWORD := 16#FFFFA500;  // 报警色（不透明+橙色）
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

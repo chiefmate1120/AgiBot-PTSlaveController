@@ -8,7 +8,7 @@ VAR CONSTANT
 END_VAR
 VAR
 	// slave self-check motion parameters
-	m_selfCheckPosture:ARRAY [1..m_selfCheckMotionNum, 1..g_sJntNum] OF LREAL:=[0.0, 	-PI/2, GVL_SlaveMotorParameters.g_maxDHJntPos[3], 	5(-g_2pi)];
+	m_selfCheckPosture:ARRAY [1..m_selfCheckMotionNum, 1..g_sJntNum] OF LREAL:=[0.0, 	-PI/2, 0, 	5(-g_2pi)];
 	m_selfCheckDeltaPosture	:ARRAY[1..g_sJntNum] OF LREAL :=[0.1, 0.1, 0.1, 5(g_2pi)];														//PI/4, -PI/4, 0.3, pi, pi, pi, pi, pi];
 	m_selfCheckMaxjntVel:Vec8d:=	 [2(40*g_deg2Rad), 0.05, 5(2*pi)];
 	m_selfCheckMaxjntAcc:Vec8d:=[2(80*g_deg2Rad), 	0.1, 5(4*pi)];
@@ -97,6 +97,7 @@ END_VAR
 
 //set different wait time for each arm, so the arms would run self-check successively
 m_enableWaitTime := i_slaveArm.armIdx-1;
+m_selfCheckPosture[1,3] := GVL_SlaveMotorParameters.g_maxDHJntPos[3];
 
 // determine base joint position for instrument joint
 baseJntPos :=g_zeroVec8d;
@@ -157,35 +158,7 @@ copyCmds(r_slaveArmCtrlCmd);]]></ST>
       <LineId Id="96" Count="2" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlSelfCheckTransport.init">
-      <LineId Id="57" Count="0" />
-      <LineId Id="218" Count="0" />
-      <LineId Id="199" Count="2" />
-      <LineId Id="233" Count="0" />
-      <LineId Id="232" Count="0" />
-      <LineId Id="237" Count="0" />
-      <LineId Id="234" Count="1" />
-      <LineId Id="254" Count="0" />
-      <LineId Id="236" Count="0" />
-      <LineId Id="121" Count="0" />
-      <LineId Id="70" Count="0" />
-      <LineId Id="138" Count="0" />
-      <LineId Id="172" Count="0" />
-      <LineId Id="217" Count="0" />
-      <LineId Id="82" Count="0" />
-      <LineId Id="98" Count="0" />
-      <LineId Id="86" Count="0" />
-      <LineId Id="99" Count="0" />
-      <LineId Id="74" Count="0" />
-      <LineId Id="159" Count="0" />
-      <LineId Id="158" Count="0" />
-      <LineId Id="156" Count="0" />
-      <LineId Id="127" Count="0" />
-      <LineId Id="253" Count="0" />
-      <LineId Id="135" Count="0" />
-      <LineId Id="131" Count="2" />
-      <LineId Id="126" Count="0" />
-      <LineId Id="157" Count="0" />
-      <LineId Id="154" Count="1" />
+      <LineId Id="269" Count="35" />
       <LineId Id="152" Count="0" />
     </LineIds>
   </POU>
