@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <GVL Name="GVL_adsITF" Id="{9535baf7-3d8c-4f3b-ab24-c8dbbcff5b72}">
+    <Declaration><![CDATA[VAR_GLOBAL
+	itf_content : ST_adsITF;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

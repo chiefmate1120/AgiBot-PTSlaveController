@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <GVL Name="GVL_PTInstruction" Id="{0e07da42-d08b-4b00-b116-9e59ec443a45}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	g_motionTest : ST_PTMotionTest;
+	g_cycleTest : ST_PTCycleTest;
+	g_caliData	: ST_PTCaliData;
+	g_IOTest	: ST_PTIO;
+	g_instrument : ST_PTInstrument;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>
