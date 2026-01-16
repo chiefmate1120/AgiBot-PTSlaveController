@@ -3440,14 +3440,6 @@
 							<Type>UDINT</Type>
 						</Var>
 					</Vars>
-					<UnrestoredVarLinks ImportTime="2026-01-14T10:55:00">
-						<OwnerA Name="OutputSrc" Prefix="TIPC^SlaveController^SlaveController Instance" Type="2">
-							<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
-								<Link VarA="SetupArmControl.m_setupMotorData" TypeA="ST_SetupMotorData" InOutA="1" GuidA="{073DA8BF-EDDB-2296-A790-5628B724BA9C}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_setupMotorData" RestoreInfo="TypeChanged" IdA="2789"/>
-								<Link VarA="SlaveArmControl.m_slaveMotorData" TypeA="ST_SlaveMotorData" InOutA="1" GuidA="{D9867BA1-2EA9-F0F1-871F-36FD1491A7B9}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_slaveMotorData" RestoreInfo="TypeChanged" IdA="1804"/>
-							</OwnerB>
-						</OwnerA>
-					</UnrestoredVarLinks>
 					<Contexts>
 						<Context>
 							<Id NeedCalleeCall="true">0</Id>
@@ -16971,8 +16963,10 @@
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_cartJointsData" VarB="TaskCartControl Outputs^CartControl.m_cartJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_cartStatus" VarB="TaskCartControl Outputs^CartControl.m_cartStatus"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupJointsData" VarB="TaskSlaveArmControl Outputs^SetupArmControl.m_setupJointsData"/>
+				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupMotorData" VarB="TaskSlaveArmControl Outputs^SetupArmControl.m_setupMotorData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupStatus" VarB="TaskSlaveArmControl Outputs^SetupArmControl.m_setupStatus"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_slaveJointData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveJointsData"/>
+				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_slaveMotorData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveMotorData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_slaveStatus" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupInputDataPool.m_safetyData" VarB="TaskCartControl Outputs^SafetyCheck.m_safetyCheckData"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupInputDataPool.m_setupJnt3Gravity" VarB="TaskDynamic Outputs^RobotDynamics.m_setupJnt3Gravity"/>
