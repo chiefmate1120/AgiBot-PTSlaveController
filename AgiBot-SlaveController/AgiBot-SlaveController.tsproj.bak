@@ -712,7 +712,7 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{A23F74BD-F0AE-D71C-9646-92CB5B58D8BF}" AutoDeleteType="true">E_SlaveArmState</Name>
+			<Name GUID="{238E08D7-F038-5E34-B534-D0F15C8B6D1F}" AutoDeleteType="true">E_SlaveArmState</Name>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
 			<EnumInfo>
@@ -828,6 +828,10 @@
 				<Enum>28</Enum>
 			</EnumInfo>
 			<EnumInfo>
+				<Text><![CDATA[SlaveArmState_ScopeRotate]]></Text>
+				<Enum>29</Enum>
+			</EnumInfo>
+			<EnumInfo>
 				<Text><![CDATA[SlaveArmState_MotionTest]]></Text>
 				<Enum>50</Enum>
 			</EnumInfo>
@@ -850,6 +854,11 @@
 			<EnumInfo>
 				<Text><![CDATA[SlaveArmState_DargFreeTest]]></Text>
 				<Enum>55</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[SlaveArmState_OffScreenTest]]></Text>
+				<Enum>59</Enum>
+				<Comment><![CDATA[hdk：calibration for endoscpoe]]></Comment>
 			</EnumInfo>
 			<EnumInfo>
 				<Text><![CDATA[SlaveArmState_SingleJntTest]]></Text>
@@ -1023,13 +1032,13 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{2E9B7A8A-96CB-EA47-DDF7-608B146D648F}" AutoDeleteType="true">ST_SlaveStatus</Name>
+			<Name GUID="{0F64A575-9865-6956-FBDB-9D1682DD890C}" AutoDeleteType="true">ST_SlaveStatus</Name>
 			<Comment><![CDATA[ Output from slave arm control task, including arm status and cartesian data
  Input to safety task and Master controller]]></Comment>
 			<BitSize>14080</BitSize>
 			<SubItem>
 				<Name>m_armState</Name>
-				<Type GUID="{A23F74BD-F0AE-D71C-9646-92CB5B58D8BF}">E_SlaveArmState</Type>
+				<Type GUID="{238E08D7-F038-5E34-B534-D0F15C8B6D1F}">E_SlaveArmState</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
 					<Elements>4</Elements>
@@ -2739,7 +2748,7 @@
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{2E9B7A8A-96CB-EA47-DDF7-608B146D648F}">ST_SlaveStatus</Type>
+							<Type GUID="{0F64A575-9865-6956-FBDB-9D1682DD890C}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_safetyData</Name>
@@ -2771,7 +2780,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot status, including arm status and cartesian data, output to other tasks]]></Comment>
-							<Type GUID="{2E9B7A8A-96CB-EA47-DDF7-608B146D648F}">ST_SlaveStatus</Type>
+							<Type GUID="{0F64A575-9865-6956-FBDB-9D1682DD890C}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveJointsData</Name>
@@ -3218,7 +3227,7 @@
 						<Var>
 							<Name>CartControl.m_cartDataPool.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{2E9B7A8A-96CB-EA47-DDF7-608B146D648F}">ST_SlaveStatus</Type>
+							<Type GUID="{0F64A575-9865-6956-FBDB-9D1682DD890C}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_masterRobotData</Name>
@@ -3344,7 +3353,7 @@
 						<Var>
 							<Name>SafetyCheck.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot information, including arm status and cartesian data]]></Comment>
-							<Type GUID="{2E9B7A8A-96CB-EA47-DDF7-608B146D648F}">ST_SlaveStatus</Type>
+							<Type GUID="{0F64A575-9865-6956-FBDB-9D1682DD890C}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_slaveJointData</Name>
@@ -3425,6 +3434,19 @@
 							<Type>UDINT</Type>
 						</Var>
 					</Vars>
+					<UnrestoredVarLinks ImportTime="2026-01-21T16:07:01">
+						<OwnerA Name="InputDst" Prefix="TIPC^SlaveController^SlaveController Instance" Type="1">
+							<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
+								<Link VarA="SetupArmControl.m_setupInputDataPool.m_slaveStatus" TypeA="ST_SlaveStatus" InOutA="0" GuidA="{2E9B7A8A-96CB-EA47-DDF7-608B146D648F}" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus" RestoreInfo="TypeChanged" IdA="655"/>
+							</OwnerB>
+						</OwnerA>
+						<OwnerA Name="OutputSrc" Prefix="TIPC^SlaveController^SlaveController Instance" Type="2">
+							<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
+								<Link VarA="SlaveArmControl.m_slaveStatus" TypeA="ST_SlaveStatus" InOutA="1" GuidA="{2E9B7A8A-96CB-EA47-DDF7-608B146D648F}" VarB="TaskCartControl Inputs^CartControl.m_cartDataPool.m_slaveStatus" RestoreInfo="TypeChanged" IdA="1146"/>
+								<Link VarA="SlaveArmControl.m_slaveStatus" TypeA="ST_SlaveStatus" InOutA="1" GuidA="{2E9B7A8A-96CB-EA47-DDF7-608B146D648F}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_slaveStatus" RestoreInfo="TypeChanged" IdA="1146"/>
+							</OwnerB>
+						</OwnerA>
+					</UnrestoredVarLinks>
 					<Contexts>
 						<Context>
 							<Id NeedCalleeCall="true">0</Id>
@@ -16174,8 +16196,8 @@
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500870000403}" Id="#x02030030"/>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-5008C0000403}" Id="#x02030080"/>
 		<MappingInfo Identifier="{00000000-2004-0850-0020-500800205008}" Id="#x020301e0"/>
-		<MappingInfo Identifier="{00000000-2004-0850-0220-500890000403}" Id="#x02030110"/>
-		<MappingInfo Identifier="{00000000-2004-0850-0220-5008B1000403}" Id="#x020300d0"/>
+		<MappingInfo Identifier="{00000000-2004-0850-0220-500890000403}" Id="#x020300d0"/>
+		<MappingInfo Identifier="{00000000-2004-0850-0220-5008B1000403}" Id="#x02030010"/>
 		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030020" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2004-0850-0020-500802205008}" Id="#x02030070" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2005-0850-0020-500804205008}" Id="#x020300a0" Watchdog="10000000040000000400000004000000"/>

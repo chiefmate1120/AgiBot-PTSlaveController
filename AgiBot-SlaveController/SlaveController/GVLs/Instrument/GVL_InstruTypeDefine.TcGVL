@@ -220,7 +220,11 @@ VAR_GLOBAL CONSTANT
 	  InstruTypeInfo_DeBakeyForceps, 	InstruTypeInfo_BlackDiamondForceps, 	InstruTypeInfo_PottsScissors, 	InstruTypeInfo_CurvedBipolarDissector,
 	  InstruTypeInfo_MicroBipolarForceps,InstruTypeInfo_ForceBipolar, InstruTypeInfo_MicroCauteryHook,InstruTypeInfo_CadiereForcepsV2, InstruTypeInfo_NeedleDriverV2,
 	  InstruTypeInfo_MarylandForcepsV2,InstruTypeInfo_FenestratedForcepsV2];
-	 
+	  
+	 // map derivated instrument to normal type, which is different with normal instument only with ID 
+	 g_derivedInstruNum :INT := 12;
+	 g_InstruTypeMap:ARRAY[1..g_derivedInstruNum] OF Vec2i :=
+	 [[307, 7], [308, 8], [309, 9], [310, 10], [311, 11], [312, 12], [313, 13], [314, 14], [315, 15], [316, 16], [317, 17], [320, 31]];
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>
