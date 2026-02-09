@@ -20713,6 +20713,15 @@
                       <v n="Id">2880254039L</v>
                       <v n="Value">"GVL_armCali.g_powerBoxCalicomplete[1]"</v>
                     </o>
+                    <o>
+                      <v n="Id">318782457L</v>
+                      <l n="Value" t="ArrayList" cet="NamedStyleColor">
+                        <o>
+                          <v n="Color">-16777216</v>
+                          <v n="CanonicalName">"Black"</v>
+                        </o>
+                      </l>
+                    </o>
                   </l>
                 </o>
                 <v n="VisualElementName">"Lamp1"</v>
@@ -29317,10 +29326,10 @@
               <d n="FbMethods" t="CaseInsensitiveHashtable" ckt="String" cvt="Guid">
                 <v>FB_Init</v>
                 <v>46c8bbd5-c5b3-4bbc-902d-22513aa4476c</v>
-                <v>FB_Exit</v>
-                <v>c1d008d7-de7f-4d62-a8a6-f391315c5234</v>
                 <v>FB_Reinit</v>
                 <v>b535ed2e-6dea-40ef-b910-59a625f44006</v>
+                <v>FB_Exit</v>
+                <v>c1d008d7-de7f-4d62-a8a6-f391315c5234</v>
               </d>
               <v n="FbName">"NotImportant"</v>
               <v n="FbGuid">{6464f73d-8920-4a03-9ff4-4f79d1a86a23}</v>
