@@ -16371,6 +16371,7 @@
 				<Link VarA="TaskSlaveArmControl Outputs^SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[2].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCsp^Controlword for axis2"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm1^SetupJoint3">
+				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[1].m_asepticMegnetSpringBreakCheck" VarB="TxPdoMappingCspCsv^Digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[3].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[3].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^Error message"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[3].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCspCsv^Heartbeat"/>
