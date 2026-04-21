@@ -16756,15 +16756,15 @@
 			<OwnerB Name="TIID^SlaveArm3^SlaveJoint45">
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_instrument.m_instruReadFlag" VarB="TxPdoMappingCsv^Analog input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[4].m_motorInputs^m_current" VarB="TxPdoMappingCsv^Torque actual value for axis2"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[4].m_motorInputs^m_driverError" VarB="TxPdoMappingCsv^Heartbeat"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[4].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCsv^Error message"/>
+				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[4].m_motorInputs^m_driverError" VarB="TxPdoMappingCsv^Error message"/>
+				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[4].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCsv^Heartbeat"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[4].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCsv^ENC for axis2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[4].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCsv^Position actual value for axis2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[4].m_motorInputs^m_state" VarB="InfoData^State"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[4].m_motorInputs^m_statusWord" VarB="TxPdoMappingCsv^Statusword"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[5].m_motorInputs^m_current" VarB="TxPdoMappingCsv^Torque actual value for axis3"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[5].m_motorInputs^m_driverError" VarB="TxPdoMappingCsv^Heartbeat"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[5].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCsv^Error message"/>
+				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[5].m_motorInputs^m_driverError" VarB="TxPdoMappingCsv^Error message"/>
+				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[5].m_motorInputs^m_heartBeat" VarB="TxPdoMappingCsv^Heartbeat"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[5].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCsv^ENC for axis3"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[5].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCsv^Position actual value for axis3"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[5].m_motorInputs^m_state" VarB="InfoData^State"/>
